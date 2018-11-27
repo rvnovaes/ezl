@@ -139,28 +139,51 @@ class CorrespondentsTable(object):
             state = court_district.state if court_district else None
             client = task.movement.law_suit.folder.person_customer
             offices_related = task.office.offices.all()
+            networks = task.office.network_members.all()
+            network_office_id_list = []
+            for net in networks:
+                network_office_id_list.extend([x.id for x in net.members.all().order_by('id') if x.id != task.office.id])
+            network_office_id_list = list(set(network_office_id_list))
             qs = ServicePriceTable.objects.filter(
                 Q(
-                    Q(office=task.office)
-                    | Q(Q(
-                        office__public_office=True), ~Q(office=task.office))),
+                    Q(office=task.office) |
+                    Q(
+                        Q(office__public_office=True), ~Q(office=task.office)
+                    ) |
+                    Q(office_id__in=network_office_id_list)
+                ),
                 Q(
                     Q(
                         Q(  # para escritorios nao publicos seleciona os precos que
                             # estao vinculados aos tipos de servico da tabaela do
                             # proprio escritorio
                             Q(type_task=type_task) | Q(type_task=None)),
-                        Q(office=task.office)) |
+                        Q(office=task.office)
+                    ) |
                     Q(  # para escritorios publicos seleciona os precos que estao
                         # vinculados aos tipos de servico vinculados ao tipo de
                         # servico padrao
                         Q(type_task__type_task_main__in=type_task_main),
-                        Q(office__public_office=True))),
+                        Q(office__public_office=True)) |
+                    Q(
+                        # para escritórios que pertencem as mesmas redes do escritório da task
+                        # selecionar os preços que estão vinculados aos tipos de serviço vinculado
+                        # ao tipo de serviço padrão
+                        Q(Q(type_task__type_task_main__in=type_task_main) | Q(type_task__isnull=True)),
+                        Q(office_network__in=networks),
+                        ~Q(office=task.office)
+                    )
+                ),
                 Q(
-                    Q(office_correspondent__in=offices_related) | Q(
-                        Q(office_correspondent__public_office=True), ~Q(
-                            office_correspondent=task.office))),
-                Q(office_correspondent__is_active=True),
+                    Q(office_correspondent__in=offices_related) |
+                    Q(
+                        Q(office_correspondent__public_office=True), ~Q(office_correspondent=task.office)
+                    ) |
+                    Q(office_correspondent__in=network_office_id_list)
+                ),
+                Q(
+                    Q(office_correspondent__is_active=True) | Q(office_correspondent__isnull=True)
+                ),
                 Q(Q(court_district=court_district) | Q(court_district=None)),
                 Q(Q(state=state) | Q(state=None)),
                 Q(Q(court_district_complement=complement) | Q(court_district_complement=None)),

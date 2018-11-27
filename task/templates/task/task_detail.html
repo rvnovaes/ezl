@@ -478,6 +478,7 @@
                                 'data-value="${value}" data-formated-value="${formated_value}" ' +
                                 'data-office-public="${office_public}" class="tr_select" role="row">\n' +
                     '<td class="office_correspondent">${office_correspondent}</td>\n' +
+                    '<td class="office_correspondent">${office_network}</td>\n' +
                     '<td class="court_district">${court_district}</td>\n' +
                     '<td class="court_district_complement">${court_district_complement}</td>\n' +
                     '<td class="state">${city}</td>\n' +
@@ -499,7 +500,7 @@
                     if(window.table) {
                         window.table.destroy();
                     }
-                    tbody.html('')
+                    tbody.html('');
                     if (data.total > 0) {
                         $.each(data.correspondents_table, function (index, value) {
                             $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
@@ -515,7 +516,7 @@
         var correspondents_data_table = function() {
             window.table = $('#correspondents-table').DataTable({
                 paging: false,
-                order: [[6, 'asc'], [7, 'desc'], [8, 'asc'], [0, 'asc']],
+                order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
                 dom: 'frti',
                 buttons: [],
                 destroy: true,

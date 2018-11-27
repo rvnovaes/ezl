@@ -26,21 +26,22 @@ class ServicePriceTableTable(tables.Table):
     value = tables.Column(attrs={"editable": True, "mask": "money"})
 
     class Meta:
-        sequence = ('selection', 'office', 'office_correspondent', 'type_task', 'state', 'court_district',
+        sequence = ('selection', 'office', 'office_correspondent', 'office_network', 'type_task', 'state', 'court_district',
                     'court_district_complement', 'city', 'client', 'value', 'is_active')
         model = ServicePriceTable
-        fields = ('selection', 'office', 'office_correspondent', 'type_task', 'court_district', 'state', 'client',
+        fields = ('selection', 'office', 'office_correspondent', 'office_network', 'type_task', 'court_district', 'state', 'client',
                   'value', 'is_active', 'court_district_complement', 'city')
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existe tabela de preços cadastrada."
         row_attrs = {
             'data_href': lambda record: reverse_lazy('servicepricetable_update', args=(record.pk,))
         }
-        order_by = 'office'
+        order_by = ('office', 'office_correspondent', 'office_network')
 
 
 class ServicePriceTableTaskTable(tables.Table):
     office_correspondent = tables.Column(orderable=False, verbose_name='Escritório correspondente')
+    office_network = tables.Column(orderable=False, verbose_name='Rede')
     court_district = tables.Column(orderable=False, verbose_name='Comarca')
     court_district_complement = tables.Column(orderable=False, verbose_name='Complemento da comarca')
     city = tables.Column(orderable=False, verbose_name='Cidade')
@@ -51,10 +52,10 @@ class ServicePriceTableTaskTable(tables.Table):
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')
 
     class Meta:
-        sequence = ('office_correspondent', 'state', 'court_district', 'court_district_complement', 'city', 'client',
-                    'value', 'office_rating', 'office_return_rating')
+        sequence = ('office_correspondent', 'office_network', 'state', 'court_district', 'court_district_complement',
+                    'city', 'client', 'value', 'office_rating', 'office_return_rating')
         model = ServicePriceTable
-        fields = ('office_correspondent', 'court_district', 'state', 'client', 'value', 'court_district_complement',
+        fields = ('office_correspondent', 'office_network', 'court_district', 'state', 'client', 'value', 'court_district_complement',
                   'office_rating', 'office_return_rating', 'city')
         attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
         empty_text = "Não existe tabela de preços cadastrada para o tipo de serviço selecionado."
@@ -64,6 +65,7 @@ class ServicePriceTableTaskTable(tables.Table):
             'data-id': lambda record: record.pk,
             'data-value': lambda record: record.value,
             'data-formated-value': lambda record: Money(record.value, 'BRL').__str__(),
-            'data-office-public': lambda record: record.office_correspondent.public_office,
+            'data-office-public': lambda record: record.office_correspondent.public_office if record.office_correspondent else False,
+            'data-office-txt': lambda record: record.office.__str__(),
             'class': 'tr_select'
         }
