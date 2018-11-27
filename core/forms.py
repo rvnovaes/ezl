@@ -633,7 +633,7 @@ class XlsxFileField(forms.FileField):
 class CustomSettingsForm(BaseForm):
     class Meta:
         model = CustomSettings
-        fields = ('office', 'email_to_notification', 'default_customer')
+        fields = ('office', 'email_to_notification', 'default_customer', 'is_active')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

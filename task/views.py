@@ -83,7 +83,6 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         self.law_suit = None
         self.movement = None
 
-
     def get_folder(self, validation_data):
         folder_number = validation_data.get('folder_number', False)
         if folder_number:

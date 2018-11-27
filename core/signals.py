@@ -14,12 +14,24 @@ from task.models import TaskShowStatus, TaskWorkflow, TaskStatus
 
 
 def create_office_custom_settings(office, i_work_alone):
+    default_customer, created = Person.objects.get_or_create(legal_name=office.legal_name,
+                                                             name=office.legal_name,
+                                                             is_customer=True,
+                                                             defaults={"create_user_id": office.create_user.id,
+                                                                       "is_active": True})
+    if created:
+        OfficeMembership.objects.create(person=default_customer,
+                                        office=office,
+                                        create_user_id=office.create_user.id,
+                                        is_active=True)
     CustomSettings.objects.create(
         create_user=office.create_user,
+        default_customer=default_customer,
         office=office,
         default_user=office.create_user,
         email_to_notification=office.create_user.email,
-        i_work_alone=i_work_alone
+        i_work_alone=i_work_alone,
+        is_active=True
     )
 
 
