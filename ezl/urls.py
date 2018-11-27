@@ -15,6 +15,8 @@ from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, \
     TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView, ToPayTaskReportTemplateView, ToPayTaskReportXlsxView
 from rest_framework_swagger.views import get_swagger_view
+from core.views import oauth2_login, oauth2_callback
+
 
 schema_view = get_swagger_view(title='API para integração com o Ezlawyer')
 urlpatterns = [
@@ -28,6 +30,8 @@ urlpatterns = [
     url(r'^accounts/password/reset/$',
         PasswordResetViewMixin.as_view(),
         name='account_reset_password'),
+    url(r'^accounts/google/login/$', oauth2_login),
+    url(r'^accounts/google/login/callback/$', oauth2_callback),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^financeiro/', include('financial.urls'), name='financial'),
     url(r'^pesquisa/', include('survey.urls'), name='survey'),
