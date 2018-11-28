@@ -107,43 +107,59 @@
         <tr>
             <th>Registro de atendimento</th>
             <td id="CheckinPosition">
-                {% get_checkin form.instance.geolocation as checkin %}
-                {% get_checkout form.instance.geolocation as checkout %}
-                {% if checkin %}
-                    Atendimento iniciado em: {{ checkin.date|localtime }}
-                    ({{ checkin.position }})
-                    {% if checkout %}
-                        <br>Atendimento finalizado em: {{ checkout.date|localtime }}
-                        ({{ checkout.position }})
+                {% get_checkin form.instance.geolocation as checkins%}
+                {% get_checkout form.instance.geolocation as checkouts %}
+                {% for checkin in checkins%} 
+                    {% if form.instance.person_company_representative == checkin.create_user.person%}                
+                        <img src="http://maps.google.com/mapfiles/ms/icons/green-dot.png"></img><strong>{{checkin.create_user.username}}</strong> Iniciou o atendimento em: {{ checkin.date|localtime }}
+                    {% else %} 
+                        <img src="http://maps.google.com/mapfiles/ms/icons/red-dot.png"></img><strong>{{checkin.create_user.username}}</strong> Iniciou o atendimento em: {{ checkin.date|localtime }}
                     {% endif %}
-                    <div class="panel panel-default">
-                        <a href="#" data-perform="panel-collapse">Ver mapa</a>
-                        <div class="panel-wrapper collapse" aria-expanded="false">
-                            <div id="map" style="height: 400px;width: 100%;"></div>
-                            <!-- Replace the value of the key parameter with your own API key. -->
-                            <script>
-                                function initMap() {
-                                    var latitude = "{{ form.instance.geolocation.all.0.latitude }}";
-                                    var longitude = "{{ form.instance.geolocation.all.0.longitude }}";
-                                    var center = {lat: parseFloat(latitude.replace(',','.')), lng: parseFloat(longitude.replace(',','.'))};
-                                    var map = new google.maps.Map(document.getElementById('map'), {
-                                        zoom: 16, center: center });
-                                    {% for marker in form.instance.geolocation.all %}
-                                        latitude = "{{ marker.latitude }}";
-                                        longitude = "{{ marker.longitude }}";
-                                        var {{ marker.checkpointtype }}{{ marker.id }} = {lat: parseFloat(latitude.replace(',','.')), lng: parseFloat(longitude.replace(',','.'))};
+                    ({{ checkin.position }})
+                    <hr/>
+                {% endfor %}
+                {% for checkout in checkouts%} 
+                    {% if form.instance.person_company_representative == checkout.create_user.person%}                
+                        <img src="http://maps.google.com/mapfiles/ms/icons/green-dot.png"></img><strong>{{checkout.create_user.username}}</strong> Finalizou o atendimento em: {{ checkout.date|localtime }}
+                    {% else %} 
+                        <img src="http://maps.google.com/mapfiles/ms/icons/red-dot.png"></img><strong>{{checkout.create_user.username}}</strong> Finalizou o atendimento em: {{ checkout.date|localtime }}
+                    {% endif %}
+                    ({{ checkout.position }})
+                    <hr/>
+                {% endfor %}
+                <div class="panel panel-default">
+                    <a href="#" data-perform="panel-collapse">Ver mapa</a>
+                    <div class="panel-wrapper collapse" aria-expanded="false">
+                        <div id="map" style="height: 400px;width: 100%;"></div>
+                        <!-- Replace the value of the key parameter with your own API key. -->
+                        <script>
+                            function initMap() {
+                                var latitude = "{{ form.instance.geolocation.all.0.latitude }}";
+                                var longitude = "{{ form.instance.geolocation.all.0.longitude }}";
+                                var center = {lat: parseFloat(latitude.replace(',','.')), lng: parseFloat(longitude.replace(',','.'))};
+                                var map = new google.maps.Map(document.getElementById('map'), {
+                                    zoom: 16, center: center });
+                                {% for marker in form.instance.geolocation.all %}
+                                    latitude = "{{ marker.latitude }}";
+                                    longitude = "{{ marker.longitude }}";
+                                    var {{ marker.checkpointtype }}{{ marker.id }} = {lat: parseFloat(latitude.replace(',','.')), lng: parseFloat(longitude.replace(',','.'))};
+                                    {% if form.instance.person_company_representative == marker.create_user.person%}
                                         var marker = new google.maps.Marker({ position: {{ marker.checkpointtype }}{{ marker.id }},
+                                                                              icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
                                                                               title: "{{ marker.checkpointtype }}",
                                                                               map: map });
-                                    {% endfor %}
-                                }
-                            </script>
-                            <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAgCSmxoG93hw-yel6ZhAzX9F5cdn5evGw&callback=initMap"> </script>
-                        </div>
+                                    {% else %}
+                                        var marker = new google.maps.Marker({ position: {{ marker.checkpointtype }}{{ marker.id }},
+                                                                              icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                                                                              title: "{{ marker.checkpointtype }}",
+                                                                              map: map });
+                                    {% endif %}                                        
+                                {% endfor %}
+                            }
+                        </script>
+                        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAgCSmxoG93hw-yel6ZhAzX9F5cdn5evGw&callback=initMap"> </script>
                     </div>
-                {% else %}
-                    Registro de atendimento não realizado
-                {% endif %}
+                </div>                                
             </td>
         </tr>
         </tbody>

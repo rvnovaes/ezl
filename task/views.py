@@ -1678,7 +1678,7 @@ class GeolocationTaskCreate(CustomLoginRequiredView, View):
         task = Task.objects.filter(pk=task_id).first()
         if task and latitude and longitude:
             taskgeolocation = TaskGeolocation.objects.filter(
-                task=task, checkpointtype=checkpointtype).first()
+                task=task, checkpointtype=checkpointtype, create_user=request.user).first()
             if taskgeolocation:
                 taskgeolocation.latitude = Decimal(latitude)
                 taskgeolocation.longitude = Decimal(longitude)

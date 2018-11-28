@@ -1,6 +1,6 @@
 from django import template
 from django.conf import settings
-from task.models import TaskStatus
+from task.models import TaskStatus, CheckPointType
 
 
 register = template.Library()
@@ -45,12 +45,24 @@ def remove_spaces_lower(status):
 @register.simple_tag
 def get_checkin(geolocation):
     if geolocation:
-        return geolocation.filter(checkpointtype='Checkin').first()
+        return geolocation.filter(checkpointtype='Checkin')
     return ''
 
 
 @register.simple_tag
 def get_checkout(geolocation):
     if geolocation:
-        return geolocation.filter(checkpointtype='Checkout').first()
+        return geolocation.filter(checkpointtype='Checkout')
     return ''
+
+
+@register.filter
+def get_checkpoint_type(geolocation, user):
+    checkin_exist = geolocation.filter(create_user=user, checkpointtype=CheckPointType.CHECKIN).exists()
+    checkout_exist = geolocation.filter(create_user=user, checkpointtype=CheckPointType.CHECKOUT).exists()
+    if all([checkin_exist, checkout_exist]):
+        return ''
+    if (checkin_exist):
+        return 'CHECKOUT'
+    return 'CHECKIN'
+
