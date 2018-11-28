@@ -1,4 +1,5 @@
 {% load core_filters task_filters tz %}
+{%load static%}
 <div class="table-responsive">
     <table class="table table-hover">
         <tbody>
@@ -111,18 +112,18 @@
                 {% get_checkout form.instance.geolocation as checkouts %}
                 {% for checkin in checkins%} 
                     {% if form.instance.person_company_representative == checkin.create_user.person%}                
-                        <img src="http://maps.google.com/mapfiles/ms/icons/green-dot.png"></img><strong>{{checkin.create_user.username}}</strong> Iniciou o atendimento em: {{ checkin.date|localtime }}
+                        <img src="{% static 'skeleton/images/marker-blue-32x32.png'%}"></img><strong>{{checkin.create_user.username}}</strong> Iniciou o atendimento em: {{ checkin.date|localtime }}
                     {% else %} 
-                        <img src="http://maps.google.com/mapfiles/ms/icons/red-dot.png"></img><strong>{{checkin.create_user.username}}</strong> Iniciou o atendimento em: {{ checkin.date|localtime }}
+                        <img src="{% static 'skeleton/images/marker-red-32x32.png'%}"></img><strong>{{checkin.create_user.username}}</strong> Iniciou o atendimento em: {{ checkin.date|localtime }}
                     {% endif %}
                     ({{ checkin.position }})
                     <hr/>
                 {% endfor %}
                 {% for checkout in checkouts%} 
                     {% if form.instance.person_company_representative == checkout.create_user.person%}                
-                        <img src="http://maps.google.com/mapfiles/ms/icons/green-dot.png"></img><strong>{{checkout.create_user.username}}</strong> Finalizou o atendimento em: {{ checkout.date|localtime }}
+                        <img src="{% static 'skeleton/images/marker-blue-32x32.png'%}"></img><strong>{{checkout.create_user.username}}</strong> Finalizou o atendimento em: {{ checkout.date|localtime }}
                     {% else %} 
-                        <img src="http://maps.google.com/mapfiles/ms/icons/red-dot.png"></img><strong>{{checkout.create_user.username}}</strong> Finalizou o atendimento em: {{ checkout.date|localtime }}
+                        <img src="{% static 'skeleton/images/marker-red-32x32.png'%}"></img><strong>{{checkout.create_user.username}}</strong> Finalizou o atendimento em: {{ checkout.date|localtime }}
                     {% endif %}
                     ({{ checkout.position }})
                     <hr/>
@@ -145,12 +146,12 @@
                                     var {{ marker.checkpointtype }}{{ marker.id }} = {lat: parseFloat(latitude.replace(',','.')), lng: parseFloat(longitude.replace(',','.'))};
                                     {% if form.instance.person_company_representative == marker.create_user.person%}
                                         var marker = new google.maps.Marker({ position: {{ marker.checkpointtype }}{{ marker.id }},
-                                                                              icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                                                                              icon: "{% static 'skeleton/images/marker-blue-32x32.png'%}",
                                                                               title: "{{ marker.checkpointtype }}",
                                                                               map: map });
                                     {% else %}
                                         var marker = new google.maps.Marker({ position: {{ marker.checkpointtype }}{{ marker.id }},
-                                                                              icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                                                                              icon: "{% static 'skeleton/images/marker-red-32x32.png'%}",
                                                                               title: "{{ marker.checkpointtype }}",
                                                                               map: map });
                                     {% endif %}                                        

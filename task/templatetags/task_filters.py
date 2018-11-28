@@ -1,6 +1,6 @@
 from django import template
 from django.conf import settings
-from task.models import TaskStatus, CheckPointType
+from task.models import Task, TaskStatus, CheckPointType
 
 
 register = template.Library()
@@ -66,3 +66,12 @@ def get_checkpoint_type(geolocation, user):
         return 'CHECKOUT'
     return 'CHECKIN'
 
+@register.filter
+def get_checkpoint_type_by_task(dashboard_task, user):
+    checkin_exist = Task.objects.get(pk=dashboard_task.pk).geolocation.filter(create_user=user, checkpointtype=CheckPointType.CHECKIN).exists()
+    checkout_exist = Task.objects.get(pk=dashboard_task.pk).geolocation.filter(create_user=user, checkpointtype=CheckPointType.CHECKOUT).exists()
+    if all([checkin_exist, checkout_exist]):
+        return ''
+    if (checkin_exist):
+        return 'CHECKOUT'
+    return 'CHECKIN'
