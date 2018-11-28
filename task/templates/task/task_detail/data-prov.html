@@ -147,12 +147,12 @@
                                     {% if form.instance.person_company_representative == marker.create_user.person%}
                                         var marker = new google.maps.Marker({ position: {{ marker.checkpointtype }}{{ marker.id }},
                                                                               icon: "{% static 'skeleton/images/marker-blue-32x32.png'%}",
-                                                                              title: "{{ marker.checkpointtype }}",
+                                                                              title: "{{ marker.create_user.username }}",
                                                                               map: map });
                                     {% else %}
                                         var marker = new google.maps.Marker({ position: {{ marker.checkpointtype }}{{ marker.id }},
                                                                               icon: "{% static 'skeleton/images/marker-red-32x32.png'%}",
-                                                                              title: "{{ marker.checkpointtype }}",
+                                                                              title: "{{ marker.create_user.username }}",
                                                                               map: map });
                                     {% endif %}                                        
                                 {% endfor %}
