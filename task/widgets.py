@@ -86,11 +86,12 @@ class PersonAskedByWidget(UnaccentForeignKeyWidget):
 
 class PersonCompanyRepresentative(UnaccentForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
-        person_company_representative = super().clean(value)
         office = Office.objects.get(pk=row['office'])
-        if person_company_representative and person_company_representative in office.persons.filter(legal_type='F'):
+        person_company_representative = office.persons.filter(legal_name__unaccent__icontains=value,
+                                                              legal_type='F').first()
+        if value and person_company_representative:
             return person_company_representative
-        elif not person_company_representative:
+        elif not value:
             return None
         else:
             raise ValueError(

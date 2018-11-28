@@ -387,7 +387,7 @@ class TaskResource(resources.ModelResource):
             court_district_complement = row.get('lawsuit_court_district_complement', '')
             if court_district_complement:
                 court_district_complement = CourtDistrictComplement.objects.filter(
-                    name=court_district_complement).first()
+                    name__unaccent__iexact=court_district_complement).first()
                 if not court_district_complement:
                     row['warnings'].append([insert_incorrect_natural_key_message(row,
                                                                                  'lawsuit_court_district_complement')])
