@@ -83,7 +83,6 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         self.law_suit = None
         self.movement = None
 
-
     def get_folder(self, validation_data):
         folder_number = validation_data.get('folder_number', False)
         if folder_number:
@@ -169,6 +168,17 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
 
         self.get_folder(validation_data)
         self.get_law_suit(validation_data)
+        if self.request.POST.get('court_district', None) \
+                and self.law_suit.court_district_id != int(self.request.POST['court_district']):
+            self.law_suit.court_district_id = int(self.request.POST['court_district'])
+            self.law_suit.save()
+        if self.request.POST.get('court_district_complement', None) and \
+                self.law_suit.court_district_complement_id != int(self.request.POST['court_district_complement']):
+            self.law_suit.court_district_complement_id = int(self.request.POST['court_district_complement'])
+            self.law_suit.save()
+        if self.request.POST.get('city', None) and self.law_suit.city_id != int(self.request.POST['city']):
+            self.law_suit.city_id = int(self.request.POST['city'])
+            self.law_suit.save()
         self.get_movement(validation_data)
 
         form.instance.movement = self.movement
@@ -739,7 +749,7 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
 
     def get(self, request, *args, **kwargs):
         office_session = get_office_session(request)
-        checker = ObjectPermissionChecker(request.user)        
+        checker = ObjectPermissionChecker(request.user)
         company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)
         view_all_tasks = checker.has_perm('view_all_tasks', office_session)
         if company_representative and not view_all_tasks:
@@ -902,9 +912,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         office_session = get_office_session(self.request)
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
-        context[
-            'correspondents_table'] = get_correspondents_table.get_correspondents_table(
-            )
+        context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
             context['form'].fields['type_task_field'] = type_task_field
@@ -1969,7 +1977,8 @@ class BatchChangeTasksView(DashboardSearchView):
             return task_list.filter(task_status__in=status_to_filter)
         status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN,
             TaskStatus.DONE, TaskStatus.ERROR]
-        return task_list.filter(task_status__in=status_to_filter)
+        office_session = get_office_session(self.request)
+        return task_list.filter(office=office_session, task_status__in=status_to_filter)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -2009,6 +2018,10 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 'office_correspondent': {
                     'id': price.office_correspondent.pk,
                     'legal_name': price.office_correspondent.legal_name
+                },
+                'office_network': {
+                    'id': price.office_network.pk if price.office_network else '-',
+                    'name': price.office_network.name if price.office_network else '-'
                 },
                 'state': price.state.initials if price.state else '-',
                 'type_task': {

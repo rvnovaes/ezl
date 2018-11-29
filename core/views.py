@@ -2332,15 +2332,6 @@ class NewRegister(TemplateView):
             user.set_password(password)
             user.save()
             office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
-            customer = Person.objects.create(name=office_name, legal_name=office_name, create_user=user, is_customer=True)
-            member, created = OfficeMembership.objects.get_or_create(
-                person=customer,
-                office=office,
-                defaults={
-                    'create_user': user,
-                    'is_active': True
-                })
-            office.customsettings.default_customer = customer
             office.customsettings.email_to_notification = email
             office.customsettings.save()
             DefaultOffice.objects.create(
@@ -2363,15 +2354,6 @@ class SocialRegister(TemplateView):
             office_name = request.POST.get('office')
             user = request.user            
             office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
-            customer = Person.objects.create(name=office_name, legal_name=office_name, create_user=user, is_customer=True)
-            member, created = OfficeMembership.objects.get_or_create(
-                person=customer,
-                office=office,
-                defaults={
-                    'create_user': user,
-                    'is_active': True
-                })
-            office.customsettings.default_customer = customer
             office.customsettings.email_to_notification = user.email
             office.customsettings.save()
             DefaultOffice.objects.create(
@@ -2392,8 +2374,6 @@ class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
     def get_callback_url(self, request, app):
         callback_url = reverse(self.provider_id + "_callback")
         protocol = self.redirect_uri_protocol
-        if settings.DEBUG:
-            return build_absolute_uri(request, callback_url, protocol)
         return build_absolute_uri(None, callback_url, protocol)            
 
 
