@@ -36,7 +36,7 @@ def import_xls_task_list(self, file_id):
                 ret['errors'].append({'line': line, 'errors': errors})
         if result.has_warnings():
             for line_warning in result.row_warnings():
-                ret['warnings'].append({'line': line_warning[0], 'warnings': line_warning[1]})
+                ret['warnings'].append({'line': line_warning[0] + 1, 'warnings': line_warning[1]})
 
     except Exception as e:
         ret['errors'] = '{} - {}'.format(e, traceback.format_exc())
