@@ -90,7 +90,7 @@ class TaskFilter(FilterSet):
             name='client',
             url='/client_form'))
     office_executed_by = CharFilter(
-        label='Escritório contrado',
+        label='Escritório contratado',
         required=False,
         widget=TypeaHeadForeignKeyWidget(
             model=Office,
