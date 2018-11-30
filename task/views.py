@@ -1341,9 +1341,17 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         task = answer.task
         base_fields = [task.id, task.legacy_code, str(task.type_task), answer.create_user.username]
         answers = ['' for x in range(len(columns))]
-        for question, answer in answer.survey_result.items():
+        for question, value in answer.survey_result.items():
             question_index = columns.index(question)
-            answers[question_index] = answer
+            # Check if is a datetime value
+            try:
+                if len(value) == 24:
+                    time = datetime.strptime(value.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+                    value = time.strftime("%d/%m/%Y %H:%M")
+            except (TypeError, ValueError):
+                # Not a datetime value
+                pass
+            answers[question_index] = value
 
         xlsx.write_row(base_fields + answers)
 
