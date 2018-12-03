@@ -78,7 +78,7 @@ class ServicePriceTableForm(BaseModelForm):
 
     class Meta:
         model = ServicePriceTable
-        fields = ('office', 'office_correspondent', 'client', 'type_task', 'state', 'court_district',
+        fields = ('office', 'office_correspondent', 'office_network', 'client', 'type_task', 'state', 'court_district',
                   'court_district_complement', 'city', 'value', 'is_active')
 
     def clean_value(self):
@@ -99,25 +99,21 @@ class ServicePriceTableForm(BaseModelForm):
             and not CourtDistrict.objects.filter(name=cleaned_data["court_district"].name,
                                                  state=cleaned_data["state"]):
             raise forms.ValidationError('A comarca selecionada não pertence à UF selecionada')
-        if ServicePriceTable.objects.filter(type_task=cleaned_data["type_task"],
-                                            court_district=cleaned_data["court_district"],
-                                            state=cleaned_data["state"],
-                                            client=cleaned_data["client"],
-                                            office_correspondent=cleaned_data["office_correspondent"],
-                                            office=cleaned_data["office"]).first():
-            raise forms.ValidationError('Já existe um registro com os dados selecionados')
         return cleaned_data
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         office_session = get_office_session(self.request)
         self.fields['office'] = get_office_field(self.request)
+        if self.fields['office'].initial == office_session.id:
+            self.fields['office'].widget = forms.HiddenInput()
         self.fields['office_correspondent'] = get_office_related_office_field(self.request)
         self.fields['office_correspondent'].label = u"Escritório Correspondente"
-        self.fields['office_correspondent'].required = True
         self.fields['office'].required = True
         self.fields['type_task'].queryset = filter_valid_choice_form(TypeTask.objects.get_queryset(
             office=office_session.id).order_by('name'))
+        self.fields['office_network'].queryset = self.fields['office_network'].queryset.filter(members=office_session)
+        self.fields['office_network'].required = True
 
 
 class ImportServicePriceTableForm(forms.ModelForm):

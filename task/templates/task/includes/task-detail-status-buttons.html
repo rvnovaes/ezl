@@ -72,22 +72,35 @@
                     {{ form.survey_result }}
                     <a>{{ form.execution_date }}</a>
                 </div>
-                {% if form.instance.geolocation.last.checkpointtype == 'Checkin' %}
+                {% if form.instance.geolocation|get_checkpoint_type:request.user == 'CHECKOUT' %}
                     <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
                             data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
                         <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkout</span>
                     </button>
-                {% elif not form.instance.geolocation.last.checkpointtype %}
+                {% elif form.instance.geolocation|get_checkpoint_type:request.user == 'CHECKIN' %}
                     <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
                             data-checkpointtype="Checkin" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
                         <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin</span>
                     </button>
-                {% endif %}
+                {% endif %}               
                 <button type="button" onclick="getId(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
                         class="text-white btn btn-ezl-done">
                     <span class="btn-label"><i class="mdi mdi-checkbox-marked-circle-outline"></i></span> Cumprir
                 </button>
             {% endif %}
         {% endif %}
+        {% if 'can_see_tasks_company_representative' in office_session_perms  and task.person_company_representative == request.user.person%}                
+            {% if form.instance.geolocation|get_checkpoint_type:request.user == 'CHECKOUT' %}
+                <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
+                        data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
+                    <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkout do preposto</span>
+                </button>
+            {% elif form.instance.geolocation|get_checkpoint_type:request.user == 'CHECKIN' %}
+                <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
+                        data-checkpointtype="Checkin" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
+                    <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin do preposto</span>
+                </button>
+            {% endif %}
+        {% endif %}         
     {% endif %}
 {% endwith %}

@@ -144,7 +144,7 @@ def get_office_related_office_field(request):
 
     return forms.ModelChoiceField(
         queryset=queryset,
-        empty_label='',
+        empty_label='Selecione',
         required=True,
         label=u'Escritório',
         initial=initial)

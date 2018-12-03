@@ -86,11 +86,12 @@ class PersonAskedByWidget(UnaccentForeignKeyWidget):
 
 class PersonCompanyRepresentative(UnaccentForeignKeyWidget):
     def clean(self, value, row=None, *args, **kwargs):
-        person_company_representative = super().clean(value)
         office = Office.objects.get(pk=row['office'])
-        if person_company_representative and person_company_representative in office.persons.filter(legal_type='F'):
+        person_company_representative = office.persons.filter(legal_name__unaccent__icontains=value,
+                                                              legal_type='F').first()
+        if value and person_company_representative:
             return person_company_representative
-        elif not person_company_representative:
+        elif not value:
             return None
         else:
             raise ValueError(
@@ -104,13 +105,15 @@ class TaskStatusWidget(Widget):
     """
 
     def clean(self, value, row=None, *args, **kwargs):
+        ret = TaskStatus.REQUESTED
         if value:
-            values = {item.value.title(): item.value for item in [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE]}
-            ret = values.get(value.title(), None)
-            if not ret:
-                raise ValueError(WRONG_TASK_STATUS.format(value.title(), values.values()))
-        else:
-            ret = TaskStatus.REQUESTED
+            if not row['id']:
+                values = {item.value.title(): item.value for item in [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE]}
+                ret = values.get(value.title(), None)
+                if not ret:
+                    raise ValueError(WRONG_TASK_STATUS.format(value.title(), values.values()))
+            else:
+                ret = value
         return ret
 
 
@@ -125,15 +128,4 @@ class DateTimeWidgetMixin(DateTimeWidget):
         if isinstance(value, float):
             seconds = int(round((value - 25569) * 86400.0))
             value = make_aware(datetime.datetime.utcfromtimestamp(seconds))
-        return super().clean(value, row, *args, **kwargs)
-
-
-class AcceptanceServiceDateWidget(DateTimeWidgetMixin):
-    """
-    Verifica o status da OS e obriga preencher a data de aceite pelo service, caso o status seja Aceite pelo Service
-    """
-
-    def clean(self, value, row=None, *args, **kwargs):
-        if not value and row['task_status'].title() == TaskStatus.ACCEPTED_SERVICE.value.title():
-            raise ValueError(MISSING_ACCEPTANCE_SERVICE_DATE)
         return super().clean(value, row, *args, **kwargs)

@@ -3,12 +3,13 @@
 {% load static %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
+{% load task_filters %}
 
 {% block content %}    	
     {% include 'task/includes/task-form-filters.html'%}
 
-    {% block extra_content %}
-        {% include 'task/includes/task-table-list.html' with title_table='Providências a responder'%}   
+    {% block extra_content %}        
+        {% include 'task/includes/task-table-list-company-representative.html' with title_table='Providências a responder'%}   
     {% endblock extra_content %}
 {% endblock content %}
 {% block extra_scripts %} 
@@ -26,11 +27,14 @@
     <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
     <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
     <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>    
+    <script src="{% static 'core/js/geolocation.js' %}"></script>
     {% include 'questionnaire/company_representative_questionnarie.html'%}
     <script type="text/javascript">
+        var geolocation = new Geolocation()
         var taskId;
         var selectedSurvey;
     	var surveys = {};
+        var checkpoints = {};
         var surveyData;
         var buttonEl = `
             <button type="button" id="btn-open-questions" class="text-white btn btn-ezl-company_representative align-middle">
@@ -41,26 +45,66 @@
         	surveyData = `{{survey.survey.data|safe}}`;
         	surveys['{{survey.task_id}}'] = surveyData;        	
         {% endfor %}
-    	$('tbody tr').each(function(){
-            if ($(this).attr('tr-data-id')) {
-    		  $(this).append(`<td>${buttonEl}</td>`)
-            }
-    	}).promise().done(function() { 
-			$('#btn-open-questions').on('click', function(event) {
-				event.stopPropagation()
-				taskId = $(this).parent().parent().attr('tr-data-id');
-                selectedSurvey = surveys[taskId];
-                if (selectedSurvey.length < 1) {
-                    swal({
-                        type: 'error', 
-                        title: 'Questionário',
-                        text: "Não existe formulário cadastrado para este tipo de serviço."
+        $(document).ready(function(){
+        	$('tbody tr').each(function(){
+                if ($(this).attr('tr-data-id')) {
+        		  $(this).append(`<td>${buttonEl}</td>`)
+                }
+        	}).promise().done(function() { 
+    			$('.btn-ezl-company_representative').each(function(el){
+                    $(this).on('click', function(event) {
+                        event.stopPropagation()
+                        taskId = $(this).parent().parent().attr('tr-data-id');
+                        selectedSurvey = surveys[taskId];
+                        if (selectedSurvey.length < 1) {
+                            swal({
+                                type: 'error', 
+                                title: 'Questionário',
+                                text: "Não existe formulário cadastrado para este tipo de serviço."
+                            })
+                        } else {
+                            $("#survey-company-representative").modal('show')
+                        }                 
                     })
-                } else {
-                    $("#survey-company-representative").modal('show')
-                }                 
-			})
+                })
+            }); 
+            
+            $('.GEOLOCATION').each(function(el){
+                $(this).on('click', function(event) {
+                    event.stopPropagation()
+                    taskId = $(this).parent().parent().attr('tr-data-id');
+                    var data = {};
+                    var checkpointtype = $('#GEOLOCATION').data("checkpointtype");
+                    data['latitude'] = geolocation.latitude;
+                    data['longitude'] = geolocation.longitude;
+                    data['task_id'] = taskId
+                    data['checkpointtype'] = checkpointtype;
+                    var url = $('#GEOLOCATION').data("url");
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: data,
+                        success: function (result) {
+                            console.log(result);
+                            if (result.ok){
+                                location.reload();
+                                $('#locating').modal('hide');
+                            }else{
+                                $('#locating').modal('hide');
+                                showToast('error', 'Atenção', "Localização não registrada", 0, false);
+                            }
+                        },
+                        error: function (request, status, error) {
+                        },
+                        beforeSend: function (xhr, settings) {
+                            xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                        },
+                        dataType: 'json'
+                    })                                    
+                })
+            });                                
         })
+
     </script>
 {%endblock%}
 
