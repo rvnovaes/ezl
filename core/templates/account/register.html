@@ -43,6 +43,13 @@
     .lg-content {
       margin-top: 150px !important;
     }
+    .social {
+        border: 1px solid #4285f4;
+        background-color: #4285f4;
+    }
+    .social:hover {
+        opacity: 0.8;
+    }
 </style>
 </head>
 
@@ -66,14 +73,14 @@
             </div>
         </div>
         <div class="new-login-box">
-            <div class="white-box">
+            <div class="white-box p-t-0">
                 <div class="col-xs-12">
                   <div class="form-group text-center m-t-20">
                     <h3 class="box-title m-b-0">Informe seus dados abaixo</h3>
                     <small>Clique em entrar após terminar o preenchimento</small>
                   </div>
                 </div>
-                <form class="form-horizontal new-lg-form" id="register-form" action="#">{% csrf_token %}
+                <form class="form-horizontal new-lg-form p-t-0" id="register-form" action="#">{% csrf_token %}
                     <div class="form-group">
                         <div class="col-xs-12">
                             <input class="form-control" type="email" required="" placeholder="E-mail" name='email'> 
@@ -112,7 +119,25 @@
                     </div>
                     <div class="form-group text-center m-t-20">
                         <div class="col-xs-12">
-                            <button class="btn btn-info btn-lg btn-block text-uppercase waves-effect waves-light" id="btn-sign-up" type="submit">Cadastrar</button>
+                            <button class="btn btn-success btn-lg btn-block text-uppercase waves-effect waves-light" id="btn-sign-up" type="submit">Cadastrar</button>
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <hr>
+                                </div>
+                                <div class="col-sm-2">
+                                    <h4>OU</h4>
+                                </div>
+                                <div class="col-sm-5">
+                                    <hr>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 text-center p-0" style="height: 50px;">
+                                <div class="social" style="margin-bottom: 0px;">
+                                    <a href="/accounts/google/login" class="" data-toggle="tooltip" title="" data-original-title="Login com Google">
+                                        <img src="/static/img/btn_google_dark_normal_ios.png" class="img-responsive">
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group m-b-0">
