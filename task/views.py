@@ -1090,11 +1090,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
             logger = logging.getLogger('teste')
             logger.info(data)
 
-
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
                 query_set = Task.objects.filter(q)
-
             else:
                 task_dynamic_query = Q()
                 client_query = Q()
@@ -1400,8 +1398,8 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 task.client.name,
                 task.opposing_party,
                 task.origin_code,
-                task.court_district.state.name,
-                task.court_district.name,
+                task.court_district.state.initials if task.court_district else '--',
+                task.court_district.name if task.court_district else '--',
                 format_date(task.requested_date),
             ]
             xlsx.write_row(values)
@@ -2143,4 +2141,3 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'error': e})
-
