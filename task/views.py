@@ -1432,7 +1432,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
     def _export_answers_write_task(self, xlsx, answer, columns):
         task = answer.task
-        base_fields = [task.id, task.legacy_code, str(task.type_task), answer.create_user.username]
+        base_fields = [task.task_number, task.legacy_code, str(task.type_task), answer.create_user.username]
         answers = ['' for x in range(len(columns))]
         for question, value in answer.survey_result.items():
             question_index = columns.index(question)
