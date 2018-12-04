@@ -62,7 +62,6 @@ django-codemirror-widget==0.4.1
 numpy==1.15.1
 pandas==0.23.4
 sendgrid==5.6.0
-XlsxWriter==1.1
 
 # docs
 django-rest-swagger==2.2.0
