@@ -10,7 +10,7 @@ class XLSXWriter():
         self.filename = filename
         self.columns = columns
         self._output = io.BytesIO()
-        self._workbook = xlsxwriter.Workbook(self._output)
+        self._workbook = xlsxwriter.Workbook(self._output,  {'remove_timezone': True})
         self._writer = self._workbook.add_worksheet()
         self.write_row(columns)
 

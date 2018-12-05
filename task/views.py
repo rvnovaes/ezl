@@ -16,8 +16,8 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When, CharField, IntegerField, Count
-from django.db.models.functions import Cast
+from django.db.models import Q, Case, When, CharField, IntegerField, Count, TextField
+from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
@@ -40,7 +40,7 @@ from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignFor
     ImportTaskListForm, TaskBulkCreateForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain, TaskSurveyAnswer
-from .report import TaskToPayXlsx
+from .report import TaskToPayXlsx, ExportFilterTask
 from task.queries import *
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
@@ -1370,44 +1370,21 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return super().get(request)
 
     def _export_result(self, request):
-        def format_date(value):
-            if not value:
-                return ""
-            return value.strftime(settings.DATETIME_FORMAT)
-
-        columns = [
-            'Status',
-            'N° da OS',
-            'Prazo',
-            'Serviço',
-            'Processo',
-            'Cliente',
-            'Parte Adversa',
-            'OS Original',
-            'UF',
-            'Comarca',
-            'Data Solicitação',
-        ]
-        xlsx = XLSXWriter("resultado_de_pesquisa.xlsx", columns)
-
-        for task in self.get_queryset():
-            values = [
-                str(task.status),
-                task.task_number,
-                format_date(task.final_deadline_date),
-                task.type_task.name,
-                task.lawsuit_number,
-                task.client.name,
-                task.opposing_party,
-                task.origin_code,
-                task.court_district.state.initials if task.court_district else '--',
-                task.court_district.name if task.court_district else '--',
-                format_date(task.requested_date),
-            ]
-            xlsx.write_row(values)
-
-        xlsx.close()
-        return xlsx.get_http_response()
+        data = self.get_queryset().annotate(
+            origin_code=Coalesce(Cast('parent__task_number', TextField()), Cast('legacy_code', TextField()))).values(
+            'task_status', 'task_number', 'final_deadline_date', 'type_task__name',
+            'movement__law_suit__law_suit_number', 'movement__law_suit__folder__person_customer__name',
+            'movement__law_suit__opposing_party', 'origin_code', 'movement__law_suit__court_district__name',
+            'movement__law_suit__court_district__state__initials', 'requested_date')
+        report = ExportFilterTask(data)
+        output = report.get_report()
+        filename = 'resultados_da_pesquisa.xlsx'
+        response = HttpResponse(
+            output,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        return response
 
     def _export_answers(self, request):
         task_ids = self.get_queryset().filter(
