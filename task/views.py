@@ -708,6 +708,7 @@ class ToPayTaskReportView(View):
                              "OS's faturadas com sucesso.")
         return JsonResponse({"status": "ok"})
 
+
 class ToPayTaskReportXlsxView(ToPayTaskReportView):
     def get(self, request, *args, **kwargs):
         self.task_filter = self.filter_class(
@@ -729,6 +730,7 @@ class ToPayTaskReportXlsxView(ToPayTaskReportView):
         )
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
+
 
 class ToPayTaskReportTemplateView(TemplateView):
     template_name = 'task/reports/to_pay.html'

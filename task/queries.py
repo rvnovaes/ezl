@@ -1,4 +1,6 @@
 from django.db import connection
+
+
 def dictfetchall(cursor):
     "Returns all rows from a cursor as a dict"
     desc = cursor.description
@@ -7,8 +9,9 @@ def dictfetchall(cursor):
         for row in cursor.fetchall()
     ]
 
+
 def get_tasks_to_pay(task_ids, order):
-	sql = """
+    sql = """
 		SELECT 	task.id as task_id, 	
 			task.legacy_code as task_legacy_code,
 			office.id as office_id,
@@ -36,7 +39,6 @@ def get_tasks_to_pay(task_ids, order):
 		WHERE task.id IN {task_ids}
 		ORDER BY {order}
 	""".format(task_ids=str(task_ids).replace('[', '(').replace(']', ')'), order=order)
-	cursor = connection.cursor()
-	cursor.execute(sql)
-	return dictfetchall(cursor)
-	
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    return dictfetchall(cursor)

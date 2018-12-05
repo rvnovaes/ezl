@@ -16,7 +16,7 @@
                     </button>
                    
                     <ul class = "dropdown-menu" role = "menu">
-                        <li><a href="#" onClick="$('#btn-export-result').click();">Resultado da pesquisa</a></li>
+                        <li><a href="#" id="export-result">Resultado da pesquisa</a></li>
                         {% if perms.core.can_view_survey_results %}
                             <li><a href="#" onClick="$('#btn-export-answers').click();">Respostas de questionários</a></li>
                         {% endif %}

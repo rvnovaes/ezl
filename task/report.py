@@ -1,6 +1,7 @@
 import xlsxwriter
 import io
 
+
 class BaseFormatCell(object):
     def __init__(self, workbook):
         self.cell_format = workbook.add_format()
@@ -20,15 +21,18 @@ class DateTimeFormatCell(BaseFormatCell):
         super().__init__(workbook)
         self.cell_format.num_format = 'dd/mm/yy hh:mm'        
 
+
 class MoneyFormatCell(BaseFormatCell):
     def __init__(self, workbook):
         super().__init__(workbook)
         self.cell_format.num_format = 'R$#.#0'
 
+
 def format_boolean(value):
     if value:
         return 'SIM'
     return 'NÃO'
+
 
 class TaskToPayXlsx(object):
     def __init__(self, data):
