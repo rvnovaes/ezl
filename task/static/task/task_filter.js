@@ -1,7 +1,9 @@
 class TaskFilter {
 	constructor() {		
 		this.elExportResults = $('#export-result');
+		this.elExportAnswers = $('#export-answers');
         this.startOnClickElExportResults();
+        this.startOnClickElExportAnswers();
 	}	
 
 	get formData() {
@@ -22,11 +24,11 @@ class TaskFilter {
 		return data;
 	}
 
-    getXlsx(fileName='task-filter') {
+    getXlsx(fileName='task-filter', typeXls='export_result') {
 		let request = new XMLHttpRequest();
 		fileName += '.xlsx';
 		let params = $.param(this.query);
-		params += '&export_result=true';
+		params += `&${typeXls}=true`;
 		let url = `/dashboard/filtrar/?${params}`;
 		request.open('GET', url, true);
 		request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
@@ -56,6 +58,13 @@ class TaskFilter {
         this.elExportResults.on('click', () => {
             this.swalLoading('os resultados da pesquisa');
             this.getXlsx('resultados_da_pesquisa');
+        });
+    }
+
+	startOnClickElExportAnswers() {
+        this.elExportAnswers.on('click', () => {
+            this.swalLoading('as respostas do questionário');
+            this.getXlsx('respostas_dos_formularios', 'export_answers');
         });
     }
 
