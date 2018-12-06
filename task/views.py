@@ -741,7 +741,6 @@ class ToPayTaskReportTemplateView(TemplateView):
         return context
 
 
-
 class DashboardView(CustomLoginRequiredView, TemplateView):
     template_name = 'task/task_dashboard.html'
     table_pagination = {'per_page': 5}
@@ -2083,6 +2082,8 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         context = super().get_context_data()
         context['surveys_company_representative'] = [
             {'task_id': task.pk, 'survey': task.type_task.survey_company_representative} for task in self.object_list
+            if task.task_status in [str(TaskStatus.RETURN), str(TaskStatus.OPEN), str(TaskStatus.ACCEPTED),
+                                    str(TaskStatus.DONE)]
         ]
         return context
 
