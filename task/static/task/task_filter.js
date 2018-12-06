@@ -56,22 +56,22 @@ class TaskFilter {
 
 	startOnClickElExportResults() {
         this.elExportResults.on('click', () => {
-            this.swalLoading('os resultados da pesquisa');
+            this.swalLoading("as OS's");
             this.getXlsx('resultados_da_pesquisa');
         });
     }
 
 	startOnClickElExportAnswers() {
         this.elExportAnswers.on('click', () => {
-            this.swalLoading('as respostas do questionário');
+            this.swalLoading('as respostas dos formulários');
             this.getXlsx('respostas_dos_formularios', 'export_answers');
         });
     }
 
     swalLoading(title) {
 	    swal({
-			title: `Exportando ${title} para o Excel`,
-	        html: '<h3>Aguarde...</h3>',
+			title: `Exportação para o Excel`,
+			html: '<h4>Aguarde... Exportando ' + title + '.</h4>',
 			onOpen: ()=>{
 				swal.showLoading();
 			}
