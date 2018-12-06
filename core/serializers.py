@@ -8,6 +8,7 @@ from .utils import get_office_session, get_office_api
 from .validators import CpfCnpjOfficeUniqueValidator
 from rest_framework.fields import SlugField
 from rest_framework.compat import unicode_to_repr
+from django.contrib.auth.models import User
 
 
 class CreateUserDefault(object):
@@ -76,3 +77,11 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = ('id', 'name', 'logo')
+   
+
+class OfficeSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model  = Office
+        fields = ('id', 'legal_name', 'name', 'is_active', 'logo', 'use_service', 'use_etl', 'cpf_cnpj')
+
+

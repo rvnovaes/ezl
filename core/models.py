@@ -446,11 +446,11 @@ class Office(AbstractPerson):
 
     @property
     def states_of_practice(self):
-        return self.office_correspondent.order_by('state').distinct('state__name').values_list('state__name', flat=True)
+        return self.office_correspondent.filter(state__isnull=False).order_by('state').distinct('state__name').values_list('state__name', flat=True)
 
     @property
     def type_of_service(self):
-        return self.office_correspondent.order_by(
+        return self.office_correspondent.filter(type_task__type_task_main__isnull=False).order_by(
             'type_task__type_task_main').distinct('type_task__type_task_main__name').values_list(
             'type_task__type_task_main__name', flat=True)
 

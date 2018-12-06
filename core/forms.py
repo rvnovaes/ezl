@@ -555,6 +555,14 @@ class OfficeForm(BaseModelForm):
                 del cleaned_data['cpf_cnpj']
         return cleaned_data
 
+class OfficeProfileForm(OfficeForm):
+    class Meta:
+        model = Office
+        fields = [
+            'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'use_service',
+            'use_etl', 'is_active', 'logo'
+        ]    
+
 
 class InviteForm(forms.ModelForm):
     person = forms.CharField(
