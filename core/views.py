@@ -2423,6 +2423,7 @@ class OfficeProfileView(TemplateView):
         data['office'] = get_office_session(self.request)
         data['form_office'] = self.form_class(instance=data['office']) 
         data['form_address'] = AddressForm()      
+        data['form_contact_mechanism'] = ContactMechanismForm()
         return data
 
 class OfficeProfileUpdateView(UpdateView):
@@ -2442,6 +2443,17 @@ class OfficeProfileAddressCreateView(ViewRelatedMixin, CreateView):
             related_model=Office,
             related_model_name='office',
             related_field_pk='office')       
+
+    def get_success_url(self):
+        return reverse('office_profile')    
+
+class OfficeProfileContactMechanismCreateView(ViewRelatedMixin, CreateView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def __init__(self):
+        super().__init__(related_model=Office, related_model_name='office', related_field_pk='office')
 
     def get_success_url(self):
         return reverse('office_profile')    
