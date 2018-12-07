@@ -1,5 +1,6 @@
 class Office {
-	constructor() {
+	constructor(office_id) {
+		this.office_id = office_id;
 		this._modalOfficeBasic = $('#modal-office-profile-basic');
 		this._elBtnEditOffice = $('#btn-edit-office');
 		this._elLegalName = document.querySelector('#el-office-legal-name');		
@@ -87,12 +88,51 @@ class Office {
 		})
 	};
 
+	onCheckItem(){
+		let self = this;
+        $('#os-table input:checkbox').on('change', function(){
+            if ($(this).attr('id') === 'checkAll') {
+                if ($(this).is(':checked')) {
+                    self.tasksToPay = self.allTaskIds
+                } else {
+                    self.tasksToPay = [];
+                }
+            } else {
+                if ($(this).is(':checked')) {
+                    self.tasksToPay.push($(this).val())    
+                } else {
+                    self.tasksToPay.splice(self.tasksToPay.indexOf($(this).val(), 1))
+                }                            
+            }
+        })		
+	}	
+
 	onSubmitForm() {
 		this.form.on('submit', (event)=>{			
+			event.preventDefault()
 			swal({
 				title: 'Aguarde',
-				onOpen() {
-					swal.showLoading();
+				onOpen: ()=> {
+					swal.showLoading();					
+					$.ajax({
+						method: 'POST',
+						url: "/office_profile_update/" + this.office_id + "/", 
+						data: this.form.serialize(),
+						success: (response)=> {
+							swal.close();
+							showToast('success', 'Perfil atualizado com sucesso', '', 3000, true);
+							this.setOffice()
+							this.hideOfficeForm()
+						}, 
+						error: (request, status, error)=> {
+							Object.keys(request.responseJSON.errors).forEach((key)=>{
+								request.responseJSON.errors[key].forEach((e)=>{
+									swal.close();
+									showToast('error', this.form.find(`[name=${key}]`).siblings('label').text(), e, 0, false);
+								})
+							})																				
+						}
+					})					
 				}
 			})
 		})

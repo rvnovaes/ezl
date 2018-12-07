@@ -2430,6 +2430,9 @@ class OfficeProfileUpdateView(UpdateView):
     model = Office
     form_class = OfficeProfileForm
 
+    def form_invalid(self, form):
+        return JsonResponse({'errors': form.errors}, status=400)
+
     def get_success_url(self):
         return reverse('office_profile')    
 
@@ -2447,6 +2450,12 @@ class OfficeProfileAddressCreateView(ViewRelatedMixin, CreateView):
     def get_success_url(self):
         return reverse('office_profile')    
 
+class OfficeProfileAddressDeleteView(CustomLoginRequiredView, View):
+    def post(self, request, *args, **kwargs):
+        address_ids = request.POST.getlist('ids[]')
+        Address.objects.filter(pk__in=address_ids).delete()
+        return JsonResponse({'status': 'ok'})
+
 class OfficeProfileContactMechanismCreateView(ViewRelatedMixin, CreateView):
     model = ContactMechanism
     form_class = ContactMechanismForm
@@ -2456,7 +2465,13 @@ class OfficeProfileContactMechanismCreateView(ViewRelatedMixin, CreateView):
         super().__init__(related_model=Office, related_model_name='office', related_field_pk='office')
 
     def get_success_url(self):
-        return reverse('office_profile')    
+        return reverse('office_profile')
+
+class OfficeProfileContactMechanismDeleteView(CustomLoginRequiredView, View):
+    def post(self, request, *args, **kwargs):
+        contact_ids = request.POST.getlist('ids[]')
+        ContactMechanism.objects.filter(pk__in=contact_ids).delete()
+        return JsonResponse({'status': 'ok'})    
 
 
 class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
