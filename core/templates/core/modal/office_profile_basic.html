@@ -5,7 +5,7 @@
 <div class="modal fade" tabindex="-1" role="dialog" id="modal-office-profile-basic" autocomplete="off">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <form enctype="multipart/form-data"  method="POST" action="{% url 'office_profile_update' office.pk %}">{% csrf_token %}              
+      <form enctype="multipart/form-data"  method="POST" action="{% url 'office_profile_update' office.pk %}" id="form-office">{% csrf_token %}              
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h4 class="modal-title">Cadastro do escritório</h4>

@@ -6,17 +6,17 @@ class Office {
 		this._elCpfCnpj = document.querySelector('#el-office-cpf-cnpj');
 		this._elBtnSaveOffice = $('#btn-save-office');
 		this.data;
-		this.onClickBtnEditOffice();
-		this.onClickBtnSaveOffice();
+		this.onClickBtnEditOffice();		
 		this.setOffice();
+		this.onSubmitForm();
 	};	
 
-	get formOffice() {
+	get form() {
 		return $("#form-office")
 	}
 
 	get formData(){		
-		return this.formOffice.serializeArray();
+		return this.form.serializeArray();
 	}
 
 	get query() {
@@ -87,13 +87,14 @@ class Office {
 		})
 	};
 
-	onClickBtnSaveOffice() {
-		this._elBtnSaveOffice.on('click', ()=>{
-			this.salvar();
+	onSubmitForm() {
+		this.form.on('submit', (event)=>{			
+			swal({
+				title: 'Aguarde',
+				onOpen() {
+					swal.showLoading();
+				}
+			})
 		})
-	}
-
-	salvar() {
-		this.formOffice.submit()
 	}
 }
