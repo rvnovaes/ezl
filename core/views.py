@@ -2421,12 +2421,27 @@ class OfficeProfileView(TemplateView):
             self.request, paginate=False).configure(
                 kwargs.get('table_offices'))
         data['office'] = get_office_session(self.request)
-        data['form_office'] = self.form_class(instance=data['office'])        
+        data['form_office'] = self.form_class(instance=data['office']) 
+        data['form_address'] = AddressForm()      
         return data
 
 class OfficeProfileUpdateView(UpdateView):
     model = Office
     form_class = OfficeProfileForm
+
+    def get_success_url(self):
+        return reverse('office_profile')    
+
+class OfficeProfileAddressCreateView(ViewRelatedMixin, CreateView):
+    model = Address
+    form_class = AddressForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def __init__(self):
+        super().__init__(
+            related_model=Office,
+            related_model_name='office',
+            related_field_pk='office')       
 
     def get_success_url(self):
         return reverse('office_profile')    

@@ -178,6 +178,9 @@ class AddressForm(BaseModelForm):
             model=City,
             field_related='name',
             name='city',
+            attrs={
+                'autocomplete': "off"
+            },
             url='/city/autocomplete/'))
     address_type = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(AddressType.objects.all()),
