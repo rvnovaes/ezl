@@ -848,7 +848,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             survey.task = form.instance
             survey.survey = form.instance.type_task.survey
             survey.create_user = self.request.user
-            survey.survey_result = survey_result
+            survey.survey_result = json.loads(survey_result)
             survey.save()
         send_notes_execution_date.send(
             sender=self.__class__,
