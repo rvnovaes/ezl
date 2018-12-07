@@ -908,6 +908,16 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             context['survey_data'] = (self.object.parent.type_task.survey.data
                                       if self.object.parent.type_task.survey
                                       else None)
+        else:
+            n_surveys = self.object.get_survey_list.__len__()
+            id_list = [self.object.id]
+            if self.object.get_child:
+                id_list.append(self.object.get_child.id)
+            n_answers = TaskSurveyAnswer.objects.filter(task_id__in=id_list).values(
+                'task_id', 'survey_result').distinct().count()
+            if n_answers == n_surveys:
+                context['survey_data'] = None
+
         office_session = get_office_session(self.request)
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
@@ -951,7 +961,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             if self.object.person_company_representative == self.request.user.person:
                 show_in_tab = False
         return show_in_tab
-
 
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
