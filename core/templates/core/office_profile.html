@@ -13,7 +13,7 @@
     </div>
     <div class="profile-data">
         <div class="profile-about">
-        	<div class="white-box">
+        	<div class="white-box custom-white-box">
                 <div class="pull-right">
                     <button class="btn btn-sm btn-success" id="btn-edit-office"> <i class="fa fa-pencil"></i> Editar</button>
                 </div>                
@@ -53,7 +53,7 @@
         </div>    
         <div class="row">
             <div class="col-md-12">
-                <div class="white-box bg-info m-b-0 p-b-0 mailbox-widget ezl-panel" id="more-info">                    
+                <div class="white-box custom-white-box bg-info m-b-0 p-b-0 mailbox-widget ezl-panel" id="more-info">                    
                     <ul class="nav customtab nav-tabs" role="tablist">
                         <li role="presentation" class="active"><a href="#tab-about" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true"><span class="visible-xs"><i class="ti-email"></i></span><span class="hidden-xs"> Sobre</span></a></li>
                         <li role="presentation" class=""><a href="#tab-address" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-export"></i></span> <span class="hidden-xs">Endereço</span></a></li>
@@ -62,7 +62,7 @@
                         <li role="presentation" class=""><a href="#tab-invite-office" aria-controls="settings" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-trash"></i></span> <span class="hidden-xs">Relacionamento com escritórios</span></a></li>
                     </ul>
                 </div>
-                <div class="white-box p-0">
+                <div class="white-box custom-white-box p-0">
                     <div class="tab-content m-t-0">
                         <div role="tabpanel" class="tab-pane fade active in" id="tab-about">
                             <div class="row">
@@ -270,7 +270,7 @@
                                             <li id="li-office-users"><a data-toggle="tab" href="#office-users">Usuários Vinculados</a></li>
                                         </ul>
                                         <div class="tab-content">
-                                            <div id="invite-users" class="tab-pane fade">
+                                            <div id="invite-users" class="tab-pane fade active in">
                                                 <form class="form-inline editable-form" id="form-invite-user" action="#">
                                                     {% csrf_token %}
                                                     <input type="text" value="{{ office.pk }}" name="office" hidden>
@@ -391,7 +391,7 @@
                                     </ul>
 
                                     <div class="tab-content">
-                                        <div id="invite-offices" class="tab-pane fade">
+                                        <div id="invite-offices" class="tab-pane fade active in">
                                             <form class="form-inline editable-form" id="form-invite-office" action="#">
                                                 {% csrf_token %}
                                                 <input type="text" value="{{ office.pk }}" name="office" hidden>
@@ -667,24 +667,6 @@
                 $("#" + source.form.id + " #delete_button").attr('disabled', true);
         }
     </script>
-    <script>
-        $(document).ready(function () {
-            $('.nav.nav-tabs').find('li').each(function () {
-                $(this).on('click', function () {
-                    window.sessionStorage.setItem('active-tab', $(this).attr('id'));
-                })
-            });
-            var ulEl = $('#' + window.sessionStorage.getItem('active-tab'));
-            if (ulEl){
-                ulEl.find('a').each(function () {
-                    $(".nav-tabs a[href='" + $(this).attr('href') + "']").tab('show');
-                })
-            } else {
-                $(".nav-tabs a[href=#endereco]").tab('show');
-            }
-
-        })
-    </script>
     <!-- DataTables -->
 {% endblock %}
 {% block extra_modal %}
@@ -752,9 +734,9 @@
             position: absolute !important;
             width: 83.33%;
             float: right;
-            top: 130px;            
+            top: 110px;            
         }
-        .profile-data .white-box {
+        .custom-white-box {
             margin-left: 25px !important;
             margin-right: 25px !important;
             box-shadow: 2px 2px 2px 2px #d9d9d9;
