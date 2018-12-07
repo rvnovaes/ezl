@@ -337,6 +337,15 @@
             var office_work_alone = false;
             {% endif %}
 
+            if(value.id === 'FINISHED' && {{ pending_survey|lower }}){
+                swal({
+                    type: 'error',
+                    title: 'Questionário',
+                    html: "<h4>A OS não pode ser finalizada porque o preposto não respondeu o questionário.</h4>"
+                });
+                return false;
+            }
+
             if ((value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED") && !(office_work_alone) ){
                 $('.rating-container').show();
             } else {

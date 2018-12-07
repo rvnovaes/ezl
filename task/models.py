@@ -274,8 +274,12 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
         return list(self.type_task_main.all())
 
     @property
-    def suvey_list(self):
-        return [survey for survey in [self.survey, self.survey_company_representative] if survey]
+    def suvey_dict(self):
+        return {
+            'survey': self.survey if self.survey else None,
+            'survey_company_representative': self.survey_company_representative if self.survey_company_representative
+            else None
+        }
 
     def __str__(self):
         return self.name
@@ -541,8 +545,25 @@ class Task(Audit, LegacyCode, OfficeMixin):
             return self.legacy_code
 
     @property
-    def get_survey_list(self):
-        return self.type_task.suvey_list
+    def get_survey_dict(self):
+        return self.type_task.suvey_dict
+
+    @property
+    def have_pending_surveys(self):
+        survey_dict = self.get_survey_dict
+        if survey_dict:
+            task_id_list = [self.pk]
+            if self.get_child:
+                task_id_list.append(self.get_child.pk)
+            pending_survey_company_representative = pending_survey = False
+            if survey_dict.get('survey', None):
+                pending_survey = not TaskSurveyAnswer.objects.filter(task__in=task_id_list,
+                                                                     survey=survey_dict.get('survey')).first()
+            if self.person_company_representative and survey_dict.get('survey_company_representative', None):
+                pending_survey_company_representative = not TaskSurveyAnswer.objects.filter(
+                    task=self, survey=survey_dict.get('survey_company_representative'),
+                    create_user=self.person_company_representative.auth_user).first()
+            return pending_survey_company_representative or pending_survey
 
 
 class TaskFeedback(models.Model):

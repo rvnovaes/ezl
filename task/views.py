@@ -302,6 +302,7 @@ class BatchTaskToAssignView(AuditFormMixin, UpdateView):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
+
 class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         try:
@@ -707,6 +708,7 @@ class ToPayTaskReportView(View):
                              "OS's faturadas com sucesso.")
         return JsonResponse({"status": "ok"})
 
+
 class ToPayTaskReportXlsxView(ToPayTaskReportView):
     def get(self, request, *args, **kwargs):
         self.task_filter = self.filter_class(
@@ -728,6 +730,7 @@ class ToPayTaskReportXlsxView(ToPayTaskReportView):
         )
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
+
 
 class ToPayTaskReportTemplateView(TemplateView):
     template_name = 'task/reports/to_pay.html'
@@ -843,6 +846,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         if survey_result:
             survey = TaskSurveyAnswer()
             survey.task = form.instance
+            survey.survey = form.instance.type_task.survey
             survey.create_user = self.request.user
             survey.survey_result = survey_result
             survey.save()
@@ -902,21 +906,13 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         context['task_history'] = \
             TaskHistory.objects.filter(
                 task_id=self.object.id).order_by('-create_date')
+        context['pending_survey'] = self.object.have_pending_surveys
         context['survey_data'] = (self.object.type_task.survey.data
                                   if self.object.type_task.survey else None)
         if self.object.parent:
             context['survey_data'] = (self.object.parent.type_task.survey.data
                                       if self.object.parent.type_task.survey
                                       else None)
-        else:
-            n_surveys = self.object.get_survey_list.__len__()
-            id_list = [self.object.id]
-            if self.object.get_child:
-                id_list.append(self.object.get_child.id)
-            n_answers = TaskSurveyAnswer.objects.filter(task_id__in=id_list).values(
-                'task_id', 'survey_result').distinct().count()
-            if n_answers == n_surveys:
-                context['survey_data'] = None
 
         office_session = get_office_session(self.request)
         get_correspondents_table = CorrespondentsTable(self.object,
@@ -2100,7 +2096,8 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         try:
             task = Task.objects.get(pk=request.POST.get('task_id'))
             survey_result = json.loads(request.POST.get('survey'))
-            survey = TaskSurveyAnswer(create_user=request.user, task=task, survey_result=survey_result)
+            survey = TaskSurveyAnswer(create_user=request.user, task=task,
+                                      survey=task.type_task.survey_company_representative, survey_result=survey_result)
             survey.save()
             return JsonResponse({'status': 'ok'})
         except Exception as e:
