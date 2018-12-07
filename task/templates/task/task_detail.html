@@ -155,7 +155,7 @@
     <script type="text/javascript">
         var taskId;
         $('#btn-company_representative').on('click', function(event) {
-            event.preventDefault()
+            event.preventDefault();
             taskId = '{{object.pk}}';            
             {% if survey_company_representative %} 
                 selectedSurvey = `{{survey_company_representative|safe}}`;
@@ -165,7 +165,7 @@
                     type: 'error', 
                     title: 'Questionário',
                     text: "Não existe formulário cadastrado para este tipo de serviço."
-                })
+                });
             {% endif %}            
         })
 
@@ -217,14 +217,14 @@
 
         function toogleModals(modalToClose, modalToOpen, task_status) {
             $(modalToClose).one('hidden.bs.modal', function() {
-                $('#survey').attr('data-status', task_status)
+                $('#survey').attr('data-status', task_status);
                 $(modalToOpen).modal('show');
             }).modal('hide');
         }
 
         //Função para exibir modal do survey
         function beforeSubmit(task_status) {
-            toogleModals('#confirmAction', '#survey', task_status)
+            toogleModals('#confirmAction', '#survey', task_status);
             $('#task_detail').submit(function (e) {
                 e.preventDefault();
             });

@@ -273,6 +273,10 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
     def main_tasks(self):
         return list(self.type_task_main.all())
 
+    @property
+    def suvey_list(self):
+        return [survey for survey in [self.survey, self.survey_company_representative] if survey]
+
     def __str__(self):
         return self.name
 
@@ -535,6 +539,10 @@ class Task(Audit, LegacyCode, OfficeMixin):
             return self.parent.task_number
         else:
             return self.legacy_code
+
+    @property
+    def get_survey_list(self):
+        return self.type_task.suvey_list
 
 
 class TaskFeedback(models.Model):
@@ -926,5 +934,5 @@ class TaskShowStatus(Audit):
 
 class TaskSurveyAnswer(Audit):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
-    survey_result = JSONField(
-    verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    survey = models.ForeignKey('survey.Survey', on_delete=models.CASCADE, null=True, blank=True)
+    survey_result = JSONField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
