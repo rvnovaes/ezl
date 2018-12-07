@@ -499,11 +499,21 @@
     {% endif %}
     {{ inviteofficeform.media }}
     {#    Convite de usuario #}
-    <script>
+    <script>    	$
         var office = new Office('{{office.pk}}');
         var address = new Address();
         var contactMechanism = new ContactMechanism();
+        var menuOpen = true;
         $(document).ready(function () {
+		    $(".open-close").on("click", function () {
+		    	if (menuOpen) {
+		    		$('.profile-data').css('width', '100%');
+		    		menuOpen = false;			    		
+		    	} else {
+		    		$('.profile-data').css('width', '83.33%');
+		    		menuOpen = true;	    		
+		    	}
+		    });
             var invites = [
                 {
                     btn: '#btn-invite-user',
