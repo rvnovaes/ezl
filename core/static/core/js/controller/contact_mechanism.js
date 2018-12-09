@@ -3,6 +3,12 @@ class ContactMechanism {
 		this._modalOfficeContactMechanism = $('#modal-office-profile-contact-mechanism');
 		this._elBtnAddContactMechanism = $('#btn-add-contact-mechanism');
 		this._elBtnDeleteContactMechanism = $('#btn-delete-contact-mechanism');
+		this._elContactMechanismTable = $('#contact-mechanism-table').DataTable({
+			destroy: true,
+            paging: false,
+            dom: 'frti',
+            language: {"url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"}
+        });		
 		this.contactMechanismSelected = [];
 		this.onClickBtnContactMechanism();
 		this.onSubmitForm();
@@ -71,7 +77,11 @@ class ContactMechanism {
 	  			method: 'POST',
 	  			url: '/office_profile_contact_mechanism_delete/', 
 	  			data: {ids: this.contactMechanismSelected}, 
-	            success: function (response) {
+	            success: (response) => {
+	            	this.contactMechanismSelected.forEach((row_id)=>{
+	            		let tr = $(`#contact-mechanism-table tr[id=${row_id}]`);
+	            		this._elContactMechanismTable.row($(tr)).node().remove();
+	            	});	            	
 				    swal({
 					      title: 'Contatos deletados com sucesso!',				      
 					      type: 'success'				    	

@@ -3,6 +3,13 @@ class Address {
 		this._modalOfficeAddress = $('#modal-office-profile-address');
 		this._elBtnAddAddress = $('#btn-add-address');
 		this._elBtnDeleteAddress = $('#btn-delete-address');
+		this._elAddressTable = $('#address-table').DataTable({
+			destroy: true,
+            paging: false,
+            dom: 'frti',
+            language: {"url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"}
+        });
+                            
 		this.addressSelected = [];
 		this.onClickBtnAddAddress();
 		this.onClickBtnDeleteAddress();
@@ -71,7 +78,11 @@ class Address {
 	  			method: 'POST',
 	  			url: '/office_profile_address_delete/', 
 	  			data: {ids: this.addressSelected}, 
-	            success: function (response) {
+	            success: (response)=> {
+	            	this.addressSelected.forEach((row_id)=>{
+	            		let tr = $(`#address-table tr[id=${row_id}]`);
+	            		this._elAddressTable.row($(tr)).node().remove();
+	            	});
 				    swal({
 					      title: 'Endereços deletados com sucesso!',				      
 					      type: 'success'				    	

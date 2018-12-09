@@ -121,7 +121,7 @@
                                                         {% endblock table.thead %} {% block table.tbody %}
                                                         <tbody>
                                                             {% for row in table.page.object_list|default:table.rows %} {% block table.tbody.row %}
-                                                            <tr class="{% cycle " odd " "even " %}" data-href="{{ row.attrs.data_href }}" pk="{{ row.attrs.pk }}">
+                                                            <tr class="{% cycle " odd " "even " %}" id="{{ row.attrs.pk }}" pk="{{ row.attrs.pk }}">
                                                                 {% for column, cell in row.items %}
                                                                 <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                                                 {% endfor %}
@@ -190,7 +190,7 @@
 						                                <tbody>
 						                                {% for row in table_contact_mechanism.page.object_list|default:table_contact_mechanism.rows %} {# support pagination #}
 						                                    {% block table_contact_mechanism.tbody.row %}
-						                                        <tr class="{% cycle "odd" "even" %}" data-href="{{ row.attrs.data_href }}" pk="{{ row.attrs.pk }}">
+						                                        <tr class="{% cycle "odd" "even" %}" data-href="{{ row.attrs.data_href }}" pk="{{ row.attrs.pk }}" id="{{ row.attrs.pk }}">
 						                                            {% for column, cell in row.items %}
 						                                                <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
 						                                            {% endfor %}
@@ -482,6 +482,7 @@
 
 {% block extra_scripts %}
     <!-- Custom Theme JavaScript -->    
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'core/js/controller/office.js' %}"></script>
     <script src="{% static 'core/js/controller/address.js' %}"></script>
     <script src="{% static 'core/js/controller/contact_mechanism.js' %}"></script>
@@ -632,7 +633,8 @@
             }
         }
     </script>
-    <!-- DataTables -->
+    <!-- DataTables -->    
+    
 {% endblock %}
 {% block extra_modal %}
     <!-- Janela modal para mostrar progresso de deleção do arquivo -->
