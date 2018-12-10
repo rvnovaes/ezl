@@ -1,7 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 from pycpfcnpj import cpfcnpj
-from .models import Person, Office, Company
+from .models import Person, Office, Company, Address, ContactMechanism
 from .view_validators import create_person_office_relation, person_exists
 from .messages import person_cpf_cnpj_already_exists, invalid_field
 from .utils import get_office_session, get_office_api
@@ -85,3 +85,17 @@ class OfficeSerializer(serializers.ModelSerializer):
         fields = ('id', 'legal_name', 'name', 'is_active', 'logo', 'use_service', 'use_etl', 'cpf_cnpj')
 
 
+class AddressSerializer(serializers.ModelSerializer):
+    city_name = serializers.SerializerMethodField()
+    class Meta:
+        model = Address        
+        fields = '__all__'
+
+    def get_city_name(self, obj):
+        return obj.city.__str__()
+
+
+class ContactMechanismSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = ContactMechanism
+        fields = '__all__'

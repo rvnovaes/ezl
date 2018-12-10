@@ -16,7 +16,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from core.serializers import OfficeSerializer
+from core.serializers import OfficeSerializer, AddressSerializer, ContactMechanismSerializer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q, F
 from django.db import transaction, IntegrityError
@@ -2447,14 +2447,51 @@ class OfficeProfileAddressCreateView(ViewRelatedMixin, CreateView):
             related_model_name='office',
             related_field_pk='office')       
 
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.office = get_office_session(self.request)
+        self.object = form.save()        
+        return JsonResponse(AddressSerializer(form.instance).data)        
+
     def get_success_url(self):
         return reverse('office_profile')    
+
+class OfficeProfileAddressUpdateView(CustomLoginRequiredView, UpdateView):
+    model = Address
+    form_class = AddressForm
+
+    def form_invalid(self, form):
+        return JsonResponse({'errors': form.errors}, status=400)
+
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.office = get_office_session(self.request)
+        self.object = form.save()        
+        return JsonResponse(AddressSerializer(form.instance).data)        
+
+    def get_success_url(self):
+        return reverse('office_profile')
+
 
 class OfficeProfileAddressDeleteView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         address_ids = request.POST.getlist('ids[]')
         Address.objects.filter(pk__in=address_ids).delete()
         return JsonResponse({'status': 'ok'})
+
+class OfficeProfileAddressDataView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):        
+        address = Address.objects.get(pk=pk)
+        address_serializer = AddressSerializer(address)
+        return JsonResponse(address_serializer.data)
+
+
+class OfficeProfileContactMechanismDataView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):        
+        contact_mechanism = ContactMechanism.objects.get(pk=pk)
+        contact_mechanism_serializer = ContactMechanismSerializer(contact_mechanism)
+        return JsonResponse(contact_mechanism_serializer.data)
+
 
 class OfficeProfileContactMechanismCreateView(ViewRelatedMixin, CreateView):
     model = ContactMechanism
@@ -2464,8 +2501,32 @@ class OfficeProfileContactMechanismCreateView(ViewRelatedMixin, CreateView):
     def __init__(self):
         super().__init__(related_model=Office, related_model_name='office', related_field_pk='office')
 
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.office = get_office_session(self.request)
+        self.object = form.save()
+        return JsonResponse(ContactMechanismSerializer(self.object).data)        
+
     def get_success_url(self):
         return reverse('office_profile')
+
+class OfficeProfileContactMechanismUpdateView(CustomLoginRequiredView, UpdateView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+
+    def form_invalid(self, form):
+        return JsonResponse({'errors': form.errors}, status=400)
+
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.office = get_office_session(self.request)
+        self.object = form.save()        
+        return JsonResponse(ContactMechanismSerializer(form.instance).data)
+
+
+    def get_success_url(self):
+        return reverse('office_profile')        
+
 
 class OfficeProfileContactMechanismDeleteView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):

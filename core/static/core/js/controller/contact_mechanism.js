@@ -1,5 +1,6 @@
 class ContactMechanism {
-	constructor() {
+	constructor(officeId) {
+		this.officeId = officeId;
 		this._modalOfficeContactMechanism = $('#modal-office-profile-contact-mechanism');
 		this._elBtnAddContactMechanism = $('#btn-add-contact-mechanism');
 		this._elBtnDeleteContactMechanism = $('#btn-delete-contact-mechanism');
@@ -14,10 +15,24 @@ class ContactMechanism {
 		this.onSubmitForm();
 		this.onCheckItem();
 		this.onClickBtnDeleteContactMechanism();
+		this.onClickTr();
 	}
 
 	get form() {
 		return $("#form-contact-mechanism")
+	}	
+
+
+	get query() {
+		let formData = this.form.serializeArray();
+		let data = {};
+		$(formData).each((index, obj) =>{
+		        data[obj.name] = obj.value;
+		    });
+		this.form.find('input[type=checkbox]').each(function(){
+			data[$(this).attr('name')] = $(this).prop('checked')
+		})				
+		return data;
 	}	
 
 	onClickBtnContactMechanism(){
@@ -27,6 +42,7 @@ class ContactMechanism {
 	}
 
 	showOfficeContactMechanismForm() {
+		this.form.attr(`action', '/office_profile_contact_mechanism_create/${this.officeId}/`)
 		this._modalOfficeContactMechanism.modal('show');
 	};	    
 
@@ -36,10 +52,31 @@ class ContactMechanism {
 
 	onSubmitForm() {
 		this.form.on('submit', (event)=>{			
+			event.preventDefault();
+			let action = this.form.attr('action');
+			let self = this;			
 			swal({
 				title: 'Aguarde',
 				onOpen() {
 					swal.showLoading();
+					$.ajax({
+						method: 'POST',
+						url: action, 
+						data: self.query,
+						success: (response)=> {
+							swal.close();
+							location.reload();
+							showToast('success', 'Perfil atualizado com sucesso', '', 3000, true);							
+						}, 
+						error: (request, status, error)=> {
+							Object.keys(request.responseJSON.errors).forEach((key)=>{
+								request.responseJSON.errors[key].forEach((e)=>{
+									swal.close();
+									showToast('error', self.form.find(`[name=${key}]`).siblings('label').text(), e, 0, false);
+								})
+							})																				
+						}
+					})					
 				}
 			})
 		})
@@ -96,4 +133,27 @@ class ContactMechanism {
 		  }
 		})
 	}
+
+	onClickTr(){
+		let self = this;
+		$(`#contact-mechanism-table tr`).on('click', function(event){			
+			self.showOfficeContactMechanismForm(); 
+			let contactMechanismId = $(this).attr('id');
+			$.ajax({
+				url: `/office_profile_contact_mechanism_data/${contactMechanismId}/`, 
+				method: 'GET', 
+				success: (response)=>{
+					self.form.attr('action', ('action', `/office_profile_contact_mechanism_update/${response.id}/`))
+					Object.keys(response).forEach((key)=>{
+						if (typeof response[key] == 'boolean') {
+							self.form.find(`[name=${key}]`).prop('checked', response[key]);
+						} else {
+							self.form.find(`[name=${key}]`).val(response[key])
+						}
+					})
+				}
+			})
+		})
+	}
+
 }

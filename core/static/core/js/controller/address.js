@@ -1,8 +1,10 @@
 class Address {
-	constructor() {
+	constructor(officeId) {
+		this.officeId = officeId;
 		this._modalOfficeAddress = $('#modal-office-profile-address');
 		this._elBtnAddAddress = $('#btn-add-address');
 		this._elBtnDeleteAddress = $('#btn-delete-address');
+		this.elCity = $('[name=city]');
 		this._elAddressTable = $('#address-table').DataTable({
 			destroy: true,
             paging: false,
@@ -15,11 +17,34 @@ class Address {
 		this.onClickBtnDeleteAddress();
 		this.onSubmitForm();
 		this.onCheckItem();
+		this.onClickTr();		
 	}
 
 	get form() {
 		return $("#form-address")
 	}	
+
+	setSelect2(text, value, element) {
+	    if(text && value) {
+	        var newOption = new Option(text, value, true, true);
+            element.append(newOption).trigger('change');
+        }else{
+	        element.val(null).trigger('change');
+        }
+    }	
+
+	get query() {
+		let formData = this.form.serializeArray();
+		let data = {};
+		$(formData).each((index, obj) =>{
+		        data[obj.name] = obj.value;
+		    });
+		this.form.find('input[type=checkbox]').each(function(){
+			data[$(this).attr('name')] = $(this).prop('checked')
+		})				
+		return data;
+	}
+
 
 	onClickBtnAddAddress(){
 		this._elBtnAddAddress.on('click', ()=> {
@@ -28,6 +53,7 @@ class Address {
 	}
 
 	showOfficeAddressForm() {
+		this.form.attr(`action', '/office_profile_address_create/${this.officeId}/`)
 		this._modalOfficeAddress.modal('show');
 	};	    
 
@@ -36,11 +62,33 @@ class Address {
 	};	
 
 	onSubmitForm() {
-		this.form.on('submit', (event)=>{			
+		this.form.on('submit', (event)=>{	
+			event.preventDefault();		
+			let action = this.form.attr('action');
+			let self = this;
 			swal({
 				title: 'Aguarde',
 				onOpen() {
-					swal.showLoading();
+					swal.showLoading();					
+					$.ajax({
+						method: 'POST',
+						url: action, 
+						data: self.query,
+						success: (response)=> {
+							swal.close();
+							showToast('success', 'Perfil atualizado com sucesso', '', 3000, true);							
+							self.hideOfficeAddressForm();
+							location.reload();
+						}, 
+						error: (request, status, error)=> {
+							Object.keys(request.responseJSON.errors).forEach((key)=>{
+								request.responseJSON.errors[key].forEach((e)=>{
+									swal.close();
+									showToast('error', self.form.find(`[name=${key}]`).siblings('label').text(), e, 0, false);
+								})
+							})																				
+						}
+					})					
 				}
 			})
 		})
@@ -97,5 +145,31 @@ class Address {
 		  }
 		})
 	}	
+
+	onClickTr(){
+		let self = this;
+		$(`#address-table tr`).on('click', function(event){						
+			$(event.currentTarget).parent()			
+			self.showOfficeAddressForm(); 
+			let addressId = $(this).attr('id');
+			$.ajax({
+				url: `/office_profile_address_data/${addressId}/`, 
+				method: 'GET', 
+				success: (response)=>{
+					self.form.attr('action', `/office_profile_address_update/${response.id}/`)					
+					Object.keys(response).forEach((key)=>{
+						if (key == 'city') {
+							self.setSelect2(response['city_name'], response[key], self.elCity)							
+						}
+						if (typeof response[key] == 'boolean') {
+							self.form.find(`[name=${key}]`).prop('checked', response[key]);
+						} else {
+							self.form.find(`[name=${key}]`).val(response[key])
+						}
+					})
+				}
+			})
+		})
+	}
 
 }

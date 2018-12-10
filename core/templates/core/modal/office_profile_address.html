@@ -12,7 +12,7 @@
         </div>
         <div class="modal-body">        
           <fieldset>
-            <div class="row">
+            <div class="row">              
                 {% bootstrap_field form_address.address_type form_group_class="form-group col-sm-4" %}
                 {% bootstrap_field form_address.street form_group_class="form-group col-sm-4" %}
                 {% bootstrap_field form_address.number form_group_class="form-group col-sm-4" %}
@@ -44,3 +44,4 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+{{ form_address.media }}

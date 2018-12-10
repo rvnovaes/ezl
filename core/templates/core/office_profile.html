@@ -190,7 +190,7 @@
 						                                <tbody>
 						                                {% for row in table_contact_mechanism.page.object_list|default:table_contact_mechanism.rows %} {# support pagination #}
 						                                    {% block table_contact_mechanism.tbody.row %}
-						                                        <tr class="{% cycle "odd" "even" %}" data-href="{{ row.attrs.data_href }}" pk="{{ row.attrs.pk }}" id="{{ row.attrs.pk }}">
+						                                        <tr class="{% cycle "odd" "even" %}" pk="{{ row.attrs.pk }}" id="{{ row.attrs.pk }}">
 						                                            {% for column, cell in row.items %}
 						                                                <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
 						                                            {% endfor %}
@@ -481,7 +481,7 @@
 {%endblock%}
 
 {% block extra_scripts %}
-    <!-- Custom Theme JavaScript -->    
+    <!-- Custom Theme JavaScript -->        
     <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'core/js/controller/office.js' %}"></script>
     <script src="{% static 'core/js/controller/address.js' %}"></script>
@@ -500,9 +500,10 @@
     {% endif %}
     {{ inviteofficeform.media }}
     {#    Convite de usuario #}
-    <script>    	$
+    <script> 
+        $.fn.modal.Constructor.prototype.enforceFocus = function() {};
         var office = new Office('{{office.pk}}');
-        var address = new Address();
+        var address = new Address("{{office.pk}}");
         var contactMechanism = new ContactMechanism();
         var menuOpen = true;
         $(document).ready(function () {
@@ -654,6 +655,8 @@
 
 
 {% block extra_stylesheets %} 
+    <link href="/static/autocomplete_light/vendor/select2/dist/css/select2.css" type="text/css" media="all" rel="stylesheet" />
+    <link href="/static/autocomplete_light/select2.css" type="text/css" media="all" rel="stylesheet" />
 	<style type="text/css">
 		.container-fluid {
 			padding: 0 !important;
