@@ -90,6 +90,18 @@
                                         {% endfor %}
                                     </ul>
                                 </div>
+                                <div class="col col-md-6">
+                                    <div class="p-10">
+                                        <h3>Áreas em que atua</h3>
+                                    </div>
+                                    <ul>
+                                        {% for area in office.areaofexpertise_set.all %}
+                                        <div class="col col-md-6" style="margin: 3px">
+                                            <li>{{area.area}}</li>
+                                        </div>
+                                        {% endfor %}
+                                    </ul>
+                                </div>                                
                             </div>
                         </div>
                         <div role="tabpanel" class="tab-pane fade" id="tab-address">

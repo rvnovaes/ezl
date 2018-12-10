@@ -795,3 +795,14 @@ class EmailTemplate(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class AreaOfExpertise(models.Model):
+    area = models.CharField(verbose_name='Área de atuação', max_length=2555)
+    offices = models.ManyToManyField(Office, blank=True)
+
+    class Meta:
+        verbose_name='Áreas de atuação'
+
+    def __str__(self):
+        return self.area

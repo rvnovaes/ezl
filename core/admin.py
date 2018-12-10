@@ -2,7 +2,7 @@ from django.contrib import admin
 from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate
 #Todo: Remover office
 from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings, Company, CompanyUser, City, \
-    State, Country
+    State, Country, AreaOfExpertise
 from task.models import TaskWorkflow, TaskShowStatus
 
 
@@ -68,7 +68,7 @@ class ContactMechanism(admin.ModelAdmin):
 class OfficeAdmin(admin.ModelAdmin):
     filter_horizontal = ['persons', 'offices']
     search_fields = ['legal_name']
-    list_display = ['name', 'auth_user']
+    list_display = ['name', 'auth_user']    
 
 
 @admin.register(Invite)
@@ -104,6 +104,11 @@ class CityAdmin(admin.ModelAdmin):
 @admin.register(State)
 class StateAdmin(admin.ModelAdmin):
     search_fields = ['name']
+
+
+@admin.register(AreaOfExpertise)
+class AreaOfExpertiseAdmin(admin.ModelAdmin):
+    search_fields = ['area']
 
 
 admin.site.register(AddressType)

@@ -2430,6 +2430,14 @@ class OfficeProfileUpdateView(UpdateView):
     model = Office
     form_class = OfficeProfileForm
 
+    def post(self, request, *args, **kwargs):        
+        form = self.form_class(request.POST, request.FILES, instance=get_office_session(request))
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('office_profile'))
+        else:
+            return JsonResponse({'errors': form.errors}, status=400)
+
     def form_invalid(self, form):
         return JsonResponse({'errors': form.errors}, status=400)
 
