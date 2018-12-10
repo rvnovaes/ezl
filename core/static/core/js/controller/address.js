@@ -148,27 +148,28 @@ class Address {
 
 	onClickTr(){
 		let self = this;
-		$(`#address-table tr`).on('click', function(event){						
-			$(event.currentTarget).parent()			
-			self.showOfficeAddressForm(); 
-			let addressId = $(this).attr('id');
-			$.ajax({
-				url: `/office_profile_address_data/${addressId}/`, 
-				method: 'GET', 
-				success: (response)=>{
-					self.form.attr('action', `/office_profile_address_update/${response.id}/`)					
-					Object.keys(response).forEach((key)=>{
-						if (key == 'city') {
-							self.setSelect2(response['city_name'], response[key], self.elCity)							
-						}
-						if (typeof response[key] == 'boolean') {
-							self.form.find(`[name=${key}]`).prop('checked', response[key]);
-						} else {
-							self.form.find(`[name=${key}]`).val(response[key])
-						}
-					})
-				}
-			})
+		$(`#address-table tr td`).on('click', function(event){									
+			if (!$(this).hasClass('selection')) {						
+				self.showOfficeAddressForm(); 
+				let addressId = $(event.currentTarget).parent().attr('id');
+				$.ajax({
+					url: `/office_profile_address_data/${addressId}/`, 
+					method: 'GET', 
+					success: (response)=>{
+						self.form.attr('action', `/office_profile_address_update/${response.id}/`)					
+						Object.keys(response).forEach((key)=>{
+							if (key == 'city') {
+								self.setSelect2(response['city_name'], response[key], self.elCity)							
+							}
+							if (typeof response[key] == 'boolean') {
+								self.form.find(`[name=${key}]`).prop('checked', response[key]);
+							} else {
+								self.form.find(`[name=${key}]`).val(response[key])
+							}
+						})
+					}
+				})				
+			}
 		})
 	}
 
