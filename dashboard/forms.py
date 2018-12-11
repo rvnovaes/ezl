@@ -1,5 +1,5 @@
 from django import forms
-from .models import Dashboard, Card, DoughnutChart, LineChart
+from .models import Dashboard, Card, DoughnutChart, LineChart, BarChart
 from codemirror import CodeMirrorTextarea
 import json
 from .schemas import *
@@ -57,4 +57,14 @@ class LineChartForm(ComponentForm):
 
     class Meta:
         model = LineChart
+        fields = '__all__'
+
+
+class BarChartForm(ComponentForm):
+    schema = forms.CharField(
+        label="Schema", widget=code_mirror_schema, initial=json.dumps(
+            BAR, indent=4))
+
+    class Meta:
+        model = BarChart
         fields = '__all__'
