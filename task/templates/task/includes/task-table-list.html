@@ -34,8 +34,11 @@
                                     {% for column, cell in row.items %}
                                         <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                     {% endfor %}
+                                    {% block extra_td %}
+                                        
+                                    {% endblock%}
                                 </tr>
-                            {% endblock table.tbody.row %}
+                            {% endblock table.tbody.row %}                            
                         {% empty %}
                             {% if table.empty_text %}
                                 {% block table.tbody.empty_text %}

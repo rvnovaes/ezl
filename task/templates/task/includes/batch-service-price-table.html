@@ -55,6 +55,7 @@
                 <thead>
                   <tr>
                     <th>Escritório correspondente</th>
+                    <th>Rede</th>
                     <th>UF</th>
                     <th>Comarca</th>
                     <th>Complemento da comarca</th>
@@ -120,13 +121,14 @@
                         .DataTable({
                             destroy: true,
                             paging: false,
-                            order: [[6, 'asc'], [7, 'desc'], [8, 'asc'], [0, 'asc']],
+                            order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
                             dom: 'frti',
                             language: {"url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"}
                         });
                 }
                 servicePriceTable.prices.forEach(function(price) {
                     let office_correspondent_name = price.office_correspondent.legal_name;
+                    let office_networ_name = price.office_network.name;
                     let state = price.state;
                     let court_district_name = price.court_district.name;
                     let court_district_complement_name = price.court_district_complement.name;
@@ -139,6 +141,7 @@
                     correspondentTable.row.add(
                         [
                             office_correspondent_name,
+                            office_networ_name,
                             state,
                             court_district_name,
                             court_district_complement_name,

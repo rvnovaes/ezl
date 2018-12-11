@@ -2,6 +2,12 @@
 {% load static %}
 {% block extra_scripts %}
     {{ block.super }}
+    <script src="{% static 'js/service_price_table.js' %}"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        servicePriceTable = new ServicePriceTable();
+    });
+    </script>
 {% endblock %}
 {% block extra_content %}
     {% include 'core/mask_selector.html' %}

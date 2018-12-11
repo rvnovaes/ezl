@@ -168,6 +168,7 @@ class Country(Audit):
     class Meta:
         db_table = 'country'
         verbose_name = 'País'
+        verbose_name_plural = 'Paises'
 
     def __str__(self):
         return self.name
@@ -493,7 +494,8 @@ class OfficeRelGroup(models.Model):
             return self.group.name
 
     class Meta:
-        verbose_name = 'Groupos por escritório'
+        verbose_name = 'Grupo por escritório'
+        verbose_name_plural = 'Grupos por escritório'
 
 
 class DefaultOffice(OfficeMixin, Audit):
@@ -509,6 +511,24 @@ class DefaultOffice(OfficeMixin, Audit):
     class Meta:
         verbose_name = 'Escritório Padrão'
         verbose_name_plural = 'Escritórios Padrão'
+
+
+class OfficeNetwork(Audit):
+    name = models.CharField(verbose_name='Nome do grupo', max_length=255)
+    members = models.ManyToManyField(Office, related_name='network_members', verbose_name='Membros')
+
+    class Meta:
+        verbose_name = 'Rede de escritórios'
+        verbose_name_plural = 'Redes de escritórios'
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def list_members(self):
+        list_members = [x.__str__() for x in self.members.all().order_by('legal_name')]
+        return list_members
+    list_members.fget.short_description = 'Membros'
 
 
 class Invite(Audit):

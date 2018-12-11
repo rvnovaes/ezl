@@ -749,7 +749,7 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
 
     def get(self, request, *args, **kwargs):
         office_session = get_office_session(request)
-        checker = ObjectPermissionChecker(request.user)        
+        checker = ObjectPermissionChecker(request.user)
         company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)
         view_all_tasks = checker.has_perm('view_all_tasks', office_session)
         if company_representative and not view_all_tasks:
@@ -912,9 +912,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         office_session = get_office_session(self.request)
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
-        context[
-            'correspondents_table'] = get_correspondents_table.get_correspondents_table(
-            )
+        context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
         type_task_field = get_correspondents_table.get_type_task_field()
         if type_task_field:
             context['form'].fields['type_task_field'] = type_task_field
@@ -1125,7 +1123,11 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         person_dynamic_query.add(Q(person_company_representative=person.id), Q.OR)
                 if data['office_executed_by']:
                     task_dynamic_query.add(
-                        Q(child__office_id=data['office_executed_by']), Q.AND)
+                        Q(
+                            Q(child__office_id=data['office_executed_by']),
+                            ~Q(child__task_status__in=[TaskStatus.REFUSED_SERVICE.__str__(),
+                                                       TaskStatus.REFUSED.__str__()])
+                        ), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__court_district__state=data[
@@ -1678,7 +1680,7 @@ class GeolocationTaskCreate(CustomLoginRequiredView, View):
         task = Task.objects.filter(pk=task_id).first()
         if task and latitude and longitude:
             taskgeolocation = TaskGeolocation.objects.filter(
-                task=task, checkpointtype=checkpointtype).first()
+                task=task, checkpointtype=checkpointtype, create_user=request.user).first()
             if taskgeolocation:
                 taskgeolocation.latitude = Decimal(latitude)
                 taskgeolocation.longitude = Decimal(longitude)
@@ -1979,7 +1981,8 @@ class BatchChangeTasksView(DashboardSearchView):
             return task_list.filter(task_status__in=status_to_filter)
         status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN,
             TaskStatus.DONE, TaskStatus.ERROR]
-        return task_list.filter(task_status__in=status_to_filter)
+        office_session = get_office_session(self.request)
+        return task_list.filter(office=office_session, task_status__in=status_to_filter)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -2019,6 +2022,10 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 'office_correspondent': {
                     'id': price.office_correspondent.pk,
                     'legal_name': price.office_correspondent.legal_name
+                },
+                'office_network': {
+                    'id': price.office_network.pk if price.office_network else '-',
+                    'name': price.office_network.name if price.office_network else '-'
                 },
                 'state': price.state.initials if price.state else '-',
                 'type_task': {
