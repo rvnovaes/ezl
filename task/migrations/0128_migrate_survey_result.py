@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
+import json
 
 
 def migrate_survey_result(apps, schema_editor):
@@ -25,11 +26,14 @@ def migrate_survey_result(apps, schema_editor):
             if create_user is None:
                 print("Sem usuário:", task.id)
                 continue
+            survey_result = values[3]
+            if not getattr(survey_result, 'items', None):
+                survey_result = json.loads(survey_result)
             TaskSurveyAnswer.objects.create(
                 task_id=values[0],
                 create_date=values[1],
                 create_user_id=create_user,
-                survey_result=values[3]
+                survey_result=survey_result
             )
 
 

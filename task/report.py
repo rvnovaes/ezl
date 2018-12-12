@@ -47,8 +47,9 @@ class DefaultXlsFile(object):
         return self.workbook.add_worksheet()
 
 
-class TaskToPayXlsx(object):
-    def __init__(self, data):
+class TaskToPayXlsx(DefaultXlsFile):
+    def __init__(self, data, remove_timezone=True):
+        super().__init__(remove_timezone)
         self.data = data
         self.columns = [
                     {'label': 'OS', 'size': 10},
@@ -66,33 +67,28 @@ class TaskToPayXlsx(object):
                 ]
 
     def get_report(self): 
-        output = io.BytesIO()
-        workbook = xlsxwriter.Workbook(output,  {'remove_timezone': True})
-        base_cell_format = BaseFormatCell(workbook)
-        title_cell_format = TitleFormatCell(workbook)
-        datetime_cell_format = DateTimeFormatCell(workbook)
-        money_format = MoneyFormatCell(workbook)
-        worksheet = workbook.add_worksheet()
+        worksheet = self.get_worksheet()
         worksheet.autofilter(0, 0, 50, 11)
         for col_num, column in enumerate(self.columns):        
             worksheet.set_column(col_num, col_num, column.get('size'))
-            worksheet.write(0, col_num, column.get('label'), title_cell_format.cell_format)
+            worksheet.write(0, col_num, column.get('label'), self.title_cell_format.cell_format)
         for row_num, item in enumerate(self.data, 1):
-            worksheet.write(row_num, 0, item.get('parent_task_number'), base_cell_format.cell_format)      
-            worksheet.write(row_num, 1, item.get('office_name'))        
-            worksheet.write_datetime(row_num, 2, item.get('finished_date'), datetime_cell_format.cell_format)
-            worksheet.write(row_num, 3, item.get('type_task'), base_cell_format.cell_format)
-            worksheet.write(row_num, 4, item.get('lawsuit_number'), base_cell_format.cell_format)
-            worksheet.write(row_num, 5, item.get('court_district'), base_cell_format.cell_format)
-            worksheet.write(row_num, 6, item.get('client_name'), base_cell_format.cell_format)
-            worksheet.write(row_num, 7, format_boolean(item.get('client_refunds')), base_cell_format.cell_format)
-            worksheet.write(row_num, 8, item.get('opposing_party'), base_cell_format.cell_format)
-            worksheet.write(row_num, 9, item.get('legacy_code', item.get('parent_task_number')), base_cell_format.cell_format)
-            worksheet.write(row_num, 10, format_boolean(item.get('billing_date')), base_cell_format.cell_format)
-            worksheet.write(row_num, 11, item.get('amount'), money_format.cell_format)
-        workbook.close()
-        output.seek(0)        
-        return output
+            worksheet.write(row_num, 0, item.get('parent_task_number'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 1, item.get('office_name'), self.base_cell_format.cell_format)
+            worksheet.write_datetime(row_num, 2, item.get('finished_date'), self.datetime_cell_format.cell_format)
+            worksheet.write(row_num, 3, item.get('type_task'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 4, item.get('lawsuit_number'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 5, item.get('court_district'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 6, item.get('client_name'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 7, format_boolean(item.get('client_refunds')), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 8, item.get('opposing_party'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 9, item.get('legacy_code', item.get('parent_task_number')),
+                            self.base_cell_format.cell_format)
+            worksheet.write(row_num, 10, format_boolean(item.get('billing_date')), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 11, item.get('amount'), self.money_format.cell_format)
+        self.workbook.close()
+        self.output.seek(0)
+        return self.output
 
 
 class ExportFilterTask(DefaultXlsFile):
@@ -115,7 +111,7 @@ class ExportFilterTask(DefaultXlsFile):
 
     def get_report(self):
         worksheet = self.get_worksheet()
-        worksheet.autofilter(0, 0, 50, 11)
+        worksheet.autofilter(0, 0, 50, 10)
         for col_num, column in enumerate(self.columns):
             worksheet.set_column(col_num, col_num, column.get('size'))
             worksheet.write(0, col_num, column.get('label'), self.title_cell_format.cell_format)

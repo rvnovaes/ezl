@@ -1067,7 +1067,7 @@ def delete_external_ecm(request, task_hash, pk):
 
 
 class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
-    model = Task
+    model = DashboardViewModel
     filter_class = TaskFilter
     template_name = 'task/task_filter.html'
     context_object_name = 'task_filter'
@@ -1094,7 +1094,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
-                query_set = Task.objects.filter(q)
+                query_set = DashboardViewModel.objects.filter(q)
             else:
                 task_dynamic_query = Q()
                 client_query = Q()
@@ -1320,7 +1320,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
                 office_id = (get_office_session(self.request).id
                              if get_office_session(self.request) else 0)
-                query_set = Task.objects.filter(
+                query_set = DashboardViewModel.objects.filter(
                     office_id=office_id).filter(person_dynamic_query)
 
             try:
@@ -1387,11 +1387,8 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return response
 
     def _export_answers(self, request):
-        task_ids = self.get_queryset().filter(
-                tasksurveyanswer__survey_result__isnull=False
-            ).values_list('id', flat=True)
-        answers = TaskSurveyAnswer.objects.filter(
-            task_id__in=task_ids).select_related('task')
+        task_ids = self.get_queryset().filter(survey_result__isnull=False).values_list('id', flat=True)
+        answers = TaskSurveyAnswer.objects.filter(task_id__in=task_ids).select_related('task')
         columns = self._get_answers_columns(answers)
         all_columns = [
             'N° da OS',
