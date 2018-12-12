@@ -6,30 +6,35 @@ from django.db import migrations
 
 
 def migrate_survey_result(apps, schema_editor):
-    from task.models import Task, TaskSurveyAnswer
+    Task = apps.get_model('task', 'Task')
+    TaskSurveyAnswer = apps.get_model('task', 'TaskSurveyAnswer')
+    User = apps.get_model('auth', 'User')
 
-    tasks = Task.objects.filter(survey_result__isnull=False).exclude(survey_result='')
-    count = tasks.count()
-    fields = ['id', 'execution_date', 'person_executed_by__auth_user',
-              'survey_result', 'person_distributed_by_id__auth_user']
-    for x, values in enumerate(tasks.values_list(*fields)):
-        if x % 100 == 0:
-            print("{} of {}".format(x, count))
-        task = Task.objects.get(id=values[0])
-        create_user = values[2] or values[4]
-        if create_user is None:
-            print("Sem usuário:", task.id)
-            continue
-        TaskSurveyAnswer.objects.create(
-            task_id=values[0],
-            create_date=values[1],
-            create_user_id=values[2] or values[4],
-            survey_result=values[3]
-        )
+    admin = User.objects.filter(username='admin').first()
+
+    if admin:
+        tasks = Task.objects.filter(survey_result__isnull=False).exclude(survey_result='')
+        count = tasks.count()
+        fields = ['id', 'execution_date', 'person_executed_by__auth_user', 'survey_result',
+                  'person_distributed_by__auth_user']
+        for x, values in enumerate(tasks.values_list(*fields)):
+            if x % 100 == 0:
+                print("{} of {}".format(x, count))
+            task = Task.objects.get(id=values[0])
+            create_user = values[2] or values[4] or admin.id
+            if create_user is None:
+                print("Sem usuário:", task.id)
+                continue
+            TaskSurveyAnswer.objects.create(
+                task_id=values[0],
+                create_date=values[1],
+                create_user_id=create_user,
+                survey_result=values[3]
+            )
 
 
 def clear_survey_result(apps, schema_editor):
-    from task.models import TaskSurveyAnswer
+    TaskSurveyAnswer = apps.get_model('task', 'TaskSurveyAnswer')
     TaskSurveyAnswer.objects.all().delete()
 
 
