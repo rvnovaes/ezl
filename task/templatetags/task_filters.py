@@ -14,6 +14,14 @@ def valid_status(status):
     return False
 
 
+@register.filter
+def show_company_representative_buttons(status):
+    if status:
+        return str(TaskStatus(status)) in [str(TaskStatus.RETURN), str(TaskStatus.OPEN), str(TaskStatus.ACCEPTED),
+                                      str(TaskStatus.DONE)]
+    return False
+
+
 @register.simple_tag
 def get_refused_action(user, task, office_session_perms):
     refused_action = None
