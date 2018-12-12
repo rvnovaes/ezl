@@ -2,7 +2,7 @@ from django.core.urlresolvers import reverse_lazy
 import django_tables2 as tables
 
 from core.tables import CheckBoxMaterial
-from .models import CostCenter, ServicePriceTable
+from .models import CostCenter, ServicePriceTable, PolicyPrice
 from djmoney.money import Money
 
 
@@ -68,4 +68,15 @@ class ServicePriceTableTaskTable(tables.Table):
             'data-office-public': lambda record: record.office_correspondent.public_office if record.office_correspondent else False,
             'data-office-txt': lambda record: record.office.__str__(),
             'class': 'tr_select'
+        }
+
+
+class PolicyPriceTable(tables.Table):
+    selection = CheckBoxMaterial(accessor="pk", orderable=False)
+    class Meta: 
+        model = PolicyPrice
+        fields = ('selection', 'name', 'category', 'billing_type', 'billing_moment', 'is_active')
+        empty_text = "Não existe Tipos de preços cadastrados."
+        row_attrs = {
+            'data_href': lambda record: reverse_lazy('policyprice_update', args=(record.pk,))
         }

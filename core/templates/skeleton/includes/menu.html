@@ -160,6 +160,12 @@
                 </a>
             </li>
             {% if 'group_admin' in office_session_perms or request.user.is_superuser %}
+            <li><!-- TIPOS DE PRECO -->
+                <a href="{% url 'policyprice_list' %}" target="_self">
+                    <i class="fa fa-code-fork fa-fw"></i>
+                    <span class="hide-menu">Tipos de preço</span>
+                </a>
+            </li>            
             <li><!-- TIPOS DE TASK -->
                 <a href="{% url 'typetask_list' %}" target="_self">
                     <i class="fa fa-code-fork fa-fw"></i>

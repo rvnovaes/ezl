@@ -6,6 +6,56 @@ from django.db.models import Q
 from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office, OfficeNetwork
 from decimal import Decimal
 from task.metrics import get_office_correspondent_metrics
+from enum import Enum
+
+
+class CategoryPrice(Enum):
+    DEFAULT = 'Padrão'
+    PUBLIC = 'Pública'
+    NETWORK = 'Rede'
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
+
+
+class BillingType(Enum):
+    PER_UNIT = 'Avulso'
+    PER_MONTH = 'Mensal'
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
+
+
+class BillingMoment(Enum):    
+    PRE_PAID = 'Pré-pago'
+    POST_PAID = 'Pós-pago'
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        return [(x.value, x.name) for x in cls]
+
+class PolicyPrice(Audit, OfficeMixin):
+    name = models.CharField(verbose_name='Nome', max_length=255)
+    category = models.CharField(verbose_name='Categoria', max_length=255, choices=CategoryPrice.choices())
+    billing_type = models.CharField(verbose_name='Tipo de faturamento', max_length=255, choices=BillingType.choices())
+    billing_moment = models.CharField(verbose_name='Momento do faturamento', max_length=255, choices=BillingMoment.choices())
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Tipos de preço'      
 
 
 class CostCenter(Audit, LegacyCode, OfficeMixin):
@@ -92,6 +142,14 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         related_name='%(class)s_city',
         verbose_name='Cidade'
     )
+    policy_price = models.ForeignKey(
+        PolicyPrice, 
+        null=True, 
+        blank=True,        
+        on_delete=models.PROTECT, 
+        related_name='service_prices', 
+        verbose_name='Tipo de preço'
+    )
 
     objects = OfficeManager()
 
@@ -173,3 +231,5 @@ class ImportServicePriceTable(Audit, OfficeMixin):
 
     class Meta:
         verbose_name = 'Arquivos Importados de Tabela de Preços'
+
+

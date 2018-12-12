@@ -3,7 +3,7 @@ from core.models import Person, State, City
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field, get_office_session
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from task.models import TypeTask
-from .models import CostCenter, ServicePriceTable, ImportServicePriceTable
+from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, PolicyPrice
 from decimal import Decimal
 from core.forms import BaseModelForm, XlsxFileField
 from core.widgets import TypeaHeadForeignKeyWidget
@@ -69,7 +69,12 @@ class ServicePriceTableForm(BaseModelForm):
         required=False,
         label=u"Tipo de Serviço",
     )
-
+    policy_price = forms.ModelChoiceField(
+      queryset=PolicyPrice.objects.all(),
+      empty_label='', 
+      required=True, 
+      label='Política de preço'
+    )    
     value = forms.CharField(label="Valor",
                             localize=True,
                             required=False,
@@ -79,7 +84,7 @@ class ServicePriceTableForm(BaseModelForm):
     class Meta:
         model = ServicePriceTable
         fields = ('office', 'office_correspondent', 'office_network', 'client', 'type_task', 'state', 'court_district',
-                  'court_district_complement', 'city', 'value', 'is_active')
+                  'court_district_complement', 'city', 'policy_price', 'value', 'is_active')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
@@ -124,3 +129,13 @@ class ImportServicePriceTableForm(forms.ModelForm):
     class Meta:
         model = ImportServicePriceTable
         fields = ('file_xls', )
+
+
+class PolicyPriceForm(BaseModelForm):  
+  class Meta: 
+    model = PolicyPrice
+    fields = ('office', 'name', 'category', 'billing_type', 'billing_moment')
+
+  def __init__(self, *args, **kwargs):
+      super().__init__(*args, **kwargs)
+      self.fields['office'] = get_office_field(self.request)

@@ -14,9 +14,9 @@ from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
 from core.models import Office, ContactMechanismType, EMAIL
 from core.views import (AuditFormMixin, MultiDeleteViewMixin,
                         SingleTableViewMixin)
-from .forms import CostCenterForm, ServicePriceTableForm, ImportServicePriceTableForm
-from .models import CostCenter, ServicePriceTable, ImportServicePriceTable
-from .tables import CostCenterTable, ServicePriceTableTable
+from .forms import CostCenterForm, ServicePriceTableForm, ImportServicePriceTableForm, PolicyPriceForm
+from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, PolicyPrice
+from .tables import CostCenterTable, ServicePriceTableTable, PolicyPriceTable
 from .tasks import import_xls_service_price_table, IMPORTED_IMPORT_SERVICE_PRICE_TABLE, \
 PROCESS_PERCENT_IMPORT_SERVICE_PRICE_TABLE, WORKSHEET_IN_PROCESS, IMPORTED_WORKSHEET,\
 ERROR_PROCESS
@@ -265,3 +265,41 @@ def ajax_get_log_import_service_price_table_data_table(request):
         "data": log_list
     }        
     return JsonResponse(data)
+
+
+class PolicyPriceView(CustomLoginRequiredView, SingleTableViewMixin):
+    model = PolicyPrice
+    table_class = PolicyPriceTable
+
+class PolicyPriceCreateView(AuditFormMixin, CreateView):
+    model = PolicyPrice
+    form_class = PolicyPriceForm
+    success_url = reverse_lazy('policyprice_list')
+    success_message = CREATE_SUCCESS_MESSAGE
+    object_list_url = 'policyprice_list'
+
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+class PolicyPriceUpdateView(AuditFormMixin, UpdateView):
+    model = PolicyPrice
+    form_class = PolicyPriceForm
+    success_url = reverse_lazy('policyprice_list')
+    success_message = UPDATE_SUCCESS_MESSAGE
+    object_list_url = 'policyprice_list'
+
+
+    def get_form_kwags(self):        
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+
+class PolicyPriceDeleteView(AuditFormMixin, MultiDeleteViewMixin):
+    model = PolicyPrice
+    success_url = reverse_lazy('policyprice_list')
+    success_message = DELETE_SUCCESS_MESSAGE.format(
+        model._meta.verbose_name_plural)
+    object_list_url = 'policyprice_list'
