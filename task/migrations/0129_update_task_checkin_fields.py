@@ -11,8 +11,8 @@ import django.utils.timezone
 def update_task_checkin_fields(apps, schema_editor):
     TaskGeolocation = apps.get_model('task', 'TaskGeolocation')
     Task = apps.get_model('task', 'Task')
-    post_save.disconnect(post_save_task, sender=Task)
     pre_save.disconnect(pre_save_task, sender=Task)
+    post_save.disconnect(post_save_task, sender=Task)
     for taskgeolocation in TaskGeolocation.objects.all().order_by('id'):
         task = taskgeolocation.task
         task.executed_by_checkin = taskgeolocation
@@ -21,8 +21,8 @@ def update_task_checkin_fields(apps, schema_editor):
             task = task.parent
             task.executed_by_checkin = taskgeolocation
             task.save()
-    post_save.connect(post_save_task, sender=Task)
     pre_save.connect(pre_save_task, sender=Task)
+    post_save.connect(post_save_task, sender=Task)
 
 
 class Migration(migrations.Migration):
