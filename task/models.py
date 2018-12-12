@@ -397,6 +397,20 @@ class Task(Audit, LegacyCode, OfficeMixin):
         blank=True,
         null=True,
         verbose_name='Preposto', related_name='tasks_to_person_representative')
+    """
+    Os campos a seguir armazenam o checkin dos atores da OS, independente de terem sido feitos 
+    pela OS pai, ou por outra OS da cadeia.
+    """
+    executed_by_checkin = models.ForeignKey('task.TaskGeolocation',
+                                            on_delete=models.PROTECT,
+                                            blank=True,
+                                            null=True,
+                                            related_name='task_executed_by')
+    company_representative_checkin = models.ForeignKey('task.TaskGeolocation',
+                                                       on_delete=models.PROTECT,
+                                                       blank=True,
+                                                       null=True,
+                                                       related_name='task_company_representative')
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
