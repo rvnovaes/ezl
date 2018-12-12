@@ -50,6 +50,7 @@ class PolicyPrice(Audit, OfficeMixin):
     category = models.CharField(verbose_name='Categoria', max_length=255, choices=((x.name, x.value) for x in CategoryPrice))
     billing_type = models.CharField(verbose_name='Tipo de faturamento', max_length=255, choices=((x.name, x.value) for x in BillingType))
     billing_moment = models.CharField(verbose_name='Momento do faturamento', max_length=255, choices=((x.name, x.value) for x in BillingMoment))
+    objects = OfficeManager()
 
     def __str__(self):
         return self.name
