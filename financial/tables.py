@@ -27,10 +27,10 @@ class ServicePriceTableTable(tables.Table):
 
     class Meta:
         sequence = ('selection', 'office', 'office_correspondent', 'office_network', 'type_task', 'state', 'court_district',
-                    'court_district_complement', 'city', 'client', 'value', 'is_active')
+                    'court_district_complement', 'city', 'client', 'policy_price', 'value', 'is_active')
         model = ServicePriceTable
         fields = ('selection', 'office', 'office_correspondent', 'office_network', 'type_task', 'court_district', 'state', 'client',
-                  'value', 'is_active', 'court_district_complement', 'city')
+                  'policy_price', 'value', 'is_active', 'court_district_complement', 'city')
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existe tabela de preços cadastrada."
         row_attrs = {
@@ -46,7 +46,7 @@ class ServicePriceTableTaskTable(tables.Table):
     court_district_complement = tables.Column(orderable=False, verbose_name='Complemento da comarca')
     city = tables.Column(orderable=False, verbose_name='Cidade')
     state = tables.Column(orderable=False, verbose_name='UF')
-    client = tables.Column(orderable=False, verbose_name='Cliente')
+    client = tables.Column(orderable=False, verbose_name='Cliente')    
     value = tables.Column(orderable=False, verbose_name='Valor')
     office_rating = tables.Column(orderable=False, verbose_name='Avaliação*')
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')

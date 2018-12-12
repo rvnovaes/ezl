@@ -145,8 +145,8 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
     )
     policy_price = models.ForeignKey(
         PolicyPrice, 
-        null=True, 
-        blank=True,        
+        null=False, 
+        blank=False,        
         on_delete=models.PROTECT, 
         related_name='service_prices', 
         verbose_name='Tipo de preço'
