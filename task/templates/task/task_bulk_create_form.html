@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block content %}
-    {% include 'core/widgets/messages.html' %}
+    {% include 'core/widgets/messages.html' %}    
     <form id="task_form" action="" method="post" enctype="multipart/form-data">
         <fieldset>
         {% csrf_token %}
@@ -186,7 +186,7 @@
                     <div class="text-center">
                         {% block form_buttons %}
                             {{ block.super }}
-                        {% endblock %}
+                        {% endblock %}                        
                     </div>
                 </div>
             </div>
@@ -199,6 +199,8 @@
     {{ block.super }}
     {{ form.media }}
     <script src="{% static 'task/task-bulk-create.js' %}"></script>
+    <script src="{% static 'billing/js/gerencianet/lightbox-dev.js' %}"></script>    
+    <script src="{% static 'billing/js/billing.js' %}"></script>
     <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
     <script src="{% static "file_form/file_form.js" %}"></script>
     <script>
