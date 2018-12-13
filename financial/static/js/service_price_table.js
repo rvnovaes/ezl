@@ -1,11 +1,14 @@
 class ServicePriceTable {
-    constructor(){
+    constructor(officeSessionId){
+        this.officeSessionId = officeSessionId
         this.elOfficeNetwork = $('#id_office_network');
         this.elOfficeCorrespondent = $('#id_office_correspondent');
         this.elOffice = $('#id_office');
+        this._elPolicyPrice = $('select[name=policy_price]');
         this.onChangeOfficeNetwork();
         this.onChangeOfficeCorrespondent();
         this.onSaveSubmit();
+        this.onChangePolicyPrice();
     }
 
     static enableElement(element){
@@ -69,6 +72,7 @@ class ServicePriceTable {
                 ServicePriceTable.enableElement(this.elOfficeNetwork);
                 this.elOfficeNetwork.parent().addClass('ezl-required');
             }
+            this.validatePolicyPrice(true);
         });
     }
 
@@ -81,5 +85,26 @@ class ServicePriceTable {
             ServicePriceTable.enableElement(this.elOfficeNetwork);
             ServicePriceTable.enableElement(this.elOfficeCorrespondent);
         });
+    }
+
+    validatePolicyPrice(showAlert) {
+        let officeCorrespondentId = this.elOfficeCorrespondent.val();
+        let selected = this._elPolicyPrice.find('option:selected').text();
+        if (selected === 'Público' && officeCorrespondentId !== this.officeSessionId) {
+            this.elOfficeCorrespondent.val(this.officeSessionId)
+            if (showAlert) {
+                swal({
+                    type: 'error', 
+                    title: 'Atenção!', 
+                    text: 'Para tipo de preço público o escritório correspondente deve ser o mesmo em que está logado.'
+                })                
+            }
+        }        
+    }
+
+    onChangePolicyPrice() {
+        this._elPolicyPrice.on('change', (event)=>{
+            this.validatePolicyPrice(false)       
+        })        
     }
 }

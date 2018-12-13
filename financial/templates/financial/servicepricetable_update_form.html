@@ -5,7 +5,7 @@
     <script src="{% static 'js/service_price_table.js' %}"></script>
     <script type="text/javascript">
     $(document).ready(function(){
-        insServicePriceTable = new ServicePriceTable();
+        insServicePriceTable = new ServicePriceTable('{{object.office.pk}}');
         if (insServicePriceTable.officeNetwork) {
             insServicePriceTable.disableOfficeCorrespondent();
         }

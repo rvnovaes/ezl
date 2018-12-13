@@ -134,7 +134,7 @@ class ImportServicePriceTableForm(forms.ModelForm):
 class PolicyPriceForm(BaseModelForm):  
   category = forms.ChoiceField(
       label='Categoria',
-      choices=((x.name, x.value) for x in CategoryPrice),
+      choices=[(x.name, x.value) for x in CategoryPrice],
       required=True,
   )
   billing_type = forms.ChoiceField(

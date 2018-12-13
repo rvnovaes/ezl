@@ -15,11 +15,7 @@ class CategoryPrice(Enum):
     NETWORK = 'Rede'
 
     def __str__(self):
-        return str(self.value)
-
-    @classmethod
-    def choices(cls):
-        return [(x.value, x.name) for x in cls]
+        return self.name
 
 
 class BillingType(Enum):
@@ -27,28 +23,19 @@ class BillingType(Enum):
     PER_MONTH = 'Mensal'
 
     def __str__(self):
-        return str(self.value)
-
-    @classmethod
-    def choices(cls):
-        return [(x.value, x.name) for x in cls]
-
+        return self.name
 
 class BillingMoment(Enum):    
     PRE_PAID = 'Pré-pago'
     POST_PAID = 'Pós-pago'
 
     def __str__(self):
-        return str(self.value)
-
-    @classmethod
-    def choices(cls):
-        return [(x.value, x.name) for x in cls]
+        return self.name
 
 
 class PolicyPrice(Audit, OfficeMixin):
     name = models.CharField(verbose_name='Nome', max_length=255)
-    category = models.CharField(verbose_name='Categoria', max_length=255, choices=((x.name, x.value) for x in CategoryPrice))
+    category = models.CharField(verbose_name='Categoria', max_length=255, choices=[(x.name, x.value) for x in CategoryPrice])
     billing_type = models.CharField(verbose_name='Tipo de faturamento', max_length=255, choices=((x.name, x.value) for x in BillingType))
     billing_moment = models.CharField(verbose_name='Momento do faturamento', max_length=255, choices=((x.name, x.value) for x in BillingMoment))
     objects = OfficeManager()
@@ -59,6 +46,7 @@ class PolicyPrice(Audit, OfficeMixin):
     class Meta:
         verbose_name = 'Tipo de Preço'
         verbose_name_plural = 'Tipos de Preço'
+        ordering = ['name']
 
 
 class CostCenter(Audit, LegacyCode, OfficeMixin):
