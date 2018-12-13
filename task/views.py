@@ -302,6 +302,7 @@ class BatchTaskToAssignView(AuditFormMixin, UpdateView):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
+
 class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         try:
@@ -707,6 +708,7 @@ class ToPayTaskReportView(View):
                              "OS's faturadas com sucesso.")
         return JsonResponse({"status": "ok"})
 
+
 class ToPayTaskReportXlsxView(ToPayTaskReportView):
     def get(self, request, *args, **kwargs):
         self.task_filter = self.filter_class(
@@ -729,6 +731,7 @@ class ToPayTaskReportXlsxView(ToPayTaskReportView):
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
+
 class ToPayTaskReportTemplateView(TemplateView):
     template_name = 'task/reports/to_pay.html'
     filter_class = TaskToPayFilter
@@ -739,7 +742,6 @@ class ToPayTaskReportTemplateView(TemplateView):
             data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
         return context
-
 
 
 class DashboardView(CustomLoginRequiredView, TemplateView):
@@ -844,8 +846,9 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         if survey_result:
             survey = TaskSurveyAnswer()
             survey.task = form.instance
+            survey.survey = form.instance.type_task.survey
             survey.create_user = self.request.user
-            survey.survey_result = survey_result
+            survey.survey_result = json.loads(survey_result)
             survey.save()
         send_notes_execution_date.send(
             sender=self.__class__,
@@ -903,12 +906,14 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         context['task_history'] = \
             TaskHistory.objects.filter(
                 task_id=self.object.id).order_by('-create_date')
+        context['pending_survey'] = self.object.have_pending_surveys
         context['survey_data'] = (self.object.type_task.survey.data
                                   if self.object.type_task.survey else None)
         if self.object.parent:
             context['survey_data'] = (self.object.parent.type_task.survey.data
                                       if self.object.parent.type_task.survey
                                       else None)
+
         office_session = get_office_session(self.request)
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
@@ -952,7 +957,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             if self.object.person_company_representative == self.request.user.person:
                 show_in_tab = False
         return show_in_tab
-
 
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
@@ -1123,7 +1127,11 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         person_dynamic_query.add(Q(person_company_representative=person.id), Q.OR)
                 if data['office_executed_by']:
                     task_dynamic_query.add(
-                        Q(child__office_id=data['office_executed_by']), Q.AND)
+                        Q(
+                            Q(child__office_id=data['office_executed_by']),
+                            ~Q(child__task_status__in=[TaskStatus.REFUSED_SERVICE.__str__(),
+                                                       TaskStatus.REFUSED.__str__()])
+                        ), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__court_district__state=data[
@@ -2083,6 +2091,8 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         context = super().get_context_data()
         context['surveys_company_representative'] = [
             {'task_id': task.pk, 'survey': task.type_task.survey_company_representative} for task in self.object_list
+            if task.task_status in [str(TaskStatus.RETURN), str(TaskStatus.OPEN), str(TaskStatus.ACCEPTED),
+                                    str(TaskStatus.DONE)]
         ]
         return context
 
@@ -2090,7 +2100,8 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         try:
             task = Task.objects.get(pk=request.POST.get('task_id'))
             survey_result = json.loads(request.POST.get('survey'))
-            survey = TaskSurveyAnswer(create_user=request.user, task=task, survey_result=survey_result)
+            survey = TaskSurveyAnswer(create_user=request.user, task=task,
+                                      survey=task.type_task.survey_company_representative, survey_result=survey_result)
             survey.save()
             return JsonResponse({'status': 'ok'})
         except Exception as e:
