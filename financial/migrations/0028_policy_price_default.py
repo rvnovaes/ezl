@@ -19,7 +19,7 @@ def create_default_policy(apps, schema_editor):
         policy_default = PolicyPrice(
             office=office, 
             create_user_id=admin_user.pk,
-            name=CategoryPrice.DEFAULT,
+            name='Padrão',
             category=CategoryPrice.DEFAULT, 
             billing_type=BillingType.PER_UNIT, 
             billing_moment=BillingMoment.PRE_PAID)
@@ -27,7 +27,7 @@ def create_default_policy(apps, schema_editor):
         policy_public = PolicyPrice(
             office=office, 
             create_user_id=admin_user.pk,
-            name=CategoryPrice.PUBLIC,
+            name='Público',
             category=CategoryPrice.PUBLIC, 
             billing_type=BillingType.PER_UNIT, 
             billing_moment=BillingMoment.PRE_PAID
