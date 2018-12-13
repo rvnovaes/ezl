@@ -120,19 +120,6 @@
 
 {% block extra_scripts %}
     <!-- UPLOADS SCRIPTS  -->
-    <script src="{% static 'billing/js/gerencianet/lightbox-dev.js' %}"></script>    
-    <script src="{% static 'billing/js/billing.js' %}"></script>
-    <script type="text/javascript">
-        var billing;
-        $gn.ready(function(obj) {
-          obj;
-          billing = new Billing(obj)
-          var payment_forms = ["credit_card", "banking_billet"];
-         
-        });
-    </script>
-
-
     {% include 'task/includes/upload.html' %}
     <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
     <script src="{% static 'libs/bootstrap-rating/bootstrap-rating.min.js' %}"></script>
@@ -168,7 +155,7 @@
     <script type="text/javascript">
         var taskId;
         $('#btn-company_representative').on('click', function(event) {
-            event.preventDefault()
+            event.preventDefault();
             taskId = '{{object.pk}}';            
             {% if survey_company_representative %} 
                 selectedSurvey = `{{survey_company_representative|safe}}`;
@@ -178,7 +165,7 @@
                     type: 'error', 
                     title: 'Questionário',
                     text: "Não existe formulário cadastrado para este tipo de serviço."
-                })
+                });
             {% endif %}            
         })
 
@@ -230,14 +217,14 @@
 
         function toogleModals(modalToClose, modalToOpen, task_status) {
             $(modalToClose).one('hidden.bs.modal', function() {
-                $('#survey').attr('data-status', task_status)
+                $('#survey').attr('data-status', task_status);
                 $(modalToOpen).modal('show');
             }).modal('hide');
         }
 
         //Função para exibir modal do survey
         function beforeSubmit(task_status) {
-            toogleModals('#confirmAction', '#survey', task_status)
+            toogleModals('#confirmAction', '#survey', task_status);
             $('#task_detail').submit(function (e) {
                 e.preventDefault();
             });
@@ -349,6 +336,15 @@
             {% else %}
             var office_work_alone = false;
             {% endif %}
+
+            if(value.id === 'FINISHED' && {{ pending_survey|lower }}){
+                swal({
+                    type: 'error',
+                    title: 'Questionário',
+                    html: "<h4>A OS não pode ser finalizada porque o preposto não respondeu o questionário.</h4>"
+                });
+                return false;
+            }
 
             if ((value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED") && !(office_work_alone) ){
                 $('.rating-container').show();

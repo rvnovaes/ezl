@@ -70,6 +70,3 @@ django-rest-swagger==2.2.0
 django-oauth-toolkit==1.1.2
 rest-condition==1.0.3
 django-rest-auth==0.9.3
-
-# Gerencianet
-gerencianet==1.0.9
