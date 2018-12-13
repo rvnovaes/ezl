@@ -45,6 +45,7 @@ class BillingMoment(Enum):
     def choices(cls):
         return [(x.value, x.name) for x in cls]
 
+
 class PolicyPrice(Audit, OfficeMixin):
     name = models.CharField(verbose_name='Nome', max_length=255)
     category = models.CharField(verbose_name='Categoria', max_length=255, choices=((x.name, x.value) for x in CategoryPrice))
@@ -56,7 +57,8 @@ class PolicyPrice(Audit, OfficeMixin):
         return self.name
 
     class Meta:
-        verbose_name = 'Tipos de preço'      
+        verbose_name = 'Tipo de Preço'
+        verbose_name_plural = 'Tipos de Preço'
 
 
 class CostCenter(Audit, LegacyCode, OfficeMixin):

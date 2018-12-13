@@ -76,7 +76,7 @@ class PolicyPriceTable(tables.Table):
     class Meta: 
         model = PolicyPrice
         fields = ('selection', 'name', 'category', 'billing_type', 'billing_moment', 'is_active')
-        empty_text = "Não existe Tipos de preços cadastrados."
+        empty_text = "Não existe tipo de preço cadastrado."
         row_attrs = {
             'data_href': lambda record: reverse_lazy('policyprice_update', args=(record.pk,))
         }
