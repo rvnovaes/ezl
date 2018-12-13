@@ -1127,7 +1127,11 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         person_dynamic_query.add(Q(person_company_representative=person.id), Q.OR)
                 if data['office_executed_by']:
                     task_dynamic_query.add(
-                        Q(child__office_id=data['office_executed_by']), Q.AND)
+                        Q(
+                            Q(child__office_id=data['office_executed_by']),
+                            ~Q(child__task_status__in=[TaskStatus.REFUSED_SERVICE.__str__(),
+                                                       TaskStatus.REFUSED.__str__()])
+                        ), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__court_district__state=data[
