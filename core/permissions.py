@@ -8,11 +8,16 @@ from guardian.shortcuts import assign_perm, remove_perm
 
 GROUP_PERMISSIONS = {
     Person.ADMINISTRATOR_GROUP:
-    (Permissions.view_all_tasks, Permissions.return_all_tasks,
-     Permissions.validate_all_tasks, Permissions.block_payment_tasks,
-     Permissions.can_access_general_data, SurveyPermissions.can_edit_surveys,
+    (Permissions.can_access_settings,
+     Permissions.view_all_tasks,
+     Permissions.return_all_tasks,
+     Permissions.validate_all_tasks,
+     Permissions.block_payment_tasks,
+     Permissions.can_access_general_data,
+     SurveyPermissions.can_edit_surveys,
      SurveyPermissions.can_view_survey_results,
-     Permissions.can_distribute_tasks, CorePermissions.group_admin),
+     Permissions.can_distribute_tasks,
+     CorePermissions.group_admin),
     Person.SUPERVISOR_GROUP:
     (Permissions.can_access_settings, Permissions.block_payment_tasks,
      Permissions.can_access_general_data, SurveyPermissions.can_edit_surveys,
