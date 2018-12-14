@@ -68,7 +68,7 @@ class ContactMechanism(admin.ModelAdmin):
 class OfficeAdmin(admin.ModelAdmin):
     filter_horizontal = ['persons', 'offices']
     search_fields = ['legal_name']
-    list_display = ['name', 'auth_user']    
+    list_display = ['legal_name', 'name', 'cpf_cnpj']
 
 
 @admin.register(Invite)

@@ -9,10 +9,10 @@ class Office {
 		this.onClickBtnEditOffice();
 		this.onClickBtnSaveOffice();
 		this.setOffice();
-	};	
+	}
 
 	get formOffice() {
-		return $("#form-office")
+		return $("#form-office");
 	}
 
 	get formData(){		
@@ -37,7 +37,7 @@ class Office {
 	}
 
 	get cpfCnpj() {
-		return this._elCpfCnpj.textContent	
+		return this._elCpfCnpj.textContent;
 	}
 
 	set cpfCnpj(value) {
@@ -53,12 +53,12 @@ class Office {
 
 	updateInstance(name, value) {
 		Object.keys(this.data).forEach((key)=>{
-			this.updateAttr(key, this.data[key])
-		})
+			this.updateAttr(key, this.data[key]);
+		});
 	}
 
 	updateAttr(name, value) {
-		this[this.formatAttr(name)] = value	
+		this[this.formatAttr(name)] = value;
 	}
 
 
@@ -70,30 +70,31 @@ class Office {
 				this.data = response;
 				this.updateInstance();
 			}
-		})
-	};
+		});
+	}
 
 	showOfficeForm() {
 		this._modalOfficeBasic.modal('show');
-	};	    
+	}
 
 	hideOfficeForm() {
 		this._modalOfficeBasic.modal('hide');
-	};	
+	}
 
 	onClickBtnEditOffice() {
 		this._elBtnEditOffice.on('click', ()=>{
-			this.showOfficeForm()
-		})
-	};
+		    console.log('aqui');
+			this.showOfficeForm();
+		});
+	}
 
 	onClickBtnSaveOffice() {
 		this._elBtnSaveOffice.on('click', ()=>{
 			this.salvar();
-		})
+		});
 	}
 
 	salvar() {
-		this.formOffice.submit()
+		this.formOffice.submit();
 	}
 }

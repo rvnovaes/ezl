@@ -2426,12 +2426,14 @@ class OfficeProfileView(TemplateView):
         data['form_contact_mechanism'] = ContactMechanismForm()
         return data
 
+
 class OfficeProfileUpdateView(UpdateView):
     model = Office
     form_class = OfficeProfileForm
 
-    def post(self, request, *args, **kwargs):        
+    def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST, request.FILES, instance=get_office_session(request))
+        import pdb;pdb.set_trace()
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('office_profile'))
@@ -2443,6 +2445,7 @@ class OfficeProfileUpdateView(UpdateView):
 
     def get_success_url(self):
         return reverse('office_profile')    
+
 
 class OfficeProfileAddressCreateView(ViewRelatedMixin, CreateView):
     model = Address

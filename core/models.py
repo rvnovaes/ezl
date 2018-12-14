@@ -455,12 +455,9 @@ class Office(AbstractPerson):
             'type_task__type_task_main').distinct('type_task__type_task_main__name').values_list(
             'type_task__type_task_main__name', flat=True)
 
-
     def save(self, *args, **kwargs):
         self._i_work_alone = kwargs.pop('i_work_alone', False)
         return super().save(*args, **kwargs)
-
-
 
 
 class OfficeMixin(models.Model):
@@ -823,6 +820,7 @@ class AreaOfExpertise(models.Model):
 
     class Meta:
         verbose_name='Áreas de atuação'
+        ordering = ['area']
 
     def __str__(self):
         return self.area
