@@ -10,6 +10,9 @@ from django.core.management import call_command
 
 def load_fixture(apps, schema_editor):
     call_command('loaddata', 'bar_chart', app_label='dashboard')
+    call_command('loaddata', 'line_chart', app_label='dashboard')
+    call_command('loaddata', 'card', app_label='dashboard')
+    call_command('loaddata', 'doughnut_chart', app_label='dashboard')
 
 
 class Migration(migrations.Migration):
