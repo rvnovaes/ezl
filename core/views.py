@@ -2433,7 +2433,7 @@ class OfficeProfileUpdateView(UpdateView):
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST, request.FILES, instance=get_office_session(request))
-        import pdb;pdb.set_trace()
+
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('office_profile'))
