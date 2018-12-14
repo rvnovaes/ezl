@@ -113,6 +113,12 @@ class ServicePriceTableCreateView(AuditFormMixin, CreateView):
         kw['request'] = self.request
         return kw
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['office_session'] = get_office_session(self.request)
+        return context
+
+
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         if request.POST['office_network'] and not request.POST['office_correspondent']:
