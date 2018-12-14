@@ -13,7 +13,7 @@ class Office {
 	};	
 
 	get form() {
-		return $("#form-office")
+		return $("#form-office");
 	}
 
 	get formData(){		
@@ -30,7 +30,7 @@ class Office {
 	}	
 
 	get legalName(){
-		return this._elLegalName.textContent
+		return this._elLegalName.textContent;
 	}
 
 	set legalName(value){
@@ -54,7 +54,9 @@ class Office {
 
 	updateInstance(name, value) {
 		Object.keys(this.data).forEach((key)=>{
-			this.updateAttr(key, this.data[key])
+		    if (key !== 'logo') {
+                this.updateAttr(key, this.data[key]);
+            }
 		});
 	}
 
@@ -111,14 +113,22 @@ class Office {
 	onSubmitForm() {
 		this.form.on('submit', (event)=>{			
 			event.preventDefault();
-			swal({
+			var formdata = false;
+            if (window.FormData){
+                formdata = new FormData(this.form[0]);
+            }
+
+            swal({
 				title: 'Aguarde',
 				onOpen: ()=> {
 					swal.showLoading();					
 					$.ajax({
+                        contentType: false,
+                        cache: false,
+                        processData: false,
 						method: 'POST',
 						url: "/office_profile_update/" + this.office_id + "/", 
-						data: this.form.serialize(),
+						data: formdata ? formdata : this.form.serialize(),
 						success: (response)=> {
 							swal.close();
 							showToast('success', 'Perfil atualizado com sucesso', '', 3000, true);

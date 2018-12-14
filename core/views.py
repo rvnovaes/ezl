@@ -2370,9 +2370,10 @@ class SocialRegister(TemplateView):
 class TermsView(TemplateView):
     template_name = 'account/terms/terms_and_conditions.html'
 
+
 class OfficeProfileDataView(View):
     def get(self, request, *args, **kwargs):
-        office = get_office_session(request)        
+        office = get_office_session(request)
         return JsonResponse(OfficeSerializer(office).data)
 
     def post(self, request, *args, **kwargs):
@@ -2433,7 +2434,6 @@ class OfficeProfileUpdateView(UpdateView):
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST, request.FILES, instance=get_office_session(request))
-
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('office_profile'))

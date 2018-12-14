@@ -21,7 +21,7 @@ from core.models import ContactUs, Person, Address, City, ContactMechanism, Cont
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
 from core.widgets import TypeaHeadForeignKeyWidget, MDSelect
 from core.models import OfficeMixin, ImportXlsFile
-from django_file_form.forms import MultipleUploadedFileField, FileFormMixin
+from django_file_form.forms import MultipleUploadedFileField, FileFormMixin, UploadedFileField
 from core.utils import validate_xlsx_header
 from django.core.exceptions import ValidationError
 
@@ -551,7 +551,11 @@ class OfficeForm(BaseModelForm):
                 del cleaned_data['cpf_cnpj']
         return cleaned_data
 
+
 class OfficeProfileForm(OfficeForm):
+
+    logo = UploadedFileField()
+
     class Meta:
         model = Office
         fields = [
