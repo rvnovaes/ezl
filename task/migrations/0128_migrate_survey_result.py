@@ -14,6 +14,8 @@ def migrate_survey_result(apps, schema_editor):
     admin = User.objects.filter(username='admin').first()
 
     if admin:
+        TaskSurveyAnswer.objects.all().delete()
+
         tasks = Task.objects.filter(survey_result__isnull=False).exclude(survey_result='')
         count = tasks.count()
         fields = ['id', 'execution_date', 'person_executed_by__auth_user', 'survey_result',

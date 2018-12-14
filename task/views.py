@@ -844,12 +844,15 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         survey_result = (form.cleaned_data['survey_result']
                          if form.cleaned_data['survey_result'] else
                          form.initial['survey_result'])
-        if survey_result:
+
+        if survey_result and not form.initial['survey_result']:
+            if isinstance(survey_result, str):
+                survey_result = json.loads(survey_result)
             survey = TaskSurveyAnswer()
             survey.task = form.instance
             survey.survey = form.instance.type_task.survey
             survey.create_user = self.request.user
-            survey.survey_result = json.loads(survey_result)
+            survey.survey_result = survey_result
             survey.save()
         send_notes_execution_date.send(
             sender=self.__class__,
@@ -1354,6 +1357,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         task_list, task_filter = self.query_builder()
         self.filter = task_filter
 
+        if not self.request.GET.get('export_answers'):
+            task_list = task_list.distinct()
+
         return task_list
 
     def get_context_data(self, **kwargs):
@@ -1414,8 +1420,11 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         task = answer.task
         base_fields = [task.task_number, task.legacy_code, str(task.type_task), answer.create_user.username]
         answers = ['' for x in range(len(columns))]
-        if getattr(answer.survey_result, 'items', None):
-            for question, value in answer.survey_result.items():
+        survey_result = answer.survey_result
+        if isinstance(survey_result, str):
+            survey_result = json.loads(answer.survey_result)
+        if getattr(survey_result, 'items', None):
+            for question, value in survey_result.items():
                 question_index = columns.index(question)
                 # Check if is a datetime value
                 try:
