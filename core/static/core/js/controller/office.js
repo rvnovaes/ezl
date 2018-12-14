@@ -6,6 +6,7 @@ class Office {
 		this._elLegalName = document.querySelector('#el-office-legal-name');		
 		this._elCpfCnpj = document.querySelector('#el-office-cpf-cnpj');
 		this._elBtnSaveOffice = $('#btn-save-office');
+		this._elImgLogo = $("#logo");
 		this.data;
 		this.onClickBtnEditOffice();		
 		this.setOffice();
@@ -56,7 +57,9 @@ class Office {
 		Object.keys(this.data).forEach((key)=>{
 		    if (key !== 'logo') {
                 this.updateAttr(key, this.data[key]);
-            }
+            } else {
+		    	this._elImgLogo.attr('src', this.data[key]);
+			}
 		});
 	}
 
