@@ -11,7 +11,7 @@ import task.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0128_migrate_survey_result'),
+        ('task', '0129_tasksurveyanswer_survey'),
     ]
 
     operations = []
