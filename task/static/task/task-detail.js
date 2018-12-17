@@ -229,7 +229,7 @@ class TaskDetail {
                 .attr('value', 'OPEN')
                 .appendTo('#task_detail');
             $('#task_detail').unbind('submit').submit();
-            toogleModals('#confirmAction', '#processing')
+            this.toogleModals('#confirmAction', '#processing')
         }        
     }
 
@@ -240,9 +240,9 @@ class TaskDetail {
         let ret;
         actionButton.disabled = true;
         if ((task_status === 'DONE' || task_status === 'FINISHED' && use_service === 'False') && have_survey){
-            beforeSubmit(task_status);
+            this.beforeSubmit(task_status);
         }else if(task_status === 'OPEN'){
-            checkDelegationOffice();
+            this.checkDelegationOffice();
         }else{
             ret = true;
             $('#task_detail [required]').each(function(index) {
@@ -334,10 +334,10 @@ class TaskDetail {
 
     row_click_function() {
         $("#correspondents-table tbody tr").click(function(){
-            $("#servicepricetable-alert").addClass("hidden");
-            id = $(this).data('id');
-            amount = $(this).data('value').toString();
-            $('input[name=servicepricetable_id]').val(id);
+            $("#servicepricetable-alert").addClass("hidden");            
+            let rowId = $(this).data('id');
+            let amount = $(this).data('value').toString();
+            $('input[name=servicepricetable_id]').val(rowId);
             $('input[name=amount]').val(amount.replace(".", ","));
             $(this).addClass("ezl-bg-open");
             $(this).siblings().removeClass("ezl-bg-open");
@@ -380,7 +380,7 @@ class TaskDetail {
                         $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
                     });
                 }
-                correspondents_data_table();
+                this.correspondents_data_table();
             },
             dataType: 'json'
         });

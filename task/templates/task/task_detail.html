@@ -200,7 +200,6 @@
     </div>
     {% include 'task/modal/processing.html' %}
 {% endblock %}
-{#
 {% block script_document_ready %}
      {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
         taskDetail.row_click_function();
@@ -219,7 +218,7 @@
             }
             (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
             if (table_rows > 0) {
-                correspondents_data_table();
+                taskDetail.correspondents_data_table();
             }
         });
         $('#confirmAction').on('shown.bs.modal', function (event) {
@@ -236,4 +235,3 @@
 
     {% endif %} 
 {% endblock %}
-#}
