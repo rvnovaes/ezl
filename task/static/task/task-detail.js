@@ -1,9 +1,11 @@
 class TaskDetail {
-    constructor(taskId, officeWorkAlone, pendingSurvey, SurveyCompanyRepresentative) {
+    constructor(taskId, officeWorkAlone, pendingSurvey, surveyCompanyRepresentative, csrfToken) {
+        this.csrfToken = csrfToken;
         this.taskId = taskId
         this.officeWorkAlone = officeWorkAlone;
         this.pendingSurvey = pendingSurvey;
-        this.surveyCompanyRepresentative=SurveyCompanyRepresentative
+        this.surveyCompanyRepresentative=surveyCompanyRepresentative;
+        this.expanded=false;    
         this._elExecutionDate = $("input[name=execution_date]"); 
         this._elModalAction = $('#confirmAction');
         this._elRatingContainer = $('.rating-container');
@@ -16,6 +18,7 @@ class TaskDetail {
         this._elBtnCompanyRepresentative = $('#btn-company_representative');
         this._elModalSurveyCompanyRepresentative = $("#survey-company-representative");
         this._elExecutionDate.attr({'required': true, 'placeholder': 'Data de Cumprimento'});
+        this._elTypeTaskField = $('#id_type_task_field');
         this.initFeedbackRating();
         this.initCpfCnpjField();
 
@@ -223,7 +226,7 @@ class TaskDetail {
     }
 
 // Todo: Ajustar de desmembrar
-    submit_task_detail(actionButton, use_service) {
+    submitTaskDetail(actionButton, use_service) {
         var task_status = actionButton.value;
         var have_survey = actionButton.getAttribute('survey');
         actionButton.disabled = true;
@@ -253,187 +256,151 @@ class TaskDetail {
         if ($('#id_feedback_rating').length > 0) {
             $('#id_feedback_rating').rating('rate', '');
         }
-    }        
-}
-
-
-// 201852137687 Protocolo algar
-
-// Busca os correspondentes de acordo com o tipo de serviço
-$('#id_type_task_field').on('change', function () {
-    ajax_get_correspondents($(this).val())
-})
-
-
-// Pega a posicao corrente do browser, levar para outro js
-function getLocation() {
-    if (navigator.geolocation) {
-        $('#locating').modal('show');
-        navigator.geolocation.getCurrentPosition(showPosition, showError);
-    } else {
-        console.log("Geolocalização não é suportada pelo browser.");
     }
-}
 
+    onChangeTypeTaskField(){
+        this._elTypeTaskField.on('change', (event) => {
+            ajax_get_correspondents($(this).val())        
+        })
+    }
 
-// Mostra dados do checkin e checkout
-/*
-function showPosition(position) {
-    var data = {};
-    var checkpointtype = $('#GEOLOCATION').data("checkpointtype");
-    data['latitude'] = position.coords.latitude;
-    data['longitude'] = position.coords.longitude;
-    data['task_id'] = {{ form.instance.pk }};
-    data['checkpointtype'] = checkpointtype;
-    var url = $('#GEOLOCATION').data("url");
-    $.ajax({
-        type: 'POST',
-        url: url,
-        data: data,
-        success: function (result) {
-            console.log(result);
-            if (result.ok){
-                location.reload();
-                $('#locating').modal('hide');
-            }else{
-                $('#locating').modal('hide');
-                showToast('error', 'Atenção', "Localização não registrada", 0, false);
+    getLocation() {
+        if (navigator.geolocation) {
+            $('#locating').modal('show');
+            navigator.geolocation.getCurrentPosition(this.showPosition, this.showError);
+        } else {
+            console.log("Geolocalização não é suportada pelo browser.");
+        }
+    }    
+
+    showPosition(position, taskId) {
+        var data = {};
+        var checkpointtype = $('#GEOLOCATION').data("checkpointtype");
+        data['latitude'] = position.coords.latitude;
+        data['longitude'] = position.coords.longitude;        
+        data['checkpointtype'] = checkpointtype;
+        data['task_id'] = taskDetail.taskId;
+        var url = $('#GEOLOCATION').data("url");
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: data,
+            success: function (result) {
+                console.log(result);
+                if (result.ok){
+                    location.reload();
+                    $('#locating').modal('hide');
+                }else{
+                    $('#locating').modal('hide');
+                    showToast('error', 'Atenção', "Localização não registrada", 0, false);
+                }
+            },
+            error: function (request, status, error) {
+            },
+            beforeSend: function (xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", taskDetail.csrfToken);
+            },
+            dataType: 'json'
+        })        
+    }
+    showError(error) {
+        $('#locating').modal('hide');
+        var msg = '';
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                msg = "O usuário negou o acesso à Geolocalização.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                msg = "Informação de localização não disponível.";
+                break;
+            case error.TIMEOUT:
+                msg = "Tempo limite atingido para o pedido de localização.";
+                break;
+            case error.UNKNOWN_ERROR:
+                msg = "Ocorreu um erro desconhecido.";
+                break;
+        }
+        showToast('error', 'Atenção', msg, 0, false);
+    }    
+
+    row_click_function() {
+        $("#correspondents-table tbody tr").click(function(){
+            $("#servicepricetable-alert").addClass("hidden");
+            id = $(this).data('id');
+            amount = $(this).data('value').toString();
+            $('input[name=servicepricetable_id]').val(id);
+            $('input[name=amount]').val(amount.replace(".", ","));
+            $(this).addClass("ezl-bg-open");
+            $(this).siblings().removeClass("ezl-bg-open");
+            $('input[name=amount]').focus();
+        });
+
+        return;
+    };    
+
+    ajax_get_correspondents(type_task) {
+        var tmplRowCorrespondent = '<tr id="office-${pk}" data-id="${pk}" ' +
+                            'data-value="${value}" data-formated-value="${formated_value}" ' +
+                            'data-office-public="${office_public}" class="tr_select" role="row">\n' +
+                '<td class="office_correspondent">${office_correspondent}</td>\n' +
+                '<td class="office_correspondent">${office_network}</td>\n' +
+                '<td class="court_district">${court_district}</td>\n' +
+                '<td class="court_district_complement">${court_district_complement}</td>\n' +
+                '<td class="state">${city}</td>\n' +
+                '<td class="state">${state}</td>\n' +
+                '<td class="client">${client}</td>\n' +
+                '<td class="value">${value}</td>\n' +
+                '<td class="office_rating">${office_rating}</td>\n' +
+                '<td class="office_return_rating">${office_return_rating}</td>\n' +
+            '</tr>';
+        $.ajax({
+            type: 'GET',
+            url: '/providencias/ajax_get_correspondent_table/?task={{ form.instance.pk }}&type_task='+type_task,
+            success: function (data) {
+                window.total = data.total;
+                window.table_rows = data.total;
+                window.type_task_id = data.type_task_id;
+                $("#type_task").html(data.type_task);
+                var tbody = $('#correspondents-table tbody');
+                if(window.table) {
+                    window.table.destroy();
+                }
+                tbody.html('');
+                if (data.total > 0) {
+                    $.each(data.correspondents_table, function (index, value) {
+                        $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
+                    });
+                }
+                correspondents_data_table();
+            },
+            dataType: 'json'
+        });
+        return;
+    };    
+
+    correspondents_data_table() {
+        window.table = $('#correspondents-table').DataTable({
+            paging: false,
+            order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
+            dom: 'frti',
+            buttons: [],
+            destroy: true,
+            language: {
+                "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+            },
+        });
+        $('#actionButton').removeAttr('disabled');
+        this.row_click_function();
+        $("#correspondents-table_filter input").focus();
+        return;
+    };   
+
+    onKeypressAmountField() {
+        $('input[id=id_amount]').keypress(function(e) {
+            if(e.which == 13) {
+              e.preventDefault();
             }
-        },
-        error: function (request, status, error) {
-        },
-        beforeSend: function (xhr, settings) {
-            xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-        },
-        dataType: 'json'
-    })
-}
-*/
-
-// Mostra errro caso nao consiga pegar a localizacao
-function showError(error) {
-    $('#locating').modal('hide');
-    var msg = '';
-    switch(error.code) {
-        case error.PERMISSION_DENIED:
-            msg = "O usuário negou o acesso à Geolocalização.";
-            break;
-        case error.POSITION_UNAVAILABLE:
-            msg = "Informação de localização não disponível.";
-            break;
-        case error.TIMEOUT:
-            msg = "Tempo limite atingido para o pedido de localização.";
-            break;
-        case error.UNKNOWN_ERROR:
-            msg = "Ocorreu um erro desconhecido.";
-            break;
-    }
-    showToast('error', 'Atenção', msg, 0, false);
+        });
+    }     
 }
 
-
-
-// Altera o estilo da linha selecionada na tabela de precos
-var row_click_function = function (){
-    $("#correspondents-table tbody tr").click(function(){
-        $("#servicepricetable-alert").addClass("hidden");
-        id = $(this).data('id');
-        amount = $(this).data('value').toString();
-        $('input[name=servicepricetable_id]').val(id);
-        $('input[name=amount]').val(amount.replace(".", ","));
-        $(this).addClass("ezl-bg-open");
-        $(this).siblings().removeClass("ezl-bg-open");
-        $('input[name=amount]').focus();
-    });
-
-    return;
-};
-
-// Aparentemente monta a tabela de precos
-var ajax_get_correspondents = function (type_task) {
-    var tmplRowCorrespondent = '<tr id="office-${pk}" data-id="${pk}" ' +
-                        'data-value="${value}" data-formated-value="${formated_value}" ' +
-                        'data-office-public="${office_public}" class="tr_select" role="row">\n' +
-            '<td class="office_correspondent">${office_correspondent}</td>\n' +
-            '<td class="office_correspondent">${office_network}</td>\n' +
-            '<td class="court_district">${court_district}</td>\n' +
-            '<td class="court_district_complement">${court_district_complement}</td>\n' +
-            '<td class="state">${city}</td>\n' +
-            '<td class="state">${state}</td>\n' +
-            '<td class="client">${client}</td>\n' +
-            '<td class="value">${value}</td>\n' +
-            '<td class="office_rating">${office_rating}</td>\n' +
-            '<td class="office_return_rating">${office_return_rating}</td>\n' +
-        '</tr>';
-    $.ajax({
-        type: 'GET',
-        url: '/providencias/ajax_get_correspondent_table/?task={{ form.instance.pk }}&type_task='+type_task,
-        success: function (data) {
-            window.total = data.total;
-            window.table_rows = data.total;
-            window.type_task_id = data.type_task_id;
-            $("#type_task").html(data.type_task);
-            var tbody = $('#correspondents-table tbody');
-            if(window.table) {
-                window.table.destroy();
-            }
-            tbody.html('');
-            if (data.total > 0) {
-                $.each(data.correspondents_table, function (index, value) {
-                    $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
-                });
-            }
-            correspondents_data_table();
-        },
-        dataType: 'json'
-    });
-    return;
-};
-
-// Cria um dataTable da tabela de correspondentes
-var correspondents_data_table = function() {
-    window.table = $('#correspondents-table').DataTable({
-        paging: false,
-        order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
-        dom: 'frti',
-        buttons: [],
-        destroy: true,
-        language: {
-            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-        },
-    });
-    $('#actionButton').removeAttr('disabled');
-    row_click_function();
-    $("#correspondents-table_filter input").focus();
-    return;
-};
-
-$('input[id=id_amount]').keypress(function(e) {
-    if(e.which == 13) {
-      e.preventDefault();
-    }
-});
-
-// Habilita botao de pagamento
-// var billing;
-// $gn.ready(function(obj) {
-//   billing = new Billing(obj);                                          
-// });
-
-
-// Aparentemente é o toggle do historico
-var expanded = false;
-
-function toggleArrowHist() {
-
-    if (expanded) {
-        expanded = false;
-        document.getElementById("up_hist").style.display = "none";
-        document.getElementById("down_hist").style.display = "block";
-    }
-    else {
-        expanded = true;
-        document.getElementById("up_hist").style.display = "block";
-        document.getElementById("down_hist").style.display = "none";
-    }
-}

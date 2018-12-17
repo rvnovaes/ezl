@@ -68,12 +68,12 @@
                     <a>{{ form.execution_date }}</a>
                 </div>
                 {% if form.instance.geolocation|get_checkpoint_type:request.user == 'CHECKOUT' %}
-                    <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
+                    <button type="button" onclick="taskDetail.getLocation()" data-url="/providencias/providencias/geolocation/checkin"
                             data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
                         <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkout</span>
                     </button>
                 {% elif form.instance.geolocation|get_checkpoint_type:request.user == 'CHECKIN' %}
-                    <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
+                    <button type="button" onclick="taskDetail.getLocation()" data-url="/providencias/providencias/geolocation/checkin"
                             data-checkpointtype="Checkin" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
                         <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin</span>
                     </button>
@@ -91,12 +91,12 @@
                 </button>
             {% endif %}
             {% if form.instance.geolocation|get_checkpoint_type:request.user == 'CHECKOUT' %}
-                <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
+                <button type="button" onclick="taskDetail.getLocation()" data-url="/providencias/providencias/geolocation/checkin"
                         data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
                     <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkout do preposto</span>
                 </button>
             {% elif form.instance.geolocation|get_checkpoint_type:request.user == 'CHECKIN' %}
-                <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
+                <button type="button" onclick="taskDetail.getLocation()" data-url="/providencias/providencias/geolocation/checkin"
                         data-checkpointtype="Checkin" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
                     <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin do preposto</span>
                 </button>
