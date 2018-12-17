@@ -1,11 +1,12 @@
 class TaskDetail {
-    constructor(taskId, officeWorkAlone, pendingSurvey, surveyCompanyRepresentative, csrfToken) {
+    constructor(taskId, officeWorkAlone, pendingSurvey, surveyCompanyRepresentative, csrfToken, billing) {
         this.csrfToken = csrfToken;
         this.taskId = taskId
         this.officeWorkAlone = officeWorkAlone;
         this.pendingSurvey = pendingSurvey;
         this.surveyCompanyRepresentative=surveyCompanyRepresentative;
-        this.expanded=false;    
+        this.billing = billing;
+        this.expanded=false;            
         this._elExecutionDate = $("input[name=execution_date]"); 
         this._elModalAction = $('#confirmAction');
         this._elRatingContainer = $('.rating-container');
@@ -21,10 +22,26 @@ class TaskDetail {
         this._elTypeTaskField = $('#id_type_task_field');
         this.initFeedbackRating();
         this.initCpfCnpjField();
-
+        this.onClickRowServicePriceTable();        
     }
 
     // Funcao que invoca o action form de acordo com o status
+
+    get servicePriceTableId(){
+        return $('input[name=servicepricetable_id]').val();
+    }
+
+    get officeToDelegate() {
+        return $("#office-" + this.servicePriceTableId);
+    }    
+
+    get officeToDelegateName() {
+        return $(this.officeToDelegate).find('td.office_correspondent').text()
+    }
+
+    get officeToDelegateValue() {
+        return this.officeToDelegate.data('value')
+    }
 
     get nextState() {
         return {
@@ -40,6 +57,15 @@ class TaskDetail {
             BLOCKEDPAYMENT: {text: "Glosar", icon: "mdi mdi-currency-usd-off"},
             RETURN: {text: "Retornar", icon: "mdi mdi-backburger"}
         };
+    }
+
+    setBillingItem() {
+        this.billing.items = [
+          {
+            name: this.officeToDelegateName, 
+            value: parseInt(this.officeToDelegate.data('value').replace('.', '').replace(', ', ''))
+          },
+        ];         
     }
 
     setExecutionDateRequire(status) {
@@ -181,55 +207,22 @@ class TaskDetail {
         $('#actionButton').removeAttr('disabled')
     }        
 
-// Todo: desmembrar
-    checkDelegationOffice() {
-        var servicepricetable_id = $('input[name=servicepricetable_id]').val();
-        var selected_office = $("#office-"+servicepricetable_id);
-        var public_office = (selected_office.data('office-public') == "True");
+    checkDelegationOffice() {        
         $('#task_detail').submit(function (e) {
             e.preventDefault();                
         });
-        if (servicepricetable_id === ""){
+        if (this.servicePriceTableId === ""){
             $("#alert-correspondent").remove();
             $("#servicepricetable-alert").removeClass("hidden");
-            $('#actionButton').removeAttr('disabled')
-        } else if (public_office){
-            var text_public_office = "Para a contratação dos serviços do EZLog deve ser feita a transferência do" +
-                " valor " + selected_office.data('formated-value') + " para a conta abaixo:" +
-                "\nBanco Bradesco" +
-                "\nAgência: 2146-6" +
-                "\nConta corrente: 40930-8" +
-                "\nSílex Sistemas Ltda." +
-                "\n04.170.575-0001-03" +
-                "\nTelefone de contato: 31 2538-7869";
-            swal({
-                title: "Importante",
-                text: text_public_office,
-                type: "warning",
-                showCancelButton: true,
-                cancelButtonText: "Cancelar",
-                confirmButtonColor: "#DD6B55",
-                confirmButtonText: "Delegar",                    
-            }).then(function(result){
-                if (result.value) {
-                    $('<input />').attr('type', 'hidden')
-                        .attr('name', 'action')
-                        .attr('value', 'OPEN')
-                        .appendTo('#task_detail');
-                    swal.close();
-                    toogleModals('#confirmAction', '#procssing')
-                    $('#task_detail').unbind('submit').submit();
-                }else{
-                    $('#actionButton').removeAttr('disabled')
-                }
-            });
-        }else{
+            this._elModalActionButton.removeAttr('disabled');        
+        } else{
             $('<input />').attr('type', 'hidden')
                 .attr('name', 'action')
                 .attr('value', 'OPEN')
                 .appendTo('#task_detail');
-            $('#task_detail').unbind('submit').submit();
-            this.toogleModals('#confirmAction', '#processing')
+                this.hideModalAction();
+            // $('#task_detail').unbind('submit').submit();
+            // this.toogleModals('#confirmAction', '#processing');
         }        
     }
 
@@ -241,9 +234,9 @@ class TaskDetail {
         actionButton.disabled = true;
         if ((task_status === 'DONE' || task_status === 'FINISHED' && use_service === 'False') && have_survey){
             this.beforeSubmit(task_status);
-        }else if(task_status === 'OPEN'){
+        } else if(task_status === 'OPEN'){
             this.checkDelegationOffice();
-        }else{
+        } else{
             ret = true;
             $('#task_detail [required]').each(function(index) {
                 if (!Boolean($( this ).val())){
@@ -258,8 +251,7 @@ class TaskDetail {
             }
         }
     }
-
-    // Verificar a nescessidade
+    
     resetForm(el){
         el.form.reset();
         if ($('#id_feedback_rating').length > 0) {
@@ -312,6 +304,7 @@ class TaskDetail {
             dataType: 'json'
         })        
     }
+
     showError(error) {
         $('#locating').modal('hide');
         var msg = '';
@@ -332,8 +325,9 @@ class TaskDetail {
         showToast('error', 'Atenção', msg, 0, false);
     }    
 
-    row_click_function() {
-        $("#correspondents-table tbody tr").click(function(){
+    onClickRowServicePriceTable() {
+        let self = this;
+        $("#correspondents-table tbody tr").on('click', function(){            
             $("#servicepricetable-alert").addClass("hidden");            
             let rowId = $(this).data('id');
             let amount = $(this).data('value').toString();
@@ -342,13 +336,12 @@ class TaskDetail {
             $(this).addClass("ezl-bg-open");
             $(this).siblings().removeClass("ezl-bg-open");
             $('input[name=amount]').focus();
-        });
-
-        return;
+            self.setBillingItem();
+        });        
     };    
 
     ajax_get_correspondents(type_task) {
-        var tmplRowCorrespondent = '<tr id="office-${pk}" data-id="${pk}" ' +
+        let tmplRowCorrespondent = '<tr id="office-${pk}" data-id="${pk}" ' +
                             'data-value="${value}" data-formated-value="${formated_value}" ' +
                             'data-office-public="${office_public}" class="tr_select" role="row">\n' +
                 '<td class="office_correspondent">${office_correspondent}</td>\n' +
@@ -398,8 +391,7 @@ class TaskDetail {
                 "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
             },
         });
-        $('#actionButton').removeAttr('disabled');
-        this.row_click_function();
+        this._elModalActionButton.removeAttr('disabled')        
         $("#correspondents-table_filter input").focus();
         return;
     };   
@@ -410,6 +402,6 @@ class TaskDetail {
               e.preventDefault();
             }
         });
-    }     
+    }
 }
 

@@ -121,8 +121,8 @@
 {% block extra_scripts %}
     <!-- UPLOADS SCRIPTS  -->
     {% include 'task/includes/upload.html' %}
-    <!--<script src="{% static 'billing/js/gerencianet/lightbox-dev.js' %}"></script>
-    <script src="{% static 'billing/js/billing.js' %}"></script>-->
+    <script src="{% static 'billing/js/gerencianet/lightbox-dev.js' %}"></script>
+    <script src="{% static 'billing/js/billing.js' %}"></script>
     <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
     <script src="{% static 'libs/bootstrap-rating/bootstrap-rating.min.js' %}"></script>
     <!--Style Switcher -->
@@ -142,8 +142,12 @@
     <script src='{% static "task/task-detail.js" %}'></script>
     <script type="text/javascript">
     var taskDetail;
+    var ligthbox;
     $(document).ready(function(){
-        taskDetail = new TaskDetail('{{object.pk}}', '{{custom_settings.i_work_alone}}', '{{ pending_survey|lower }}', '{{survey_company_representative|safe}}', '{{csrf_token}}')
+        $gn.ready(function(obj){ 
+            let billing = new Billing(obj)
+            taskDetail = new TaskDetail('{{object.pk}}', '{{custom_settings.i_work_alone}}', '{{ pending_survey|lower }}', '{{survey_company_representative|safe}}', '{{csrf_token}}', billing);
+        });        
     })
     </script>
 {% endblock %}
@@ -201,8 +205,7 @@
     {% include 'task/modal/processing.html' %}
 {% endblock %}
 {% block script_document_ready %}
-     {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
-        taskDetail.row_click_function();
+     {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}        
         $('#confirmAction').on('show.bs.modal', function (event) {
             if (! window.type_task_id){
                 window.type_task_id = {{ form.instance.type_task.id }}
