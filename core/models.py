@@ -427,7 +427,7 @@ class Office(AbstractPerson):
     logo = models.ImageField(verbose_name='Logo', null=True, blank=True)
     persons = models.ManyToManyField(
         Person, blank=True, related_name='offices', through='OfficeMembership')
-    offices = models.ManyToManyField('self', blank=True)
+    offices = models.ManyToManyField('self', blank=True, through='OfficeOffices', symmetrical=False)
     public_office = models.BooleanField(
         default=False, verbose_name='Escritório público')
     use_service = models.BooleanField(
@@ -461,6 +461,12 @@ class OfficeMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class OfficeOffices(Audit):
+    from_office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name='from_offices')
+    to_office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name='to_offices')
+    person_reference = models.ForeignKey(Person, on_delete=models.CASCADE, blank=True, null=True)
 
 
 class OfficeMembership(Audit):
