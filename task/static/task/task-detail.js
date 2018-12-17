@@ -43,11 +43,19 @@ class TaskDetail {
     }
 
     setExecutionDateRequire(status) {
-        if (status === 'REQUESTED') {
-            this._elExecutionDate.attr('required', false);
-            this._elExecutionDate.val('');
-        } else {
-            this._elExecutionDate.attr('required', true);
+        if (this._elExecutionDate.length > 0) {
+            if (status === "REQUESTED"){
+                this._elExecutionDate.attr('required', false);
+                this._elExecutionDate.val('');
+
+            }else{
+                this._elExecutionDate.attr('required', true);
+            }
+            let input = this._elExecutionDate.get(0);
+            if (! input.checkValidity()) {
+                input.reportValidity();
+                return false
+            }
         }
     }
 
@@ -227,8 +235,9 @@ class TaskDetail {
 
 // Todo: Ajustar de desmembrar
     submitTaskDetail(actionButton, use_service) {
-        var task_status = actionButton.value;
-        var have_survey = actionButton.getAttribute('survey');
+        let task_status = actionButton.value;
+        let have_survey = actionButton.getAttribute('survey');
+        let ret;
         actionButton.disabled = true;
         if ((task_status === 'DONE' || task_status === 'FINISHED' && use_service === 'False') && have_survey){
             beforeSubmit(task_status);
@@ -244,7 +253,7 @@ class TaskDetail {
             });
             if (ret) {
                 $('<input name="action" value="'+ task_status +'">').appendTo($('#task_detail'));
-                toogleModals('#confirmAction', '#processing');
+                this.toogleModals('#confirmAction', '#processing');
                 $('#task_detail').unbind('submit').submit();
             }
         }
