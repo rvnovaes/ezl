@@ -105,12 +105,6 @@ class OfficeOfficesAdmin(admin.ModelAdmin):
                 offices__in=office_id).order_by('legal_name')
         return ret
 
-    def get_fields(self, request, obj=None):
-        if self.fields:
-            return self.fields
-        form = self.get_formset(request, obj, fields=None).form
-        return list(self.get_readonly_fields(request, obj)) + list(form.base_fields)
-
     def has_add_permission(self, request):
         return False
 
