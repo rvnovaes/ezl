@@ -2,7 +2,7 @@ from django.contrib import admin
 from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate
 #Todo: Remover office
 from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings, Company, CompanyUser, City, \
-    State, Country, OfficeNetwork
+    State, Country, OfficeNetwork, OfficeOffices
 from task.models import TaskWorkflow, TaskShowStatus
 
 
@@ -64,11 +64,34 @@ class ContactMechanism(admin.ModelAdmin):
         verbose_name_plural = 'Mecanismos de Contato'
 
 
+@admin.register(OfficeOffices)
+class OfficeOfficesAdmin(admin.ModelAdmin):
+    list_display = ['from_office', 'to_office', 'person_reference']
+    readonly_fields = ('from_office', 'to_office')
+
+    def get_field_queryset(self, db, db_field, request):
+        ret = super().get_field_queryset(db, db_field, request)
+        if db_field.name == 'person_reference':
+            office_id = list(request.resolver_match.args)
+            ret = db_field.remote_field.model._default_manager.using(db).filter(
+                offices__in=office_id).order_by('legal_name')
+        return ret
+
+    def get_fields(self, request, obj=None):
+        if self.fields:
+            return self.fields
+        form = self.get_formset(request, obj, fields=None).form
+        return list(self.get_readonly_fields(request, obj)) + list(form.base_fields)
+
+    def has_add_permission(self, request):
+        return False
+
+
 @admin.register(Office)
 class OfficeAdmin(admin.ModelAdmin):
     filter_horizontal = ['persons', 'offices']
-    search_fields = ['legal_name']
-    list_display = ['name', 'auth_user']
+    search_fields = ['legal_name', 'name']
+    list_display = ['legal_name', 'cpf_cnpj']
 
 
 @admin.register(Invite)
