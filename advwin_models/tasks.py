@@ -496,11 +496,16 @@ def export_task(self, task_id, task=None, execute=True):
         if task.get_child:
             delegated_office = task.get_child.office
             delegated_to = delegated_office.legal_name
-            for user in {user for user, perms in
-                         get_users_with_perms(delegated_office, attach_perms=True).items() if 'group_admin' in perms}:
-                if user.person.legacy_code:
-                    advwin_advogado = user.person.legacy_code
-                    break
+            person_reference = task.office.from_offices.filter(to_office=delegated_office).person_reference
+            if person_reference:
+                advwin_advogado = person_reference.legacy_code
+            else:
+                for user in {user for user, perms in
+                             get_users_with_perms(delegated_office, attach_perms=True).items() if
+                             'group_admin' in perms}:
+                    if user.person.legacy_code:
+                        advwin_advogado = user.person.legacy_code
+                        break
         else:
             advwin_advogado = task.person_executed_by.legacy_code
             delegated_to = task.person_executed_by.auth_user.username

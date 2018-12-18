@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate
 #Todo: Remover office
 from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings, Company, CompanyUser, City, \
@@ -64,9 +65,36 @@ class ContactMechanism(admin.ModelAdmin):
         verbose_name_plural = 'Mecanismos de Contato'
 
 
+class VersionFilter(SimpleListFilter):
+    title = 'Escritório de Origem'
+    parameter_name = 'from_office__legal_name'
+    template = 'admin/input_filter.html'
+
+    def lookups(self, request, model_admin):
+        qs = model_admin.get_queryset(request)
+        return [(i, i) for i in qs.values_list('from_office__legal_name',
+                                               flat=True).distinct().order_by('from_office__legal_name')]
+
+    def choices(self, changelist):
+        # Grab only the "all" option.
+        all_choice = next(super().choices(changelist))
+        all_choice['query_parts'] = (
+            (k, v)
+            for k, v in changelist.get_filters_params().items()
+            if k == self.parameter_name
+        )
+        yield all_choice
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(from_office__legal_name__unaccent__icontains=self.value())
+
+
 @admin.register(OfficeOffices)
 class OfficeOfficesAdmin(admin.ModelAdmin):
     list_display = ['from_office', 'to_office', 'person_reference']
+    search_fields = ['from_office__legal_name', 'to_office__legal_name']
+    list_filter = (VersionFilter,)
     readonly_fields = ('from_office', 'to_office')
 
     def get_field_queryset(self, db, db_field, request):
