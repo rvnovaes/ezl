@@ -668,3 +668,13 @@ fieldset[disabled] .btn-ezl-error.active {
 .col-sm-3-batch-form {
     width: 19.5%;
 }
+
+.ezl-panel {
+    background-color: #0d3c55 !important;    
+}
+
+.ezl-panel h3 {
+    color: #fff !important;
+}
+
+

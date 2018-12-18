@@ -16,6 +16,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
+from core.serializers import OfficeSerializer, AddressSerializer, ContactMechanismSerializer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q, F
 from django.db import transaction, IntegrityError
@@ -32,7 +33,7 @@ from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
 from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
     ResetPasswordFormMixin, OfficeForm, InviteForm, InviteOfficeForm, ContactMechanismForm, TeamForm, \
-    CustomSettingsForm, ImportCityListForm
+    CustomSettingsForm, ImportCityListForm, OfficeProfileForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
@@ -2368,6 +2369,181 @@ class SocialRegister(TemplateView):
 
 class TermsView(TemplateView):
     template_name = 'account/terms/terms_and_conditions.html'
+
+
+class OfficeProfileDataView(View):
+    def get(self, request, *args, **kwargs):
+        office = get_office_session(request)
+        return JsonResponse(OfficeSerializer(office).data)
+
+    def post(self, request, *args, **kwargs):
+        office_serializer = OfficeSerializer(data=request.POST, instance=get_office_session(request))
+        if office_serializer.is_valid():
+            office_serializer.save();
+            return JsonResponse(office_serializer.data)
+        return JsonResponse({'error': office_serializer.errors})            
+
+
+class OfficeProfileView(TemplateView):
+    template_name = 'core/office_profile.html'
+
+    model = Office
+    form_class = OfficeProfileForm    
+    success_message = UPDATE_SUCCESS_MESSAGE
+    object_list_url = 'office_list'
+
+    def get_context_data(self, **kwargs):        
+        self.object = get_office_session(self.request)
+        kwargs.update({
+            'table':
+            AddressOfficeTable(self.object.get_address()),
+            'table_members':
+            OfficeMembershipTable(
+                self.object.officemembership_set.filter(
+                    is_active=True,
+                    person__auth_user__isnull=False,
+                    person__auth_user__is_superuser=False).exclude(
+                        person__auth_user=self.request.user)),
+            'table_offices':
+            OfficeTable(
+                Office.objects.get(pk=self.object.pk).offices.all().
+                order_by('legal_name')),
+            'table_contact_mechanism':
+            ContactMechanismOfficeTable(
+                self.object.contactmechanism_set.all()),
+        })
+        data = super().get_context_data(**kwargs)
+        data['inviteofficeform'] = InviteForm(self.request.POST) \
+            if InviteForm(self.request.POST).is_valid() else InviteForm()
+        RequestConfig(
+            self.request, paginate=False).configure(
+                kwargs.get('table_members'))
+        RequestConfig(
+            self.request, paginate=False).configure(
+                kwargs.get('table_offices'))
+        data['office'] = get_office_session(self.request)
+        data['form_office'] = self.form_class(instance=data['office']) 
+        data['form_address'] = AddressForm()      
+        data['form_contact_mechanism'] = ContactMechanismForm()
+        return data
+
+
+class OfficeProfileUpdateView(UpdateView):
+    model = Office
+    form_class = OfficeProfileForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST, request.FILES, instance=get_office_session(request))
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('office_profile'))
+        else:
+            return JsonResponse({'errors': form.errors}, status=400)
+
+    def form_invalid(self, form):
+        return JsonResponse({'errors': form.errors}, status=400)
+
+    def get_success_url(self):
+        return reverse('office_profile')    
+
+
+class OfficeProfileAddressCreateView(ViewRelatedMixin, CreateView):
+    model = Address
+    form_class = AddressForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def __init__(self):
+        super().__init__(
+            related_model=Office,
+            related_model_name='office',
+            related_field_pk='office')       
+
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.office = get_office_session(self.request)
+        self.object = form.save()        
+        return JsonResponse(AddressSerializer(form.instance).data)        
+
+    def get_success_url(self):
+        return reverse('office_profile')    
+
+class OfficeProfileAddressUpdateView(CustomLoginRequiredView, UpdateView):
+    model = Address
+    form_class = AddressForm
+
+    def form_invalid(self, form):
+        return JsonResponse({'errors': form.errors}, status=400)
+
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.office = get_office_session(self.request)
+        self.object = form.save()        
+        return JsonResponse(AddressSerializer(form.instance).data)        
+
+    def get_success_url(self):
+        return reverse('office_profile')
+
+
+class OfficeProfileAddressDeleteView(CustomLoginRequiredView, View):
+    def post(self, request, *args, **kwargs):
+        address_ids = request.POST.getlist('ids[]')
+        Address.objects.filter(pk__in=address_ids).delete()
+        return JsonResponse({'status': 'ok'})
+
+class OfficeProfileAddressDataView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):        
+        address = Address.objects.get(pk=pk)
+        address_serializer = AddressSerializer(address)
+        return JsonResponse(address_serializer.data)
+
+
+class OfficeProfileContactMechanismDataView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):        
+        contact_mechanism = ContactMechanism.objects.get(pk=pk)
+        contact_mechanism_serializer = ContactMechanismSerializer(contact_mechanism)
+        return JsonResponse(contact_mechanism_serializer.data)
+
+
+class OfficeProfileContactMechanismCreateView(ViewRelatedMixin, CreateView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+    success_message = CREATE_SUCCESS_MESSAGE
+
+    def __init__(self):
+        super().__init__(related_model=Office, related_model_name='office', related_field_pk='office')
+
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.office = get_office_session(self.request)
+        self.object = form.save()
+        return JsonResponse(ContactMechanismSerializer(self.object).data)        
+
+    def get_success_url(self):
+        return reverse('office_profile')
+
+class OfficeProfileContactMechanismUpdateView(CustomLoginRequiredView, UpdateView):
+    model = ContactMechanism
+    form_class = ContactMechanismForm
+
+    def form_invalid(self, form):
+        return JsonResponse({'errors': form.errors}, status=400)
+
+    def form_valid(self, form):
+        form.instance.create_user = self.request.user
+        form.instance.office = get_office_session(self.request)
+        self.object = form.save()        
+        return JsonResponse(ContactMechanismSerializer(form.instance).data)
+
+
+    def get_success_url(self):
+        return reverse('office_profile')        
+
+
+class OfficeProfileContactMechanismDeleteView(CustomLoginRequiredView, View):
+    def post(self, request, *args, **kwargs):
+        contact_ids = request.POST.getlist('ids[]')
+        ContactMechanism.objects.filter(pk__in=contact_ids).delete()
+        return JsonResponse({'status': 'ok'})    
 
 
 class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
