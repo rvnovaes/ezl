@@ -64,16 +64,16 @@ class AddressTable(tables.Table):
         ]
         attrs = {"class": "table-striped table-bordered"}
         row_attrs = {
-            'data_href':
-            lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
+            'pk': lambda record: str(record.pk),
+            'data_href': lambda record: '/pessoas/' + str(record.person.pk) + '/enderecos/' + str(record.pk) + '/'
         }
 
 
 class AddressOfficeTable(AddressTable):
     class Meta:
         row_attrs = {
-            'data_href':
-            lambda record: '/escritorios/' + str(record.office.pk) + '/enderecos/' + str(record.pk) + '/'
+            'pk': lambda record: str(record.pk),
+            'data_href': lambda record: '/escritorios/' + str(record.office.pk) + '/enderecos/' + str(record.pk) + '/'
         }
 
 
@@ -208,6 +208,7 @@ class ContactMechanismTable(tables.Table):
         ]
         attrs = {"class": "table-striped table-bordered"}
         row_attrs = {
+            'pk': lambda record: str(record.pk),
             'data_href':
             lambda record: '/pessoas/' + str(record.person.pk) + '/contatos/' + str(record.pk) + '/'
         }
@@ -216,6 +217,7 @@ class ContactMechanismTable(tables.Table):
 class ContactMechanismOfficeTable(ContactMechanismTable):
     class Meta:
         row_attrs = {
+            'pk': lambda record: str(record.pk),
             'data_href':
             lambda record: '/escritorios/' + str(record.office.pk) + '/contatos/' + str(record.pk) + '/'
         }
