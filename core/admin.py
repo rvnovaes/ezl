@@ -96,13 +96,16 @@ class OfficeOfficesAdmin(admin.ModelAdmin):
     search_fields = ['from_office__legal_name', 'to_office__legal_name']
     list_filter = (VersionFilter,)
     readonly_fields = ('from_office', 'to_office')
+    exclude = ('is_active',)
 
     def get_field_queryset(self, db, db_field, request):
         ret = super().get_field_queryset(db, db_field, request)
         if db_field.name == 'person_reference':
-            office_id = list(request.resolver_match.args)
-            ret = db_field.remote_field.model._default_manager.using(db).filter(
-                offices__in=office_id).order_by('legal_name')
+            office_office_id = list(request.resolver_match.args)
+            if office_office_id:
+                office = OfficeOffices.objects.get(pk__in=office_office_id).from_office
+                ret = db_field.remote_field.model._default_manager.using(db).filter(
+                    offices=office).order_by('legal_name')
         return ret
 
     def has_add_permission(self, request):
