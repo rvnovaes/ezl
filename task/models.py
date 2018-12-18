@@ -835,6 +835,8 @@ class DashboardViewModel(Audit, OfficeMixin):
         verbose_name='Número do Processo')
     parent_task_number = models.PositiveIntegerField(
         default=0, verbose_name='OS Original')
+    survey_result = JSONField(
+        verbose_name=u'Respotas do Formulário', blank=True, null=True)
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
