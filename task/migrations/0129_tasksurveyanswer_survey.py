@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('survey', '0006_update_survey_sequence'),
-        ('task', '0127_auto_20181029_1711'),
+        ('task', '0128_migrate_survey_result'),
     ]
 
     operations = [
