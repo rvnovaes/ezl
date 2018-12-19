@@ -55,8 +55,8 @@ class ServicePriceTableTaskTable(tables.Table):
         sequence = ('office_correspondent', 'office_network', 'state', 'court_district', 'court_district_complement',
                     'city', 'client', 'value', 'office_rating', 'office_return_rating')
         model = ServicePriceTable
-        fields = ('office_correspondent', 'office_network', 'court_district', 'state', 'client', 'value', 'court_district_complement',
-                  'office_rating', 'office_return_rating', 'city')
+        fields = ('office_correspondent', 'office_network', 'court_district', 'state', 'client', 'value',
+                  'court_district_complement', 'office_rating', 'office_return_rating', 'city')
         attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
         empty_text = "Não existe tabela de preços cadastrada para o tipo de serviço selecionado."
         order_by = ("value", "office_rating", "office_return_rating", "office_correspondent__legal_name")
@@ -75,7 +75,7 @@ class PolicyPriceTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
     class Meta: 
         model = PolicyPrice
-        fields = ('selection', 'name', 'category', 'billing_type', 'billing_moment', 'is_active')
+        fields = ('selection', 'name', 'category', 'billing_moment', 'is_active')
         empty_text = "Não existe tipo de preço cadastrado."
         row_attrs = {
             'data_href': lambda record: reverse_lazy('policyprice_update', args=(record.pk,))

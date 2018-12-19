@@ -1,10 +1,11 @@
 class ServicePriceTable {
-    constructor(officeSessionId){
-        this.officeSessionId = officeSessionId
+    constructor(officeSessionId, policyPricesCategories){
+        this.officeSessionId = officeSessionId;
+        this.policyPricesCategories = policyPricesCategories;
         this.elOfficeNetwork = $('#id_office_network');
         this.elOfficeCorrespondent = $('#id_office_correspondent');
         this.elOffice = $('#id_office');
-        this._elPolicyPrice = $('select[name=policy_price]');
+        this.elPolicyPrice = $('select[name=policy_price]');
         this.onChangeOfficeNetwork();
         this.onChangeOfficeCorrespondent();
         this.onSaveSubmit();
@@ -53,6 +54,14 @@ class ServicePriceTable {
         return this.elOffice.val();
     }
 
+    get policyPrice(){
+        return this.elPolicyPrice.val();
+    }
+
+    get pricePolicyCategory(){
+        return (this.policyPrice) ? this.policyPricesCategories[this.policyPrice] : null;
+    }
+
     onChangeOfficeNetwork(){
 	    this.elOfficeNetwork.on('change',()=>{
             if (this.officeNetwork) {
@@ -89,22 +98,27 @@ class ServicePriceTable {
 
     validatePolicyPrice(showAlert) {
         let officeCorrespondentId = this.elOfficeCorrespondent.val();
-        let selected = this._elPolicyPrice.find('option:selected').text();
-        if (selected === 'Público' && officeCorrespondentId !== this.officeSessionId) {
-            this.elOfficeCorrespondent.val(this.officeSessionId)
+        let pricePolicyCategory = this.pricePolicyCategory;
+        if (pricePolicyCategory === 'PUBLIC' && officeCorrespondentId !== this.officeSessionId) {
+            this.elOfficeCorrespondent.val(this.officeSessionId);
             if (showAlert) {
                 swal({
                     type: 'error', 
                     title: 'Atenção!', 
                     text: 'Para tipo de preço público o escritório correspondente deve ser o mesmo em que está logado.'
-                })                
+                });
             }
-        }        
+        }
+        if (pricePolicyCategory === 'NETWORK'){
+            this.disableOfficeCorrespondent();
+        } else{
+            ServicePriceTable.enableElement(this.elOfficeCorrespondent);
+        }
     }
 
     onChangePolicyPrice() {
-        this._elPolicyPrice.on('change', (event)=>{
-            this.validatePolicyPrice(false)       
-        })        
+        this.elPolicyPrice.on('change', (event)=>{
+            this.validatePolicyPrice(false);
+        });
     }
 }

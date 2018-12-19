@@ -17,6 +17,10 @@ class Migration(migrations.Migration):
             name='policyprice',
             options={'verbose_name': 'Tipos de preço'},
         ),
+        migrations.RemoveField(
+            model_name='policyprice',
+            name='billing_type',
+        ),
         migrations.AlterField(
             model_name='policyprice',
             name='billing_moment',
@@ -24,13 +28,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='policyprice',
-            name='billing_type',
-            field=models.CharField(choices=[('PER_UNIT', 'Avulso'), ('PER_MONTH', 'Mensal')], max_length=255, verbose_name='Tipo de faturamento'),
-        ),
-        migrations.AlterField(
-            model_name='policyprice',
             name='category',
-            field=models.CharField(choices=[('DEFAULT', 'Padrão'), ('PUBLIC', 'Pública'), ('NETWORK', 'Rede')], max_length=255, verbose_name='Categoria'),
+            field=models.CharField(choices=[('PREPAID', 'Pré-pago'), ('POSTPAID', 'Pós-pago'), ('PUBLIC', 'Público'), ('NETWORK', 'Rede')], max_length=255, verbose_name='Categoria'),
         ),
         migrations.AlterField(
             model_name='servicepricetable',

@@ -1,3 +1,4 @@
+import json
 from core.views import CustomLoginRequiredView
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib import messages
@@ -116,8 +117,9 @@ class ServicePriceTableCreateView(AuditFormMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['office_session'] = get_office_session(self.request)
+        context['policy_prices_categories'] = json.dumps({policy_price.id: policy_price.category for
+                                               policy_price in context['form'].fields['policy_price'].queryset})
         return context
-
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()

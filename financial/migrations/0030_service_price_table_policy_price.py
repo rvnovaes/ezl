@@ -7,16 +7,17 @@ logger = logging.getLogger('0030_service_price_table_policy_price')
 
 
 def update_service_price_table(apps, schema_editor):
-    from financial.models import CategoryPrice, BillingType, BillingMoment
+    from financial.models import CategoryPrice, BillingMoment
     PolicyPrice = apps.get_model('financial', 'PolicyPrice')
     ServicePriceTable = apps.get_model('financial', 'ServicePriceTable')
     for service_price in ServicePriceTable.objects.all():
         if service_price.office == service_price.office_correspondent:
             service_price.policy_price = PolicyPrice.objects.filter(office=service_price.office, category=CategoryPrice.PUBLIC).first()
         else:
-            service_price.policy_price = PolicyPrice.objects.filter(office=service_price.office, category=CategoryPrice.DEFAULT).first()
+            service_price.policy_price = PolicyPrice.objects.filter(office=service_price.office, category=CategoryPrice.POSTPAID).first()
         service_price.save()        
         logging.info('ALTERADO TIPO DE PRECO NA TABLEA DE PRECOS: ID-{}'.format(service_price.pk))
+
 
 class Migration(migrations.Migration):
 

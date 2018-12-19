@@ -5,7 +5,7 @@
     <script src="{% static 'js/service_price_table.js' %}"></script>
     <script type="text/javascript">
     $(document).ready(function(){
-        servicePriceTable = new ServicePriceTable('{{office_session.pk}}');
+        servicePriceTable = new ServicePriceTable('{{office_session.pk}}', {{ policy_prices_categories|safe }});
     });
     </script>
 {% endblock %}

@@ -3,7 +3,7 @@ from core.models import Person, State, City
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field, get_office_session
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from task.models import TypeTask
-from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, PolicyPrice, CategoryPrice, BillingType, BillingMoment
+from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, PolicyPrice, CategoryPrice, BillingMoment
 from decimal import Decimal
 from core.forms import BaseModelForm, XlsxFileField
 from core.widgets import TypeaHeadForeignKeyWidget
@@ -70,10 +70,10 @@ class ServicePriceTableForm(BaseModelForm):
         label=u"Tipo de Serviço",
     )
     policy_price = forms.ModelChoiceField(
-      queryset=PolicyPrice.objects.all(),
-      empty_label='',
-      required=True,
-      label='Tipo de preço'
+        queryset=PolicyPrice.objects.all(),
+        empty_label='',
+        required=True,
+        label='Tipo de preço'
     )
     value = forms.CharField(label="Valor",
                             localize=True,
@@ -132,25 +132,21 @@ class ImportServicePriceTableForm(forms.ModelForm):
 
 
 class PolicyPriceForm(BaseModelForm):  
-  category = forms.ChoiceField(
-      label='Categoria',
-      choices=[(x.name, x.value) for x in CategoryPrice],
-      required=True,
-  )
-  billing_type = forms.ChoiceField(
-    label='Tipo de faturamento',
-    choices=((x.name, x.value) for x in BillingType),
-    required=True,
-  )
-  billing_moment = forms.ChoiceField(
-    label='Momento do faturamento',
-    choices=((x.name, x.value) for x in BillingMoment),
-    required=True,
-  )    
-  class Meta: 
-    model = PolicyPrice
-    fields = ('office', 'name', 'category', 'billing_type', 'billing_moment', 'is_active')
+    category = forms.ChoiceField(
+        label='Categoria',
+        choices=[(x.name, x.value) for x in CategoryPrice],
+        required=True,
+    )
+    billing_moment = forms.ChoiceField(
+        label='Momento do faturamento',
+        choices=((x.name, x.value) for x in BillingMoment),
+        required=True,
+    )
 
-  def __init__(self, *args, **kwargs):
-      super().__init__(*args, **kwargs)
-      self.fields['office'] = get_office_field(self.request)
+    class Meta:
+        model = PolicyPrice
+        fields = ('office', 'name', 'category', 'billing_moment', 'is_active')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)

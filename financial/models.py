@@ -10,22 +10,16 @@ from enum import Enum
 
 
 class CategoryPrice(Enum):
-    DEFAULT = 'Padrão'
-    PUBLIC = 'Pública'
+    PREPAID = 'Pré-pago'
+    POSTPAID = 'Pós-pago'
+    PUBLIC = 'Público'
     NETWORK = 'Rede'
 
     def __str__(self):
         return self.name
 
 
-class BillingType(Enum):
-    PER_UNIT = 'Avulso'
-    PER_MONTH = 'Mensal'
-
-    def __str__(self):
-        return self.name
-
-class BillingMoment(Enum):    
+class BillingMoment(Enum):
     PRE_PAID = 'Pré-pago'
     POST_PAID = 'Pós-pago'
 
@@ -36,7 +30,6 @@ class BillingMoment(Enum):
 class PolicyPrice(Audit, OfficeMixin):
     name = models.CharField(verbose_name='Nome', max_length=255)
     category = models.CharField(verbose_name='Categoria', max_length=255, choices=[(x.name, x.value) for x in CategoryPrice])
-    billing_type = models.CharField(verbose_name='Tipo de faturamento', max_length=255, choices=((x.name, x.value) for x in BillingType))
     billing_moment = models.CharField(verbose_name='Momento do faturamento', max_length=255, choices=((x.name, x.value) for x in BillingMoment))
     objects = OfficeManager()
 
