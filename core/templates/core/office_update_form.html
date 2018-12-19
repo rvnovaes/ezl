@@ -43,6 +43,38 @@
 
 
 {% block extra_content %}
+        <div class="white-box">
+            <div class="row">
+                <div class="col col-md-6">
+                    <div class="panel panel-default"> 
+                        <div class="panel-heading ezl-panel"> 
+                            <h3 class="panel-title">Estados em que atua</h3> 
+                        </div> 
+                        <div class="panel-body">
+                            {% for state in object.states_of_practice %}
+                                <div class="col col-md-3" style="margin: 3px">
+                                    <span class="">{{state}}</span>                    
+                                </div>
+                            {% endfor %}
+                        </div> 
+                    </div>            
+                </div>
+                <div class="col col-md-6">
+                    <div class="panel panel-default"> 
+                        <div class="panel-heading ezl-panel"> 
+                            <h3 class="panel-title">Serviços que executa</h3> 
+                        </div> 
+                        <div class="panel-body">
+                            {% for service in object.type_of_service %}
+                                <div class="col col-md-4" style="margin: 3px">
+                                    <span class="">{{service}}</span>                    
+                                </div>
+                            {% endfor %}
+                        </div> 
+                    </div>            
+                </div>                
+            </div>
+        </div>
     <div class="white-box">
         <ul class="nav nav-tabs">
             <li class="active" id="li-endereco"><a data-toggle="tab" name="endereco" href="#endereco">Endereços</a></li>

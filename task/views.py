@@ -16,8 +16,8 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When, CharField, IntegerField, Count
-from django.db.models.functions import Cast
+from django.db.models import Q, Case, When, CharField, IntegerField, Count, TextField
+from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
@@ -27,11 +27,12 @@ from django.core.exceptions import ValidationError
 from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
 from djmoney.money import Money
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
-    operational_error_create, ioerror_create, exception_create, \
-    integrity_error_delete, \
-    DELETE_EXCEPTION_MESSAGE, success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
+    operational_error_create, ioerror_create, exception_create, integrity_error_delete, DELETE_EXCEPTION_MESSAGE, \
+    success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
 from core.models import Person, CorePermissions, CustomSettings, Office
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
+from core.xlsx import XLSXWriter
+from lawsuit.models import Movement
 from lawsuit.forms import LawSuitForm
 from lawsuit.models import Movement, LawSuit, Folder, TypeMovement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
@@ -39,7 +40,7 @@ from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignFor
     ImportTaskListForm, TaskBulkCreateForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain, TaskSurveyAnswer
-from .report import TaskToPayXlsx
+from .report import TaskToPayXlsx, ExportFilterTask
 from task.queries import *
 from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
@@ -57,7 +58,7 @@ from django.shortcuts import render
 import os
 from django.conf import settings
 from urllib.parse import urljoin
-
+from survey.models import SurveyPermissions
 
 import logging
 logger = logging.getLogger(__name__)
@@ -843,12 +844,15 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         survey_result = (form.cleaned_data['survey_result']
                          if form.cleaned_data['survey_result'] else
                          form.initial['survey_result'])
-        if survey_result:
+
+        if survey_result and not form.initial['survey_result']:
+            if isinstance(survey_result, str):
+                survey_result = json.loads(survey_result)
             survey = TaskSurveyAnswer()
             survey.task = form.instance
             survey.survey = form.instance.type_task.survey
             survey.create_user = self.request.user
-            survey.survey_result = json.loads(survey_result)
+            survey.survey_result = survey_result
             survey.save()
         send_notes_execution_date.send(
             sender=self.__class__,
@@ -1093,11 +1097,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
             logger = logging.getLogger('teste')
             logger.info(data)
 
-
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
                 query_set = DashboardViewModel.objects.filter(q)
-
             else:
                 task_dynamic_query = Q()
                 client_query = Q()
@@ -1355,6 +1357,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         task_list, task_filter = self.query_builder()
         self.filter = task_filter
 
+        if not self.request.GET.get('export_answers'):
+            task_list = task_list.distinct()
+
         return task_list
 
     def get_context_data(self, **kwargs):
@@ -1371,50 +1376,76 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 'can_view_survey_results', get_office_session(request))):
             return self._export_answers(request)
 
+        if self.request.GET.get('export_result'):
+            return self._export_result(request)
+
         return super().get(request)
 
-    def _export_answers(self, request):
-        response = HttpResponse(content_type='text/csv')
-        response[
-            'Content-Disposition'] = 'attachment; filename="respostas_dos_formularios.csv"'
-        writer = csv.writer(response)
-
-        queryset = self.get_queryset().filter(survey_result__isnull=False)
-        tasks = self._fill_tasks_answers(queryset)
-        columns = self._get_answers_columns(tasks)
-        writer.writerow(['N° da OS', 'N° da OS no sistema de origem'] +
-                        columns)
-
-        for task in tasks:
-            self._export_answers_write_task(writer, task, columns)
+    def _export_result(self, request):
+        data = self.get_queryset().annotate(
+            origin_code=Coalesce(Cast('parent__task_number', TextField()), Cast('legacy_code', TextField()))).values(
+            'task_status', 'task_number', 'final_deadline_date', 'type_task__name',
+            'movement__law_suit__law_suit_number', 'movement__law_suit__folder__person_customer__name',
+            'movement__law_suit__opposing_party', 'origin_code', 'movement__law_suit__court_district__name',
+            'movement__law_suit__court_district__state__initials', 'requested_date')
+        report = ExportFilterTask(data)
+        output = report.get_report()
+        filename = 'resultados_da_pesquisa.xlsx'
+        response = HttpResponse(
+            output,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
-    def _fill_tasks_answers(self, queryset):
-        tasks = []
-        for task in queryset:
-            try:
-                task.survey_result = json.loads(task.survey_result)
-                tasks.append(task)
-            except ValueError:
-                return
-        return tasks
+    def _export_answers(self, request):
+        task_ids = self.get_queryset().filter(survey_result__isnull=False).values_list('id', flat=True)
+        answers = TaskSurveyAnswer.objects.filter(task_id__in=task_ids).select_related('task')
+        columns = self._get_answers_columns(answers)
+        all_columns = [
+            'N° da OS',
+            'N° da OS no sistema de origem',
+            'Tipo de Serviço',
+            'Usuário',
+        ] + columns
+        xlsx = XLSXWriter("respostas_dos_formularios.xlsx", all_columns)
 
-    def _export_answers_write_task(self, writer, task, columns):
-        base_fields = [task.id, task.legacy_code]
+        for answer in answers:
+            self._export_answers_write_task(xlsx, answer, columns)
+
+        xlsx.close()
+        return xlsx.get_http_response()
+
+    def _export_answers_write_task(self, xlsx, answer, columns):
+        task = answer.task
+        base_fields = [task.task_number, task.legacy_code, str(task.type_task), answer.create_user.username]
         answers = ['' for x in range(len(columns))]
-        for question, answer in task.survey_result.items():
-            question_index = columns.index(question)
-            answers[question_index] = answer
+        survey_result = answer.survey_result
+        if isinstance(survey_result, str):
+            survey_result = json.loads(answer.survey_result)
+        if getattr(survey_result, 'items', None):
+            for question, value in survey_result.items():
+                question_index = columns.index(question)
+                # Check if is a datetime value
+                try:
+                    if len(value) == 24:
+                        time = datetime.strptime(value.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+                        value = time.strftime("%d/%m/%Y %H:%M")
+                except (TypeError, ValueError):
+                    # Not a datetime value
+                    pass
+                answers[question_index] = value
 
-        writer.writerow(base_fields + answers)
+        xlsx.write_row(base_fields + answers)
 
-    def _get_answers_columns(self, tasks):
+    def _get_answers_columns(self, answers):
         columns = []
         i = 0
-        for task in tasks:
-            for question, answer in task.survey_result.items():
-                if question not in columns:
-                    columns.append(question)
+        for answer in answers:
+            if getattr(answer.survey_result, 'items', None):
+                for question, answer in answer.survey_result.items():
+                    if question not in columns:
+                        columns.append(question)
         columns.sort()
         return columns
 
@@ -2106,4 +2137,3 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'error': e})
-
