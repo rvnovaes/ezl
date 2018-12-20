@@ -139,7 +139,7 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         office = get_office_session(self.request)
         context['default_customer'] = None
         context['lawsuit_form'] = LawSuitForm()
-        if office.customsettings and office.customsettings.default_customer:
+        if hasattr(office, 'customsettings') and office.customsettings.default_customer:
             context['default_customer'] = {'id': office.customsettings.default_customer.id,
                                            'text': office.customsettings.default_customer.legal_name}
         return context
