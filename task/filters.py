@@ -205,8 +205,6 @@ class BatchChangTaskFilter(TaskFilter):
             map(lambda x: (TaskStatus(x).name, x), status_to_filter))
 
 
-
-
 class TaskReportFilterBase(FilterSet):
     finished_in = MDDateTimeRangeFilter(name='finished_in')
 
@@ -248,6 +246,7 @@ class TaskToReceiveFilter(TaskReportFilterBase):
         ))
     group_by_tasks = ChoiceFilter(
         empty_label=None, choices=GROUP_BY_TASK_TO_RECEIVE_TYPE)
+    parent_finished_in = MDDateTimeRangeFilter(name='parent_finished_in')
 
 
 class TypeTaskMainFilter(filters.FilterSet):
