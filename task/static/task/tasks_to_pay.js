@@ -120,8 +120,8 @@ class ReportToPay {
 	async search() {
 		const response = await this.getData().then((data)=>{
 			 return this.data = data
-		})			
-		return response		
+		});
+		return response;
 	}
 
 	async getData() {
@@ -139,13 +139,13 @@ class ReportToPay {
 			title: 'Exportando para o Excel',
 	        html: '<h3>Aguarde...</h3>',
 			onOpen: ()=>{
-				swal.showLoading()
+				swal.showLoading();
 			}
-		})
+		});
 		let request = new XMLHttpRequest();
-		let fileName = 'os-a-pagar.xlsx'
-		let params = $.param(this.query)
-		let url = `/relatorios/os-a-pagar-xlsx?${params}` 
+		let fileName = 'os-a-pagar.xlsx';
+		let params = $.param(this.query);
+		let url = `/relatorios/os-a-pagar-xlsx?${params}`;
 		request.open('GET', url, true);
 		request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 		request.responseType = 'blob';
@@ -165,7 +165,7 @@ class ReportToPay {
 		            document.body.removeChild(downloadLink);
 		           }
 		       }
-		       swal.close()
+		       swal.close();
 		   };
 		   request.send();				
 	}
