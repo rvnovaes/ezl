@@ -1,11 +1,31 @@
 class ServicePriceTable {
-    constructor(){
+    constructor(officeSessionId, policyPricesCategories){
+        this.officeSessionId = officeSessionId;
+        this.policyPricesCategories = policyPricesCategories;
         this.elOfficeNetwork = $('#id_office_network');
         this.elOfficeCorrespondent = $('#id_office_correspondent');
         this.elOffice = $('#id_office');
+        this.elPolicyPrice = $('select[name=policy_price]');
         this.onChangeOfficeNetwork();
         this.onChangeOfficeCorrespondent();
         this.onSaveSubmit();
+        this.onChangePolicyPrice();
+    }
+
+    static showSwal(type, title, text){
+        swal({
+            type: type,
+            title: title,
+            text: text
+        });
+    }
+
+    static enableRequired(element){
+        element.parent().addClass('ezl-required');
+    }
+
+    static disableRequired(element){
+        element.parent().removeClass('ezl-required');
     }
 
     static enableElement(element){
@@ -21,13 +41,13 @@ class ServicePriceTable {
             this.officeCorrespondent = '';
         }
         ServicePriceTable.disableElement(this.elOfficeCorrespondent);
-        this.elOfficeCorrespondent.parent().removeClass('ezl-required');
+        ServicePriceTable.disableRequired(this.elOfficeCorrespondent);
     }
 
     disableOfficeNetwork(){
         this.officeNetwork = '';
         ServicePriceTable.disableElement(this.elOfficeNetwork);
-        this.elOfficeNetwork.parent().removeClass('ezl-required');
+        ServicePriceTable.disableRequired(this.elOfficeNetwork);
     }
 
     get officeNetwork(){
@@ -50,13 +70,21 @@ class ServicePriceTable {
         return this.elOffice.val();
     }
 
+    get policyPrice(){
+        return this.elPolicyPrice.val();
+    }
+
+    get pricePolicyCategory(){
+        return (this.policyPrice) ? this.policyPricesCategories[this.policyPrice] : null;
+    }
+
     onChangeOfficeNetwork(){
 	    this.elOfficeNetwork.on('change',()=>{
             if (this.officeNetwork) {
                 this.disableOfficeCorrespondent();
             } else {
                 ServicePriceTable.enableElement(this.elOfficeCorrespondent);
-                this.elOfficeCorrespondent.parent().addClass('ezl-required');
+                ServicePriceTable.enableRequired(this.elOfficeCorrespondent);
             }
         });
     }
@@ -67,8 +95,9 @@ class ServicePriceTable {
                 this.disableOfficeNetwork();
             } else {
                 ServicePriceTable.enableElement(this.elOfficeNetwork);
-                this.elOfficeNetwork.parent().addClass('ezl-required');
+                ServicePriceTable.enableRequired(this.elOfficeNetwork);
             }
+            this.validatePolicyPrice(true);
         });
     }
 
@@ -76,10 +105,38 @@ class ServicePriceTable {
         $('[type=submit]').on('click', (el)=> {
             if (!(this.officeCorrespondent || this.officeNetwork)){
                 el.preventDefault();
-                showToast('error', 'Atenção', 'Favor selecionar um Escritório Correspondente ou uma Rede de escritórios', 0, false);
+                ServicePriceTable.showSwal('error', 'Atenção!', 'Favor selecionar um Escritório Correspondente ou uma Rede de escritórios');
             }
             ServicePriceTable.enableElement(this.elOfficeNetwork);
             ServicePriceTable.enableElement(this.elOfficeCorrespondent);
+        });
+    }
+
+    validatePolicyPrice(showAlert) {
+        let officeCorrespondentId = this.elOfficeCorrespondent.val();
+        let pricePolicyCategory = this.pricePolicyCategory;
+        if (pricePolicyCategory === 'PUBLIC' && officeCorrespondentId !== this.officeSessionId) {
+            this.elOfficeCorrespondent.val(this.officeSessionId);
+            if (showAlert) {
+                ServicePriceTable.showSwal('error', 'Atenção!', 'Para tipo de preço público o escritório correspondente deve ser o mesmo em que está logado.');
+            }
+        }
+        if (pricePolicyCategory === 'NETWORK'){
+            this.disableOfficeCorrespondent();
+            ServicePriceTable.enableElement(this.elOfficeNetwork);
+            ServicePriceTable.enableRequired(this.elOfficeNetwork);
+            if (!this.officeNetwork && showAlert){
+                ServicePriceTable.showSwal('error', 'Atenção!', 'Para tipo de preço rede é obrigatório o preenchimento da rede de escritórios.');
+            }
+        } else{
+            ServicePriceTable.enableElement(this.elOfficeCorrespondent);
+            ServicePriceTable.enableRequired(this.elOfficeCorrespondent);
+        }
+    }
+
+    onChangePolicyPrice() {
+        this.elPolicyPrice.on('change', (event)=>{
+            this.validatePolicyPrice(true);
         });
     }
 }
