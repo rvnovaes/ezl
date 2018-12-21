@@ -448,55 +448,16 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         return queryset.order_by('child__office__name')
 
     def filter_queryset(self, queryset):
-        if not self.task_filter.form.is_valid():
-            messages.add_message(self.request, messages.ERROR,
-                                 'Formulário inválido.')
-        else:
-            data = self.task_filter.form.cleaned_data
-            query = Q()
-            finished_query = Q()
-
-            if data['status']:
-                key = "{}__isnull".format(self.datetime_field)
-                query.add(Q(**{key: data['status'] != 'true'}), Q.AND)
-
-            if data['client']:
-                query.add(
-                    Q(movement__law_suit__folder__person_customer__legal_name__unaccent__icontains
-                      =data['client']), Q.AND)
-
-            if data['office']:
-                if isinstance(self, ToReceiveTaskReportView):
-                    query.add(
-                        Q(parent__office__name__unaccent__icontains=data[
-                            'office']), Q.AND)
-                else:
-                    query.add(
-                        Q(office__name__unaccent__icontains=data['office']),
-                        Q.AND)
-
-            if data['finished_in']:
-                if data['finished_in'].start:
-                    finished_query.add(
-                        Q(finished_date__gte=data['finished_in'].start.replace(
-                            hour=0, minute=0)), Q.AND)
-                if data['finished_in'].stop:
-                    finished_query.add(
-                        Q(finished_date__lte=data['finished_in'].stop.replace(
-                            hour=23, minute=59)), Q.AND)
-
-            if 'refunds_correspondent_service' in data and data['refunds_correspondent_service']:
-                refunds = (data['refunds_correspondent_service'] == 'True')
-                query.add(
-                    Q(movement__law_suit__folder__person_customer__refunds_correspondent_service=refunds),
-                    Q.AND)
+        if self._validate_form():
+            query, finished_query = self._base_filter_queryset()
 
             if query or finished_query:
                 query.add(Q(finished_query), Q.AND)
                 queryset = queryset.filter(query)
             else:
                 queryset = Task.objects.none()
-
+        else:
+            queryset = Task.objects.none()
         return queryset
 
     def get_os_grouped_by_office(self):
@@ -574,6 +535,54 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
     def _get_related_client(self, task):
         return task.client
 
+    def _validate_form(self):
+        if not self.task_filter.form.is_valid():
+            messages.add_message(self.request, messages.ERROR,
+                                 'Formulário inválido.')
+            return False
+        return True
+
+    def _base_filter_queryset(self):
+        data = self.task_filter.form.cleaned_data
+        query = Q()
+        finished_query = Q()
+
+        if data['status']:
+            key = "{}__isnull".format(self.datetime_field)
+            query.add(Q(**{key: data['status'] != 'true'}), Q.AND)
+
+        if data['client']:
+            query.add(
+                Q(movement__law_suit__folder__person_customer__legal_name__unaccent__icontains
+                  =data['client']), Q.AND)
+
+        if data['office']:
+            if isinstance(self, ToReceiveTaskReportView):
+                query.add(
+                    Q(parent__office__name__unaccent__icontains=data[
+                        'office']), Q.AND)
+            else:
+                query.add(
+                    Q(office__name__unaccent__icontains=data['office']),
+                    Q.AND)
+
+        if data['finished_in']:
+            if data['finished_in'].start:
+                finished_query.add(
+                    Q(finished_date__gte=data['finished_in'].start.replace(
+                        hour=0, minute=0)), Q.AND)
+            if data['finished_in'].stop:
+                finished_query.add(
+                    Q(finished_date__lte=data['finished_in'].stop.replace(
+                        hour=23, minute=59)), Q.AND)
+
+        if 'refunds_correspondent_service' in data and data['refunds_correspondent_service']:
+            refunds = (data['refunds_correspondent_service'] == 'True')
+            query.add(
+                Q(movement__law_suit__folder__person_customer__refunds_correspondent_service=refunds),
+                Q.AND)
+        return query, finished_query
+
 
 class ToReceiveTaskReportView(TaskReportBase):
     template_name = 'task/reports/to_receive.html'
@@ -587,10 +596,34 @@ class ToReceiveTaskReportView(TaskReportBase):
             task_status=TaskStatus.FINISHED,
             parent__isnull=False)
         queryset = self.filter_queryset(queryset)
-        return queryset.order_by('parent__office__name')
+        return queryset.order_by('parent__office__legal_name')
 
     def _get_related_office(self, task):
         return task.parent.office
+
+    def filter_queryset(self, queryset):
+        if self._validate_form():
+            query, finished_query = self._base_filter_queryset()
+            data = self.task_filter.form.cleaned_data
+            parent_finished_query = Q()
+            if data['parent_finished_in']:
+                if data['parent_finished_in'].start:
+                    parent_finished_query.add(
+                        Q(parent__finished_date__gte=data['parent_finished_in'].start.replace(
+                            hour=0, minute=0)), Q.AND)
+                if data['parent_finished_in'].stop:
+                    parent_finished_query.add(
+                        Q(parent__finished_date__lte=data['parent_finished_in'].stop.replace(
+                            hour=23, minute=59)), Q.AND)
+
+            if query or finished_query or parent_finished_query:
+                query.add(Q(finished_query), Q.AND).add(Q(parent_finished_query), Q.AND)
+                queryset = queryset.filter(query)
+            else:
+                queryset = Task.objects.none()
+        else:
+            queryset = Task.objects.none()
+        return queryset
 
     def post(self, request):
         office = get_office_session(self.request)
