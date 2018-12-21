@@ -3,7 +3,7 @@ from django.contrib.admin import SimpleListFilter
 from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate
 #Todo: Remover office
 from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings, Company, CompanyUser, City, \
-    State, Country, OfficeNetwork, OfficeOffices
+    State, Country, AreaOfExpertise, OfficeNetwork, OfficeOffices
 from task.models import TaskWorkflow, TaskShowStatus
 
 
@@ -152,6 +152,11 @@ class CityAdmin(admin.ModelAdmin):
 @admin.register(State)
 class StateAdmin(admin.ModelAdmin):
     search_fields = ['name']
+
+
+@admin.register(AreaOfExpertise)
+class AreaOfExpertiseAdmin(admin.ModelAdmin):
+    search_fields = ['area']
 
 
 @admin.register(OfficeNetwork)
