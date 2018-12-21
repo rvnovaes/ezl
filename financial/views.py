@@ -152,6 +152,13 @@ class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
         kw['request'] = self.request
         return kw
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['policy_prices_categories'] = json.dumps({policy_price.id: policy_price.category for
+                                                          policy_price in
+                                                          context['form'].fields['policy_price'].queryset})
+        return context
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         form = self.get_form()
