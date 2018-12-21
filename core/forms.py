@@ -19,9 +19,9 @@ from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism, ContactMechanismType, AddressType, \
     LegalType, Office, Invite, InviteOffice, Team, CustomSettings
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
-from core.widgets import TypeaHeadForeignKeyWidget
+from core.widgets import TypeaHeadForeignKeyWidget, MDSelect
 from core.models import OfficeMixin, ImportXlsFile
-from django_file_form.forms import MultipleUploadedFileField, FileFormMixin
+from django_file_form.forms import MultipleUploadedFileField, FileFormMixin, UploadedFileField
 from core.utils import validate_xlsx_header
 from django.core.exceptions import ValidationError
 
@@ -171,14 +171,10 @@ class ContactMechanismForm(BaseModelForm):
 
 
 class AddressForm(BaseModelForm):
-    city = forms.CharField(
-        label="Cidade",
-        required=True,
-        widget=TypeaHeadForeignKeyWidget(
-            model=City,
-            field_related='name',
-            name='city',
-            url='/city/autocomplete/'))
+    city = forms.ModelChoiceField(label='Cidade',
+                                  required=False,
+                                  widget=MDSelect(url='/city/autocomplete_select2/', ),
+                                  queryset=City.objects.all())
     address_type = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(AddressType.objects.all()),
         empty_label='',
@@ -554,6 +550,18 @@ class OfficeForm(BaseModelForm):
                     self.error_class(exc.messages)
                 del cleaned_data['cpf_cnpj']
         return cleaned_data
+
+
+class OfficeProfileForm(OfficeForm):
+
+    logo = UploadedFileField()
+
+    class Meta:
+        model = Office
+        fields = [
+            'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'use_service',
+            'use_etl', 'is_active', 'logo'
+        ]    
 
 
 class InviteForm(forms.ModelForm):

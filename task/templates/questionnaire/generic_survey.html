@@ -72,7 +72,7 @@
         Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-sm btn-raised btn-primary";
 
         survey.onComplete.add(function (result) {
-            var surveyResponse = JSON.stringify(getSurveyResult(result));
+            var surveyResponse = JSON.stringify(result);
             var surveyResult = document.getElementsByName('survey_result').item(0);
             surveyResult.value = surveyResponse;
             document.getElementById('id_survey_result').innerHTML = surveyResponse;
