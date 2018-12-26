@@ -2170,3 +2170,12 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'error': e})
+
+class TaskUpdateAmountView(CustomLoginRequiredView, View):
+    def post(self, request, *args, **kwargs):
+        task = Task.objects.get(pk=request.POST.get('task_id'))
+        child_task = task.get_child
+        child_task.amount = task.amount = request.POST.get('amount')
+        task.save()
+        child_task.save()
+        return JsonResponse({'message': 'Registro atualizado com sucesso'})
