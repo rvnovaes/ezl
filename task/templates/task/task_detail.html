@@ -120,8 +120,7 @@
 
 {% block extra_scripts %}
     <!-- UPLOADS SCRIPTS  -->
-    {% include 'task/includes/upload.html' %}
-    <script src="{% static 'billing/js/gerencianet/lightbox-dev.js' %}"></script>
+    {% include 'task/includes/upload.html' %}    
     <script src="{% static 'billing/js/billing.js' %}"></script>
     <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
     <script src="{% static 'libs/bootstrap-rating/bootstrap-rating.min.js' %}"></script>
@@ -144,10 +143,8 @@
     var taskDetail;
     var ligthbox;
     $(document).ready(function(){
-        $gn.ready(function(obj){ 
-            let billing = new Billing(obj)
-            taskDetail = new TaskDetail('{{object.pk}}', '{{custom_settings.i_work_alone}}', '{{ pending_survey|lower }}', '{{survey_company_representative|safe}}', '{{csrf_token}}', billing);
-        });        
+        let billing = new Billing()
+        taskDetail = new TaskDetail('{{object.pk}}', '{{custom_settings.i_work_alone}}', '{{ pending_survey|lower }}', '{{survey_company_representative|safe}}', '{{csrf_token}}', billing);
     })
     </script>
 {% endblock %}

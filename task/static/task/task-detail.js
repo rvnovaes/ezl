@@ -60,12 +60,11 @@ class TaskDetail {
     }
 
     setBillingItem() {
-        this.billing.items = [
+        this.billing.item =
           {
             name: this.officeToDelegateName, 
             value: parseInt(this.officeToDelegate.data('value').replace('.', '').replace(', ', ''))
-          },
-        ];         
+          };         
     }
 
     setExecutionDateRequire(status) {
@@ -221,6 +220,7 @@ class TaskDetail {
                 .attr('value', 'OPEN')
                 .appendTo('#task_detail');
                 this.hideModalAction();
+                this.billing.createCharge(this.csrfToken)
             // $('#task_detail').unbind('submit').submit();
             // this.toogleModals('#confirmAction', '#processing');
         }        
