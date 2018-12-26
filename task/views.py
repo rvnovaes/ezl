@@ -620,7 +620,8 @@ class ToPayTaskReportView(View):
         else:
             order = 'client_name, office_name, finished_date'
         if tasks:
-            data = json.dumps(get_tasks_to_pay(task_ids=list(tasks.values_list('pk', flat=True)), order=order), cls=DjangoJSONEncoder)
+            data = json.dumps(get_tasks_to_pay(task_ids=list(tasks.values_list('pk', flat=True)), order=order),
+                              cls=DjangoJSONEncoder)
         return JsonResponse(data, safe=False)
 
     def filter_queryset(self, queryset):
@@ -706,6 +707,7 @@ class ToPayTaskReportView(View):
         messages.add_message(self.request, messages.INFO,
                              "OS's faturadas com sucesso.")
         return JsonResponse({"status": "ok"})
+
 
 class ToPayTaskReportXlsxView(ToPayTaskReportView):
     def get(self, request, *args, **kwargs):

@@ -1,6 +1,7 @@
 import xlsxwriter
 import io
 
+
 class BaseFormatCell(object):
     def __init__(self, workbook):
         self.cell_format = workbook.add_format()
@@ -20,15 +21,18 @@ class DateTimeFormatCell(BaseFormatCell):
         super().__init__(workbook)
         self.cell_format.num_format = 'dd/mm/yy hh:mm'        
 
+
 class MoneyFormatCell(BaseFormatCell):
     def __init__(self, workbook):
         super().__init__(workbook)
         self.cell_format.num_format = 'R$#.#0'
 
+
 def format_boolean(value):
     if value:
         return 'SIM'
     return 'NÃO'
+
 
 class TaskToPayXlsx(object):
     def __init__(self, data):
@@ -39,7 +43,8 @@ class TaskToPayXlsx(object):
                     {'label': 'Finalização', 'size': 15}, 
                     {'label': 'Serviço', 'size': 50}, 
                     {'label': 'Processo', 'size': 30}, 
-                    {'label': 'Comarca', 'size': 20}, 
+                    {'label': 'Setor de Custos', 'size': 30},
+                    {'label': 'Comarca', 'size': 20},
                     {'label': 'Cliente', 'size': 45}, 
                     {'label': 'Reembolsa valor', 'size': 20}, 
                     {'label': 'Parte adversa', 'size': 50}, 
@@ -66,13 +71,14 @@ class TaskToPayXlsx(object):
             worksheet.write_datetime(row_num, 2, item.get('finished_date'), datetime_cell_format.cell_format)
             worksheet.write(row_num, 3, item.get('type_task'), base_cell_format.cell_format)
             worksheet.write(row_num, 4, item.get('lawsuit_number'), base_cell_format.cell_format)
-            worksheet.write(row_num, 5, item.get('court_district'), base_cell_format.cell_format)
-            worksheet.write(row_num, 6, item.get('client_name'), base_cell_format.cell_format)
-            worksheet.write(row_num, 7, format_boolean(item.get('client_refunds')), base_cell_format.cell_format)
-            worksheet.write(row_num, 8, item.get('opposing_party'), base_cell_format.cell_format)
-            worksheet.write(row_num, 9, item.get('legacy_code', item.get('parent_task_number')), base_cell_format.cell_format)
-            worksheet.write(row_num, 10, format_boolean(item.get('billing_date')), base_cell_format.cell_format)
-            worksheet.write(row_num, 11, item.get('amount'), money_format.cell_format)
+            worksheet.write(row_num, 5, item.get('cost_center'), base_cell_format.cell_format)
+            worksheet.write(row_num, 6, item.get('court_district'), base_cell_format.cell_format)
+            worksheet.write(row_num, 7, item.get('client_name'), base_cell_format.cell_format)
+            worksheet.write(row_num, 8, format_boolean(item.get('client_refunds')), base_cell_format.cell_format)
+            worksheet.write(row_num, 9, item.get('opposing_party'), base_cell_format.cell_format)
+            worksheet.write(row_num, 10, item.get('legacy_code', item.get('parent_task_number')), base_cell_format.cell_format)
+            worksheet.write(row_num, 11, format_boolean(item.get('billing_date')), base_cell_format.cell_format)
+            worksheet.write(row_num, 12, item.get('amount'), money_format.cell_format)
         workbook.close()
         output.seek(0)        
         return output                

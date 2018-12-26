@@ -72,9 +72,9 @@ class ReportToPay {
                 }
             } else {
                 if ($(this).is(':checked')) {
-                    self.tasksToPay.push($(this).val())    
+                    self.tasksToPay.push($(this).val());
                 } else {
-                    self.tasksToPay.splice(self.tasksToPay.indexOf($(this).val(), 1))
+                    self.tasksToPay.splice(self.tasksToPay.indexOf($(this).val(), 1));
                 }                            
             }
         })		
@@ -98,7 +98,7 @@ class ReportToPay {
 	                this.billingTasks();
 	            });                        			
             }
-		})
+		});
 	}
 
 	billingTasks(){
@@ -120,8 +120,8 @@ class ReportToPay {
 	async search() {
 		const response = await this.getData().then((data)=>{
 			 return this.data = data
-		})			
-		return response		
+		});
+		return response;
 	}
 
 	async getData() {
@@ -139,13 +139,13 @@ class ReportToPay {
 			title: 'Exportando para o Excel',
 	        html: '<h3>Aguarde...</h3>',
 			onOpen: ()=>{
-				swal.showLoading()
+				swal.showLoading();
 			}
-		})
+		});
 		let request = new XMLHttpRequest();
-		let fileName = 'os-a-pagar.xlsx'
-		let params = $.param(this.query)
-		let url = `/relatorios/os-a-pagar-xlsx?${params}` 
+		let fileName = 'os-a-pagar.xlsx';
+		let params = $.param(this.query);
+		let url = `/relatorios/os-a-pagar-xlsx?${params}`;
 		request.open('GET', url, true);
 		request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 		request.responseType = 'blob';
@@ -201,6 +201,7 @@ class ReportToPay {
 	                <td>${this.formatLocalDateTime(task.finished_date)}</td>
 	                <td>${task.type_task}</td>
 	                <td>${task.lawsuit_number}</td>
+	                <td>${task.cost_center}</td>
 	                <td>${task.court_district}</td>
 	                <td>${task.opposing_party}</td>
 	                <td>${this.setDefaultOfNull(task.task_legacy_code)}</td>
