@@ -3,16 +3,16 @@
    
     {% load core_filters %}    
     <div class="panel panel-default">
-        <form method="get">
+        <form method="get" id="form-filter">
             <div class="panel-heading ">
                 <a href="#" data-perform="panel-collapse"><i class="ti-filter"></i> Filtrar providências</a>
                 <div class="panel-action">
                     <label for="{{ filter.form.custom_filter.id_for_label }}">{{ filter.form.custom_filter.label }}</label>
                     {{ filter.form.custom_filter }}
-                    <a href="#" data-perform="panel-collapse">{% if not request.GET.csrfmiddlewaretoken %}<i class="ti-minus">{% else %}<i class="ti-plus">{% endif %}</i></a>
+                    <a href="#" data-perform="panel-collapse">{% if not request.GET.csrfmiddlewaretoken and not person_company_representative %}<i class="ti-minus">{% else %}<i class="ti-plus">{% endif %}</i></a>
                 </div>
             </div>
-            <div id="filter_content" class="panel-wrapper collapse {% if not request.GET.csrfmiddlewaretoken %}in{% endif %}" aria-expanded="true">
+            <div id="filter_content" class="panel-wrapper collapse {% if not request.GET.csrfmiddlewaretoken  and not person_company_representative %}in{% endif %}" aria-expanded="true">
                 {% csrf_token %}
                 <div class="panel-body">
                     <fieldset>

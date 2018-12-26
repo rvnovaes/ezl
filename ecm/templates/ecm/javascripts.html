@@ -64,7 +64,7 @@
             confirmButtonColor: "#DD6B55",
             confirmButtonText: "Sim, excluir o arquivo.",
             cancelButtonText: "Cancelar",
-        }.then(function(result){
+        }).then(function(result){
             if (result.value) {
                 $('#deleting').modal('show');
                 $.ajax({
@@ -84,7 +84,7 @@
                     }
                 })                
             }
-        });
+        }));
     }
 
     $(function () {

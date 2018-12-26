@@ -104,7 +104,15 @@
             <td>
                 {{ form.instance.movement.law_suit.folder.cost_center|default:"---" }}
             </td>
-        </tr>
+        </tr>        
+        {%if request|has_group:"Supervisor" or request|has_group:"Administrador" or request.user.is_superuser%} 
+            <tr>
+                <th>Valor</th>
+                <td>
+                    {{ form.instance.amount}} {% if not form.instance.parent %} <button class="btn btn-link" type="button" id="task-edit-amount"><i class="fa fa-edit"> </i> Editar</button> {% endif %}
+                </td>
+            </tr>
+        {% endif %}
         <tr>
             <th>Registro de atendimento</th>
             <td id="CheckinPosition">
@@ -159,6 +167,60 @@
                             }
                         </script>
                         <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAgCSmxoG93hw-yel6ZhAzX9F5cdn5evGw&callback=initMap"> </script>
+                        <script type="text/javascript">
+                            $(document).ready(function() {
+                                async function showModalEditValue (){
+                                    const {value: value} = await swal({
+                                      title: 'Informe o valor da ordem de serviço',
+                                      input: 'text',
+                                      width: '30%', 
+                                      inputValue: '{{form.instance.amount}}',
+                                      inputClass: 'form-control money',
+                                      showCancelButton: true,                                      
+                                      confirmButtonText: 'Salvar',
+                                      cancelButtonText: 'Cancelar',
+                                      reverseButtons: true,                                      
+                                      inputValidator: (value) => {
+                                        return new Promise((resolve) => {
+                                          if (!value) {
+                                            resolve('Você precisa informar um valor!');
+                                          } else {
+                                            resolve();
+                                          }
+
+                                        })
+                                      }
+                                    })
+
+                                    if (value) {
+                                        let amount = $('.money').maskMoney('unmasked')[0]
+                                        swal({
+                                            title: 'Aguarde', 
+                                            onOpen: ()=>{
+                                                swal.showLoading()
+                                            }
+                                        });
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: '/providencias/task/update/amount',
+                                            data: {task_id: '{{form.instance.pk}}', amount: amount},
+                                            success: function (response) {
+                                                location.reload();
+                                            },
+                                            beforeSend: function (xhr, settings) {
+                                                xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
+                                            },
+                                            dataType: 'json'
+                                        });                                         
+                                    }
+                                };
+
+                                $('#task-edit-amount').on('click', function(event) {                                    
+                                    showModalEditValue();
+                                    $('.money').maskMoney({'prefix': 'R$ ', 'decimal': ',', 'thousands': '.', 'allowZero': true})
+                                })
+                            })
+                        </script>
                     </div>
                 </div>                                
             </td>
