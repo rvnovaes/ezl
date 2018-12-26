@@ -7,6 +7,7 @@ class TaskDetail {
         this.surveyCompanyRepresentative=surveyCompanyRepresentative;
         this.billing = billing;
         this.expanded=false;            
+        this._elTaskTitle = $('#task-title');
         this._elExecutionDate = $("input[name=execution_date]"); 
         this._elModalAction = $('#confirmAction');
         this._elRatingContainer = $('.rating-container');
@@ -62,7 +63,7 @@ class TaskDetail {
     setBillingItem() {
         this.billing.item =
           {
-            name: this.officeToDelegateName, 
+            name: this._elTaskTitle.text() + ' para ' + this.officeToDelegateName, 
             value: parseInt(this.officeToDelegate.data('value').replace('.', '').replace(', ', ''))
           };         
     }

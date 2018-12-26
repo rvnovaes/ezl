@@ -1,15 +1,8 @@
 class Billing {
-	constructor() {
-		//this.lightbox=lightbox;
-		this.item;
-		this.payments_forms = ['credit_card'];			
-		//this.configLigthbox(this.payments_forms);		
+	constructor(checkout) {		
+		this.checkout = checkout;
+		this.item;		
 	}
-
-/*	configLigthbox(payments_forms){
-		this.lightbox.lightbox(payments_forms);
-	}*/
-
 	createCharge(csrfToken) {
 		let data = this.item
 		$.ajax({
@@ -17,7 +10,8 @@ class Billing {
 			method: 'POST', 
 			data: data, 
 			success: (response) => {
-			    window.open(response.url, '_blank');			    
+				let charge_id = response.charge_id;
+				this.checkout.openCheckout();
 			}, 
 			error: (error)=>{
 				console.log(error)
@@ -28,18 +22,4 @@ class Billing {
             dataType: 'json'			
 		})
 	}
-
-	// onClickPaymentButton() {		
-	// 	this.lightbox.jq('#actionButton').on('click', (evt) => {
-	// 	  console.log(this.items);
- //          var data = {
- //          	customer: false,
- //          	shippingAddress: false,
- //            items: this.items,            
- //            actionForm: '/billing/payment/'
- //          };
- //          this.lightbox.show(data)			;
-	// 	})
-	// }
-
 }

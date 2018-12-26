@@ -28,7 +28,5 @@ class ChargeCreateView(View):
 		charge_item.name = item.get('name')
 		charge_item.value = item.get('value')
 		charge_item.amount = 1
-		charge_item.save()
-		payment_link = gn_api.create_payment_link(charge.charge_id)
-		print(payment_link)		
-		return JsonResponse({'url': payment_link.get('data').get('payment_url')})
+		charge_item.save()	
+		return JsonResponse({'charge_id': charge.charge_id})

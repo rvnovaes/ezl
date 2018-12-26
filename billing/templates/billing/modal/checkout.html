@@ -1,0 +1,105 @@
+{% load static %}
+{% block extra_stylesheets %} 
+  <style type="text/css">  
+  /* HIDE RADIO */
+  #modal-billing-checkout [type=radio] { 
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* IMAGE STYLES */
+  #modal-billing-checkout [type=radio] + img {
+    cursor: pointer;
+  }
+
+  /* CHECKED STYLES */
+  #modal-billing-checkout [type=radio]:checked + img {
+    outline: 2px solid #f00;
+  }    
+
+  #modal-billing-checkout img {
+    -webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
+    filter: grayscale(100%);    
+  }
+  </style>
+{% endblock %}
+
+<div id="modal-billing-checkout" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+               <div class="col-md-12">
+                  <form>
+                     <div class="form-group">                       
+                       <img src="{% static "img/visa.png" %}">
+                       <label>
+                       </label>
+                        <label>
+                         <input type="radio" name="card-brand" value="MASTERCARD">
+                         <img src="{% static "img/mastercard.png" %}">
+                       </label>                       
+                        <label>
+                         <input type="radio" name="card-brand" value="ELO">
+                         <img src="{% static "img/elo.png" %}">
+                       </label>                       
+                        <label>
+                         <input type="radio" name="card-brand" value="AMEX">
+                         <img src="{% static "img/amex.png" %}">
+                       </label>
+                        <label>
+                         <input type="radio" name="card-brand" value="DINERS">
+                         <img src="{% static "img/diners.png" %}">
+                       </label>                         
+                        <label>
+                         <input type="radio" name="card-brand" value="hipercard">
+                         <img src="{% static "img/hipercard.png" %}">
+                       </label>                                            
+                     </div>
+                     <div class="form-group">
+                        <label for="input-card-number">Número do cartão</label>
+                        <div class="input-group">
+                           <div class="input-group-addon"><i class="fa fa-credit-card"></i></div>
+                           <input type="text" class="form-control" id="input-card-number" placeholder="Card Number"> 
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-xs-7 col-md-7">
+                           <div class="form-group">
+                              <label>Data de vencimento</label>
+                              <input type="text" class="form-control" name="input-card-expiration-date" placeholder="MM / YY" required="" id="input-card-expiration-date"> 
+                           </div>
+                        </div>
+                        <div class="col-xs-5 col-md-5 pull-right">
+                           <div class="form-group">
+                              <label>Código CVV</label>
+                              <input type="text" class="form-control" name="input-card-cvv-code" placeholder="CVV" required="" id="input-card-cvv-code"> 
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div class="col-xs-12">
+                           <div class="form-group">
+                              <label>Nome no cartão</label>
+                              <input type="text" class="form-control" name="input-card-name" id="input-card-name" placeholder="NOME NO CARTÃO"> 
+                           </div>
+                        </div>
+                     </div>
+                     <button class="btn btn-info" type="button" id="btn-pay">Pagar</button>
+                  </form>
+               </div>
+               <div class="clearfix"></div>                
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+{% block extra_scripts %} 
+  <script src="{% static 'billing/js/checkout.js' %}"></script>
+  <script type="text/javascript">
+    var checkout = new Checkout();  
+  </script>
+{% endblock%}

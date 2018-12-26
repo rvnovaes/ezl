@@ -57,6 +57,7 @@ from django.shortcuts import render
 import os
 from django.conf import settings
 from urllib.parse import urljoin
+from billing.gerencianet_api import api as gn_api
 
 
 import logging

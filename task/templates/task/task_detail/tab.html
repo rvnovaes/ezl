@@ -9,7 +9,7 @@
 <div class="white-box">
     <!-- Tabstyle start -->
     <div class="ezl-text-{{ form.instance.status.name|lower }} panel-title font-bolder font-20">
-        {{ form.instance.task_number|stringformat:"05d" }} - {{ form.instance.type_task }}
+        <span id="task-title">{{ form.instance.task_number|stringformat:"05d" }} - {{ form.instance.type_task }}</span>
         <span class="font-15 badge pull-right ezl-bg-{{form.instance.status.name|lower}} p-10"><i class="font-15 {{ form.instance.status.get_icon }}"></i> {{ form.instance.status }}</span>
     </div>
     <hr>
