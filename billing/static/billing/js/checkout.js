@@ -24,7 +24,7 @@ class Checkout {
 	}
 
 	get name() {
-		return this._elInputCardName.val();
+		return this._elInputName.val();
 	}
 
 	get email() {
