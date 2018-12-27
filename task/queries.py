@@ -24,21 +24,22 @@ def get_tasks_to_pay(task_ids, order):
 			lawsuit.law_suit_number as lawsuit_number,
 			court_district.name as court_district,
 			lawsuit.opposing_party, 
-			task.billing_date, 
-			task.amount,
+			parent.billing_date, 
+			parent.amount,
 			client.refunds_correspondent_service as client_refunds,
 			COALESCE(cost_center."name",  '') as cost_center
 		FROM TASK as task
 		INNER JOIN task as parent ON parent.id = task.parent_id
 		INNER JOIN core_office as office ON office.id = task.office_id
-		INNER JOIN movement ON movement.id = task.movement_id
+		INNER JOIN movement ON movement.id = parent.movement_id
 		INNER JOIN law_suit as lawsuit ON lawsuit.id = movement.law_suit_id
 		INNER JOIN court_district ON lawsuit.court_district_id = court_district.id
 		INNER JOIN folder ON folder.id = lawsuit.folder_id
 		INNER JOIN person AS client ON client.id = folder.person_customer_id
-		INNER JOIN type_task ON type_task.id = task.type_task_id
+		INNER JOIN type_task ON type_task.id = parent.type_task_id
 		LEFT JOIN cost_center ON cost_center.id = folder.cost_center_id
-		WHERE task.id IN {task_ids}
+		WHERE parent.task_status = 'Finalizada' and task.task_status = 'Finalizada'
+		AND task.id IN {task_ids}
 		ORDER BY {order}
 	""".format(task_ids=str(task_ids).replace('[', '(').replace(']', ')'), order=order)
     cursor = connection.cursor()
