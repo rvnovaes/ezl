@@ -60,6 +60,8 @@ from django.conf import settings
 from urllib.parse import urljoin
 from survey.models import SurveyPermissions
 from babel.numbers import format_currency
+from task import signals
+from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
 import logging
 logger = logging.getLogger(__name__)
 
@@ -2173,10 +2175,13 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
             return JsonResponse({'error': e})
 
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):        
         task = Task.objects.get(pk=request.POST.get('task_id'))
         current_amount = task.amount        
         task.amount = request.POST.get('amount')
+        pre_save.disconnect(signals.change_status, sender=Task)
+        pre_save.disconnect(signals.pre_save_task, sender=Task)        
+        post_save.disconnect(signals.post_save_task, sender=Task)
         task.save()
         child_task = task.get_child
         if child_task:
@@ -2186,4 +2191,7 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         TaskHistory.objects.create(create_user=request.user, task=task, notes=msg, status=task.status.value)
         if child_task:
             TaskHistory.objects.create(create_user=request.user, task=child_task, notes=msg, status=task.status.value)
+        pre_save.connect(signals.change_status, sender=Task)           
+        pre_save.connect(signals.pre_save_task, sender=Task)
+        post_save.connect(signals.post_save_task, sender=Task) 
         return JsonResponse({'message': 'Registro atualizado com sucesso'})
