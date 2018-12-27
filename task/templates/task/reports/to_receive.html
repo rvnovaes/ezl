@@ -143,7 +143,7 @@
                         {% for office in offices_report %}
                             {% ifchanged office.office_name %}
                                 <tr>
-                                    <th colspan="10">{{ office.office_name }}</th>
+                                    <th colspan="11">{{ office.office_name }}</th>
                                     <th></th>
                                     <th><center>{{office.office_total}}</center></th>
                                 </tr>
@@ -152,7 +152,7 @@
                             {% ifchanged office.client_name or office.office_name %}
                                 <tr>
                                     <th></th>
-                                    <th colspan="10">{{ office.client_name }}</th>
+                                    <th colspan="11">{{ office.client_name }}</th>
                                     <th><center>{{office.client_total}}</center></th>
                                 </tr>
                             {% endifchanged %}
@@ -183,12 +183,12 @@
                             {% endfor %}
                         {% empty %}
                             <tr>
-                                <td colspan="11">Nenhuma OS encontrada com os filtros especificados.</td>
+                                <td colspan="12">Nenhuma OS encontrada com os filtros especificados.</td>
                             </tr>
                         {% endfor %}
                         {% if total %}
                             <tr class="total-container">
-                                <th colspan="10" class="text-right" >Total Geral (R$)</th>
+                                <th colspan="11" class="text-right" >Total Geral (R$)</th>
                                 <th colspan="2" class="text-right">{{total}}</th>
                             </tr>
                         {% endif %}

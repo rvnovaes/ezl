@@ -18,11 +18,11 @@ class ReportToPay {
 	}	
 
 	showBtnDownloadXlsxFile() {
-		this.btnDownloadXlsx.show()
+		this.btnDownloadXlsx.show();
 		this.btnDownloadXlsx.on('click', ()=>{
-			this.getXlsx()
-		})
-	}	
+			this.getXlsx();
+		});
+	}
 
 	getBillingDate(billingData) {
 	    if (!billingData) {
@@ -33,7 +33,7 @@ class ReportToPay {
 
 	setDefaultOfNull(value){
 	    if (!value) {
-	        return ''
+	        return '';
 	    }
 	}
 
@@ -77,7 +77,7 @@ class ReportToPay {
                     self.tasksToPay.splice(self.tasksToPay.indexOf($(this).val(), 1));
                 }                            
             }
-        })		
+        });
 	}
 
 	startOnClickBtnBilling() {
@@ -176,9 +176,9 @@ class ReportToPay {
                 <div class="col-xs-2">                    
                     <span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>
                 </div>
-			`
+			`;
 		}
-		return ''
+		return '';
 	}
 
 	getTrTask(task) {    
@@ -207,15 +207,15 @@ class ReportToPay {
 	                <td>${this.setDefaultOfNull(task.task_legacy_code)}</td>
 	                <td>${this.getBillingDate(task.billing_date)}</td>
 	                <td class="text-center"><center>${this.formatMoney(task.amount)}</center></td>
-	            </tr>            `
+	            </tr>`;
 	}
 
 	getTrfoot() {
 	    return `
 	        <tr class="total-container">
-	            <th colspan="10" class="text-right" >Total Geral (R$)</th>
+	            <th colspan="11" class="text-right" >Total Geral (R$)</th>
 	            <th colspan="2" class="text-right">${this.formatMoney(this.totalToPay.toFixed(2))}</th>
-	        </tr>`
+	        </tr>`;
 		};   	
 
 	getBtnBilling() {
@@ -223,19 +223,19 @@ class ReportToPay {
 	        <div class="text-center" style="padding-top: 10px">
 	            <button class="btn btn-success" id="btn-faturar">Faturar</button>
 	        </div>            
-	    `
+	    `;
 	}		
 
 	addAmount(instance, key, value){
 		if (!instance[key]) {
-			instance[key] = parseFloat(value)
+			instance[key] = parseFloat(value);
 		} else {
-			instance[key] += parseFloat(value)
+			instance[key] += parseFloat(value);
 		}
 	}
 
 	formatMoney(value) {
-		return parseFloat(value).toLocaleString("pt-BR", { style: "currency" , currency:"BRL"})
+		return parseFloat(value).toLocaleString("pt-BR", { style: "currency" , currency:"BRL"});
 	}
 
 	async mountTable(data){		
@@ -305,18 +305,18 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	getTrOffice(officeId, officeName){
 	    return `
 	        <tr>
-	            <th colspan="10">${officeName}</th>
+	            <th colspan="11">${officeName}</th>
 	            <th></th>
 	            <th><center><span office-id="${officeId}">|office=${officeId}|</span></center></th>
 	        </tr>
-	    `
+	    `;
 	}
 
 	getTrClient(officeId, clientId, clientName, clientRefunds){
 	    return `
 	        <tr>
 	            <th></th>
-	            <th colspan="10">
+	            <th colspan="11">
 	                <div class="col-xs-10">
 	                    ${clientName}                            
 	                </div>
@@ -324,7 +324,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	            </th>
 	            <th><center><span client-id=${officeId}-${clientId}>|client=${officeId}-${clientId}|<span></center></th>
 	        </tr>
-	    `
+	    `;
 	}
 
 	async mountTrOffice(task) {
@@ -408,7 +408,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 	getTrClient(clientId, clientName, clientRefunds){
 	    return `
 	        <tr>
-	            <th colspan="10">
+	            <th colspan="11">
 	            	<div class="col-xs-10">
 	            		${clientName}
 	            	</div>	
@@ -424,7 +424,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 	    return `
 	        <tr>
 	            <th></th>
-	            <th colspan="10">
+	            <th colspan="11">
 	                <div class="col-xs-10">
 	                    ${officeName}                            
 	                </div>
@@ -492,7 +492,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 		    	this.mountTable(task);		    	
 		    	this.computeTotals(task);
 		    });	
-		};
+		}
 		await this.replaceTotalByClient();
 		await this.replaceTotalOfficeByClient();
 		await this.writeTable();	
