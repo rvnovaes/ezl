@@ -633,10 +633,21 @@ class ToReceiveTaskReportView(TaskReportBase):
         if not tasks_payload:
             return JsonResponse({"error": "tasks is required"}, status=400)
 
+        # Todo: Ajustar signals e dar um unico update  
         for task_id in json.loads(tasks_payload):
-            task = Task.objects.get(id=task_id, office=office)
-            setattr(task, self.datetime_field, timezone.now())
-            task.save()
+            try:
+                pre_save.disconnect(signals.change_status, sender=Task)
+                pre_save.disconnect(signals.pre_save_task, sender=Task)        
+                post_save.disconnect(signals.post_save_task, sender=Task)                
+                task = Task.objects.get(id=task_id, office=office)
+                setattr(task, self.datetime_field, timezone.now())
+                task.save()
+            except: 
+                pass
+            finally:
+                pre_save.connect(signals.change_status, sender=Task)           
+                pre_save.connect(signals.pre_save_task, sender=Task)
+                post_save.connect(signals.post_save_task, sender=Task)             
 
         messages.add_message(self.request, messages.INFO,
                              "OS's marcadas como recebidas com sucesso.")
@@ -737,9 +748,20 @@ class ToPayTaskReportView(View):
             return JsonResponse({"error": "tasks is required"}, status=400)
 
         for task_id in tasks_payload:
-            task = Task.objects.get(id=task_id, parent__office=office)
-            setattr(task, self.datetime_field, timezone.now())
-            task.save()
+            # Todo: Ajustar signals e dar um unico update
+            try:
+                pre_save.disconnect(signals.change_status, sender=Task)
+                pre_save.disconnect(signals.pre_save_task, sender=Task)        
+                post_save.disconnect(signals.post_save_task, sender=Task)                
+                task = Task.objects.get(id=task_id, parent__office=office)
+                setattr(task, self.datetime_field, timezone.now())
+                task.save()
+            except:
+                pass
+            finally:
+                pre_save.connect(signals.change_status, sender=Task)           
+                pre_save.connect(signals.pre_save_task, sender=Task)
+                post_save.connect(signals.post_save_task, sender=Task)                
 
         messages.add_message(self.request, messages.INFO,
                              "OS's faturadas com sucesso.")
