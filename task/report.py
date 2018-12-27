@@ -76,7 +76,11 @@ class TaskToPayXlsx(DefaultXlsFile):
         for row_num, item in enumerate(self.data, 1):
             worksheet.write(row_num, 0, item.get('parent_task_number'), self.base_cell_format.cell_format)
             worksheet.write(row_num, 1, item.get('office_name'), self.base_cell_format.cell_format)
-            worksheet.write_datetime(row_num, 2, item.get('finished_date'), self.datetime_cell_format.cell_format)
+            finished_date = item.get('finished_date') if item.get('finished_date') else ''
+            if finished_date:
+                worksheet.write_datetime(row_num, 2, finished_date, self.datetime_cell_format.cell_format)
+            else:
+                worksheet.write(row_num, 2, finished_date, self.datetime_cell_format.cell_format)
             worksheet.write(row_num, 3, item.get('type_task'), self.base_cell_format.cell_format)
             worksheet.write(row_num, 4, item.get('lawsuit_number'), self.base_cell_format.cell_format)
             worksheet.write(row_num, 5, item.get('cost_center'), self.base_cell_format.cell_format)
@@ -120,7 +124,11 @@ class ExportFilterTask(DefaultXlsFile):
         for row_num, item in enumerate(self.data, 1):
             worksheet.write(row_num, 0, item.get('task_status'), self.base_cell_format.cell_format)
             worksheet.write(row_num, 1, item.get('task_number'), self.base_cell_format.cell_format)
-            worksheet.write_datetime(row_num, 2, item.get('final_deadline_date'), self.datetime_cell_format.cell_format)
+            final_deadline_date = item.get('final_deadline_date') if item.get('final_deadline_date') else ''
+            if final_deadline_date:
+                worksheet.write_datetime(row_num, 2, final_deadline_date, self.datetime_cell_format.cell_format)
+            else:
+                worksheet.write(row_num, 2, final_deadline_date, self.datetime_cell_format.cell_format)
             worksheet.write(row_num, 3, item.get('type_task__name'), self.base_cell_format.cell_format)
             worksheet.write(row_num, 4, item.get('movement__law_suit__law_suit_number'),
                             self.base_cell_format.cell_format)
@@ -133,7 +141,11 @@ class ExportFilterTask(DefaultXlsFile):
                             self.base_cell_format.cell_format)
             worksheet.write(row_num, 9, item.get('movement__law_suit__court_district__state__initials'),
                             self.base_cell_format.cell_format)
-            worksheet.write_datetime(row_num, 10, item.get('requested_date'), self.datetime_cell_format.cell_format)
+            requested_date = item.get('requested_date') if item.get('requested_date') else ''
+            if requested_date:
+                worksheet.write_datetime(row_num, 10, requested_date, self.datetime_cell_format.cell_format)
+            else:
+                worksheet.write(row_num, 10, requested_date, self.datetime_cell_format.cell_format)
         self.workbook.close()
         self.output.seek(0)
         return self.output

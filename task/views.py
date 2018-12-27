@@ -723,7 +723,7 @@ class ToPayTaskReportView(View):
         .select_related('parent__type_task') \
         .filter(
             parent__office=office,
-            task_status=TaskStatus.FINISHED,
+            parent__task_status=TaskStatus.FINISHED,
             parent__isnull=False)
         queryset = self.filter_queryset(queryset)
         return queryset
