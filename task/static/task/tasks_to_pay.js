@@ -37,6 +37,7 @@ class ReportToPay {
 	    if (!value) {
 	        return '';
 	    }
+	    return value;
 	}
 
 	formatLocalDateTime(strDate) {
