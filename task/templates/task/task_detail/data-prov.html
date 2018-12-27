@@ -109,7 +109,7 @@
             <tr>
                 <th>Valor</th>
                 <td>
-                    {{ form.instance.amount}} {% if not form.instance.parent and form.instance.status.name != "FINISHED" %} <button class="btn btn-link" type="button" id="task-edit-amount"><i class="fa fa-edit"> </i> Editar</button> {% endif %}
+                    {{ form.instance.amount}} {% if not form.instance.parent and form.instance|show_edit_amount %} <button class="btn btn-link" type="button" id="task-edit-amount"><i class="fa fa-edit"> </i> Editar</button> {% endif %}
                 </td>
             </tr>
         {% endif %}
