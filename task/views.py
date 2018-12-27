@@ -649,7 +649,7 @@ class ToReceiveTaskReportView(TaskReportBase):
                 pre_save.connect(signals.pre_save_task, sender=Task)
                 post_save.connect(signals.post_save_task, sender=Task)             
 
-        messages.add_message(self.request, messages.INFO,
+        messages.add_message(self.request, messages.SUCCESS,
                              "OS's marcadas como recebidas com sucesso.")
         return JsonResponse({"status": "ok"})
 
