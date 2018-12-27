@@ -14,6 +14,14 @@ def valid_status(status):
     return False
 
 
+@register.filter
+def show_company_representative_buttons(status):
+    if status:
+        return str(TaskStatus(status)) in [str(TaskStatus.RETURN), str(TaskStatus.OPEN), str(TaskStatus.ACCEPTED),
+                                      str(TaskStatus.DONE)]
+    return False
+
+
 @register.simple_tag
 def get_refused_action(user, task, office_session_perms):
     refused_action = None
@@ -68,11 +76,16 @@ def get_checkpoint_type(geolocation, user):
 
 @register.filter
 def get_checkpoint_type_by_task(dashboard_task, user):
-    checkin_exist = Task.objects.get(pk=dashboard_task.pk).geolocation.filter(create_user=user, checkpointtype=CheckPointType.CHECKIN).exists()
-    checkout_exist = Task.objects.get(pk=dashboard_task.pk).geolocation.filter(create_user=user, checkpointtype=CheckPointType.CHECKOUT).exists()
-    if all([checkin_exist, checkout_exist]):
+    checkin_exist = Task.objects.get(pk=dashboard_task.pk).geolocation.filter(
+        create_user=user, checkpointtype=CheckPointType.CHECKIN).exists()
+    checkout_exist = Task.objects.get(pk=dashboard_task.pk).geolocation.filter(
+        create_user=user, checkpointtype=CheckPointType.CHECKOUT).exists()
+    if all([checkin_exist, checkout_exist]) or dashboard_task.task_status not in [str(TaskStatus.RETURN),
+                                                                                  str(TaskStatus.OPEN),
+                                                                                  str(TaskStatus.ACCEPTED),
+                                                                                  str(TaskStatus.DONE)]:
         return ''
-    if (checkin_exist):
+    if checkin_exist:
         return 'CHECKOUT'
     return 'CHECKIN'
 
@@ -80,3 +93,10 @@ def get_checkpoint_type_by_task(dashboard_task, user):
 @register.filter
 def show_delegation_modal(task):
     return task.status.name == 'ACCEPTED_SERVICE' or (not task.office.use_service and task.status.name == 'REQUESTED')
+
+
+@register.filter
+def show_edit_amount(task):
+    if task.status.name in ['RETURN', 'OPEN', 'ACCEPTED', 'DONE']:
+        return True
+    return False

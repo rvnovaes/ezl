@@ -55,7 +55,11 @@
                     {% include 'task/person_info.html' with person=form.instance.person_distributed_by %}
                     {% if show_company_representative_in_tab %}
                      	<h3>Preposto</h3>
-                        {% include 'task/person_info.html' with person=form.instance.person_company_representative %}
+                        {% if form.instance.person_company_representative %}
+                            {% include 'task/person_info.html' with person=form.instance.person_company_representative %}
+                        {% elif form.instance.parent and form.instance.parent.person_company_representative %}
+                            {% include 'task/person_info.html' with person=form.instance.parent.person_company_representative %}
+                        {% endif %}
                     {%endif%}
 
                 </section>

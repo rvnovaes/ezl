@@ -1,0 +1,47 @@
+{% load static %}
+{% load bootstrap3 %}   
+{% load core_filters %}    
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal-office-profile-address">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <form enctype="multipart/form-data"  method="POST" action="{% url 'office_profile_address_create' office.pk%}" autocomplete="off" id="form-address">{% csrf_token %}              
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Cadastro de endereço</h4>
+        </div>
+        <div class="modal-body">        
+          <fieldset>
+            <div class="row">              
+                {% bootstrap_field form_address.address_type form_group_class="form-group col-sm-4" %}
+                {% bootstrap_field form_address.street form_group_class="form-group col-sm-4" %}
+                {% bootstrap_field form_address.number form_group_class="form-group col-sm-4" %}
+            </div>
+            <div class="row">
+                {% bootstrap_field form_address.complement form_group_class="form-group col-sm-4" %}
+                {% bootstrap_field form_address.city_region form_group_class="form-group col-sm-4" %}
+                {% bootstrap_field form_address.city form_group_class="form-group col-sm-4" %}
+            </div>
+            <div class="row">
+                {% bootstrap_field form_address.zip_code form_group_class="form-group col-sm-6" %}
+                <div class="form-group col-sm-6">
+                    <div class="checkbox checkbox-success p-t-20">
+                        {{ form_address.is_active }}
+                        {{ form_address.is_active.label_tag }}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                {% bootstrap_field form_address.notes form_group_class="form-group col-sm-12" %}
+            </div>          
+          </fieldset>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success" id="btn-save-office">Salvar</button>
+        </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{{ form_address.media }}

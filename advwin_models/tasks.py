@@ -527,7 +527,6 @@ def export_task(self, task_id, task=None, execute=True):
         values = {
             'SubStatus': 70,
             'Status': 2,
-            'Data_Fech': timezone.localtime(task.execution_date),
             'prazo_lido': 1,
             'Prazo_Interm': 1,
             'Ag_StatusExecucao': '',
@@ -547,11 +546,9 @@ def export_task(self, task_id, task=None, execute=True):
         values = {
             'SubStatus': 90,
             'Status': 1,
-            'prazo_lido': 1,
-            'Prazo_Interm': 1,
-            'Data_correspondente': task.refused_date,
             'Ag_StatusExecucao': 'Glosado',
-            'Data_cumprimento': task.execution_date,
+            'Data_confirmacao': task.blocked_payment_date,
+            'valor_agenda': 0.0,
             'Obs': get_task_observation(task,
                                         'Diligência não cumprida - pagamento glosado por',
                                         'blocked_payment_date')
@@ -563,6 +560,8 @@ def export_task(self, task_id, task=None, execute=True):
             'prazo_lido': 1,
             'Ag_StatusExecucao': 'Em Execucao',
             'Data_confirmacao': timezone.localtime(task.finished_date),
+            'Data_Fech': timezone.localtime(task.finished_date),
+            'valor_agenda': task.amount,
             'Obs': get_task_observation(task, 'Diligência devidamente cumprida por',
                                         'finished_date')
         }

@@ -6,7 +6,7 @@
 {% load task_filters %}
 
 {% block content %}    	
-    {% include 'task/includes/task-form-filters.html'%}
+    {% include 'task/includes/task-form-filters.html' with person_company_representative=True %}
 
     {% block extra_content %}        
         {% include 'task/includes/task-table-list-company-representative.html' with title_table='Providências a responder'%}   
@@ -40,20 +40,20 @@
             <button type="button" id="btn-open-questions" class="text-white btn btn-ezl-company_representative align-middle">
                 <span class="btn-label align-middle"><i class="mdi mdi-checkbox-multiple-marked-outline"></i></span> Responder
             </button>  
-        `        
-        {% for survey in surveys_company_representative%} 
+        `;
+        {% for survey in surveys_company_representative %}
         	surveyData = `{{survey.survey.data|safe}}`;
         	surveys['{{survey.task_id}}'] = surveyData;        	
         {% endfor %}
         $(document).ready(function(){
         	$('tbody tr').each(function(){
-                if ($(this).attr('tr-data-id')) {
+                if ($(this).attr('tr-data-id') && surveys[$(this).attr('tr-data-id')]) {
         		  $(this).append(`<td>${buttonEl}</td>`)
                 }
         	}).promise().done(function() { 
     			$('.btn-ezl-company_representative').each(function(el){
                     $(this).on('click', function(event) {
-                        event.stopPropagation()
+                        event.stopPropagation();
                         taskId = $(this).parent().parent().attr('tr-data-id');
                         selectedSurvey = surveys[taskId];
                         if (selectedSurvey.length < 1) {
