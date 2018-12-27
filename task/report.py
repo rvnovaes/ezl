@@ -57,7 +57,7 @@ class TaskToPayXlsx(DefaultXlsFile):
                     {'label': 'Finalização', 'size': 15}, 
                     {'label': 'Serviço', 'size': 50}, 
                     {'label': 'Processo', 'size': 30}, 
-                    {'label': 'Setor de Custo', 'size': 30},
+                    {'label': 'Setor de custo', 'size': 30},
                     {'label': 'Comarca', 'size': 20},
                     {'label': 'Cliente', 'size': 45}, 
                     {'label': 'Reembolsa valor', 'size': 20}, 
