@@ -753,7 +753,7 @@ class ToPayTaskReportView(View):
                 pre_save.disconnect(signals.change_status, sender=Task)
                 pre_save.disconnect(signals.pre_save_task, sender=Task)        
                 post_save.disconnect(signals.post_save_task, sender=Task)                
-                task = Task.objects.get(id=task_id, parent__office=office)
+                task = Task.objects.get(id=task_id, office=office)
                 setattr(task, self.datetime_field, timezone.now())
                 task.save()
             except:

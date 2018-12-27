@@ -12,8 +12,8 @@ def dictfetchall(cursor):
 
 def get_tasks_to_pay(task_ids, order):
     sql = """
-		SELECT 	task.id as task_id,
-			task.legacy_code as task_legacy_code,
+		SELECT 	parent.id as task_id,
+			parent.legacy_code as task_legacy_code,
 			office.id as office_id,
 			office.legal_name as office_name,
 			client.id as client_id,
