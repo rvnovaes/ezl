@@ -59,7 +59,7 @@ import os
 from django.conf import settings
 from urllib.parse import urljoin
 from survey.models import SurveyPermissions
-
+from babel.numbers import format_currency
 import logging
 logger = logging.getLogger(__name__)
 
@@ -2175,10 +2175,15 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.POST.get('task_id'))
+        current_amount = task.amount        
         task.amount = request.POST.get('amount')
         task.save()
         child_task = task.get_child
         if child_task:
             child_task.amount = task.amount
             child_task.save()
+        msg = "Valor alterado de {} para {} pelo escritório {}".format(format_currency(current_amount, 'R$', locale='pt_BR'), format_currency(task.amount, 'R$', locale='pt_BR'), get_office_session(request).legal_name)
+        TaskHistory.objects.create(create_user=request.user, task=task, notes=msg, status=task.status.value)
+        if child_task:
+            TaskHistory.objects.create(create_user=request.user, task=child_task, notes=msg, status=task.status.value)
         return JsonResponse({'message': 'Registro atualizado com sucesso'})
