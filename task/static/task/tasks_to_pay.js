@@ -165,7 +165,7 @@ class ReportToPay {
 		            document.body.removeChild(downloadLink);
 		           }
 		       }
-		       swal.close()
+		       swal.close();
 		   };
 		   request.send();				
 	}

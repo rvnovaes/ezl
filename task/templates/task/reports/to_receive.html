@@ -44,26 +44,18 @@
                                 {% bootstrap_field filter.form.status form_group_class="" bound_css_class='' show_label=False %}
                             </div>
                             <div class="form-group col-sm-12 col-md-6">
-                                {% bootstrap_label "Finalizadas entre: " %}
-                                {% bootstrap_field filter.form.finished_in form_group_class="" bound_css_class='' show_label=False %}
-                                <script>
-                                    $(document).ready(function () {
-                                        var config = {
-                                            format: "dd/mm/yyyy",
-                                            language: "pt-br",
-                                            autoclose: true                                            
-                                        };
-                                        
-                                        $('#finished_in_0').datepicker(config);
-                                        $('#finished_in_1').datepicker(config);
-                                    });                                                                        
-                                </script>
+                                {% bootstrap_label "Finalizadas pelo contratante entre: " %}
+                                {% bootstrap_field filter.form.parent_finished_in form_group_class="" bound_css_class='' show_label=False %}
                             </div>
                         </div>
                         <div class="row">
                             <div class="form-group col-sm-12 col-md-6">
                                 {% bootstrap_label "Agrupar por: " %}
                                 {% bootstrap_field filter.form.group_by_tasks form_group_class="" bound_css_class='' show_label=False %}
+                            </div>
+                            <div class="form-group col-sm-12 col-md-6">
+                                {% bootstrap_label "Finalizadas entre: " %}
+                                {% bootstrap_field filter.form.finished_in form_group_class="" bound_css_class='' show_label=False %}
                             </div>
                         </div>
                     </fieldset>
@@ -242,6 +234,20 @@
     <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var config = {
+                format: "dd/mm/yyyy",
+                locale: "pt-BR",
+                autoclose: true
+            };
+
+            $('#finished_in_0').datepicker(config);
+            $('#finished_in_1').datepicker(config);
+            $('#parent_finished_in_0').datepicker(config);
+            $('#parent_finished_in_1').datepicker(config);
+        });
+    </script>
     <script>
     $('#os_exportable').dataTable({
         dom: 'Bfrtip',

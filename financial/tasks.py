@@ -133,8 +133,8 @@ def get_service_value(row, xls_file, office_correspondent, court_district, state
         return value
 
 
-def row_is_valid(office_correspondent, type_task, state, row_errors):
-    return all([office_correspondent, type_task, state, not row_errors])
+def row_is_valid(office_correspondent, type_task, row_errors):
+    return all([office_correspondent, type_task, not row_errors])
 
 
 def update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent,
@@ -148,7 +148,7 @@ def update_or_create_service_price_table(xls_file, office_session, user_session,
         court_district_complement=court_district_complement.pk if court_district_complement else None,
         city=city.pk if city else None,
         client=client.pk if client else None,
-        state=state.pk).first()
+        state=state.pk if state else None).first()
     if not service_price_table:                    
         service_price_table = ServicePriceTable.objects.create(
             office=office_session,
@@ -158,7 +158,7 @@ def update_or_create_service_price_table(xls_file, office_session, user_session,
             court_district_complement=court_district_complement if court_district_complement else None,
             city=city if city else None,
             client=client if client else None,
-            state=state,
+            state=state if state else None,
             value=value,
             create_user=user_session
         )
@@ -204,7 +204,7 @@ def import_xls_service_price_table(self, file_id):
                 court_district_complement = get_court_district_complement(row, xls_file, court_district)
                 city = get_city(row, xls_file, state)
                 client = get_client(row, xls_file, office_session)
-                if row_is_valid(office_correspondent, type_task, state, row[len(row) - 1]['errors']):
+                if row_is_valid(office_correspondent, type_task, row[len(row) - 1]['errors']):
                     value = get_service_value(row, xls_file, office_correspondent, court_district, state, client)
                     update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent,
                                                          type_task, court_district, court_district_complement, state,
