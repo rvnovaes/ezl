@@ -75,7 +75,7 @@ class FolderForm(BaseForm):
             url='/client_form'))
     cost_center = forms.CharField(
         required=False,
-        label="Centro de Custos",
+        label="Centro de Custo",
         widget=TypeaHeadForeignKeyWidget(
             model=CostCenter,
             field_related='name',

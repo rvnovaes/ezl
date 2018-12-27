@@ -89,7 +89,7 @@
                             <th>Processo</th>
                             <th>Comarca</th>
                             <th>Cliente</th>
-                            <th>Setor de Custo</th>
+                            <th>Centro de Custo</th>
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
                             <th>Recebida</th>
@@ -107,7 +107,7 @@
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.client }}</td>
-                                    <td>{{ task.movement.folder.cost_center }}</td>
+                                    <td>{{ task.movement.folder.cost_center|default_if_none:"" }}</td>
                                     <td>{{ task.opposing_party }}</td>
                                     {% if task.parent %}
                                         <td>{{ task.parent.task_number }}</td>
@@ -131,7 +131,7 @@
                             <th>Finalização</th>
                             <th>Serviço</th>
                             <th>Processo</th>
-                            <th>Setor de Custo</th>
+                            <th>Centro de Custo</th>
                             <th>Comarca</th>
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
@@ -169,7 +169,7 @@
                                     <td>{{ task.finished_date|date:"d/m/Y H:i" }}</td>
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
-                                    <td>{{ task.movement.folder.cost_center }}</td>
+                                    <td>{{ task.movement.folder.cost_center|default_if_none:"" }}</td>
                                     <td>{{ task.court_district }}</td>
                                     <td>{{ task.opposing_party }}</td>
                                     {% if task.parent %}
