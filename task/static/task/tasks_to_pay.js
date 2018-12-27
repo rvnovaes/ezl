@@ -13,7 +13,9 @@ class ReportToPay {
 	    this.tasksToPay = [];
 	    this.allTaskIds = [] ;  
 	    this.htmlTable = ``;
-	    this.elInputClient = $('[name=client]');	    
+	    this.elInputClient = $('[name=client]');
+	    this.elFinishedDate0 = $("#finished_in_0");
+	    this.elFinishedDate1 = $("#finished_in_1");
 
 	}	
 
@@ -53,6 +55,14 @@ class ReportToPay {
 		        data[obj.name] = obj.value;
 		    });		
 		return data;
+	}
+
+	get finishedDate0() {
+		return this.elFinishedDate0.val()
+	}
+
+	get finishedDate1() {
+		return this.elFinishedDate1.val()
 	}
 
 	startOnCheckAllItems() {
@@ -272,11 +282,23 @@ class ReportToPay {
 	        onOpen: ()=> {
 	        	swal.showLoading()
 	        }
-		})		
+		});
 		const data = await this.search();
 		await this.makeReport(data);		
 		swal.close()		
-	}	
+	}
+
+	checkFinishedDate(){
+		if (!(this.finishedDate0 || this.finishedDate1)){
+			swal({
+				 type: 'error',
+				title: "Data de finalização",
+				html: '<h3>Favor informar as datas de finalização para o filtro</h3>'
+			});
+			return false
+		}
+		return true
+	}
 
 	clear() {
 		this.elTableBody.empty();
@@ -384,7 +406,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 		    	this.mountTable(task);		    	
 		    	this.computeTotals(task);
 		    });	
-		};
+		}
 		await this.replaceTotalByOffice();
 		await this.replaceTotalClientByOffice();
 		await this.writeTable();	
@@ -480,9 +502,9 @@ class ReportToPayGroupByClient extends ReportToPay {
 	}
 
 	async computeTotals(task){
-		this.computeTotalClient(task)
-		this.computeTotalOfficeByClient(task)				
-		this.computeTotalToPay(task)
+		this.computeTotalClient(task);
+		this.computeTotalOfficeByClient(task);
+		this.computeTotalToPay(task);
 	}
 
 	async makeReport(data) {
