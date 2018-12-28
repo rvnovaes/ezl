@@ -59,7 +59,9 @@ import os
 from django.conf import settings
 from urllib.parse import urljoin
 from survey.models import SurveyPermissions
-
+from babel.numbers import format_currency
+from task import signals
+from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
 import logging
 logger = logging.getLogger(__name__)
 
@@ -631,12 +633,23 @@ class ToReceiveTaskReportView(TaskReportBase):
         if not tasks_payload:
             return JsonResponse({"error": "tasks is required"}, status=400)
 
+        # Todo: Ajustar signals e dar um unico update  
         for task_id in json.loads(tasks_payload):
-            task = Task.objects.get(id=task_id, office=office)
-            setattr(task, self.datetime_field, timezone.now())
-            task.save()
+            try:
+                pre_save.disconnect(signals.change_status, sender=Task)
+                pre_save.disconnect(signals.pre_save_task, sender=Task)        
+                post_save.disconnect(signals.post_save_task, sender=Task)                
+                task = Task.objects.get(id=task_id, office=office)
+                setattr(task, self.datetime_field, timezone.now())
+                task.save()
+            except: 
+                pass
+            finally:
+                pre_save.connect(signals.change_status, sender=Task)           
+                pre_save.connect(signals.pre_save_task, sender=Task)
+                post_save.connect(signals.post_save_task, sender=Task)             
 
-        messages.add_message(self.request, messages.INFO,
+        messages.add_message(self.request, messages.SUCCESS,
                              "OS's marcadas como recebidas com sucesso.")
         return JsonResponse({"status": "ok"})
 
@@ -655,7 +668,8 @@ class ToPayTaskReportView(View):
         else:
             order = 'client_name, office_name, finished_date'
         if tasks:
-            data = json.dumps(get_tasks_to_pay(task_ids=list(tasks.values_list('pk', flat=True)), order=order), cls=DjangoJSONEncoder)
+            data = json.dumps(get_tasks_to_pay(task_ids=list(tasks.values_list('pk', flat=True)), order=order),
+                              cls=DjangoJSONEncoder)
         return JsonResponse(data, safe=False)
 
     def filter_queryset(self, queryset):
@@ -722,7 +736,7 @@ class ToPayTaskReportView(View):
         .select_related('parent__type_task') \
         .filter(
             parent__office=office,
-            task_status=TaskStatus.FINISHED,
+            parent__task_status=TaskStatus.FINISHED,
             parent__isnull=False)
         queryset = self.filter_queryset(queryset)
         return queryset
@@ -734,11 +748,22 @@ class ToPayTaskReportView(View):
             return JsonResponse({"error": "tasks is required"}, status=400)
 
         for task_id in tasks_payload:
-            task = Task.objects.get(id=task_id, parent__office=office)
-            setattr(task, self.datetime_field, timezone.now())
-            task.save()
+            # Todo: Ajustar signals e dar um unico update
+            try:
+                pre_save.disconnect(signals.change_status, sender=Task)
+                pre_save.disconnect(signals.pre_save_task, sender=Task)        
+                post_save.disconnect(signals.post_save_task, sender=Task)                
+                task = Task.objects.get(id=task_id, office=office)
+                setattr(task, self.datetime_field, timezone.now())
+                task.save()
+            except:
+                pass
+            finally:
+                pre_save.connect(signals.change_status, sender=Task)           
+                pre_save.connect(signals.pre_save_task, sender=Task)
+                post_save.connect(signals.post_save_task, sender=Task)                
 
-        messages.add_message(self.request, messages.INFO,
+        messages.add_message(self.request, messages.SUCCESS,
                              "OS's faturadas com sucesso.")
         return JsonResponse({"status": "ok"})
 
@@ -2170,3 +2195,25 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'error': e})
+
+class TaskUpdateAmountView(CustomLoginRequiredView, View):
+    def post(self, request, *args, **kwargs):        
+        task = Task.objects.get(pk=request.POST.get('task_id'))
+        current_amount = task.amount        
+        task.amount = request.POST.get('amount')
+        pre_save.disconnect(signals.change_status, sender=Task)
+        pre_save.disconnect(signals.pre_save_task, sender=Task)        
+        post_save.disconnect(signals.post_save_task, sender=Task)
+        task.save()
+        child_task = task.get_child
+        if child_task:
+            child_task.amount = task.amount
+            child_task.save()
+        msg = "Valor alterado de {} para {} pelo escritório {}".format(format_currency(current_amount, 'R$', locale='pt_BR'), format_currency(task.amount, 'R$', locale='pt_BR'), get_office_session(request).legal_name)
+        TaskHistory.objects.create(create_user=request.user, task=task, notes=msg, status=task.status.value)
+        if child_task:
+            TaskHistory.objects.create(create_user=request.user, task=child_task, notes=msg, status=task.status.value)
+        pre_save.connect(signals.change_status, sender=Task)           
+        pre_save.connect(signals.pre_save_task, sender=Task)
+        post_save.connect(signals.post_save_task, sender=Task) 
+        return JsonResponse({'message': 'Registro atualizado com sucesso'})

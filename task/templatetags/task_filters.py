@@ -93,3 +93,10 @@ def get_checkpoint_type_by_task(dashboard_task, user):
 @register.filter
 def show_delegation_modal(task):
     return task.status.name == 'ACCEPTED_SERVICE' or (not task.office.use_service and task.status.name == 'REQUESTED')
+
+
+@register.filter
+def show_edit_amount(task):
+    if task.status.name in ['RETURN', 'OPEN', 'ACCEPTED', 'DONE']:
+        return True
+    return False
