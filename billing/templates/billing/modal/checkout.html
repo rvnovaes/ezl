@@ -2,12 +2,12 @@
 {% block extra_stylesheets %} 
   <style type="text/css">  
   /* HIDE RADIO */
-  #modal-billing-checkout [type=radio] { 
+/*  #modal-billing-checkout [type=radio] { 
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
-  }
+  }*/
 
   /* IMAGE STYLES */
   #modal-billing-checkout [type=radio] + img {
@@ -15,9 +15,9 @@
   }
 
   /* CHECKED STYLES */
-  #modal-billing-checkout [type=radio]:checked + img {
+/*  #modal-billing-checkout [type=radio]:checked + img {
     outline: 2px solid #f00;
-  }    
+  }    */
 
   #modal-billing-checkout img {
     -webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
@@ -43,7 +43,7 @@
                      <div class="col-xs-6">
                         <div class="form-group">
                            <label>E-mail</label>
-                           <input type="email" name="input-email" class="form-control">                            
+                           <input type="email" name="input-email" class="form-control" id="input-email">                            
                         </div>
                      </div>
                   </div>
@@ -57,13 +57,13 @@
                      <div class="col-xs-4">
                         <div class="form-group">
                            <label>Data de nascimento</label>
-                           <input type="date" name="input-birth" class="form-control">
+                           <input type="date" name="input-birth" class="form-control" id="input-birth">
                         </div>
                      </div>
                      <div class="col-xs-4">
                         <div class="form-group">
                            <label>Telefone</label>
-                           <input type="tel" name="input-phone-number" class="form-control">
+                           <input type="tel" name="input-phone-number" class="form-control" id="input-phone-number">
                         </div>
                      </div>
                   </div>
@@ -72,29 +72,12 @@
                   <div class="row">
                      <div class="col-xs-12">
                         <div class="form-group">                       
-                           <img src="{% static "img/visa.png" %}">
-                           <label>
-                           </label>
-                           <label>
-                           <input type="radio" name="card-brand" value="MASTERCARD">
-                           <img src="{% static "img/mastercard.png" %}">
-                           </label>                       
-                           <label>
-                           <input type="radio" name="card-brand" value="ELO">
-                           <img src="{% static "img/elo.png" %}">
-                           </label>                       
-                           <label>
-                           <input type="radio" name="card-brand" value="AMEX">
-                           <img src="{% static "img/amex.png" %}">
-                           </label>
-                           <label>
-                           <input type="radio" name="card-brand" value="DINERS">
-                           <img src="{% static "img/diners.png" %}">
-                           </label>                         
-                           <label>
-                           <input type="radio" name="card-brand" value="hipercard">
-                           <img src="{% static "img/hipercard.png" %}">
-                           </label>                                            
+                           <img src="{% static "img/visa.png" %}" class="brand" brand="VISA">
+                           <img src="{% static "img/mastercard.png" %}" class="brand" brand="MASTERCARD">
+                           <img src="{% static "img/elo.png" %}" class="brand" brand="ELO">
+                           <img src="{% static "img/amex.png" %}" class="brand" brand="AMEX">
+                           <img src="{% static "img/diners.png" %}" class="brand" brand="DINERS">
+                           <img src="{% static "img/hipercard.png" %}" class="brand" brand="HIPERCARD">
                         </div>
                      </div>
                   </div>                  
@@ -125,19 +108,19 @@
                     <div class="col col-xs-3">
                       <div class="form-group">
                           <label>CEP: </label>
-                          <input type="text" name="input-address-zipcode" class="form-control">
+                          <input type="text" name="input-address-zipcode" class="form-control" id="input-address-zipcode">
                       </div>
                     </div>
                     <div class="col col-xs-6">
                       <div class="form-group">
                           <label>Logradouro: </label>
-                          <input type="text" name="input-address-street" class="form-control">
+                          <input type="text" name="input-address-street" class="form-control" id="input-address-street">
                       </div>
                     </div>                    
                     <div class="col col-xs-3">
                       <div class="form-group">
                           <label>Número: </label>
-                          <input type="text" name="input-address-number" class="form-control">
+                          <input type="text" name="input-address-number" class="form-control" id="input-address-number">
                       </div>
                     </div>                    
                   </div>
@@ -145,25 +128,25 @@
                     <div class="col col-xs-3">
                       <div class="form-group">
                           <label>Bairro: </label>
-                          <input type="text" name="input-address-neighborhood" class="form-control">
+                          <input type="text" name="input-address-neighborhood" class="form-control" id="input-address-neighborhood">
                       </div>
                     </div>
                     <div class="col col-xs-3">
                       <div class="form-group">
                           <label>Complemento: </label>
-                          <input type="text" name="input-address-complement" class="form-control">
+                          <input type="text" name="input-address-complement" class="form-control" id="input-address-complement">
                       </div>
                     </div>                    
                     <div class="col col-xs-3">
                       <div class="form-group">
                           <label>Cidade: </label>
-                          <input type="text" name="input-address-city" class="form-control">
+                          <input type="text" name="input-address-city" class="form-control" id="input-address-city">
                       </div>
                     </div>
                     <div class="col col-xs-3">
                       <div class="form-group">
                           <label>Estado: </label>
-                          <input type="text" name="input-address-state" class="form-control">
+                          <input type="text" name="input-address-state" class="form-control" id="input-address-state">
                       </div>
                     </div>                                        
                   </div>                  
@@ -181,6 +164,6 @@
 {% block extra_scripts %} 
   <script src="{% static 'billing/js/checkout.js' %}"></script>
   <script type="text/javascript">
-    var checkout = new Checkout();  
+    var checkout = new Checkout('{{csrf_token}}');  
   </script>
 {% endblock%}

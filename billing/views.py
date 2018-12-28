@@ -1,12 +1,14 @@
+import json
 from django.shortcuts import render
 from django.views import View
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from billing.gerencianet_api import api as gn_api
 from billing.models import *
+from core.views import CustomLoginRequiredView
 # Create your views here.
 
 
-class ChargeCreateView(View):
+class ChargeCreateView(CustomLoginRequiredView, View):
 	def post(self, request, *args, **kwargs):
 		name = request.POST.get('name')
 		item = {
@@ -30,3 +32,13 @@ class ChargeCreateView(View):
 		charge_item.amount = 1
 		charge_item.save()	
 		return JsonResponse({'charge_id': charge.charge_id})
+
+class ConfirmPayment(CustomLoginRequiredView, View):
+	content_type = 'application/json'
+	def post(self, request, *args, **kwargs):
+		body = json.loads(request.body)
+		charge_id = body.get('charge_id')
+		payment_token = body.get('payment_token')		
+		data = body.get('data')
+		res = gn_api.confirm_payment(charge_id, payment_token, data)
+		return JsonResponse(res)
