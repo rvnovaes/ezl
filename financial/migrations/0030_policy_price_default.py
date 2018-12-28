@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 from django.db import migrations, models
 import logging
-logger = logging.getLogger('0028_policy_price_default')
+logger = logging.getLogger('0030_policy_price_default')
 
 
 def create_default_policy(apps, schema_editor):
@@ -53,7 +53,7 @@ def create_default_policy(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('financial', '0027_servicepricetable_policy_price'),
+        ('financial', '0029_servicepricetable_policy_price'),
     ]
 
     operations = [

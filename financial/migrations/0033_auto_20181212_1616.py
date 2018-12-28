@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('financial', '0030_service_price_table_policy_price'),
+        ('financial', '0032_service_price_table_policy_price'),
     ]
 
     operations = [

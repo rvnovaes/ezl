@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 from django.db import migrations, models
 import logging
-logger = logging.getLogger('0030_service_price_table_policy_price')
+logger = logging.getLogger('0032_service_price_table_policy_price')
 
 
 def update_service_price_table(apps, schema_editor):
@@ -22,7 +22,7 @@ def update_service_price_table(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('financial', '0029_auto_20181212_1416'),
+        ('financial', '0031_auto_20181212_1416'),
     ]
 
     operations = [
