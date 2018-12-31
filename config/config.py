@@ -16,12 +16,19 @@ if ENV is None:
 
 
 def get_parser():
-    filepath = os.path.join(BASE_DIR, 'config/{}.general.ini'.format(ENV))
+    base_config_path = os.path.join(BASE_DIR, 'config/base.ini')
+    base_config_file = open(base_config_path)
+    variable_config_path = os.path.join(BASE_DIR, 'config/{}.ini'.format(ENV))
+    variable_config_file = open(variable_config_path)
     parser = configparser.ConfigParser()
     try:
-        with open(filepath) as config_file:
-            parser.read_file(config_file)
+        parser.read_file(base_config_file)
     except FileNotFoundError:
-        logger.fatal('{} file was not found'.format(filepath))
+        logger.fatal('{} file was not found'.format(base_config_path))
+        sys.exit(1)
+    try:
+        parser.read_file(variable_config_file)
+    except FileNotFoundError:
+        logger.fatal('{} file was not found'.format(variable_config_path))
         sys.exit(1)
     return parser

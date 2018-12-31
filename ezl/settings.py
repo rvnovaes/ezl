@@ -2,14 +2,52 @@ import datetime
 import os
 import sys
 import tempfile
-import moneyed
+
+# Todas as variáveis de configuração devem ser criadas nos arquivos desta pasta
+from config.config import get_parser
 
 from django.urls import reverse_lazy
-
-from config.config import get_parser
 from decimal import ROUND_HALF_EVEN
+import moneyed
 from moneyed.localization import _FORMATTER, DEFAULT
 from celery.schedules import crontab
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+parser = get_parser()
+try:
+    source = dict(parser.items('django_application'))
+    source_etl = dict(parser.items('etl'))
+    source_redis = dict(parser.items('redis'))
+    engine = source['engine']
+    database = source['database']
+    user = source['user']
+    password = source['password']
+    host = os.environ.get('DB_HOST', source['host'])
+    port = os.environ.get('DB_PORT', source['port'])
+    environment = source['environment']
+    email_use_ssl = True if os.environ.get(
+        'EMAIL_USE_SSL', source['email_use_ssl'].lower()) == "true" else False
+    email_host = os.environ.get('EMAIL_HOST', source['email_host'])
+    email_port = os.environ.get('EMAIL_PORT', source['email_port'])
+    email_host_user = source['email_host_user']
+    email_host_password = source['email_host_password']
+    email_default_from_email = source['email_default_from_email']
+    email_default_to_email = source.get('email_default_to_email', None)
+    linux_password = source_etl['linux_password']
+    linux_user = source_etl['linux_user']
+
+    redis_host = source_redis['host']
+    redis_port = source_redis['port']
+
+
+except KeyError as e:
+    print('Invalid settings. Check the General.ini file')
+    print(e)
+    sys.exit(0)
+
+
 
 MUST_LOGIN = True
 
@@ -31,36 +69,10 @@ CELERY_BEAT_SCHEDULE = {
 CELERY_SEND_TASK_EMAILS = False
 CELERY_TASK_IGNORE_RESULT = True
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 DATETIME_FORMAT = '%d/%m/%Y %H:%M'
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-parser = get_parser()
-try:
-    source = dict(parser.items('django_application'))
-    source_etl = dict(parser.items('etl'))
-    engine = source['engine']
-    database = source['database']
-    user = source['user']
-    password = source['password']
-    host = os.environ.get('DB_HOST', source['host'])
-    port = os.environ.get('DB_PORT', source['port'])
-    environment = source['environment']
-    email_use_ssl = True if os.environ.get(
-        'EMAIL_USE_SSL', source['email_use_ssl'].lower()) == "true" else False
-    email_host = os.environ.get('EMAIL_HOST', source['email_host'])
-    email_port = os.environ.get('EMAIL_PORT', source['email_port'])
-    email_host_user = source['email_host_user']
-    email_host_password = source['email_host_password']
-    email_default_from_email = source['email_default_from_email']
-    email_default_to_email = source.get('email_default_to_email', None)
-    linux_password = source_etl['linux_password']
-    linux_user = source_etl['linux_user']
 
-except KeyError as e:
-    print('Invalid settings. Check the General.ini file')
-    print(e)
-    sys.exit(0)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -199,7 +211,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgi_redis.RedisChannelLayer",
         "CONFIG": {
-            'hosts': [("redis", 6379)],
+            'hosts': [(redis_host, int(redis_port))],
         },
         "ROUTING": "chat.routing.channel_routing"
     }
@@ -208,7 +220,7 @@ CHANNEL_LAYERS = {
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/1',
+        'LOCATION': 'redis://{redis_host}:{redis_port}/1'.format(redis_host=redis_host, redis_port=redis_port),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
