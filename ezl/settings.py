@@ -84,7 +84,7 @@ SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
 
 WORKFLOW_URL_EMAIL = os.environ.get('WORKFLOW_EMAIL', 'http://localhost:8000')
 
-if environment == 'development':
+if environment in ['debug', 'development']:
     DEBUG = True
 else:
     DEBUG = False
@@ -229,7 +229,7 @@ CACHES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
-if environment == 'development':
+if environment in ['debug', 'development']:
     AUTH_PASSWORD_VALIDATORS = [
         {
             'NAME':
