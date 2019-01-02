@@ -4,7 +4,13 @@ class Billing {
 		this.item;		
 	}
 	createCharge(csrfToken) {
-		let data = this.item
+		let data = this.item;
+		swal({
+			title: 'Aguarde', 
+			onOpen: () => {
+				swal.showLoading()
+			}
+		});		
 		$.ajax({
 			url: '/billing/charge/', 
 			method: 'POST', 
@@ -12,6 +18,7 @@ class Billing {
 			success: (response) => {
 				let charge_id = response.charge_id;
 				this.checkout.openCheckout(charge_id);
+				swal.close();
 			}, 
 			error: (error)=>{
 				console.log(error)
