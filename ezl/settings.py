@@ -15,59 +15,65 @@ from celery.schedules import crontab
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-parser = get_parser()
+config = get_parser()
 try:
-    source = dict(parser.items('django_application'))
-    source_etl = dict(parser.items('etl'))
-    source_redis = dict(parser.items('redis'))
-    engine = source['engine']
-    database = source['database']
-    user = source['user']
-    password = source['password']
-    host = os.environ.get('DB_HOST', source['host'])
-    port = os.environ.get('DB_PORT', source['port'])
-    environment = source['environment']
-    email_use_ssl = True if os.environ.get(
-        'EMAIL_USE_SSL', source['email_use_ssl'].lower()) == "true" else False
-    email_host = os.environ.get('EMAIL_HOST', source['email_host'])
-    email_port = os.environ.get('EMAIL_PORT', source['email_port'])
-    email_host_user = source['email_host_user']
-    email_host_password = source['email_host_password']
-    email_default_from_email = source['email_default_from_email']
-    email_default_to_email = source.get('email_default_to_email', None)
-    linux_password = source_etl['linux_password']
-    linux_user = source_etl['linux_user']
+    engine = config['django_application']['engine']
+    database = config['django_application']['database']
+    user = config['django_application']['user']
+    password = config['django_application']['password']
+    host = config['django_application']['host']
+    port = config['django_application']['port']
+    environment = config['django_application']['environment']
+    email_use_ssl = config['django_application'].getboolean('email_use_ssl')
+    email_host = config['django_application']['email_host']
+    email_port = config['django_application']['email_port']
+    email_host_user = config['django_application']['email_host_user']
+    email_host_password = config['django_application']['email_host_password']
+    email_default_from_email = config['django_application']['email_default_from_email']
+    email_default_to_email = config['django_application']['email_default_to_email']
 
-    redis_host = source_redis['host']
-    redis_port = source_redis['port']
+    linux_password = config['etl']['linux_password']
+    linux_user = config['etl']['linux_user']
 
+    redis_host = config['redis']['host']
+    redis_port = config['redis']['port']
+
+    celery_host = config['celery']['host']
+    celery_port = config['celery']['port']
+    celery_user = config['celery']['user']
+    celery_password = config['celery']['password']
+    celery_enable_utc = config['celery'].getboolean('enable_utc')
+    celery_timezone = config['celery']['timezone']
+    celery_task_always_eager = config['celery'].getboolean('task_always_eager')
+    celery_beat_schedule_dashboard = int(config['celery']['beat_schedule_dashboard'])
+    celery_beat_schedule_clear_sessions = int(config['celery']['beat_schedule_clear_sessions'])
+    celery_send_task_emails = config['celery'].getboolean('send_task_emails')
+    celery_task_ignore_result = config['celery'].getboolean('task_ignore_result')
 
 except KeyError as e:
-    print('Invalid settings. Check the General.ini file')
+    print('Invalid settings. Check ini files on ezl/config')
     print(e)
     sys.exit(0)
 
-
-
 MUST_LOGIN = True
 
-CELERY_BROKER_URL = 'amqp://guest:guest@queues:5672/'
-CELERY_RESULT_BACKEND = 'amqp://guest:guest@queues:5672/'
-CELERY_ENABLE_UTC = False
-CELERY_TIMEZONE = 'America/Sao_Paulo'
-CELERY_TASK_ALWAYS_EAGER = False
+CELERY_BROKER_URL = 'amqp://{user}{password}@{host}:{port}/'.format(user=celery_user,password=celery_password,host=celery_host, port=celery_port)
+CELERY_RESULT_BACKEND = 'amqp://{user}:{password}@{host}:{port}/'.format(user=celery_user,password=celery_password,host=celery_host, port=celery_port)
+CELERY_ENABLE_UTC = celery_enable_utc
+CELERY_TIMEZONE = celery_timezone
+CELERY_TASK_ALWAYS_EAGER = celery_task_always_eager
 CELERY_BEAT_SCHEDULE = {
     'task-remove_old_etldashboard': {
         'task': 'etl.tasks.remove_old_etldashboard',
-        'schedule': crontab(minute=0, hour=2)
+        'schedule': crontab(minute=0, hour=celery_beat_schedule_dashboard)
     },
     'task-clear_sessions': {
         'task': 'core.tasks.clear_sessions',
-        'schedule': crontab(minute=0, hour=3)
+        'schedule': crontab(minute=0, hour=celery_beat_schedule_clear_sessions)
     },
 }
-CELERY_SEND_TASK_EMAILS = False
-CELERY_TASK_IGNORE_RESULT = True
+CELERY_SEND_TASK_EMAILS = celery_send_task_emails
+CELERY_TASK_IGNORE_RESULT = celery_task_ignore_result
 
 
 DATETIME_FORMAT = '%d/%m/%Y %H:%M'
@@ -124,7 +130,6 @@ INSTALLED_APPS = [
     'bootstrap3',
     'django_file_form',
     'django_file_form.ajaxuploader',
-    'debug_toolbar',
     'django_extensions',
     'django_cleanup',
     # Autocomplete
@@ -239,6 +244,8 @@ if environment in ['debug', 'development']:
             }
         },
     ]
+    DEBUG = True
+    INSTALLED_APPS.append('debug_toolbar')
 else:
     AUTH_PASSWORD_VALIDATORS = [
         {
@@ -258,6 +265,8 @@ else:
             'django.contrib.auth.password_validation.NumericPasswordValidator',
         },
     ]
+    DEBUG = False
+
     INSTALLED_APPS.append('raven.contrib.django.raven_compat')
 
 LANGUAGE_CODE = 'pt-br'
