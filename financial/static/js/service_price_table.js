@@ -1,5 +1,6 @@
 class ServicePriceTable {
     constructor(officeSessionId, policyPricesCategories){
+        this.formErrors = [];
         this.officeSessionId = officeSessionId;
         this.policyPricesCategories = policyPricesCategories;
         this.elOfficeNetwork = $('#id_office_network');
@@ -12,12 +13,36 @@ class ServicePriceTable {
         this.onChangePolicyPrice();
     }
 
-    static showSwal(type, title, text){
+    static showSwal(type, title, html){
         swal({
             type: type,
             title: title,
-            text: text
+            html: html
         });
+    }
+
+    clearFormErrors(){
+	    this.formErrors.splice(0, this.formErrors.length);
+    }
+
+    insertFormErrors(error){
+        this.formErrors.push(error);
+    }
+
+    static formatError(message){
+	    return `<li>${message}</li>`;
+    }
+
+    getErrors(){
+	    let liErrors = ``;
+        this.formErrors.forEach((error) => {
+            liErrors += ServicePriceTable.formatError(error);
+        });
+        return `
+            <ul style="text-align: left;">
+            ${liErrors}
+            </ul>
+        `;
     }
 
     static enableRequired(element){
@@ -97,15 +122,17 @@ class ServicePriceTable {
                 ServicePriceTable.enableElement(this.elOfficeNetwork);
                 ServicePriceTable.enableRequired(this.elOfficeNetwork);
             }
-            this.validatePolicyPrice(true);
+            this.validatePolicyPrice(false);
         });
     }
 
     onSaveSubmit() {
         $('[type=submit]').on('click', (el)=> {
-            if (!(this.officeCorrespondent || this.officeNetwork)){
+            this.validatePolicyPrice(false);
+            if (this.formErrors.length > 0){
                 el.preventDefault();
-                ServicePriceTable.showSwal('error', 'Atenção!', 'Favor selecionar um Escritório Correspondente ou uma Rede de escritórios');
+                let errorsHTML = this.getErrors();
+                ServicePriceTable.showSwal('error', 'Atenção!', errorsHTML);
             }
             ServicePriceTable.enableElement(this.elOfficeNetwork);
             ServicePriceTable.enableElement(this.elOfficeCorrespondent);
@@ -115,28 +142,37 @@ class ServicePriceTable {
     validatePolicyPrice(showAlert) {
         let officeCorrespondentId = this.elOfficeCorrespondent.val();
         let pricePolicyCategory = this.pricePolicyCategory;
+        let errorMsg = '';
+        this.clearFormErrors();
+        if (!(this.officeCorrespondent || this.officeNetwork)){
+            this.insertFormErrors('Favor selecionar um Escritório Correspondente ou uma Rede de escritórios');
+        }
         if (pricePolicyCategory === 'PUBLIC' && officeCorrespondentId !== this.officeSessionId) {
             this.elOfficeCorrespondent.val(this.officeSessionId);
-            if (showAlert) {
-                ServicePriceTable.showSwal('error', 'Atenção!', 'Para tipo de preço público o escritório correspondente deve ser o mesmo em que está logado.');
-            }
+            errorMsg = 'Para tipo de preço público o escritório correspondente deve ser o mesmo em que está logado.';
+            this.insertFormErrors(errorMsg);
         }
         if (pricePolicyCategory === 'NETWORK'){
             this.disableOfficeCorrespondent();
             ServicePriceTable.enableElement(this.elOfficeNetwork);
             ServicePriceTable.enableRequired(this.elOfficeNetwork);
-            if (!this.officeNetwork && showAlert){
-                ServicePriceTable.showSwal('error', 'Atenção!', 'Para tipo de preço rede é obrigatório o preenchimento da rede de escritórios.');
+            if (!this.officeNetwork) {
+                errorMsg = 'Para tipo de preço rede é obrigatório o preenchimento da rede de escritórios.';
+                this.insertFormErrors(errorMsg);
             }
         } else{
             ServicePriceTable.enableElement(this.elOfficeCorrespondent);
             ServicePriceTable.enableRequired(this.elOfficeCorrespondent);
         }
+        if (showAlert && this.formErrors.length > 0){
+            let errorsHTML = this.getErrors();
+            ServicePriceTable.showSwal('error', 'Atenção!', errorsHTML);
+        }
     }
 
     onChangePolicyPrice() {
         this.elPolicyPrice.on('change', (event)=>{
-            this.validatePolicyPrice(true);
+            this.validatePolicyPrice(false);
         });
     }
 }
