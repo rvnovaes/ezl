@@ -46,6 +46,13 @@ def confirm_payment(charge_id, payment_token, data):
 	}	
 	return gn.pay_charge(params=params, body=body)
 
+def get_details_payment(charge_id): 
+	gn = get_connection()
+	params = {
+		'id': charge_id
+	}
+	return gn.detail_charge(params=params)
+
 def get_notification(token):
 	gn = get_connection()
 	return gn.get_notification(params={'token': token})
