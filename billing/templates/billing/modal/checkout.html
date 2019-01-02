@@ -1,23 +1,22 @@
 {% load static %}
 {% block extra_stylesheets %} 
   <style type="text/css">  
-  /* HIDE RADIO */
-/*  #modal-billing-checkout [type=radio] { 
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }*/
+  
+  #modal-billing-checkout .modal-dialog {
+    width: 90%;
+    height: 100%;    
+    padding: 0;
+  }
+
+  #modal-billing-checkout .modal-content {
+    height: auto;
+    border-radius: 0;
+  }
 
   /* IMAGE STYLES */
   #modal-billing-checkout [type=radio] + img {
     cursor: pointer;
   }
-
-  /* CHECKED STYLES */
-/*  #modal-billing-checkout [type=radio]:checked + img {
-    outline: 2px solid #f00;
-  }    */
 
   #modal-billing-checkout img {
     -webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
@@ -149,12 +148,15 @@
                           <input type="text" name="input-address-state" class="form-control" id="input-address-state">
                       </div>
                     </div>                                        
-                  </div>                  
-                  <button class="btn btn-info" type="button" id="btn-pay">Pagar</button>
+                  </div>                                    
                </form>
             </div>
             <div class="clearfix"></div>
          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+            <button class="btn btn-info" type="button" id="btn-pay"><i class="fa fa-credit-card"></i> Pagar</button>
+          </div>         
       </div>
       <!-- /.modal-content -->
    </div>
