@@ -7,7 +7,7 @@ class Checkout {
 		this._elInputEmail = $('#input-email');
 		this._elInputCPF = $('#input-cpf').mask('000.000.000-00', {reverse: true});
 		this._elInputBirth = $('#input-birth');
-		this._elInputPhoneNumber = $('#input-phone-number').mask('(00) 00000-0000', {reverse: true});
+		this._elInputPhoneNumber = $('#input-phone-number').mask('(00) 00000-0000');
 		this._elBrand = $('.brand');
 		this._elInputCardNumber = $('#input-card-number');
 		this._elInputCardExpirationDate = $('#input-card-expiration-date').mask('00/0000');
@@ -35,7 +35,7 @@ class Checkout {
 	}	
 
 	get cpf() {
-		return this._elInputCPF.val();
+		return this._elInputCPF.cleanVal();
 	}
 
 	get birth() {
@@ -43,7 +43,7 @@ class Checkout {
 	}
 
 	get phoneNumber() {
-		return this._elInputPhoneNumber.val();
+		return this._elInputPhoneNumber.cleanVal();
 	}
 
 	get cardNumber() {
@@ -59,7 +59,7 @@ class Checkout {
 	}
 
 	get zipcode() {
-		return this._elInputZipcode.val();
+		return this._elInputZipcode.cleanVal();
 	}	
 
 	get street() {
