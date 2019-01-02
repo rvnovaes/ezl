@@ -22,6 +22,7 @@ class Checkout {
 		this._elBtnPay = $('#btn-pay');
 		this.onClickBtnPay();
 		this.onClickBrand();
+		this.onChangeZipcode();
 
 	}
 
@@ -65,6 +66,10 @@ class Checkout {
 		return this._elInputStreet.val();
 	}
 
+	set street(value) {
+		this._elInputStreet.val(value);
+	}
+
 	get addressNumber() {
 		return this._elInputAddressNumber.val();
 	}
@@ -73,16 +78,32 @@ class Checkout {
 		return this._elInputNeighborhood.val();
 	}
 
+	set neighborhood(value) {
+		this._elInputNeighborhood.val(value);
+	}
+
 	get addressComplement() {
 		return this._elInputComplement.val();
+	}
+
+	set addressComplement(value) {
+		this._elInputComplement.val(value);
 	}
 
 	get city() {
 		return this._elInputCity.val();
 	}
 
+	set city(value) {
+		this._elInputCity.val(value);
+	}
+
 	get state() {
 		return this._elState.val();
+	}
+
+	set state(value) {
+		this._elState.val(value);
 	}
 
 	openCheckout(charge_id) {
@@ -125,6 +146,22 @@ class Checkout {
 			this.cardBrand = $(evt.toElement).attr('brand');
 			$('.brand').css("filter", "grayscale(100%)")
 			$(evt.toElement).css("filter", "grayscale(0)")
+		})
+	}
+
+	onChangeZipcode() {
+		this._elInputZipcode.on('change', (evt)=> {
+			$.ajax({
+				method: 'GET',
+				url: `https://viacep.com.br/ws/${this.zipcode}/json/unicode/`, 
+				success: (response)=>{
+					this.street = response.logradouro;
+					this.neighborhood = response.bairro;
+					this.city = response.localidade;
+					this.addressComplement = response.complemento;
+					this.state = response.uf;
+				}
+			})			
 		})
 	}
 
