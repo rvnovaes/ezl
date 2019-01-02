@@ -3,7 +3,7 @@ import os
 import sys
 import tempfile
 
-# Todas as variáveis de configuração devem ser criadas nos arquivos desta pasta
+# Todas as variáveis de configuração devem ser criadas nos arquivos da pasta ezl/config
 from config.config import get_parser
 
 from django.urls import reverse_lazy
@@ -31,6 +31,16 @@ try:
     email_host_password = config['django_application']['email_host_password']
     email_default_from_email = config['django_application']['email_default_from_email']
     email_default_to_email = config['django_application']['email_default_to_email']
+    language_code = config['django_application']['language_code']
+    timezone = config['django_application']['timezone']
+    use_i18n = config['django_application'].getboolean('use_i18n')
+    use_l10n = config['django_application'].getboolean('use_l10n')
+    use_tz = config['django_application'].getboolean('use_tz')
+    datetime_format = config['django_application']['datetime_format']
+    secret_key = config['django_application']['secret_key']
+    internal_ips = config['django_application']['internal_ips']
+    project_name = config['django_application']['project_name']
+    project_link = config['django_application']['project_link']
 
     linux_password = config['etl']['linux_password']
     linux_user = config['etl']['linux_user']
@@ -43,12 +53,18 @@ try:
     celery_user = config['celery']['user']
     celery_password = config['celery']['password']
     celery_enable_utc = config['celery'].getboolean('enable_utc')
-    celery_timezone = config['celery']['timezone']
     celery_task_always_eager = config['celery'].getboolean('task_always_eager')
     celery_beat_schedule_dashboard = int(config['celery']['beat_schedule_dashboard'])
     celery_beat_schedule_clear_sessions = int(config['celery']['beat_schedule_clear_sessions'])
     celery_send_task_emails = config['celery'].getboolean('send_task_emails')
     celery_task_ignore_result = config['celery'].getboolean('task_ignore_result')
+
+    default_file_storage = config['aws']['default_file_storage']
+    aws_access_key_id = config['aws']['aws_access_key_id']
+    aws_secret_access_key = config['aws']['aws_secret_access_key']
+    aws_querystring_auth = config['aws'].getboolean('aws_querystring_auth')
+    aws_s3_file_overwrite = config['aws'].getboolean('aws_s3_file_overwrite')
+    aws_storage_bucket_url = config['aws']['aws_storage_bucket_url']
 
 except KeyError as e:
     print('Invalid settings. Check ini files on ezl/config')
@@ -56,11 +72,12 @@ except KeyError as e:
     sys.exit(0)
 
 MUST_LOGIN = True
+DATETIME_FORMAT = datetime_format
 
 CELERY_BROKER_URL = 'amqp://{user}{password}@{host}:{port}/'.format(user=celery_user,password=celery_password,host=celery_host, port=celery_port)
 CELERY_RESULT_BACKEND = 'amqp://{user}:{password}@{host}:{port}/'.format(user=celery_user,password=celery_password,host=celery_host, port=celery_port)
 CELERY_ENABLE_UTC = celery_enable_utc
-CELERY_TIMEZONE = celery_timezone
+CELERY_TIMEZONE = timezone
 CELERY_TASK_ALWAYS_EAGER = celery_task_always_eager
 CELERY_BEAT_SCHEDULE = {
     'task-remove_old_etldashboard': {
@@ -76,15 +93,11 @@ CELERY_SEND_TASK_EMAILS = celery_send_task_emails
 CELERY_TASK_IGNORE_RESULT = celery_task_ignore_result
 
 
-DATETIME_FORMAT = '%d/%m/%Y %H:%M'
-
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'f5*(8sgk)n1!i52xijv0yt@jtewp28%g%sp1rx*=y68ocgg+!2'
+SECRET_KEY = secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -266,24 +279,19 @@ else:
         },
     ]
     DEBUG = False
-
     INSTALLED_APPS.append('raven.contrib.django.raven_compat')
 
-LANGUAGE_CODE = 'pt-br'
-
-TIME_ZONE = 'America/Sao_Paulo'
-
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
+LANGUAGE_CODE = language_code
+TIME_ZONE = timezone
+USE_I18N = use_i18n
+USE_L10N = use_l10n
+USE_TZ = use_tz
 
 # configuração de formatação de moeda para o campo de Money da biblioteca django-money
-_FORMATTER.add_sign_definition('pt_BR', moneyed.BRL, prefix='R$')
+_FORMATTER.add_sign_definition(language_code, moneyed.BRL, prefix='R$')
 _FORMATTER.add_sign_definition(DEFAULT, moneyed.BRL, prefix='R$')
 _FORMATTER.add_formatting_definition(
-    'pt_BR',
+    language_code,
     group_size=3,
     group_separator='.',
     decimal_point=',',
@@ -307,32 +315,24 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = 'AKIAJTB675KE6AXUTPKA'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_FILE_OVERWRITE = False
-if environment == 'production':
-    AWS_STORAGE_BUCKET_NAME = 'ezl-production'
-else:
-    AWS_STORAGE_BUCKET_NAME = 'ezl-development'
-AWS_STORAGE_BUCKET_URL = 'https://{}.s3.amazonaws.com/'.format(
-    AWS_STORAGE_BUCKET_NAME)
+DEFAULT_FILE_STORAGE = default_file_storage
+AWS_ACCESS_KEY_ID = aws_access_key_id
+AWS_SECRET_ACCESS_KEY = aws_secret_access_key
+AWS_QUERYSTRING_AUTH = aws_querystring_auth
+AWS_S3_FILE_OVERWRITE = aws_s3_file_overwrite
+AWS_STORAGE_BUCKET_URL = aws_storage_bucket_url
 
 LOGIN_REDIRECT_URL = reverse_lazy('inicial')
 
 AUTHENTICATION_BACKENDS = (
-
     # Needed to login by username in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
-
     # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
     'guardian.backends.ObjectPermissionBackend',
 )
 
 # Host configuration to send email
-
 EMAIL_USE_SSL = email_use_ssl
 EMAIL_HOST = email_host
 EMAIL_PORT = email_port
@@ -341,9 +341,9 @@ EMAIL_HOST_PASSWORD = email_host_password
 DEFAULT_FROM_EMAIL = email_default_from_email
 DEFAULT_TO_EMAIL = email_default_to_email
 
-INTERNAL_IPS = '127.0.0.1'
-PROJECT_NAME = 'Easy Lawyer'
-PROJECT_LINK = 'https://ezl.ezlawyer.com.br'
+INTERNAL_IPS = internal_ips
+PROJECT_NAME = project_name
+PROJECT_LINK = project_link
 
 LUIGI_TARGET_PATH = os.path.join(BASE_DIR, 'luigi_targets')
 
@@ -511,9 +511,11 @@ SWAGGER_SETTINGS = {
 
 # configuração para o django_import_export
 DATETIME_INPUT_FORMATS = (
-    '%d/%m/%Y %H:%M',
-    '%d/%m/%Y %H:%M',
+    datetime_format,
+    datetime_format,
 )
+
+
 
 SOCIALACCOUNT_ADAPTER = 'core.account.adapter.EzlSocialAccountAdapter'
 ACCOUNT_AUTHENTICATION_METHOD = "username"
