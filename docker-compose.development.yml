@@ -128,16 +128,6 @@ services:
       - ./media/service_price_table:/app/media/service_price_table
       - ezl-logs:/var/log/ezl      
 
-  tunnel:
-    image: ezl:latest
-    command: python -m sshtunnel -U dev -P dev@2016 -L 0.0.0.0:2000 -R 192.168.249.14:1433 -p 22 201.86.113.86
-    ports:
-      - "2000:2000"
-    volumes:
-      - .:/app
-    depends_on:
-      - builder
-
   nginx:
     ports:
       - "8080:80"
