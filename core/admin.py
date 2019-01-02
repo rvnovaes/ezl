@@ -24,6 +24,7 @@ class TaskShowStatusInline(admin.TabularInline):
 @admin.register(CustomSettings)
 class CustomSettingsAdmin(admin.ModelAdmin):
     list_display = ('office', 'email_to_notification', 'default_customer', 'i_work_alone')
+    search_fields = ['office__legal_name', 'office__name']
     inlines = [TaskShowStatusInline, TaskWorkflowInline]
 
     def save_form(self, request, form, change):
