@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('core', '0121_officenetwork'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('financial', '0025_auto_20181126_1723'),
+        ('financial', '0026_auto_20181226_1239'),
     ]
 
     operations = [

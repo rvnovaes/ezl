@@ -77,7 +77,7 @@ class CostCenter(Audit, LegacyCode, OfficeMixin):
         ordering = ['name']
         verbose_name = 'Centro de custo'
         verbose_name_plural = 'Centros de custos'
-        unique_together = (('name', 'office'),)
+        unique_together = (('name', 'office', 'legacy_code'),)
 
 
 class ServicePriceTable(Audit, LegacyCode, OfficeMixin):

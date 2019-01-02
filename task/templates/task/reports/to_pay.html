@@ -40,7 +40,7 @@
                                 {% bootstrap_field filter.form.status form_group_class="" bound_css_class='' show_label=False %}
                             </div>
                             <div class="form-group col-sm-12 col-md-6">
-                                {% bootstrap_label "Finalizadas entre: " %}
+                                {% bootstrap_label "Finalizadas entre: " label_class='ezl-required' %}
                                 {% bootstrap_field filter.form.finished_in form_group_class="" bound_css_class='' show_label=False %}
                                 <script>
                                     $(document).ready(function () {
@@ -102,6 +102,7 @@
                             <th>Finalização</th>
                             <th>Serviço</th>
                             <th>Processo</th>
+                            <th>Centro de Custo</th>
                             <th>Comarca</th>
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
@@ -157,14 +158,16 @@
             $('#filter_content').collapse('show');
             $('form').on('submit', function(event){                
                 event.preventDefault();
-                $('#filter_content').collapse('hide');
                 if ($('[name=group_by_tasks]').val() === 'E') {
                     report = new ReportToPayGroupByOffice();
                 } else {
                     report = new ReportToPayGroupByClient();
                 }                
-                report.clear()
-                report.start()
+                if (report.checkFinishedDate()){
+                    $('#filter_content').collapse('hide');
+                    report.clear();
+                    report.start()
+                }
             })
         })  
     </script>

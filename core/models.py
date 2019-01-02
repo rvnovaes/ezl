@@ -445,6 +445,16 @@ class Office(AbstractPerson):
     def __str__(self):
         return self.legal_name
 
+    @property
+    def states_of_practice(self):
+        return self.office_correspondent.filter(state__isnull=False).order_by('state').distinct('state__name').values_list('state__name', flat=True)
+
+    @property
+    def type_of_service(self):
+        return self.office_correspondent.filter(type_task__type_task_main__isnull=False).order_by(
+            'type_task__type_task_main').distinct('type_task__type_task_main__name').values_list(
+            'type_task__type_task_main__name', flat=True)
+
     def save(self, *args, **kwargs):
         self._i_work_alone = kwargs.pop('i_work_alone', False)
         return super().save(*args, **kwargs)
@@ -802,3 +812,15 @@ class EmailTemplate(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class AreaOfExpertise(models.Model):
+    area = models.CharField(verbose_name='Área de atuação', max_length=2555)
+    offices = models.ManyToManyField(Office, blank=True)
+
+    class Meta:
+        verbose_name='Áreas de atuação'
+        ordering = ['area']
+
+    def __str__(self):
+        return self.area

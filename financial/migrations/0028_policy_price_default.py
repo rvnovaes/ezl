@@ -40,7 +40,7 @@ def create_default_policy(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('financial', '0027_servicepricetable_policy_price'),
+        ('financial', '0027_udapte_cost_center'),
     ]
 
     operations = [
