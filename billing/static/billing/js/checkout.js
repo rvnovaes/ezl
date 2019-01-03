@@ -114,10 +114,34 @@ class Checkout {
 	paymentCallback(error, response, options) {
 		if (error) {
 			console.log(error)
+			swal.close();
+			swal({
+				title: 'Atenção!',
+				text : error, 
+				type: error.error_description,
+				confirmButtonText: 'ok'
+			})
 		} else {
 			console.log(response)
 			confirmPayment(chargeId, response.data.payment_token, dataPayment, csrfToken)
 		}
+	}
+
+	getPaymentStatus() {
+		setInterval(()=>{
+			$.ajax({
+				url: `/billing/detail_payment/${this.charge_id}`, 
+				method: 'GET', 
+				dataType: 'json', 
+				success: (response)=> {
+					console.log(response)
+					if (response.data.status === 'paid') {
+						$('#task_detail').unbind('submit').submit();
+					}										
+				}
+
+			})
+		}, 10000)
 	}
 
 	confirmPayment(chargeId, paymentToken, data, csrfToken) {
@@ -130,7 +154,7 @@ class Checkout {
 			dataType: 'json',
 			data: JSON.stringify(data), 
 			success: (response) => {				
-				$('#task_detail').unbind('submit').submit();
+				console.log(response)				
 			},
 			error: (error) => {
 
@@ -165,6 +189,24 @@ class Checkout {
 		})
 	}
 
+	validateBrand() {
+		if(!this.cardBrand) {
+			swal.close();
+			swal({
+				title: 'Atenção', 
+				text: 'É necessário selecionar a bandeira do cartão',
+				type: 'error',
+				confirmButtonText: 'ok',
+			})
+			return false;
+		}
+		return true;
+	}
+
+	validateForm() {
+
+		return this.validateBrand();
+	}
 	onClickBtnPay() {
 		this._elBtnPay.on('click', (evt)=> {
 			swal({
@@ -196,13 +238,16 @@ class Checkout {
 			csrfToken = this.csrfToken;
 			chargeId = this.charge_id;
 			confirmPayment = this.confirmPayment;
-			gn_checkout.getPaymentToken({
-				brand: this.cardBrand.toLowerCase(), 
-				number: this.cardNumber, 
-				cvv: this.cardCVVCode, 
-				expiration_month: this.cardExpirationDate.slice(0,2), 
-				expiration_year: this.cardExpirationDate.slice(3,7)
-			}, this.paymentCallback)
+			if (this.validateForm()){
+				this.getPaymentStatus();
+				gn_checkout.getPaymentToken({
+					brand: this.cardBrand.toLowerCase(), 
+					number: this.cardNumber, 
+					cvv: this.cardCVVCode, 
+					expiration_month: this.cardExpirationDate.slice(0,2), 
+					expiration_year: this.cardExpirationDate.slice(3,7)
+				}, this.paymentCallback)
+			}
 		})
 	}
  }

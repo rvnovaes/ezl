@@ -42,3 +42,8 @@ class ConfirmPayment(CustomLoginRequiredView, View):
 		data = body.get('data')
 		res = gn_api.confirm_payment(charge_id, payment_token, data)
 		return JsonResponse(res)
+
+
+class DetailPayment(CustomLoginRequiredView, View):
+	def get(self, request, charge_id, *args, **kwargs):
+		return JsonResponse(gn_api.get_details_payment(charge_id))
