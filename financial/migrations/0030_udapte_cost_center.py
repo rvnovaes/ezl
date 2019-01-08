@@ -62,7 +62,7 @@ def update_cost_center(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('financial', '0027_servicepricetable_policy_price'),
+        ('financial', '0029_policy_price_default'),
     ]
 
     operations = [
