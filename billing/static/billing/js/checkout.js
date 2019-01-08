@@ -20,9 +20,19 @@ class Checkout {
 		this._elInputCity = $('#input-address-city');
 		this._elState = $('#input-address-state');
 		this._elBtnPay = $('#btn-pay');
+		this.cards = {
+			visa: '/^4\d+$/',
+			mastercard: new RegExp('^5[1-5][0-9]{14}'), 
+			elo: new RegExp('^(636368|438935|504175|451416|636297)'),				
+			amex: new RegExp('^3[47][0-9]{13}'), 
+			diners: new RegExp('^3(?:0[0-5]|[68][0-9])[0-9]{11}'), 
+			discover: new RegExp('^6(?:011|5[0-9]{2})[0-9]{12}'), 
+			jcb: new RegExp('^(35)'), 
+			aura: new RegExp('^(50)')
+		};
 		this.onClickBtnPay();
 		this.onClickBrand();
-		this.onChangeZipcode();
+		this.onChangeZipcode();		
 
 	}
 
@@ -104,7 +114,23 @@ class Checkout {
 
 	set state(value) {
 		this._elState.val(value);
+	}	
+
+	updateCardBrand(cardBrand) {
+		if (!cardBrand) {
+			$('.brand').css("filter", "grayscale(100%)")
+		} else {
+			$(`[brand=${cardBrand.toUpperCase()}]`).css("filter", "grayscale(0)")
+		}						
 	}
+
+	onKeyUpCardNumber() {
+		this._elInputCardNumber.on('keyup', (evt)=> {			
+
+		})
+	}
+
+
 
 	openCheckout(charge_id) {
 		this.charge_id = charge_id
