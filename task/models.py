@@ -835,8 +835,6 @@ class DashboardViewModel(Audit, OfficeMixin):
         verbose_name='Número do Processo')
     parent_task_number = models.PositiveIntegerField(
         default=0, verbose_name='OS Original')
-    survey_result = JSONField(
-        verbose_name=u'Respotas do Formulário', blank=True, null=True)
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -956,6 +954,6 @@ class TaskShowStatus(Audit):
 
 
 class TaskSurveyAnswer(Audit):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
+    tasks = models.ManyToManyField(Task, blank=True)
     survey = models.ForeignKey('survey.Survey', on_delete=models.CASCADE, null=True, blank=True)
     survey_result = JSONField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
