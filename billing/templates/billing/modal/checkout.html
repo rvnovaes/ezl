@@ -78,7 +78,16 @@
                     </div>
                     <div class="panel-body">
                       <div class="row">
-                         <div class="col-xs-12">
+                        <div class="col-xs-6">
+                          <div class="form-group">
+                             <label for="input-card-number">Número do cartão</label>
+                             <div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-credit-card"></i></div>
+                                <input type="text" class="form-control" id="input-card-number" placeholder="Número do cartão"> 
+                             </div>
+                          </div>                          
+                        </div>
+                         <div class="col-xs-6">
                             <div class="form-group">                       
                                <img src="{% static "img/visa.png" %}" class="brand" brand="VISA">
                                <img src="{% static "img/mastercard.png" %}" class="brand" brand="MASTERCARD">
@@ -89,13 +98,6 @@
                             </div>
                          </div>
                       </div>                  
-                      <div class="form-group">
-                         <label for="input-card-number">Número do cartão</label>
-                         <div class="input-group">
-                            <div class="input-group-addon"><i class="fa fa-credit-card"></i></div>
-                            <input type="text" class="form-control" id="input-card-number" placeholder="Número do cartão"> 
-                         </div>
-                      </div>
                       <div class="row">
                          <div class="col-xs-7 col-md-7">
                             <div class="form-group">

@@ -21,18 +21,19 @@ class Checkout {
 		this._elState = $('#input-address-state');
 		this._elBtnPay = $('#btn-pay');
 		this.cards = {
-			visa: '/^4\d+$/',
-			mastercard: new RegExp('^5[1-5][0-9]{14}'), 
-			elo: new RegExp('^(636368|438935|504175|451416|636297)'),				
-			amex: new RegExp('^3[47][0-9]{13}'), 
-			diners: new RegExp('^3(?:0[0-5]|[68][0-9])[0-9]{11}'), 
-			discover: new RegExp('^6(?:011|5[0-9]{2})[0-9]{12}'), 
-			jcb: new RegExp('^(35)'), 
-			aura: new RegExp('^(50)')
+			visa: /^4\d+$/,
+			mastercard: /^5\d+$/, 
+			elo: /^(636368|438935|504175|451416|636297|509049|509069|509050|509074|509068|509040|509045|509051|509046|509066|509047|509042|509052|509043|509064|509040|36297|5067|4576|4011)/,				
+			amex: /^(34|37)/, 
+			diners: /^(301|305|36|38)/,
+			discover: /^(6011|622|64|65)/, 
+			jcb: /^35/, 
+			aura: /^50/,
 		};
 		this.onClickBtnPay();
 		this.onClickBrand();
 		this.onChangeZipcode();		
+		this.onKeyUpCardNumber();
 
 	}
 
@@ -116,17 +117,15 @@ class Checkout {
 		this._elState.val(value);
 	}	
 
-	updateCardBrand(cardBrand) {
-		if (!cardBrand) {
-			$('.brand').css("filter", "grayscale(100%)")
-		} else {
-			$(`[brand=${cardBrand.toUpperCase()}]`).css("filter", "grayscale(0)")
-		}						
-	}
-
 	onKeyUpCardNumber() {
 		this._elInputCardNumber.on('keyup', (evt)=> {			
-
+			$('.brand').css("filter", "grayscale(100%)");
+			Object.keys(this.cards).forEach((key) => {
+				if (this.cards[key].test(this.cardNumber)) {
+					this.cardBrand = key;
+					$(`[brand=${this.cardBrand.toUpperCase()}]`).css("filter", "grayscale(0)");
+				}
+			})
 		})
 	}
 
