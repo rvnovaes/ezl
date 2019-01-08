@@ -62,6 +62,7 @@ from survey.models import SurveyPermissions
 from babel.numbers import format_currency
 from task import signals
 from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
+from billing.gerencianet_api import api as gn_api
 import logging
 logger = logging.getLogger(__name__)
 
@@ -803,6 +804,7 @@ class ToPayTaskReportTemplateView(TemplateView):
         return context
 
 
+
 class DashboardView(CustomLoginRequiredView, TemplateView):
     template_name = 'task/task_dashboard.html'
     table_pagination = {'per_page': 5}
@@ -1020,6 +1022,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 show_in_tab = False
         return show_in_tab
 
+
     def dispatch(self, request, *args, **kwargs):
         res = super().dispatch(request, *args, **kwargs)
         office_session = get_office_session(request)
@@ -1155,9 +1158,11 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
             logger = logging.getLogger('teste')
             logger.info(data)
 
+
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
                 query_set = DashboardViewModel.objects.filter(q)
+
             else:
                 task_dynamic_query = Q()
                 client_query = Q()

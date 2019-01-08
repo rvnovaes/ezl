@@ -16,6 +16,7 @@ from core.models import Office, ContactMechanismType, EMAIL
 from core.views import (AuditFormMixin, MultiDeleteViewMixin,
                         SingleTableViewMixin)
 from .forms import CostCenterForm, ServicePriceTableForm, ImportServicePriceTableForm, PolicyPriceForm
+from .serializers import ServicePriceTableSerializer
 from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, PolicyPrice
 from .tables import CostCenterTable, ServicePriceTableTable, PolicyPriceTable
 from .tasks import import_xls_service_price_table, IMPORTED_IMPORT_SERVICE_PRICE_TABLE, \
@@ -282,9 +283,16 @@ def ajax_get_log_import_service_price_table_data_table(request):
     return JsonResponse(data)
 
 
+class ServicePriceTableDetailView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):
+        instance = ServicePriceTable.objects.get(pk=pk)
+        return JsonResponse(ServicePriceTableSerializer(instance=instance).data)
+
+
 class PolicyPriceView(CustomLoginRequiredView, SingleTableViewMixin):
     model = PolicyPrice
     table_class = PolicyPriceTable
+
 
 class PolicyPriceCreateView(AuditFormMixin, CreateView):
     model = PolicyPrice
@@ -298,6 +306,7 @@ class PolicyPriceCreateView(AuditFormMixin, CreateView):
         kw['request'] = self.request
         return kw
 
+
 class PolicyPriceUpdateView(AuditFormMixin, UpdateView):
     model = PolicyPrice
     form_class = PolicyPriceForm
@@ -305,8 +314,7 @@ class PolicyPriceUpdateView(AuditFormMixin, UpdateView):
     success_message = UPDATE_SUCCESS_MESSAGE
     object_list_url = 'policyprice_list'
 
-
-    def get_form_kwags(self):        
+    def get_form_kwags(self):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw

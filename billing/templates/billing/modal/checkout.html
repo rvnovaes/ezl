@@ -1,0 +1,189 @@
+{% load static %}
+{% block extra_stylesheets %} 
+  <style type="text/css">  
+  
+  #modal-billing-checkout .modal-dialog {
+    width: 90%;
+    height: 100%;    
+    padding: 0;
+  }
+
+  #modal-billing-checkout .modal-content {
+    height: auto;
+    border-radius: 0;
+  }
+
+  /* IMAGE STYLES */
+  #modal-billing-checkout [type=radio] + img {
+    cursor: pointer;
+  }
+
+  #modal-billing-checkout img {
+    -webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
+    filter: grayscale(100%);    
+  }
+  </style>
+{% endblock %}
+
+<div id="modal-billing-checkout" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+   <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+         <div class="modal-body">
+            <div class="col-md-12">
+               <form>
+                  <div class="panel panel-defualt">
+                    <div class="panel-heading ezl-panel text-white">
+                      Dados pessoais
+                    </div>
+                    <div class="panel-body">
+                      <div class="row">
+                         <div class="col-xs-6">
+                            <div class="form-group">
+                               <label>Nome no cartão</label>
+                               <input type="text" class="form-control" name="input-card-name" id="input-name" placeholder="NOME NO CARTÃO" style="text-transform:uppercase"> 
+                            </div>
+                         </div>
+                         <div class="col-xs-6">
+                            <div class="form-group">
+                               <label>E-mail</label>
+                               <input type="email" name="input-email" class="form-control" id="input-email">                            
+                            </div>
+                         </div>
+                      </div>
+                      <div class="row">
+                         <div class="col-xs-4">
+                            <div class="form-group">
+                               <label>CPF</label>
+                               <input type="text" class="form-control" name="input-card-cpf" id="input-cpf" placeholder="CPF"> 
+                            </div>
+                         </div>
+                         <div class="col-xs-4">
+                            <div class="form-group">
+                               <label>Data de nascimento</label>
+                               <input type="date" name="input-birth" class="form-control" id="input-birth">
+                            </div>
+                         </div>
+                         <div class="col-xs-4">
+                            <div class="form-group">
+                               <label>Telefone</label>
+                               <input type="tel" name="input-phone-number" class="form-control" id="input-phone-number">
+                            </div>
+                         </div>
+                      </div>                      
+                    </div>
+                  </div>                     
+                  <div class="panel panel-defualt">
+                    <div class="panel-heading ezl-panel text-white">
+                      Formas de pagamento
+                    </div>
+                    <div class="panel-body">
+                      <div class="row">
+                        <div class="col-xs-6">
+                          <div class="form-group">
+                             <label for="input-card-number">Número do cartão</label>
+                             <div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-credit-card"></i></div>
+                                <input type="text" class="form-control" id="input-card-number" placeholder="Número do cartão"> 
+                             </div>
+                          </div>                          
+                        </div>
+                         <div class="col-xs-6">
+                            <div class="form-group">                       
+                               <img src="{% static "img/visa.png" %}" class="brand" brand="VISA">
+                               <img src="{% static "img/mastercard.png" %}" class="brand" brand="MASTERCARD">
+                               <img src="{% static "img/elo.png" %}" class="brand" brand="ELO">
+                               <img src="{% static "img/amex.png" %}" class="brand" brand="AMEX">
+                               <img src="{% static "img/diners.png" %}" class="brand" brand="DINERS">
+                               <img src="{% static "img/hipercard.png" %}" class="brand" brand="HIPERCARD">
+                            </div>
+                         </div>
+                      </div>                  
+                      <div class="row">
+                         <div class="col-xs-7 col-md-7">
+                            <div class="form-group">
+                               <label>Data de vencimento</label>
+                               <input type="text" class="form-control" name="input-card-expiration-date" placeholder="MM/AAAA" required="" id="input-card-expiration-date"> 
+                            </div>
+                         </div>
+                         <div class="col-xs-5 col-md-5 pull-right">
+                            <div class="form-group">
+                               <label>Código CVV</label>
+                               <input type="text" class="form-control" name="input-card-cvv-code" placeholder="CVV" required="" id="input-card-cvv-code"> 
+                            </div>
+                         </div>
+                      </div>                      
+                    </div>
+                  </div>
+                  <div class="panel panel-defualt">
+                    <div class="panel-heading ezl-panel text-white">
+                      Endereço de cobrança
+                    </div>
+                    <div class="panel-body">
+                      <div class="row">
+                        <div class="col col-xs-3">
+                          <div class="form-group">
+                              <label>CEP: </label>
+                              <input type="text" name="input-address-zipcode" class="form-control" id="input-address-zipcode">
+                          </div>
+                        </div>
+                        <div class="col col-xs-6">
+                          <div class="form-group">
+                              <label>Logradouro: </label>
+                              <input type="text" name="input-address-street" class="form-control" id="input-address-street">
+                          </div>
+                        </div>                    
+                        <div class="col col-xs-3">
+                          <div class="form-group">
+                              <label>Número: </label>
+                              <input type="text" name="input-address-number" class="form-control" id="input-address-number">
+                          </div>
+                        </div>                    
+                      </div>
+                      <div class="row">
+                        <div class="col col-xs-3">
+                          <div class="form-group">
+                              <label>Bairro: </label>
+                              <input type="text" name="input-address-neighborhood" class="form-control" id="input-address-neighborhood">
+                          </div>
+                        </div>
+                        <div class="col col-xs-3">
+                          <div class="form-group">
+                              <label>Complemento: </label>
+                              <input type="text" name="input-address-complement" class="form-control" id="input-address-complement">
+                          </div>
+                        </div>                    
+                        <div class="col col-xs-3">
+                          <div class="form-group">
+                              <label>Cidade: </label>
+                              <input type="text" name="input-address-city" class="form-control" id="input-address-city">
+                          </div>
+                        </div>
+                        <div class="col col-xs-3">
+                          <div class="form-group">
+                              <label>Estado: </label>
+                              <input type="text" name="input-address-state" class="form-control" id="input-address-state">
+                          </div>
+                        </div>                                        
+                      </div>                      
+                    </div>
+                  </div>                                    
+               </form>
+            </div>
+            <div class="clearfix"></div>
+         </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+            <button class="btn btn-info" type="button" id="btn-pay"><i class="fa fa-credit-card"></i> Pagar</button>
+          </div>         
+      </div>
+      <!-- /.modal-content -->
+   </div>
+   <!-- /.modal-dialog -->
+</div>
+
+{% block extra_scripts %} 
+  <script src="{% static 'billing/js/checkout.js' %}"></script>
+  <script type="text/javascript">
+    var checkout = new Checkout('{{csrf_token}}');  
+  </script>
+{% endblock%}

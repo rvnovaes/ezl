@@ -499,3 +499,9 @@ ACCOUNT_AUTHENTICATION_METHOD = "username"
 SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_QUERY_EMAIL = True
+
+GERENCIANET_CREDENTIALS = {
+    'client_id': 'Client_Id_549608d80bb546c7a5ca98851cb73e1808541027', 
+    'client_secret': 'Client_Secret_89768b5e33ccebbf9e56b27f9d8f0780c2bff07b', 
+    'sandbox': True
+}
