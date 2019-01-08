@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When, CharField, IntegerField, Count, TextField
+from django.db.models import Q, Case, When, CharField, IntegerField, Count, TextField, Prefetch
 from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse_lazy, reverse
@@ -1457,8 +1457,12 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return response
 
     def _export_answers(self, request):
-        task_ids = self.get_queryset().filter(survey_result__isnull=False).values_list('id', flat=True)
-        answers = TaskSurveyAnswer.objects.filter(task_id__in=task_ids).select_related('task')
+        tasks = self.get_queryset()
+        task_ids = tasks.values_list('id', flat=True)
+        office_list = list(set(tasks.values_list('office', flat=True)))
+        answers = TaskSurveyAnswer.objects.filter(tasks__id__in=task_ids).prefetch_related(
+            Prefetch('tasks', queryset=Task.objects.filter(office__in=office_list), to_attr='answers_office'))
+
         columns = self._get_answers_columns(answers)
         all_columns = [
             'N° da OS',
@@ -1475,7 +1479,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return xlsx.get_http_response()
 
     def _export_answers_write_task(self, xlsx, answer, columns):
-        task = answer.task
+        task = answer.answers_office[0]
         base_fields = [task.task_number, task.legacy_code, str(task.type_task), answer.create_user.username]
         answers = ['' for x in range(len(columns))]
         survey_result = answer.survey_result
