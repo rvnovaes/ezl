@@ -20,7 +20,7 @@ def change_task_to_many_2_many(apps, schema_editor):
             if survey_answer.task.parent:
                 survey_answer.tasks.add(survey_answer.task.parent)
             survey_answer.save()
-            if i % 100 == 0:
+            if i % 1000 == 0:
                 print('{} - {}'.format(i, total))
             i += 1
 

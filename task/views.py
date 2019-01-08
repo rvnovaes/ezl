@@ -907,11 +907,13 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             if isinstance(survey_result, str):
                 survey_result = json.loads(survey_result)
             survey = TaskSurveyAnswer()
-            survey.task = form.instance
             survey.survey = form.instance.type_task.survey
             survey.create_user = self.request.user
             survey.survey_result = survey_result
             survey.save()
+            survey.tasks.add(form.instance)
+            if form.instance.parent:
+                survey.tasks.add(form.instance.parent)
         send_notes_execution_date.send(
             sender=self.__class__,
             notes=notes,
@@ -985,7 +987,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             context['form'].fields['type_task_field'] = type_task_field
         checker = ObjectPermissionChecker(self.request.user)
         if checker.has_perm('can_see_tasks_company_representative', office_session):
-            if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
+            if not TaskSurveyAnswer.objects.filter(tasks=self.object, create_user=self.request.user):
                 if (self.object.type_task.survey_company_representative):
                     context['not_answer_questionnarie'] = True
                     if self.object.type_task.survey_company_representative:
@@ -2178,7 +2180,7 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         self.filter = task_filter
         return task_list.filter(
             person_company_representative=self.request.user.person).exclude(
-            pk__in=self.request.user.tasksurveyanswer_create_user.values_list('task_id', flat=True))
+            pk__in=self.request.user.tasksurveyanswer_create_user.values_list('tasks__id', flat=True))
 
     def get_context_data(self):
         context = super().get_context_data()
@@ -2193,9 +2195,12 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         try:
             task = Task.objects.get(pk=request.POST.get('task_id'))
             survey_result = json.loads(request.POST.get('survey'))
-            survey = TaskSurveyAnswer(create_user=request.user, task=task,
+            survey = TaskSurveyAnswer(create_user=request.user,
                                       survey=task.type_task.survey_company_representative, survey_result=survey_result)
             survey.save()
+            survey.tasks.add(task)
+            if task.parent:
+                survey.tasks.add(task.parent)
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'error': e})
