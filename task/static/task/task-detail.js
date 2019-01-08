@@ -6,7 +6,8 @@ class TaskDetail {
         this.pendingSurvey = pendingSurvey;
         this.surveyCompanyRepresentative=surveyCompanyRepresentative;
         this.billing = billing;
-        this.expanded=false;            
+        this.expanded = false;            
+        this.servicePriceTable = {};
         this._elTaskTitle = $('#task-title');
         this._elExecutionDate = $("input[name=execution_date]"); 
         this._elModalAction = $('#confirmAction');
@@ -29,8 +30,20 @@ class TaskDetail {
     // Funcao que invoca o action form de acordo com o status
 
     get servicePriceTableId(){
-        return $('input[name=servicepricetable_id]').val();
+        let servicePriceTableId = $('input[name=servicepricetable_id]').val();
+        this.setServicePriceDetail(servicePriceTableId);
+        return servicePriceTableId;
     }
+
+    setServicePriceDetail(servicePriceTableId) {
+        $.ajax({
+            method: 'GET', 
+            url: `/financeiro/tabelas-de-precos/detalhes/${servicePriceTableId}/`, 
+            success: (response) => {
+                this.servicePriceTable = response;
+            }
+        })
+    }    
 
     get officeToDelegate() {
         return $("#office-" + this.servicePriceTableId);
@@ -220,10 +233,19 @@ class TaskDetail {
                 .attr('name', 'action')
                 .attr('value', 'OPEN')
                 .appendTo('#task_detail');
-                this.hideModalAction();
-                this.billing.createCharge(this.csrfToken)
-            // $('#task_detail').unbind('submit').submit();
-            // this.toogleModals('#confirmAction', '#processing');
+                if (this.servicePriceTable.policy_price.billing_moment.name === 'PRE_PAID') {
+                    this.hideModalAction();
+                    this.billing.createCharge(this.csrfToken)
+                } else {
+                    swal({
+                        title: 'Delegando', 
+                        text: 'Arguard', 
+                        onOpen: () => {
+                            swal.showLoading()
+                        } 
+                    })
+                    $('#task_detail').unbind('submit').submit();
+                }
         }        
     }
 
