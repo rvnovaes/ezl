@@ -5,17 +5,9 @@ from core.serializers import CreateUserSerializerMixin, OfficeSerializerMixin
 
 
 class PolicyPriceSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin): 
-    billing_moment = serializers.SerializerMethodField()
     class Meta: 
         model = PolicyPrice
         fields = '__all__'
-
-    def get_billing_moment(self, obj): 
-        billing_moment = BillingMoment(obj.billing_moment)
-        return {
-            'name': billing_moment.name, 
-            'value': billing_moment.value
-        }
 
 class ServicePriceTableSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
     policy_price = PolicyPriceSerializer(many=False, read_only=True)

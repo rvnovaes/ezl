@@ -233,13 +233,13 @@ class TaskDetail {
                 .attr('name', 'action')
                 .attr('value', 'OPEN')
                 .appendTo('#task_detail');
-                if (this.servicePriceTable.policy_price.billing_moment.name === 'PRE_PAID') {
+                if (this.servicePriceTable.policy_price.billing_moment === 'PRE_PAID') {
                     this.hideModalAction();
                     this.billing.createCharge(this.csrfToken)
                 } else {
                     swal({
                         title: 'Delegando', 
-                        text: 'Arguard', 
+                        text: 'Arguarde', 
                         onOpen: () => {
                             swal.showLoading()
                         } 
