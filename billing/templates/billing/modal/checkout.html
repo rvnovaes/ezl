@@ -8,6 +8,10 @@
     padding: 0;
   }
 
+  #modal-billing-checkout .modal-body {
+    max-height: 640px;
+  }
+
   #modal-billing-checkout .modal-content {
     height: auto;
     border-radius: 0;
@@ -22,6 +26,16 @@
     -webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
     filter: grayscale(100%);    
   }
+
+  #modal-billing-checkout .panel {    
+    border: 0.2px solid ;
+    border-color: #e6e6e6;
+    box-shadow: 2px 4px 2px 1px #E6E6E5
+  }
+
+  .brand-images {
+    margin: 20px;
+  }
   </style>
 {% endblock %}
 
@@ -33,7 +47,7 @@
                <form>
                   <div class="panel panel-defualt">
                     <div class="panel-heading ezl-panel text-white">
-                      Dados pessoais
+                      1 - Dados pessoais
                     </div>
                     <div class="panel-body">
                       <div class="row">
@@ -74,7 +88,7 @@
                   </div>                     
                   <div class="panel panel-defualt">
                     <div class="panel-heading ezl-panel text-white">
-                      Formas de pagamento
+                      2 - Formas de pagamento
                     </div>
                     <div class="panel-body">
                       <div class="row">
@@ -89,12 +103,14 @@
                         </div>
                          <div class="col-xs-6">
                             <div class="form-group">                       
-                               <img src="{% static "img/visa.png" %}" class="brand" brand="VISA">
-                               <img src="{% static "img/mastercard.png" %}" class="brand" brand="MASTERCARD">
-                               <img src="{% static "img/elo.png" %}" class="brand" brand="ELO">
-                               <img src="{% static "img/amex.png" %}" class="brand" brand="AMEX">
-                               <img src="{% static "img/diners.png" %}" class="brand" brand="DINERS">
-                               <img src="{% static "img/hipercard.png" %}" class="brand" brand="HIPERCARD">
+                               <div class="brand-images">
+                                 <img src="{% static "img/visa.png" %}" class="brand" brand="VISA">
+                                 <img src="{% static "img/mastercard.png" %}" class="brand" brand="MASTERCARD">
+                                 <img src="{% static "img/elo.png" %}" class="brand" brand="ELO">
+                                 <img src="{% static "img/amex.png" %}" class="brand" brand="AMEX">
+                                 <img src="{% static "img/diners.png" %}" class="brand" brand="DINERS">
+                                 <img src="{% static "img/hipercard.png" %}" class="brand" brand="HIPERCARD">                                 
+                               </div>
                             </div>
                          </div>
                       </div>                  
@@ -116,7 +132,7 @@
                   </div>
                   <div class="panel panel-defualt">
                     <div class="panel-heading ezl-panel text-white">
-                      Endereço de cobrança
+                      3 - Endereço de cobrança
                     </div>
                     <div class="panel-body">
                       <div class="row">
