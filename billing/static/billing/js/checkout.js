@@ -20,6 +20,7 @@ class Checkout {
 		this._elInputCity = $('#input-address-city');
 		this._elState = $('#input-address-state');
 		this._elBtnPay = $('#btn-pay');
+		this._elPaymentPending = $('#payment-pending');
 		this.cards = {
 			visa: /^4\d+$/,
 			mastercard: /^5\d+$/, 
@@ -122,6 +123,7 @@ class Checkout {
 			$('.brand').css("filter", "grayscale(100%)");
 			Object.keys(this.cards).forEach((key) => {
 				if (this.cards[key].test(this.cardNumber)) {
+					$('.brand').css("filter", "grayscale(100%)");
 					this.cardBrand = key;
 					$(`[brand=${this.cardBrand.toUpperCase()}]`).css("filter", "grayscale(0)");
 				}
@@ -154,6 +156,7 @@ class Checkout {
 
 	getPaymentStatus() {
 		setInterval(()=>{
+			this.showPaymentPending();
 			$.ajax({
 				url: `/billing/detail_payment/${this.charge_id}`, 
 				method: 'GET', 
@@ -275,6 +278,14 @@ class Checkout {
 			}
 		})
 	}
+
+    showPaymentPending() {
+        this._elPaymentPending.css('display', 'block')
+    }
+
+    hidePaymentPending() {
+        this._elPaymentPending.css('display', 'none')
+    }	
  }
 
 var dataPayment;

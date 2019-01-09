@@ -21,7 +21,7 @@ class TaskDetail {
         this._elBtnCompanyRepresentative = $('#btn-company_representative');
         this._elModalSurveyCompanyRepresentative = $("#survey-company-representative");
         this._elExecutionDate.attr({'required': true, 'placeholder': 'Data de Cumprimento'});
-        this._elTypeTaskField = $('#id_type_task_field');
+        this._elTypeTaskField = $('#id_type_task_field');        
         this.initFeedbackRating();
         this.initCpfCnpjField();
         this.onClickRowServicePriceTable();        
