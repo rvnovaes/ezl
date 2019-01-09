@@ -123,6 +123,7 @@ class Checkout {
 			$('.brand').css("filter", "grayscale(100%)");
 			Object.keys(this.cards).forEach((key) => {
 				if (this.cards[key].test(this.cardNumber)) {
+					$('.brand').css("filter", "grayscale(100%)");
 					this.cardBrand = key;
 					$(`[brand=${this.cardBrand.toUpperCase()}]`).css("filter", "grayscale(0)");
 				}
