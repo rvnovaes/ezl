@@ -1,6 +1,6 @@
 from django import forms
 from django.db.models import Q
-from financial.models import ServicePriceTable
+from financial.models import ServicePriceTable, CategoryPrice
 from financial.tables import ServicePriceTableTaskTable
 from task.models import TaskStatus, TypeTask
 from decimal import Decimal
@@ -148,7 +148,7 @@ class CorrespondentsTable(object):
                 Q(
                     Q(office=task.office) |
                     Q(
-                        Q(office__public_office=True), ~Q(office=task.office)
+                        Q(policy_price__category=CategoryPrice.PUBLIC), ~Q(office=task.office)
                     ) |
                     Q(office_id__in=network_office_id_list)
                 ),
@@ -164,7 +164,7 @@ class CorrespondentsTable(object):
                         # vinculados aos tipos de servico vinculados ao tipo de
                         # servico padrao
                         Q(type_task__type_task_main__in=type_task_main),
-                        Q(office__public_office=True)) |
+                        Q(policy_price__category=CategoryPrice.PUBLIC)) |
                     Q(
                         # para escritórios que pertencem as mesmas redes do escritório da task
                         # selecionar os preços que estão vinculados aos tipos de serviço vinculado
@@ -177,7 +177,7 @@ class CorrespondentsTable(object):
                 Q(
                     Q(office_correspondent__in=offices_related) |
                     Q(
-                        Q(office_correspondent__public_office=True), ~Q(office_correspondent=task.office)
+                        Q(policy_price__category=CategoryPrice.PUBLIC), ~Q(office_correspondent=task.office)
                     ) |
                     Q(office_correspondent__in=network_office_id_list)
                 ),
@@ -192,6 +192,9 @@ class CorrespondentsTable(object):
                 Q(is_active=True))
             qs_values = qs.values('pk', 'office_id', 'type_task__office_id',
                                   'type_task')
+            # cria uma lista e ids que tenham tabelas de preço com preços vinculados à tipos de serviço de outros
+            # escritórios. Esse filtro é necessário para eliminar preços anteriores à criação do tipo de preços por
+            # escritório
             ignore_list = [
                 v['pk'] for v in qs_values
                 if (v['type_task']
