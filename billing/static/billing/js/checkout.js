@@ -29,7 +29,6 @@ class Checkout {
 			diners: /^(30|36|38)/,
 			discover: /^(6011|622|64|65)/, 
 			jcb: /^35/, 
-			aura: /^50/,
 		};
 		this.onClickBtnPay();
 		this.onClickBrand();
@@ -119,15 +118,14 @@ class Checkout {
 	}	
 
 	onKeyUpCardNumber() {
-		this._elInputCardNumber.on('keyup', (evt)=> {			
+		this._elInputCardNumber.on('keyup', (evt)=> {
 			$('.brand').css("filter", "grayscale(100%)");
 			Object.keys(this.cards).forEach((key) => {
-				if (this.cards[key].test(this.cardNumber)) {
-					$('.brand').css("filter", "grayscale(100%)");
-					this.cardBrand = key;
-					$(`[brand=${this.cardBrand.toUpperCase()}]`).css("filter", "grayscale(0)");
+				if (this.cards[key].test(this.cardNumber)) {					
+					this.cardBrand = key;					
 				}
 			})
+			$(`[brand=${this.cardBrand.toUpperCase()}]`).css("filter", "grayscale(0)");
 		})
 	}
 
