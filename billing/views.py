@@ -4,19 +4,22 @@ from django.views import View
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from billing.gerencianet_api import api as gn_api
 from billing.models import *
+from task.models import Task
 from core.views import CustomLoginRequiredView
 # Create your views here.
 
 
 class ChargeCreateView(CustomLoginRequiredView, View):
 	def post(self, request, *args, **kwargs):
+		task = Task.objects.get(pk=request.POST.get('task_id'))
 		name = request.POST.get('name')
+		custom_id = request.POST.get('service_price_table_id')
 		item = {
 			'name': request.POST.get('name'), 
-			'value': int(request.POST.get('value'))
+			'value': int(request.POST.get('value')),			
 		}	
 		charge = Charge()					
-		gn_response = gn_api.create_transaction([item])
+		gn_response = gn_api.create_transaction([item], custom_id)
 		gn_charge = gn_response.get('data')
 		charge.create_user = request.user
 		charge.custom_id = gn_charge.get('custom_id')
@@ -24,6 +27,7 @@ class ChargeCreateView(CustomLoginRequiredView, View):
 		charge.status = gn_charge.get('status')
 		charge.created_at = gn_charge.get('created_at')
 		charge.save()
+		charge.task_set.add(task)
 		charge_item = ChargeItem()
 		charge_item.create_user = request.user
 		charge_item.charge = charge

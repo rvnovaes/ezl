@@ -1,7 +1,8 @@
 class Checkout {
-	constructor(csrfToken) {
+	constructor(csrfToken, chargeId, callbackToPay) {		
+		this.callbackToPay = callbackToPay;
 		this.csrfToken = csrfToken;
-		this.charge_id;
+		this.chargeId = chargeId;
 		this._elModalCheckout = $('#modal-billing-checkout');
 		this._elInputName = $('#input-name');		
 		this._elInputEmail = $('#input-email');
@@ -131,8 +132,8 @@ class Checkout {
 
 
 
-	openCheckout(charge_id) {
-		this.charge_id = charge_id
+	openCheckout(chargeId) {
+		this.chargeId = chargeId
 		this._elModalCheckout.modal('show')
 	}
 
@@ -152,18 +153,21 @@ class Checkout {
 		}
 	}
 
-	getPaymentStatus() {
-		setInterval(()=>{
-			this.showPaymentPending();
+	getPaymentStatus() {									
+		this.intervalCheckStatus = setInterval(()=>{			
 			$.ajax({
-				url: `/billing/detail_payment/${this.charge_id}`, 
+				url: `/billing/detail_payment/${this.chargeId}`, 
 				method: 'GET', 
 				dataType: 'json', 
 				success: (response)=> {
 					console.log(response)
 					if (response.data.status === 'paid') {
-						$('#task_detail').unbind('submit').submit();
-					}										
+						this.callbackToPay(response.data);						
+					} else  {						
+						if (response.data.status !== 'waiting') {
+							clearInterval(this.intervalCheckStatus);
+						}						
+					}
 				}
 
 			})
@@ -262,7 +266,7 @@ class Checkout {
 				}
 			};			
 			csrfToken = this.csrfToken;
-			chargeId = this.charge_id;
+			chargeId = this.chargeId;
 			confirmPayment = this.confirmPayment;
 			if (this.validateForm()){
 				this.getPaymentStatus();

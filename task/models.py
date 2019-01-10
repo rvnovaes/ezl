@@ -406,7 +406,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
         blank=True,
         null=True,
         verbose_name='Preposto', related_name='tasks_to_person_representative')
-    # charge = models.ForeignKey(Charge, on_delete=models.PROTECT, blank=True, null=True)
+    charge = models.ForeignKey(Charge, on_delete=models.PROTECT, blank=True, null=True)
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient

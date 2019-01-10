@@ -196,10 +196,3 @@
    </div>
    <!-- /.modal-dialog -->
 </div>
-
-{% block extra_scripts %} 
-  <script src="{% static 'billing/js/checkout.js' %}"></script>
-  <script type="text/javascript">
-    var checkout = new Checkout('{{csrf_token}}');  
-  </script>
-{% endblock%}

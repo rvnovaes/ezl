@@ -5,12 +5,13 @@ import json
 def get_connection():
 	return Gerencianet(settings.GERENCIANET_CREDENTIALS)
 
-def create_transaction(items):
+def create_transaction(items, custom_id):
 	gn = get_connection()
 	body = {
 		'items': items, 
 		'metadata': {
-			'notification_url':'https://webhook.site/e983e7fe-7ff4-4251-b107-97167aa139e2'
+			'notification_url':'https://webhook.site/e983e7fe-7ff4-4251-b107-97167aa139e2', 
+			'custom_id': custom_id
 			}, 		
 	}	
 	return gn.create_charge(body=body)

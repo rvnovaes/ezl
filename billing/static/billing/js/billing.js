@@ -1,6 +1,7 @@
 class Billing {
 	constructor(checkout) {		
-		this.checkout = checkout;
+		this.taskDetail = taskDetail;
+		this.checkout = checkout;		
 		this.item;		
 	}
 	createCharge(csrfToken) {

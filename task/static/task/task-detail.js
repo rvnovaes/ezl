@@ -1,7 +1,9 @@
 class TaskDetail {
-    constructor(taskId, officeWorkAlone, pendingSurvey, surveyCompanyRepresentative, csrfToken, billing) {
+    constructor(taskId, taskStatus, officeWorkAlone, pendingSurvey, surveyCompanyRepresentative, csrfToken, billing, chargeId) {
         this.csrfToken = csrfToken;
-        this.taskId = taskId
+        this.taskId = taskId;
+        this.taskStatus = taskStatus;
+        this.chargeId = chargeId;
         this.officeWorkAlone = officeWorkAlone;
         this.pendingSurvey = pendingSurvey;
         this.surveyCompanyRepresentative=surveyCompanyRepresentative;
@@ -24,10 +26,9 @@ class TaskDetail {
         this._elTypeTaskField = $('#id_type_task_field');        
         this.initFeedbackRating();
         this.initCpfCnpjField();
-        this.onClickRowServicePriceTable();        
+        this.onClickRowServicePriceTable();  
+        this.checkPaymentPending()      
     }
-
-    // Funcao que invoca o action form de acordo com o status
 
     get servicePriceTableId(){
         let servicePriceTableId = $('input[name=servicepricetable_id]').val();
@@ -35,15 +36,9 @@ class TaskDetail {
         return servicePriceTableId;
     }
 
-    setServicePriceDetail(servicePriceTableId) {
-        $.ajax({
-            method: 'GET', 
-            url: `/financeiro/tabelas-de-precos/detalhes/${servicePriceTableId}/`, 
-            success: (response) => {
-                this.servicePriceTable = response;
-            }
-        })
-    }    
+    set servicePriceTableId(value) {
+        $('input[name=servicepricetable_id]').val(value);
+    }
 
     get officeToDelegate() {
         return $("#office-" + this.servicePriceTableId);
@@ -73,9 +68,29 @@ class TaskDetail {
         };
     }
 
+    checkPaymentPending() {
+        if (this.chargeId) {
+            this.billing.checkout.chargeId = this.chargeId            
+            this.billing.checkout.getPaymentStatus()
+        }
+    }
+
+    setServicePriceDetail(servicePriceTableId) {
+        $.ajax({
+            method: 'GET', 
+            url: `/financeiro/tabelas-de-precos/detalhes/${servicePriceTableId}/`, 
+            success: (response) => {
+                this.servicePriceTable = response;
+            }
+        })
+    }    
+
+
     setBillingItem() {
         this.billing.item =
           {
+            task_id: this.taskId, 
+            service_price_table_id: this.servicePriceTableId,
             name: this._elTaskTitle.text() + ' para ' + this.officeToDelegateName, 
             value: parseInt(this.officeToDelegate.data('value').replace('.', '').replace(', ', ''))
           };         
@@ -220,7 +235,8 @@ class TaskDetail {
         $('#actionButton').removeAttr('disabled')
     }        
 
-    checkDelegationOffice() {        
+    checkDelegationOffice(statusPayment) {        
+        console.log(statusPayment);
         $('#task_detail').submit(function (e) {
             e.preventDefault();                
         });
@@ -233,7 +249,7 @@ class TaskDetail {
                 .attr('name', 'action')
                 .attr('value', 'OPEN')
                 .appendTo('#task_detail');
-                if (this.servicePriceTable.policy_price.billing_moment === 'PRE_PAID') {
+                if (this.servicePriceTable.policy_price.billing_moment === 'PRE_PAID' && statusPayment !== 'paid') {
                     this.hideModalAction();
                     this.billing.createCharge(this.csrfToken)
                 } else {
