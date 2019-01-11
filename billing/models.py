@@ -1,6 +1,6 @@
 from django.db import models
 from djmoney.models.fields import MoneyField
-from core.models import Audit, Office
+from core.models import Audit, Office, OfficeMixin, Address
 
 
 class Plan(Audit):
@@ -82,3 +82,30 @@ class ChargeItem(Audit):
 
     def __str__(self):
         return self.name or ''
+
+
+class BillingDetails(Audit, OfficeMixin):
+    card_name = models.CharField(
+        verbose_name='Nome no cartão',
+        max_length=255,
+    )
+    email = models.EmailField(
+        verbose_name='E-mail',
+        max_length=255,
+    )
+    cpf_cnpj = models.CharField(
+        max_length=255,
+        verbose_name='CPF/CNPJ'
+    )
+    birth_date = models.DateField(verbose_name='Data de nascimento')
+    phone_number = models.CharField(
+        verbose_name='Telefone',
+        max_length=15
+    )
+    billing_address = models.ForeignKey(Address, verbose_name='Endereço de cobrança')
+
+    class Meta:
+        ordering = ['office', 'card_name']
+
+    def __str__(self):
+        return '{} - {}'.format(self.office, self.card_name)
