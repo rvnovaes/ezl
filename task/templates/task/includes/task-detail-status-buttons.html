@@ -16,7 +16,7 @@
                     class="text-white btn btn-ezl-refused_service {% if not form.instance.status.name == 'REQUESTED' %}hidden{% endif %}">
                 <span class="btn-label"><i class="mdi mdi-thumb-down-outline"></i></span> Recusar Solicitação
             </button>
-            <button type="button" data-toggle="modal" data-target="#to-assign"
+            <button type="button" id="ASSIGN" data-toggle="modal" data-target="#to-assign"
                     class="text-white btn btn-info {% if not form.instance.status.name == 'ACCEPTED_SERVICE' %}hidden{% endif %}">
                 <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Atribuir
             </button>

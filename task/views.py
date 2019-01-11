@@ -2236,6 +2236,7 @@ def ajax_bulk_create_update_status(request):
         task = Task.objects.filter(pk=task_id).first()
         if task and task.task_status == 'Solicitada':
             task.task_status = TaskStatus.ACCEPTED_SERVICE
+            task.acceptance_service_date = timezone.now()
             task.save()
             data = {
                 "updated": True,

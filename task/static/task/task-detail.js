@@ -27,7 +27,8 @@ class TaskDetail {
         this.initFeedbackRating();
         this.initCpfCnpjField();
         this.onClickRowServicePriceTable();  
-        this.checkPaymentPending()      
+        this.checkPaymentPending();
+        this.onDocumentReady();
     }
 
     get servicePriceTableId(){
@@ -439,6 +440,22 @@ class TaskDetail {
         $('input[id=id_amount]').keypress(function(e) {
             if(e.which == 13) {
               e.preventDefault();
+            }
+        });
+    }
+
+    onDocumentReady(){
+	    $(document).ready(()=>{
+	        if(this.taskStatus === 'ACCEPTED_SERVICE') {
+                let url_string = window.location.href;
+                let url = new URL(url_string);
+                let action = url.searchParams.get("action")
+                if (action === 'delegate') {
+                    $('#OPEN').click();
+                }
+                if (action === 'assign') {
+                    $('#ASSIGN').click();
+                }
             }
         });
     }
