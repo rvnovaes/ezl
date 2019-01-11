@@ -86,7 +86,6 @@ class GenericSearchFormat(object):
 
     def despatch(self, office=False):
         params = []
-
         if not any([self.params, params]):
             return False
 
@@ -104,7 +103,9 @@ class GenericSearchFormat(object):
             else:
                 if not office:
                     office = [get_office_session(self.request).id]
-                search = "self.table_class(self.model.objects.get_queryset(office=[{office}]).filter({params}))".format(
+                if not type(office) is list:
+                    office = [office]
+                search = "self.table_class(self.model.objects.get_queryset(office={office}).filter({params}))".format(
                     office=office, params='{params}')
         except:
             search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
