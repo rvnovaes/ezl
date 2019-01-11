@@ -4,6 +4,8 @@ class TaskBulkCreate {
 	    this.nullData = {id: null, text: null};
 	    this.defaultPersonAskedBy = null;
 	    this.enableOnChange = true;
+	    this.baseURL = '';
+	    this.taskID = null;
 		this.elInputPersonCustomer = $('[name=person_customer]');
 		this.elCourtDistrict = $('[name=court_district]');
 		this.elCourtDistrictComplemt = $('[name=court_district_complement]');
@@ -191,6 +193,27 @@ class TaskBulkCreate {
 
     set movement(data) {
         TaskBulkCreate.setSelect2(data, this.elMovement);
+    }
+
+    getTaskURL(){
+	    return `${this.baseURL}/dashboard/${this.taskID}/`;
+    }
+
+    getActionTaskURL(action){
+	    return `${this.getTaskURL()}?action=${action}`;
+    }
+
+    htmlConfirmSwal(result){
+	    return `Número da OS: <a href="${this.getTaskURL()}" target="_blank">${result.task_number}</a><br />` +
+                            `<button type="button" id="delegateOS" class="text-white btn btn-ezl-open btn-block m-b-10 m-t-10">` +
+                                `<span class="btn-label"><i class="fa fa-building-o"></i></span> Delegar` +
+                            `</button>` +
+                            `<button type="button" id="assignOS"  class="text-white btn btn-info btn-block m-b-10 m-t-10">`+
+                                `<span class="btn-label"><i class="mdi mdi-account-location"></i></span> Atribuir` +
+                            `</button>` +
+                            `<button type="button" id='createOS' class="text-white btn create-os-active btn-block m-b-10 m-t-10">`+
+                                `<span class="btn-label"><i class="mdi mdi-plus-circle-outline"></i></span> Criar outra OS` +
+                            `</button>`;
     }
 
     async newPersonCustomer (csrfToken){
@@ -493,24 +516,35 @@ class TaskBulkCreate {
     }
 
     submitForm(data){
-	    let baseURL = window.location.origin;
+	    this.baseURL = window.location.origin;
 	    TaskBulkCreate.swalLoading('Criando a OS');
         $.ajax({
             type: 'POST',
             url: window.location,
             data: data,
             success: (result)=>{
+                this.taskID = result.task_id;
                 swal.close();
+                let html = this.htmlConfirmSwal(result);
                 swal({
                     title: 'OS criada com sucesso',
                     type: 'success',
-                    html: `Número da OS: <a href="${baseURL}/dashboard/${result.task_id}" target="_blank">${result.task_number}</a>`,
+                    html: html,
                     showCloseButton: true,
                     showCancelButton: false,
-                    focusConfirm: true,
+                    showConfirmButton: false,
                     onClose: () => {
                         window.location.reload();
                     }
+                });
+                $('#createOS').click(()=>{
+                    window.location.reload();
+                });
+                $('#delegateOS').click(()=>{
+                    this.delegateTask();
+                });
+                $('#assignOS').click(()=>{
+                    this.assignTask();
                 });
             },
             error: (request, status, error)=>{
@@ -577,6 +611,40 @@ class TaskBulkCreate {
             el.preventDefault();
             this.save();
         });
+    }
+
+    updateTaskStatus(action) {
+	    if(this.baseURL && this.taskID && action) {
+	        TaskBulkCreate.swalLoading('Aguarde...');
+            $.ajax({
+                type: 'POST',
+                url: '/providencias/ajax_bulk_create_update_status/',
+                data: {'task_id': this.taskID},
+                success: (result) => {
+                    window.location.replace(`${this.getActionTaskURL(action)}`);
+                },
+                error: (request, status, error) => {
+                    swal.close();
+                    showToast('error', 'Atenção', error, 0, false);
+                },
+                beforeSend: (xhr, settings) => {
+                    xhr.setRequestHeader('X-CSRFToken', this.query.csrfmiddlewaretoken);
+                },
+                dataType: 'json'
+            });
+        }
+    }
+
+    delegateTask() {
+	    if(this.baseURL && this.taskID) {
+            this.updateTaskStatus('delegate');
+        }
+    }
+
+    assignTask() {
+	    if(this.baseURL && this.taskID) {
+            this.updateTaskStatus('assign');
+        }
     }
 
     static swalLoading(title='', message=''){
