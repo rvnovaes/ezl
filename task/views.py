@@ -2201,6 +2201,7 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         except Exception as e:
             return JsonResponse({'error': e})
 
+
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):        
         task = Task.objects.get(pk=request.POST.get('task_id'))
@@ -2222,3 +2223,25 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         pre_save.connect(signals.pre_save_task, sender=Task)
         post_save.connect(signals.post_save_task, sender=Task) 
         return JsonResponse({'message': 'Registro atualizado com sucesso'})
+
+
+@login_required
+def ajax_bulk_create_update_status(request):
+    task_id = request.POST.get('task_id', 0)
+    status = 200
+    data = {
+        "updated": False,
+    }
+    if task_id:
+        task = Task.objects.filter(pk=task_id).first()
+        if task and task.task_status == 'Solicitada':
+            task.task_status = TaskStatus.ACCEPTED_SERVICE
+            task.save()
+            data = {
+                "updated": True,
+            }
+        else:
+            status = 500
+    else:
+        status = 400
+    return JsonResponse(data, status=status)
