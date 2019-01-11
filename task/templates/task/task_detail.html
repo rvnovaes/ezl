@@ -160,10 +160,9 @@
     });    
 
     var callbackToPay = function(data) {
-        taskDetail.servicepricetableId = data.custom_id;
+        taskDetail.servicePricetableId = data.custom_id;
         if (taskDetail.taskStatus === 'ACCEPTED_SERVICE' || taskDetail.taskStatus === 'REQUESTED') {
-            taskDetail.checkDelegationOffice(data.status);
-            clearInterval(taskDetail.billing.checkout.intervalCheckStatus);
+            taskDetail.checkDelegationOffice(data.status);            
         } else {
             clearInterval(taskDetail.billing.checkout.intervalCheckStatus);
         }        

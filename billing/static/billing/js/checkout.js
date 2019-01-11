@@ -31,8 +31,7 @@ class Checkout {
 			discover: /^(6011|622|64|65)/, 
 			jcb: /^35/, 
 		};
-		this.onClickBtnPay();
-		this.onClickBrand();
+		this.onClickBtnPay();		
 		this.onChangeZipcode();		
 		this.onKeyUpCardNumber();
 
@@ -153,9 +152,8 @@ class Checkout {
 		}
 	}
 
-	getPaymentStatus() {									
-		this.intervalCheckStatus = setInterval(()=>{			
-			$.ajax({
+	checkStatus() {	
+		$.ajax({
 				url: `/billing/detail_payment/${this.chargeId}`, 
 				method: 'GET', 
 				dataType: 'json', 
@@ -164,14 +162,20 @@ class Checkout {
 					if (response.data.status === 'paid') {
 						this.callbackToPay(response.data);						
 					} else  {						
-						if (response.data.status !== 'waiting') {
+						if (response.data.status === 'waiting') {
+							this.showPaymentPending()							
+						} else {
 							clearInterval(this.intervalCheckStatus);
 						}						
 					}
 				}
-
 			})
-		}, 10000)
+		}	
+
+	getPaymentStatus() {									
+		window.scroll(0, 0);
+		this.checkStatus();
+		this.intervalCheckStatus = setInterval(this.checkStatus, 10000)
 	}
 
 	confirmPayment(chargeId, paymentToken, data, csrfToken) {
@@ -194,14 +198,6 @@ class Checkout {
 			}, 
 		})
 	} 
-
-	onClickBrand() {
-		this._elBrand.on('click', (evt) => {
-			this.cardBrand = $(evt.toElement).attr('brand');
-			$('.brand').css("filter", "grayscale(100%)")
-			$(evt.toElement).css("filter", "grayscale(0)")
-		})
-	}
 
 	onChangeZipcode() {
 		this._elInputZipcode.on('change', (evt)=> {
@@ -240,7 +236,8 @@ class Checkout {
 	onClickBtnPay() {
 		this._elBtnPay.on('click', (evt)=> {
 			swal({
-				title: 'Processando', 
+				title: 'Processando pagamento', 
+				text: 'Aguarde...',
 				onOpen: ()=>{
 					swal.showLoading();
 				}
