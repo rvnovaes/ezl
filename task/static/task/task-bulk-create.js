@@ -204,16 +204,37 @@ class TaskBulkCreate {
     }
 
     htmlConfirmSwal(result){
-	    return `Número da OS: <a href="${this.getTaskURL()}" target="_blank">${result.task_number}</a><br />` +
-                            `<button type="button" id="delegateOS" class="text-white btn btn-ezl-open btn-block m-b-10 m-t-10">` +
-                                `<span class="btn-label"><i class="fa fa-building-o"></i></span> Delegar` +
-                            `</button>` +
-                            `<button type="button" id="assignOS"  class="text-white btn btn-info btn-block m-b-10 m-t-10">`+
-                                `<span class="btn-label"><i class="mdi mdi-account-location"></i></span> Atribuir` +
-                            `</button>` +
-                            `<button type="button" id='createOS' class="text-white btn create-os-active btn-block m-b-10 m-t-10">`+
-                                `<span class="btn-label"><i class="mdi mdi-plus-circle-outline"></i></span> Criar outra OS` +
-                            `</button>`;
+	    return `
+            Número da OS: <a href="${this.getTaskURL()}" target="_blank">${result.task_number}</a>
+            <br />
+            <div class="row">
+                <div class="col-md-7 col-md-offset-3">                    
+                    <button type="button" id="delegateOS" class="text-white btn btn-ezl-open btn-block m-b-10 m-t-10" style="padding-left: 0px;">
+                        <span class="btn-label" style="margin-left: -35px;">
+                            <i class="fa fa-building-o"></i>
+                        </span> Delegar
+                    </button>                
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-7 col-md-offset-3">
+                    <button type="button" id="assignOS"  class="text-white btn btn-info btn-block m-b-10 m-t-10" style="padding-left: 0px;">
+                        <span class="btn-label" style="margin-left: -35px;">
+                            <i class="mdi mdi-account-location"></i>
+                        </span> Atribuir
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-7 col-md-offset-3">
+                    <button type="button" id='createOS' class="text-white btn create-os-active btn-block m-b-10 m-t-10" style="padding-left: 0px;">
+                        <span class="btn-label" style="margin-left: 0;"> 
+                            <i class="mdi mdi-plus-circle-outline"></i>
+                        </span> Criar outra OS
+                    </button>
+                </div>                
+            </div>                            
+            `;
     }
 
     async newPersonCustomer (csrfToken){

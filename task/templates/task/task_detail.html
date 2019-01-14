@@ -144,7 +144,7 @@
     <script src='{% static "task/task-detail.js" %}'></script>
     <script src="{% static 'billing/js/checkout.js' %}"></script>
     <script type="text/javascript">
-    var taskDetail;
+    var taskDetail;    
     var gn_checkout;
     var gn_callback = function(error, response) {
         if(error) {
@@ -159,17 +159,8 @@
       gn_checkout = checkout;     
     });    
 
-    var callbackToPay = function(data) {
-        taskDetail.servicePricetableId = data.custom_id;
-        if (taskDetail.taskStatus === 'ACCEPTED_SERVICE' || taskDetail.taskStatus === 'REQUESTED') {
-            taskDetail.checkDelegationOffice(data.status);            
-        } else {
-            clearInterval(taskDetail.billing.checkout.intervalCheckStatus);
-        }        
-    };
-
     $(document).ready(function(){  
-        var checkout = new Checkout('{{csrf_token}}', '{{object.charge.charge_id}}', callbackToPay);  
+        var checkout = new Checkout('{{csrf_token}}', '{{object.charge.charge_id}}');  
         let billing = new Billing(checkout)
         taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{ pending_survey|lower }}', '{{survey_company_representative|safe}}', '{{csrf_token}}', billing, '{{object.charge.charge_id}}');
     })

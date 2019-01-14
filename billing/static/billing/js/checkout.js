@@ -1,6 +1,5 @@
 class Checkout {
 	constructor(csrfToken, chargeId, callbackToPay) {		
-		this.callbackToPay = callbackToPay;
 		this.csrfToken = csrfToken;
 		this.chargeId = chargeId;
 		this._elModalCheckout = $('#modal-billing-checkout');
@@ -153,20 +152,25 @@ class Checkout {
 	}
 
 	checkStatus() {	
+		let chargeId = this.chargeId;		
+		if (!chargeId) {
+			chargeId = gnData.charge_id;			
+		}		
 		$.ajax({
-				url: `/billing/detail_payment/${this.chargeId}`, 
+				url: `/billing/detail_payment/${chargeId}`, 
 				method: 'GET', 
 				dataType: 'json', 
 				success: (response)=> {
-					console.log(response)
+					gnData = response.data;
 					if (response.data.status === 'paid') {
-						this.callbackToPay(response.data);						
+						taskDetail.servicePriceTableId = response.data.custom_id;
+						taskDetail.setServicePriceDetail(response.data.custom_id);
+						taskDetail.delegateTaskPaid(gnData, this.intervalCheckStatus);
+
 					} else  {						
 						if (response.data.status === 'waiting') {
-							this.showPaymentPending()							
-						} else {
-							clearInterval(this.intervalCheckStatus);
-						}						
+							taskDetail.billing.checkout.showPaymentPending()							
+						} 						
 					}
 				}
 			})
@@ -215,79 +219,80 @@ class Checkout {
 		})
 	}
 
-	validateBrand() {
-		if(!this.cardBrand) {
-			swal.close();
-			swal({
-				title: 'Atenção', 
-				text: 'É necessário selecionar a bandeira do cartão',
-				type: 'error',
-				confirmButtonText: 'ok',
-			})
-			return false;
-		}
-		return true;
-	}
-
 	validateForm() {
-
-		return this.validateBrand();
-	}
-	onClickBtnPay() {
-		this._elBtnPay.on('click', (evt)=> {
-			swal({
-				title: 'Processando pagamento', 
-				text: 'Aguarde...',
-				onOpen: ()=>{
-					swal.showLoading();
-				}
-			})
-			dataPayment = {
-				data: {
-					installments: 1, 				 
-					billing_address: {
-						street: this.street, 
-						number: this.addressNumber, 
-						neighborhood: this.neighborhood, 
-						zipcode: this.zipcode, 
-						city: this.city, 
-						state: this.state
-					}, 
-					customer: {
-						name: this.name, 
-						email: this.email, 
-						cpf: this.cpf, 
-						birth: this.birth, 
-						phone_number: this.phoneNumber, 				
-					}				
-				}
-			};			
-			csrfToken = this.csrfToken;
-			chargeId = this.chargeId;
-			confirmPayment = this.confirmPayment;
-			if (this.validateForm()){
-				this.getPaymentStatus();
-				gn_checkout.getPaymentToken({
-					brand: this.cardBrand.toLowerCase(), 
-					number: this.cardNumber, 
-					cvv: this.cardCVVCode, 
-					expiration_month: this.cardExpirationDate.slice(0,2), 
-					expiration_year: this.cardExpirationDate.slice(3,7)
-				}, this.paymentCallback)
+		let formValid = true
+		$('#form-checkout').find('input').each(function(el) {
+			if ($(this).prop('required') && $(this).val().length === 0) {
+				$(this).parent().addClass('has-error');
+				formValid = false;
 			}
 		})
+		return formValid		
+	}
+
+	onClickBtnPay() {
+		$('#form-checkout').submit(function (e) {
+            e.preventDefault();
+        });		
+		this._elBtnPay.on('click', (evt)=> {
+			if (this.validateForm()) {
+				swal({
+					title: 'Processando pagamento', 
+					text: 'Aguarde...',
+					onOpen: ()=>{
+						swal.showLoading();
+					}
+				})
+				dataPayment = {
+					data: {
+						installments: 1, 				 
+						billing_address: {
+							street: this.street, 
+							number: this.addressNumber, 
+							neighborhood: this.neighborhood, 
+							zipcode: this.zipcode, 
+							city: this.city, 
+							state: this.state
+						}, 
+						customer: {
+							name: this.name, 
+							email: this.email, 
+							cpf: this.cpf, 
+							birth: this.birth, 
+							phone_number: this.phoneNumber, 				
+						}				
+					}
+				};			
+				csrfToken = this.csrfToken;
+				chargeId = this.chargeId;
+				confirmPayment = this.confirmPayment;
+				if (this.validateForm()){
+					this.getPaymentStatus();
+					gn_checkout.getPaymentToken({
+						brand: this.cardBrand.toLowerCase(), 
+						number: this.cardNumber, 
+						cvv: this.cardCVVCode, 
+						expiration_month: this.cardExpirationDate.slice(0,2), 
+						expiration_year: this.cardExpirationDate.slice(3,7)
+					}, this.paymentCallback)
+				}
+			}			
+		})		
 	}
 
     showPaymentPending() {
-        this._elPaymentPending.css('display', 'block')
+        this._elPaymentPending.css('display', 'block');
+        $('[data-target]').css('display', 'none') 
     }
 
     hidePaymentPending() {
         this._elPaymentPending.css('display', 'none')
     }	
+  
  }
 
 var dataPayment;
 var csrfToken;
 var chargeId;
 var confirmPayment;
+var gnData;
