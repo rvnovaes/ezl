@@ -102,7 +102,6 @@ class BillingDetailAjaxUpdate(CustomLoginRequiredView, View, BillingDetailBaseVi
         data = {k: v for k, v in request.POST.items()}
         data['address_type'] = AddressType.objects.filter(name='Comercial').first().id
         form = BillingAddressCombinedForm(data)
-        import pdb;pdb.set_trace()
         instance = BillingDetails.objects.filter(pk=kwargs.get('pk')).first()
         if form.is_valid() and instance:
             # salva o endereço
