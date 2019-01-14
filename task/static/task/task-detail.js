@@ -236,8 +236,7 @@ class TaskDetail {
         $('#actionButton').removeAttr('disabled')
     }        
 
-    checkDelegationOffice(statusPayment) {        
-        console.log(statusPayment);
+    checkDelegationOffice() {        
         $('#task_detail').submit(function (e) {
             e.preventDefault();                
         });
@@ -250,19 +249,8 @@ class TaskDetail {
                 .attr('name', 'action')
                 .attr('value', 'OPEN')
                 .appendTo('#task_detail');
-                if (this.servicePriceTable.policy_price.billing_moment === 'PRE_PAID' && statusPayment !== 'paid') {
-                    this.hideModalAction();
-                    this.billing.createCharge(this.csrfToken)
-                } else {
-                    swal({
-                        title: 'Delegando', 
-                        text: 'Arguarde', 
-                        onOpen: () => {
-                            swal.showLoading()
-                        } 
-                    })
-                    $('#task_detail').unbind('submit').submit();
-                }
+                this.hideModalAction();
+                this.billing.createCharge(this.csrfToken)
         }        
     }
 
@@ -458,6 +446,41 @@ class TaskDetail {
                 }
             }
         });
+    }
+
+    delegateTaskPaid(gnData, intervalCheck) {
+        if (gnData.status === 'paid' && this.taskStatus === 'ACCEPTED_SERVICE' || this.taskStatus === 'REQUESTED') {
+            clearInterval(intervalCheck)
+            $.ajax({
+                method: 'GET', 
+                url: `/financeiro/tabelas-de-precos/detalhes/${gnData.custom_id}/`, 
+                success: (response) => {
+                    this.servicePriceTable = response;
+                    console.log(response)
+                    $.ajax({
+                        method: 'post', 
+                        url: `/providencias/${this.taskId}/batch/delegar`, 
+                        data: {
+                                task_id: this.taskId,
+                                servicepricetable_id: response.id,   
+                                amount: response.value, 
+                                note: '',                               
+                            },
+                        success: function(response) {                
+                            if (response.status === 'ok') {
+                                location.reload();
+                            }
+                        },
+                        error: function (request, status, error) {
+                        },
+                        beforeSend: function (xhr, settings) {
+                            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                        },
+                        dataType: 'json'                        
+                    })                        
+                }
+            })                    
+        }
     }
 }
 

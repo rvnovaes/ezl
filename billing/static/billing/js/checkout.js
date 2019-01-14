@@ -1,6 +1,5 @@
 class Checkout {
 	constructor(csrfToken, chargeId, callbackToPay) {		
-		this.callbackToPay = callbackToPay;
 		this.csrfToken = csrfToken;
 		this.chargeId = chargeId;
 		this._elModalCheckout = $('#modal-billing-checkout');
@@ -153,20 +152,25 @@ class Checkout {
 	}
 
 	checkStatus() {	
+		let chargeId = this.chargeId;		
+		if (!chargeId) {
+			chargeId = gnData.charge_id;			
+		}		
 		$.ajax({
-				url: `/billing/detail_payment/${this.chargeId}`, 
+				url: `/billing/detail_payment/${chargeId}`, 
 				method: 'GET', 
 				dataType: 'json', 
 				success: (response)=> {
-					console.log(response)
+					gnData = response.data;
 					if (response.data.status === 'paid') {
-						this.callbackToPay(response.data);						
+						taskDetail.servicePriceTableId = response.data.custom_id;
+						taskDetail.setServicePriceDetail(response.data.custom_id);
+						taskDetail.delegateTaskPaid(gnData, this.intervalCheckStatus);
+
 					} else  {						
 						if (response.data.status === 'waiting') {
-							this.showPaymentPending()							
-						} else {
-							clearInterval(this.intervalCheckStatus);
-						}						
+							taskDetail.billing.checkout.showPaymentPending()							
+						} 						
 					}
 				}
 			})
@@ -285,9 +289,11 @@ class Checkout {
     hidePaymentPending() {
         this._elPaymentPending.css('display', 'none')
     }	
+  
  }
 
 var dataPayment;
 var csrfToken;
 var chargeId;
 var confirmPayment;
+var gnData;
