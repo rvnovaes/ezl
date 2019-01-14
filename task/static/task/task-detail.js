@@ -249,8 +249,19 @@ class TaskDetail {
                 .attr('name', 'action')
                 .attr('value', 'OPEN')
                 .appendTo('#task_detail');
-                this.hideModalAction();
-                this.billing.createCharge(this.csrfToken)
+                if (this.servicePriceTable.policy_price.billing_moment === 'PRE_PAID') {
+                    this.hideModalAction();
+                    this.billing.createCharge(this.csrfToken)
+                } else {
+                    swal({
+                        title: 'Delegando', 
+                        text: 'Aguarde...',
+                        onOpen: () => {
+                            swal.showLoading();
+                            $('#task_detail').unbind('submit').submit();            
+                        }
+                    })
+                }
         }        
     }
 
