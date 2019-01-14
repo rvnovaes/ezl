@@ -996,6 +996,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                         context['survey_company_representative'] = ''
         context['show_company_representative_in_tab'] = self.show_company_representative_in_tab(checker, office_session)
         context['show_person_executed_by_in_tab'] = self.show_person_executed_by_in_tab(checker, office_session)        
+        context['ENV'] = os.environ.get('ENV')
         return context
 
     def show_company_representative_in_tab(self, checker, office_session):
