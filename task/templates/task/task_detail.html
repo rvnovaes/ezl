@@ -122,7 +122,11 @@
     <!-- UPLOADS SCRIPTS  -->
     {% include 'task/includes/upload.html' %}    
     <script src="{% static 'billing/js/billing.js' %}"></script>
-    <script src="{% static 'billing/js/gerencianet/dev.js' %}"></script>
+    {% if ENV == 'production'%} 
+        <script src="{% static 'billing/js/gerencianet/production.js' %}"></script>
+    {% else %}
+        <script src="{% static 'billing/js/gerencianet/dev.js' %}"></script>
+    {% endif %}
     <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
     <script src="{% static 'libs/bootstrap-rating/bootstrap-rating.min.js' %}"></script>
     <!--Style Switcher -->
