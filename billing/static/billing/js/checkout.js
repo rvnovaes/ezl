@@ -281,7 +281,8 @@ class Checkout {
 	}
 
     showPaymentPending() {
-        this._elPaymentPending.css('display', 'block')
+        this._elPaymentPending.css('display', 'block');
+        $('[data-target]').css('display', 'none') 
     }
 
     hidePaymentPending() {
