@@ -219,67 +219,65 @@ class Checkout {
 		})
 	}
 
-	validateBrand() {
-		if(!this.cardBrand) {
-			swal.close();
-			swal({
-				title: 'Atenção', 
-				text: 'É necessário selecionar a bandeira do cartão',
-				type: 'error',
-				confirmButtonText: 'ok',
-			})
-			return false;
-		}
-		return true;
-	}
-
 	validateForm() {
-
-		return this.validateBrand();
-	}
-	onClickBtnPay() {
-		this._elBtnPay.on('click', (evt)=> {
-			swal({
-				title: 'Processando pagamento', 
-				text: 'Aguarde...',
-				onOpen: ()=>{
-					swal.showLoading();
-				}
-			})
-			dataPayment = {
-				data: {
-					installments: 1, 				 
-					billing_address: {
-						street: this.street, 
-						number: this.addressNumber, 
-						neighborhood: this.neighborhood, 
-						zipcode: this.zipcode, 
-						city: this.city, 
-						state: this.state
-					}, 
-					customer: {
-						name: this.name, 
-						email: this.email, 
-						cpf: this.cpf, 
-						birth: this.birth, 
-						phone_number: this.phoneNumber, 				
-					}				
-				}
-			};			
-			csrfToken = this.csrfToken;
-			chargeId = this.chargeId;
-			confirmPayment = this.confirmPayment;
-			if (this.validateForm()){
-				this.getPaymentStatus();
-				gn_checkout.getPaymentToken({
-					brand: this.cardBrand.toLowerCase(), 
-					number: this.cardNumber, 
-					cvv: this.cardCVVCode, 
-					expiration_month: this.cardExpirationDate.slice(0,2), 
-					expiration_year: this.cardExpirationDate.slice(3,7)
-				}, this.paymentCallback)
+		let formValid = true
+		$('#form-checkout').find('input').each(function(el) {
+			if ($(this).prop('required') && $(this).val().length === 0) {
+				$(this).parent().addClass('has-error');
+				formValid = false;
 			}
 		})
+		return formValid		
+	}
+
+	onClickBtnPay() {
+		$('#form-checkout').submit(function (e) {
+            e.preventDefault();
+        });		
+		this._elBtnPay.on('click', (evt)=> {
+			if (this.validateForm()) {
+				swal({
+					title: 'Processando pagamento', 
+					text: 'Aguarde...',
+					onOpen: ()=>{
+						swal.showLoading();
+					}
+				})
+				dataPayment = {
+					data: {
+						installments: 1, 				 
+						billing_address: {
+							street: this.street, 
+							number: this.addressNumber, 
+							neighborhood: this.neighborhood, 
+							zipcode: this.zipcode, 
+							city: this.city, 
+							state: this.state
+						}, 
+						customer: {
+							name: this.name, 
+							email: this.email, 
+							cpf: this.cpf, 
+							birth: this.birth, 
+							phone_number: this.phoneNumber, 				
+						}				
+					}
+				};			
+				csrfToken = this.csrfToken;
+				chargeId = this.chargeId;
+				confirmPayment = this.confirmPayment;
+				if (this.validateForm()){
+					this.getPaymentStatus();
+					gn_checkout.getPaymentToken({
+						brand: this.cardBrand.toLowerCase(), 
+						number: this.cardNumber, 
+						cvv: this.cardCVVCode, 
+						expiration_month: this.cardExpirationDate.slice(0,2), 
+						expiration_year: this.cardExpirationDate.slice(3,7)
+					}, this.paymentCallback)
+				}
+			}			
+		})		
 	}
 
     showPaymentPending() {

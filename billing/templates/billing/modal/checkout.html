@@ -42,9 +42,9 @@
 <div id="modal-billing-checkout" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
    <div class="modal-dialog modal-lg">
       <div class="modal-content">
+       <form id="form-checkout">
          <div class="modal-body">
             <div class="col-md-12">
-               <form>
                   <div class="panel panel-defualt">
                     <div class="panel-heading ezl-panel text-white">
                       1 - Dados pessoais
@@ -53,34 +53,34 @@
                       <div class="row">
                          <div class="col-xs-6">
                             <div class="form-group">
-                               <label>Nome no cartão</label>
-                               <input type="text" class="form-control" name="input-card-name" id="input-name" placeholder="NOME NO CARTÃO" style="text-transform:uppercase"> 
+                               <label><span class="text-danger">*</span> Nome no cartão</label>
+                               <input type="text" class="form-control" name="input-card-name" id="input-name" placeholder="NOME NO CARTÃO" style="text-transform:uppercase" required> 
                             </div>
                          </div>
                          <div class="col-xs-6">
                             <div class="form-group">
-                               <label>E-mail</label>
-                               <input type="email" name="input-email" class="form-control" id="input-email">                            
+                               <label> <span class="text-danger">*</span>  E-mail</label>
+                               <input type="email" name="input-email" class="form-control" id="input-email" required>                            
                             </div>
                          </div>
                       </div>
                       <div class="row">
                          <div class="col-xs-4">
                             <div class="form-group">
-                               <label>CPF</label>
-                               <input type="text" class="form-control" name="input-card-cpf" id="input-cpf" placeholder="CPF"> 
+                               <label><span class="text-danger">*</span>  CPF</label>
+                               <input type="text" class="form-control" name="input-card-cpf" id="input-cpf" placeholder="CPF" required> 
                             </div>
                          </div>
                          <div class="col-xs-4">
                             <div class="form-group">
-                               <label>Data de nascimento</label>
-                               <input type="date" name="input-birth" class="form-control" id="input-birth">
+                               <label><span class="text-danger">*</span> Data de nascimento</label>
+                               <input type="date" name="input-birth" class="form-control" id="input-birth" required>
                             </div>
                          </div>
                          <div class="col-xs-4">
                             <div class="form-group">
-                               <label>Telefone</label>
-                               <input type="tel" name="input-phone-number" class="form-control" id="input-phone-number">
+                               <label> <span class="text-danger">*</span> Telefone</label>
+                               <input type="tel" name="input-phone-number" class="form-control" id="input-phone-number" required>
                             </div>
                          </div>
                       </div>                      
@@ -94,10 +94,10 @@
                       <div class="row">
                         <div class="col-xs-6">
                           <div class="form-group">
-                             <label for="input-card-number">Número do cartão</label>
+                             <label for="input-card-number"><span class="text-danger">*</span>  Número do cartão</label>
                              <div class="input-group">
                                 <div class="input-group-addon"><i class="fa fa-credit-card"></i></div>
-                                <input type="text" class="form-control" id="input-card-number" placeholder="Número do cartão"> 
+                                <input type="text" class="form-control" id="input-card-number" placeholder="Número do cartão" required> 
                              </div>
                           </div>                          
                         </div>
@@ -117,14 +117,14 @@
                       <div class="row">
                          <div class="col-xs-7 col-md-7">
                             <div class="form-group">
-                               <label>Data de vencimento</label>
-                               <input type="text" class="form-control" name="input-card-expiration-date" placeholder="MM/AAAA" required="" id="input-card-expiration-date"> 
+                               <label> <span class="text-danger">*</span>  Data de vencimento</label>
+                               <input type="text" class="form-control" name="input-card-expiration-date" placeholder="MM/AAAA" id="input-card-expiration-date" required> 
                             </div>
                          </div>
                          <div class="col-xs-5 col-md-5 pull-right">
                             <div class="form-group">
-                               <label>Código CVV</label>
-                               <input type="text" class="form-control" name="input-card-cvv-code" placeholder="CVV" required="" id="input-card-cvv-code"> 
+                               <label> <span class="text-danger">*</span>  Código CVV</label>
+                               <input type="text" class="form-control" name="input-card-cvv-code" placeholder="CVV" required id="input-card-cvv-code"> 
                             </div>
                          </div>
                       </div>                      
@@ -138,28 +138,28 @@
                       <div class="row">
                         <div class="col col-xs-3">
                           <div class="form-group">
-                              <label>CEP: </label>
-                              <input type="text" name="input-address-zipcode" class="form-control" id="input-address-zipcode">
+                              <label><span class="text-danger">*</span>  CEP: </label>
+                              <input type="text" name="input-address-zipcode" class="form-control" id="input-address-zipcode" required>
                           </div>
                         </div>
                         <div class="col col-xs-6">
                           <div class="form-group">
-                              <label>Logradouro: </label>
-                              <input type="text" name="input-address-street" class="form-control" id="input-address-street">
+                              <label> <span class="text-danger">*</span>  Logradouro: </label>
+                              <input type="text" name="input-address-street" class="form-control" id="input-address-street" required>
                           </div>
                         </div>                    
                         <div class="col col-xs-3">
                           <div class="form-group">
-                              <label>Número: </label>
-                              <input type="text" name="input-address-number" class="form-control" id="input-address-number">
+                              <label><span class="text-danger">*</span>  Número: </label>
+                              <input type="text" name="input-address-number" class="form-control" id="input-address-number" required>
                           </div>
                         </div>                    
                       </div>
                       <div class="row">
                         <div class="col col-xs-3">
                           <div class="form-group">
-                              <label>Bairro: </label>
-                              <input type="text" name="input-address-neighborhood" class="form-control" id="input-address-neighborhood">
+                              <label><span class="text-danger">*</span> Bairro: </label>
+                              <input type="text" name="input-address-neighborhood" class="form-control" id="input-address-neighborhood" required>
                           </div>
                         </div>
                         <div class="col col-xs-3">
@@ -170,27 +170,27 @@
                         </div>                    
                         <div class="col col-xs-3">
                           <div class="form-group">
-                              <label>Cidade: </label>
-                              <input type="text" name="input-address-city" class="form-control" id="input-address-city">
+                              <label><span class="text-danger">*</span>  Cidade: </label>
+                              <input type="text" name="input-address-city" class="form-control" id="input-address-city" required>
                           </div>
                         </div>
                         <div class="col col-xs-3">
                           <div class="form-group">
-                              <label>Estado: </label>
-                              <input type="text" name="input-address-state" class="form-control" id="input-address-state">
+                              <label><span class="text-danger">*</span>  Estado: </label>
+                              <input type="text" name="input-address-state" class="form-control" id="input-address-state" required>
                           </div>
                         </div>                                        
                       </div>                      
                     </div>
                   </div>                                    
-               </form>
             </div>
             <div class="clearfix"></div>
          </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-            <button class="btn btn-info" type="button" id="btn-pay"><i class="fa fa-credit-card"></i> Pagar</button>
+            <button class="btn btn-info" type="submit" id="btn-pay"><i class="fa fa-credit-card"></i> Pagar</button>
           </div>         
+       </form>
       </div>
       <!-- /.modal-content -->
    </div>
