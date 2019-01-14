@@ -1,6 +1,5 @@
 class BillingDetail {
-    constructor(officeId) {
-        this.officeId = officeId;
+    constructor() {
         this._modalBillingDetail = $('#modal-office-profile-billing-details');
         this._elBtnAddBillingDetail = $('#btn-add-billing-detail');
         this._elBtnDeleteBillingDetail = $('#btn-delete-billing-detail');
@@ -26,13 +25,22 @@ class BillingDetail {
         this.onChangeZipcode();
     }
 
-    setSelect2(text, value, element) {
+    static setSelect2(text, value, element) {
 	    if(text && value) {
 	        var newOption = new Option(text, value, true, true);
             element.append(newOption).trigger('change');
         }else{
 	        element.val(null).trigger('change');
         }
+    }
+
+    static clearSelect2(element) {
+        element.find(':selected').remove();
+    }
+
+    resetForm(){
+        this.form.trigger('reset');
+        BillingDetail.clearSelect2(this._elInputCity);
     }
 
     get form() {
@@ -76,7 +84,7 @@ class BillingDetail {
 	}
 
 	set city(objCity) {
-        this.setSelect2(objCity.text, objCity.id, this._elInputCity);
+        BillingDetail.setSelect2(objCity.text, objCity.id, this._elInputCity);
 	}
 
 	get query() {
@@ -159,7 +167,8 @@ class BillingDetail {
     }
 
 	showForm() {
-		this.form.attr(`action', '/office_profile_address_create/${this.officeId}/`)
+		this.form.attr(`action', '/billing/create_billing_detail/`);
+        this.resetForm();
 		this._modalBillingDetail.modal('show');
 	}
 
