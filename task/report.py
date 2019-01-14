@@ -64,6 +64,7 @@ class TaskToPayXlsx(DefaultXlsFile):
                     {'label': 'Parte adversa', 'size': 50}, 
                     {'label': 'OS original', 'size': 15},
                     {'label': 'Faturada', 'size': 10}, 
+                    {'label': 'Transação via cartão', 'size': 10},
                     {'label': 'Valor', 'size': 10}, 
                 ]
 
@@ -91,7 +92,8 @@ class TaskToPayXlsx(DefaultXlsFile):
             worksheet.write(row_num, 10, item.get('legacy_code', item.get('parent_task_number')),
                             self.base_cell_format.cell_format)
             worksheet.write(row_num, 11, format_boolean(item.get('billing_date')), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 12, item.get('amount'), self.money_format.cell_format)
+            worksheet.write(row_num, 12, item.get('charge_id'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 13, item.get('amount'), self.money_format.cell_format)
         self.workbook.close()
         self.output.seek(0)
         return self.output

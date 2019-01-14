@@ -229,7 +229,7 @@ class TaskDetail {
     }
 
     beforeSubmit(task_status) {
-        toogleModals('#confirmAction', '#survey', task_status);
+        this.toogleModals('#confirmAction', '#survey', task_status);
         $('#task_detail').submit(function (e) {
             e.preventDefault();
         });
