@@ -1728,15 +1728,14 @@ class CitySelect2Autocomplete(autocomplete.Select2QuerySetView):
 
 class ZipCodeCitySelect2Autocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        import pdb;pdb.set_trace()
-        qs = filter_valid_choice_form(City.objects.filter(is_active=True))
+        qs = City.objects.none()
         if self.q:
             q_list = self.q.split('|')
-            filters = None
             if q_list and len(q_list) == 2:
+                qs = filter_valid_choice_form(City.objects.filter(is_active=True))
                 filters = Q(name__unaccent__icontains=q_list[0])
                 filters &= Q(state__initials__unaccent__icontains=q_list[1])
-            qs = qs.filter(filters)
+                qs = qs.filter(filters)
         return qs.order_by('name')
 
     def get_result_label(self, result):

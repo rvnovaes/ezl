@@ -1,6 +1,5 @@
 class BillingDetail {
-    constructor(officeId) {
-        this.officeId = officeId;
+    constructor() {
         this._modalBillingDetail = $('#modal-office-profile-billing-details');
         this._elBtnAddBillingDetail = $('#btn-add-billing-detail');
         this._elBtnDeleteBillingDetail = $('#btn-delete-billing-detail');
@@ -26,13 +25,22 @@ class BillingDetail {
         this.onChangeZipcode();
     }
 
-    setSelect2(text, value, element) {
+    static setSelect2(text, value, element) {
 	    if(text && value) {
 	        var newOption = new Option(text, value, true, true);
             element.append(newOption).trigger('change');
         }else{
 	        element.val(null).trigger('change');
         }
+    }
+
+    static clearSelect2(element) {
+        element.find(':selected').remove();
+    }
+
+    resetForm(){
+        this.form.trigger('reset');
+        BillingDetail.clearSelect2(this._elInputCity);
     }
 
     get form() {
@@ -76,15 +84,15 @@ class BillingDetail {
 	}
 
 	set city(objCity) {
-        this.setSelect2(objCity.name, objCity.id, this._elInputCity);
+        BillingDetail.setSelect2(objCity.text, objCity.id, this._elInputCity);
 	}
 
 	get query() {
 		let formData = this.form.serializeArray();
 		let data = {};
 		$(formData).each((index, obj) =>{
-		        data[obj.name] = obj.value;
-		    });
+            data[obj.name] = obj.value;
+        });
 		this.form.find('input[type=checkbox]').each(function(){
 			data[$(this).attr('name')] = $(this).prop('checked')
 		});
@@ -147,28 +155,20 @@ class BillingDetail {
 		});
 	}
 
-	city_by_zip_code(query){
+	setCityByZipCode(query){
         $.ajax({
-            url: `/billing/get_billing_detail/${id}/`,
+            url: `city/zip_code/autocomplete_select2/`,
             method: 'GET',
+            data: {q: query},
             success: (response)=>{
-                self.form.attr('action', `/billing/update_billing_detail/${response.id}/`);
-                Object.keys(response.billing_address).forEach((key)=>{
-                    if (key == 'city') {
-                        self.setSelect2(response.billing_address['city_name'], response.billing_address[key], self._elInputCity);
-                    } else {
-                        self.form.find(`[name=${key}]`).val(response.billing_address[key])
-                    }
-                });
-                Object.keys(response).forEach((key)=>{
-                    self.form.find(`[name=${key}]`).val(response[key])
-                });
+                this.city = response.results[0]
             }
         });
     }
 
 	showForm() {
-		this.form.attr(`action', '/office_profile_address_create/${this.officeId}/`)
+		this.form.attr(`action', '/billing/create_billing_detail/`);
+        this.resetForm();
 		this._modalBillingDetail.modal('show');
 	}
 
@@ -223,8 +223,9 @@ class BillingDetail {
 					success: (response)=>{
 						self.form.attr('action', `/billing/update_billing_detail/${response.id}/`);
 						Object.keys(response.billing_address).forEach((key)=>{
-						    if (key == 'city') {
-								self.setSelect2(response.billing_address['city_name'], response.billing_address[key], self._elInputCity);
+						    if (key === 'city') {
+								self.city = {text: response.billing_address['city_name'],
+                                    id: response.billing_address[key]};
 							} else {
 						        self.form.find(`[name=${key}]`).val(response.billing_address[key])
                             }
@@ -244,13 +245,12 @@ class BillingDetail {
 				method: 'GET',
 				url: `https://viacep.com.br/ws/${this.zipcode}/json/unicode/`,
 				success: (response)=>{
+				    this.setCityByZipCode(`${response.localidade}|${response.uf}`);
 					this.street = response.logradouro;
-					this.neighborhood = response.bairro;
-					this.city = response.localidade;
+					this.cityRegion = response.bairro;
 					this.addressComplement = response.complemento;
-					this.state = response.uf;
 				}
-			})
-		})
+			});
+		});
 	}
 }
