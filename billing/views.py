@@ -65,6 +65,14 @@ class BillingDetailDataView(CustomLoginRequiredView, View):
         return JsonResponse(billing_serializer.data)
 
 
+class BillingDetailByOffice(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        office = get_office_session(request)
+        billing_detail = BillingDetails.objects.filter(office=office).first()
+        billing_serializer = BillingDetailSerializer(billing_detail)
+        return JsonResponse(billing_serializer.data)
+
+
 class BillingDetailBaseView(object):
     def __init__(self):
         self.office = None

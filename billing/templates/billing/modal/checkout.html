@@ -45,7 +45,12 @@
        <form id="form-checkout">
          <div class="modal-body">
             <div class="col-md-12">
-                  <div class="panel panel-defualt">
+                <div class="panel panel-defualt">
+                    <div class="panel-heading ezl-panel text-white">
+                      <input type="checkbox" name="use-billing-details"> Usar detalhes de cobrança salvos
+                    </div>
+                </div>
+                <div class="panel panel-defualt">
                     <div class="panel-heading ezl-panel text-white">
                       1 - Dados pessoais
                     </div>
@@ -54,13 +59,13 @@
                          <div class="col-xs-6">
                             <div class="form-group">
                                <label><span class="text-danger">*</span> Nome no cartão</label>
-                               <input type="text" class="form-control" name="input-card-name" id="input-name" placeholder="NOME NO CARTÃO" style="text-transform:uppercase" required> 
+                               <input type="text" class="form-control" name="input-card-name" id="input-name" placeholder="NOME NO CARTÃO" style="text-transform:uppercase" required>
                             </div>
                          </div>
                          <div class="col-xs-6">
                             <div class="form-group">
                                <label> <span class="text-danger">*</span>  E-mail</label>
-                               <input type="email" name="input-email" class="form-control" id="input-email" required>                            
+                               <input type="email" name="input-email" class="form-control" id="input-email" required>
                             </div>
                          </div>
                       </div>
@@ -68,7 +73,7 @@
                          <div class="col-xs-4">
                             <div class="form-group">
                                <label><span class="text-danger">*</span>  CPF</label>
-                               <input type="text" class="form-control" name="input-card-cpf" id="input-cpf" placeholder="CPF" required> 
+                               <input type="text" class="form-control" name="input-card-cpf" id="input-cpf" placeholder="CPF" required>
                             </div>
                          </div>
                          <div class="col-xs-4">
@@ -83,9 +88,9 @@
                                <input type="tel" name="input-phone-number" class="form-control" id="input-phone-number" required>
                             </div>
                          </div>
-                      </div>                      
+                      </div>
                     </div>
-                  </div>                     
+                </div>
                   <div class="panel panel-defualt">
                     <div class="panel-heading ezl-panel text-white">
                       2 - Formas de pagamento

@@ -2,6 +2,7 @@ class Checkout {
 	constructor(csrfToken, chargeId, callbackToPay) {		
 		this.csrfToken = csrfToken;
 		this.chargeId = chargeId;
+		this.billingDetails = null;
 		this._elModalCheckout = $('#modal-billing-checkout');
 		this._elInputName = $('#input-name');		
 		this._elInputEmail = $('#input-email');
@@ -24,7 +25,7 @@ class Checkout {
 		this.cards = {
 			visa: /^4\d+$/,
 			mastercard: /^5\d+$/, 
-			elo: /^(636368|438935|504175|451416|636297|509049|509069|509050|509074|509068|509040|509045|509051|509046|509066|509047|509042|509052|509043|509064|509040|36297|5067|4576|4011)/,				
+			elo: /^(636368|438935|504175|451416|636297|509049|509069|509050|509074|509068|509040|509045|509051|509046|509066|509047|509042|509052|509043|509064|509040|36297|5067|4576|4011)/,
 			amex: /^(34|37)/, 
 			diners: /^(30|36|38)/,
 			discover: /^(6011|622|64|65)/, 
@@ -33,27 +34,47 @@ class Checkout {
 		this.onClickBtnPay();		
 		this.onChangeZipcode();		
 		this.onKeyUpCardNumber();
-
+		this.onDocumentReady();
 	}
 
 	get name() {
 		return this._elInputName.val();
 	}
 
+	set name(value) {
+		this._elInputName.val(value);
+	}
+
 	get email() {
 		return this._elInputEmail.val();
-	}	
+	}
+
+	set email(value) {
+		this._elInputEmail.val(value);
+	}
 
 	get cpf() {
 		return this._elInputCPF.cleanVal();
+	}
+
+	set cpf(value) {
+		this._elInputCPF.val(value);
 	}
 
 	get birth() {
 		return this._elInputBirth.val();
 	}
 
+	set birth(value) {
+		this._elInputBirth.val(value);
+	}
+
 	get phoneNumber() {
 		return this._elInputPhoneNumber.cleanVal();
+	}
+
+	set phoneNumber(value) {
+		this._elInputPhoneNumber.val(value);
 	}
 
 	get cardNumber() {
@@ -70,7 +91,11 @@ class Checkout {
 
 	get zipcode() {
 		return this._elInputZipcode.cleanVal();
-	}	
+	}
+
+	set zipcode(value) {
+		this._elInputZipcode.val(value);
+	}
 
 	get street() {
 		return this._elInputStreet.val();
@@ -82,6 +107,10 @@ class Checkout {
 
 	get addressNumber() {
 		return this._elInputAddressNumber.val();
+	}
+
+	set addressNumber(value) {
+		this._elInputAddressNumber.val(value);
 	}
 
 	get neighborhood() {
@@ -123,31 +152,30 @@ class Checkout {
 				if (this.cards[key].test(this.cardNumber)) {					
 					this.cardBrand = key;					
 				}
-			})
+			});
 			$(`[brand=${this.cardBrand.toUpperCase()}]`).css("filter", "grayscale(0)");
-		})
+		});
 	}
 
-
-
 	openCheckout(chargeId) {
-		this.chargeId = chargeId
-		this._elModalCheckout.modal('show')
+		this.chargeId = chargeId;
+		this._elModalCheckout.modal('show');
+		this.fillBillingDetails();
 	}
 
 	paymentCallback(error, response, options) {
 		if (error) {
-			console.log(error)
+			console.log(error);
 			swal.close();
 			swal({
 				title: 'Atenção!',
 				text : error, 
 				type: error.error_description,
 				confirmButtonText: 'ok'
-			})
+			});
 		} else {
-			console.log(response)
-			confirmPayment(chargeId, response.data.payment_token, dataPayment, csrfToken)
+			console.log(response);
+			confirmPayment(chargeId, response.data.payment_token, dataPayment, csrfToken);
 		}
 	}
 
@@ -169,17 +197,17 @@ class Checkout {
 
 					} else  {						
 						if (response.data.status === 'waiting') {
-							taskDetail.billing.checkout.showPaymentPending()							
+							taskDetail.billing.checkout.showPaymentPending();
 						} 						
 					}
 				}
-			})
+			});
 		}	
 
 	getPaymentStatus() {									
 		window.scroll(0, 0);
 		this.checkStatus();
-		this.intervalCheckStatus = setInterval(this.checkStatus, 10000)
+		this.intervalCheckStatus = setInterval(this.checkStatus, 10000);
 	}
 
 	confirmPayment(chargeId, paymentToken, data, csrfToken) {
@@ -192,7 +220,7 @@ class Checkout {
 			dataType: 'json',
 			data: JSON.stringify(data), 
 			success: (response) => {				
-				console.log(response)				
+				console.log(response);
 			},
 			error: (error) => {
 
@@ -200,7 +228,7 @@ class Checkout {
 			beforeSend: function(xhr, settings) {
 				xhr.setRequestHeader("X-CSRFToken", self.csrfToken)
 			}, 
-		})
+		});
 	} 
 
 	onChangeZipcode() {
@@ -215,8 +243,8 @@ class Checkout {
 					this.addressComplement = response.complemento;
 					this.state = response.uf;
 				}
-			})			
-		})
+			});
+		});
 	}
 
 	validateForm() {
@@ -226,8 +254,8 @@ class Checkout {
 				$(this).parent().addClass('has-error');
 				formValid = false;
 			}
-		})
-		return formValid		
+		});
+		return formValid;
 	}
 
 	onClickBtnPay() {
@@ -242,7 +270,7 @@ class Checkout {
 					onOpen: ()=>{
 						swal.showLoading();
 					}
-				})
+				});
 				dataPayment = {
 					data: {
 						installments: 1, 				 
@@ -277,17 +305,52 @@ class Checkout {
 					}, this.paymentCallback)
 				}
 			}			
-		})		
+		});
 	}
 
     showPaymentPending() {
         this._elPaymentPending.css('display', 'block');
-        $('[data-target]').css('display', 'none') 
+        $('[data-target]').css('display', 'none');
     }
 
     hidePaymentPending() {
-        this._elPaymentPending.css('display', 'none')
-    }	
+        this._elPaymentPending.css('display', 'none');
+    }
+
+    setBillingDetails() {
+		$.ajax({
+			method: 'GET',
+			url: `/billing/get_office_billing_detail/`,
+			success: (response)=>{
+				if (response.id){
+					this.billingDetails = response;
+				}
+			}
+		});
+	}
+
+	fillBillingDetails() {
+		if(this.billingDetails){
+			this.name = this.billingDetails.card_name;
+			this.email = this.billingDetails.email;
+			this.cpf = this.billingDetails.cpf_cnpj;
+			this.birth = this.billingDetails.birth_date;
+			this.phoneNumber = this.billingDetails.phone_number;
+			this.zipcode = this.billingDetails.billing_address.zip_code;
+			this.street = this.billingDetails.billing_address.street;
+			this.addressNumber = this.billingDetails.billing_address.number;
+			this.neighborhood = this.billingDetails.billing_address.city_region;
+			this.addressComplement = this.billingDetails.billing_address.complement;
+			this.city = this.billingDetails.billing_address.city_name;
+			this.state = this.billingDetails.billing_address.state_name;
+		}
+	}
+
+    onDocumentReady(){
+	    $(document).ready(()=>{
+			this.setBillingDetails();
+        });
+    }
   
  }
 
