@@ -23,6 +23,7 @@ class BillingDetail {
         this.onCheckItem();
         this.onClickTr();
         this.onChangeZipcode();
+        this.onDocumentReady()
     }
 
     static setSelect2(text, value, element) {
@@ -195,6 +196,7 @@ class BillingDetail {
 	            	this.billingDetailSelected.forEach((row_id)=>{
 	            		let tr = $(`#billing-details-table tr[id=${row_id}]`);
 	            		this._elBillingDetailTable.row($(tr)).node().remove();
+	            		this.checkBillingDetails();
 	            	});
 				    swal({
 					      title: 'Detalhes de cobrança deletados com sucesso!',
@@ -253,4 +255,24 @@ class BillingDetail {
 			});
 		});
 	}
+
+	checkBillingDetails() {
+		$.ajax({
+			method: 'GET',
+			url: `/billing/get_office_billing_detail/`,
+			success: (response)=>{
+				if (response.id){
+					this._elBtnAddBillingDetail.prop('disabled', true);
+				} else {
+				    this._elBtnAddBillingDetail.prop('disabled', false);
+                }
+			}
+		});
+	}
+
+	onDocumentReady(){
+	    $(document).ready(()=>{
+			this.checkBillingDetails();
+        });
+    }
 }

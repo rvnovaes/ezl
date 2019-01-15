@@ -37,6 +37,7 @@ class Checkout {
 		this.onClickBtnPay();		
 		this.onChangeZipcode();		
 		this.onKeyUpCardNumber();
+		this.onChangeUseBillingDetails();
 		this.onDocumentReady();
 	}
 
@@ -335,6 +336,26 @@ class Checkout {
 		});
 	}
 
+	enableUseBillingDetails() {
+		this._elInputUseBillingDetails.attr('disabled', false);
+	}
+
+	disableUseBillingDetails() {
+		this._elInputUseBillingDetails.attr('disabled', true);
+	}
+
+	onChangeUseBillingDetails() {
+		this._elInputUseBillingDetails.on('change', () =>{
+			if(this._elInputUseBillingDetails.prop('checked')){
+				this.hidePersonalData();
+				this.hideBillingAddress();
+			} else {
+				this.showPersonalData();
+				this.showBillingAddress();
+			}
+		});
+	}
+
     showPaymentPending() {
         this._elPaymentPending.css('display', 'block');
         $('[data-target]').css('display', 'none');
@@ -358,6 +379,7 @@ class Checkout {
 
 	fillBillingDetails() {
 		if(this.billingDetails){
+			this.enableUseBillingDetails();
 			this.checkUseBillingDetails();
 			this.name = this.billingDetails.card_name;
 			this.email = this.billingDetails.email;
@@ -374,6 +396,7 @@ class Checkout {
 			this.hidePersonalData();
 			this.hideBillingAddress();
 		}else{
+			this.disableUseBillingDetails();
 			this.uncheckUseBillingDetails();
 			this.showPersonalData();
 			this.showBillingAddress();
