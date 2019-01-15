@@ -22,6 +22,9 @@ class Checkout {
 		this._elState = $('#input-address-state');
 		this._elBtnPay = $('#btn-pay');
 		this._elPaymentPending = $('#payment-pending');
+		this._elInputUseBillingDetails = $('[name=use-billing-details]');
+		this._panelPersonalData = $('#panel-personal-data');
+		this._panelBillingAddress = $('#panel-billing-address');
 		this.cards = {
 			visa: /^4\d+$/,
 			mastercard: /^5\d+$/, 
@@ -143,7 +146,31 @@ class Checkout {
 
 	set state(value) {
 		this._elState.val(value);
-	}	
+	}
+
+	checkUseBillingDetails() {
+		this._elInputUseBillingDetails.prop('checked', true);
+	}
+
+	uncheckUseBillingDetails() {
+		this._elInputUseBillingDetails.prop('checked', false);
+	}
+
+	hidePersonalData(){
+		this._panelPersonalData.find('.panel-wrapper').collapse('hide');
+	}
+
+	showPersonalData(){
+		this._panelPersonalData.find('.panel-wrapper').collapse('show');
+	}
+
+	hideBillingAddress(){
+		this._panelBillingAddress.find('.panel-wrapper').collapse('hide');
+	}
+
+	showBillingAddress(){
+		this._panelBillingAddress.find('.panel-wrapper').collapse('show');
+	}
 
 	onKeyUpCardNumber() {
 		this._elInputCardNumber.on('keyup', (evt)=> {
@@ -331,6 +358,7 @@ class Checkout {
 
 	fillBillingDetails() {
 		if(this.billingDetails){
+			this.checkUseBillingDetails();
 			this.name = this.billingDetails.card_name;
 			this.email = this.billingDetails.email;
 			this.cpf = this.billingDetails.cpf_cnpj;
@@ -343,6 +371,12 @@ class Checkout {
 			this.addressComplement = this.billingDetails.billing_address.complement;
 			this.city = this.billingDetails.billing_address.city_name;
 			this.state = this.billingDetails.billing_address.state_name;
+			this.hidePersonalData();
+			this.hideBillingAddress();
+		}else{
+			this.uncheckUseBillingDetails();
+			this.showPersonalData();
+			this.showBillingAddress();
 		}
 	}
 
