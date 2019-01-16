@@ -260,12 +260,12 @@ class TypeTaskMainFilter(filters.FilterSet):
 
 
 class TaskCheckinReportFilter(FilterSet):
-    finished_date = MDDateTimeRangeFilter(name='finished_date')
+    finished_date = MDDateTimeRangeFilter(name='finished_date', label='TESTE')
     execution_date = MDDateTimeRangeFilter(name='execution_date')
     task_executed_by = CharFilter(name='executed_by_checkin__create_user__person__legal_name',
-                                  lookup_expr='unaccent__icontains')
+                                  lookup_expr='unaccent__icontains', label='Correspondente/Escritório contratado')
     task_company_representative = CharFilter(name='company_representative_checkin__create_user__person__legal_name',
-                                             lookup_expr='unaccent__icontains')
+                                             lookup_expr='unaccent__icontains', label='Preposto')
 
     class Meta:
         model = Task

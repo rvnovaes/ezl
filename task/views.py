@@ -2225,15 +2225,14 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         return JsonResponse({'message': 'Registro atualizado com sucesso'})
 
 
-class TaskCheckinReportBase(CustomLoginRequiredView, TemplateView):
+class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
     template_name = 'task/reports/checkin.html'
-
-
-class TaskCheckinReportView(CustomLoginRequiredView, View):
     filter_class = TaskCheckinReportFilter
     model = Task
 
     def get(self, request, *args, **kwargs):
+        if not request.GET:
+            return super().get(request, *args, **kwargs)
         tasks = self.filter_class(request.GET, queryset=self.get_queryset())
         tasks_serializer = TaskCheckinSerializer(tasks.qs, many=True)
         return JsonResponse(tasks_serializer.data, safe=False)
@@ -2242,3 +2241,8 @@ class TaskCheckinReportView(CustomLoginRequiredView, View):
         office = get_office_session(self.request)
         return self.model.objects.filter(office=office, task_status__in=[TaskStatus.DONE, TaskStatus.FINISHED,
                                                                          TaskStatus.BLOCKEDPAYMENT])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filter_class
+        return context
