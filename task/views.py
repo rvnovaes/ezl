@@ -2227,6 +2227,5 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
 class TaskCheckinReportView(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         tasks = Task.objects.all()[:10]
-        import pdb;pdb.set_trace()
         tasks_serializer = TaskCheckinSerializer(tasks, many=True)
         return JsonResponse(tasks_serializer.data, safe=False)
