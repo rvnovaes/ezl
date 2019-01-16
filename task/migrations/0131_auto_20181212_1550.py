@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0127_auto_20181029_1711'),
+        ('task', '0130_dashboardviewmodel_survey_answers'),
     ]
 
     operations = [

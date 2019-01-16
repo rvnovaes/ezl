@@ -13,16 +13,18 @@ class ReportToPay {
 	    this.tasksToPay = [];
 	    this.allTaskIds = [] ;  
 	    this.htmlTable = ``;
-	    this.elInputClient = $('[name=client]');	    
+	    this.elInputClient = $('[name=client]');
+	    this.elFinishedDate0 = $("#finished_in_0");
+	    this.elFinishedDate1 = $("#finished_in_1");
 
 	}	
 
 	showBtnDownloadXlsxFile() {
-		this.btnDownloadXlsx.show()
+		this.btnDownloadXlsx.show();
 		this.btnDownloadXlsx.on('click', ()=>{
-			this.getXlsx()
-		})
-	}	
+			this.getXlsx();
+		});
+	}
 
 	getBillingDate(billingData) {
 	    if (!billingData) {
@@ -33,8 +35,9 @@ class ReportToPay {
 
 	setDefaultOfNull(value){
 	    if (!value) {
-	        return ''
+	        return '';
 	    }
+	    return value;
 	}
 
 	formatLocalDateTime(strDate) {
@@ -55,6 +58,14 @@ class ReportToPay {
 		return data;
 	}
 
+	get finishedDate0() {
+		return this.elFinishedDate0.val()
+	}
+
+	get finishedDate1() {
+		return this.elFinishedDate1.val()
+	}
+
 	startOnCheckAllItems() {
 		this.elCheckAllItems.on('change', function() {
 			$('#os-table input:checkbox').not(this).prop('checked', this.checked);
@@ -72,12 +83,12 @@ class ReportToPay {
                 }
             } else {
                 if ($(this).is(':checked')) {
-                    self.tasksToPay.push($(this).val())    
+                    self.tasksToPay.push($(this).val());
                 } else {
-                    self.tasksToPay.splice(self.tasksToPay.indexOf($(this).val(), 1))
+                    self.tasksToPay.splice(self.tasksToPay.indexOf($(this).val(), 1));
                 }                            
             }
-        })		
+        });
 	}
 
 	startOnClickBtnBilling() {
@@ -98,7 +109,7 @@ class ReportToPay {
 	                this.billingTasks();
 	            });                        			
             }
-		})
+		});
 	}
 
 	billingTasks(){
@@ -120,8 +131,8 @@ class ReportToPay {
 	async search() {
 		const response = await this.getData().then((data)=>{
 			 return this.data = data
-		})			
-		return response		
+		});
+		return response;
 	}
 
 	async getData() {
@@ -139,13 +150,13 @@ class ReportToPay {
 			title: 'Exportando para o Excel',
 	        html: '<h3>Aguarde...</h3>',
 			onOpen: ()=>{
-				swal.showLoading()
+				swal.showLoading();
 			}
-		})
+		});
 		let request = new XMLHttpRequest();
-		let fileName = 'os-a-pagar.xlsx'
-		let params = $.param(this.query)
-		let url = `/relatorios/os-a-pagar-xlsx?${params}` 
+		let fileName = 'os-a-pagar.xlsx';
+		let params = $.param(this.query);
+		let url = `/relatorios/os-a-pagar-xlsx?${params}`;
 		request.open('GET', url, true);
 		request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 		request.responseType = 'blob';
@@ -165,7 +176,7 @@ class ReportToPay {
 		            document.body.removeChild(downloadLink);
 		           }
 		       }
-		       swal.close()
+		       swal.close();
 		   };
 		   request.send();				
 	}
@@ -176,9 +187,9 @@ class ReportToPay {
                 <div class="col-xs-2">                    
                     <span class="badge badge-danger pull-right"><i class="fa fa-check"></i> Reembolsa valor</span>
                 </div>
-			`
+			`;
 		}
-		return ''
+		return '';
 	}
 
 	getTrTask(task) {    
@@ -201,20 +212,21 @@ class ReportToPay {
 	                <td>${this.formatLocalDateTime(task.finished_date)}</td>
 	                <td>${task.type_task}</td>
 	                <td>${task.lawsuit_number}</td>
+	                <td>${task.cost_center}</td>
 	                <td>${task.court_district}</td>
 	                <td>${task.opposing_party}</td>
 	                <td>${this.setDefaultOfNull(task.task_legacy_code)}</td>
 	                <td>${this.getBillingDate(task.billing_date)}</td>
 	                <td class="text-center"><center>${this.formatMoney(task.amount)}</center></td>
-	            </tr>            `
+	            </tr>`;
 	}
 
 	getTrfoot() {
 	    return `
 	        <tr class="total-container">
-	            <th colspan="10" class="text-right" >Total Geral (R$)</th>
+	            <th colspan="11" class="text-right" >Total Geral (R$)</th>
 	            <th colspan="2" class="text-right">${this.formatMoney(this.totalToPay.toFixed(2))}</th>
-	        </tr>`
+	        </tr>`;
 		};   	
 
 	getBtnBilling() {
@@ -222,19 +234,19 @@ class ReportToPay {
 	        <div class="text-center" style="padding-top: 10px">
 	            <button class="btn btn-success" id="btn-faturar">Faturar</button>
 	        </div>            
-	    `
+	    `;
 	}		
 
 	addAmount(instance, key, value){
 		if (!instance[key]) {
-			instance[key] = parseFloat(value)
+			instance[key] = parseFloat(value);
 		} else {
-			instance[key] += parseFloat(value)
+			instance[key] += parseFloat(value);
 		}
 	}
 
 	formatMoney(value) {
-		return parseFloat(value).toLocaleString("pt-BR", { style: "currency" , currency:"BRL"})
+		return parseFloat(value).toLocaleString("pt-BR", { style: "currency" , currency:"BRL"});
 	}
 
 	async mountTable(data){		
@@ -271,11 +283,23 @@ class ReportToPay {
 	        onOpen: ()=> {
 	        	swal.showLoading()
 	        }
-		})		
+		});
 		const data = await this.search();
 		await this.makeReport(data);		
 		swal.close()		
-	}	
+	}
+
+	checkFinishedDate(){
+		if (!(this.finishedDate0 || this.finishedDate1)){
+			swal({
+				 type: 'error',
+				title: "Data de finalização",
+				html: '<h3>Favor informar as datas de finalização para o filtro</h3>'
+			});
+			return false
+		}
+		return true
+	}
 
 	clear() {
 		this.elTableBody.empty();
@@ -304,18 +328,18 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	getTrOffice(officeId, officeName){
 	    return `
 	        <tr>
-	            <th colspan="10">${officeName}</th>
+	            <th colspan="11">${officeName}</th>
 	            <th></th>
 	            <th><center><span office-id="${officeId}">|office=${officeId}|</span></center></th>
 	        </tr>
-	    `
+	    `;
 	}
 
 	getTrClient(officeId, clientId, clientName, clientRefunds){
 	    return `
 	        <tr>
 	            <th></th>
-	            <th colspan="10">
+	            <th colspan="11">
 	                <div class="col-xs-10">
 	                    ${clientName}                            
 	                </div>
@@ -323,7 +347,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	            </th>
 	            <th><center><span client-id=${officeId}-${clientId}>|client=${officeId}-${clientId}|<span></center></th>
 	        </tr>
-	    `
+	    `;
 	}
 
 	async mountTrOffice(task) {
@@ -383,7 +407,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 		    	this.mountTable(task);		    	
 		    	this.computeTotals(task);
 		    });	
-		};
+		}
 		await this.replaceTotalByOffice();
 		await this.replaceTotalClientByOffice();
 		await this.writeTable();	
@@ -407,7 +431,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 	getTrClient(clientId, clientName, clientRefunds){
 	    return `
 	        <tr>
-	            <th colspan="10">
+	            <th colspan="11">
 	            	<div class="col-xs-10">
 	            		${clientName}
 	            	</div>	
@@ -423,7 +447,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 	    return `
 	        <tr>
 	            <th></th>
-	            <th colspan="10">
+	            <th colspan="11">
 	                <div class="col-xs-10">
 	                    ${officeName}                            
 	                </div>
@@ -479,9 +503,9 @@ class ReportToPayGroupByClient extends ReportToPay {
 	}
 
 	async computeTotals(task){
-		this.computeTotalClient(task)
-		this.computeTotalOfficeByClient(task)				
-		this.computeTotalToPay(task)
+		this.computeTotalClient(task);
+		this.computeTotalOfficeByClient(task);
+		this.computeTotalToPay(task);
 	}
 
 	async makeReport(data) {
@@ -491,7 +515,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 		    	this.mountTable(task);		    	
 		    	this.computeTotals(task);
 		    });	
-		};
+		}
 		await this.replaceTotalByClient();
 		await this.replaceTotalOfficeByClient();
 		await this.writeTable();	

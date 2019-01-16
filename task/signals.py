@@ -360,7 +360,7 @@ def update_status_parent_task(sender, instance, **kwargs):
     :param kwargs:
     :return:
     """
-    if instance.parent and not instance.task_status == TaskStatus.REQUESTED:
+    if instance.parent and not instance.task_status == TaskStatus.REQUESTED and instance.task_status != instance.__previous_status:    
         if not get_parent_status(instance.status) == TaskStatus(instance.parent.__previous_status) \
                 and not getattr(instance, '_from_parent'):
             instance.parent.task_status = get_parent_status(instance.status)

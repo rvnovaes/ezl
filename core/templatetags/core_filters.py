@@ -1,6 +1,7 @@
 from django import template
 from django.conf import settings
 from core.models import Office
+from django.contrib.auth.models import Group 
 from bootstrap3.templatetags.bootstrap3 import bootstrap_field
 from django.utils.safestring import mark_safe
 
@@ -134,3 +135,9 @@ def bootstrap_field_oneline(*args, **kwargs):
     """
     field_str = bootstrap_field(*args, **kwargs).replace('\n', '')
     return mark_safe(field_str)
+
+
+@register.filter(name='has_group')
+def has_group(request, group_name):
+    group =  Group.objects.get(name=group_name + '-' + str(get_office_session_pk(request))) 
+    return group in request.user.groups.all()   

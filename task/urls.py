@@ -44,6 +44,9 @@ urlpatterns = [
     url(r'^providencias/geolocation/finalizar$',
         login_required(views.GeolocationTaskFinish.as_view()),
         name='task_geolocation_finish'),
+    url(r'^task/update/amount$', 
+        login_required(views.TaskUpdateAmountView.as_view()), 
+        name='task_update_amount'),
     url(r'^ecm/(?P<pk>[0-9]+)/$',
         views.EcmCreateView.as_view(),
         name='ecm_add'),
@@ -112,4 +115,9 @@ urlpatterns = [
     url(r'^import_task_list/$',
         login_required(views.ImportTaskList.as_view()),
         name='import_task_list'),
+
+    # Relatórios
+    url(r'^task_checkin_list/$',
+        login_required(views.TaskCheckinReportView.as_view()),
+        name='task_checkin_list'),
 ]
