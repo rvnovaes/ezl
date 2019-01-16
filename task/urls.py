@@ -115,4 +115,9 @@ urlpatterns = [
     url(r'^import_task_list/$',
         login_required(views.ImportTaskList.as_view()),
         name='import_task_list'),
+
+    # Relatórios
+    url(r'^task_checkin_list/$',
+        login_required(views.TaskCheckinReportView.as_view()),
+        name='task_checkin_list'),
 ]
