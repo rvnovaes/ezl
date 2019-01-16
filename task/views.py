@@ -35,7 +35,8 @@ from core.xlsx import XLSXWriter
 from lawsuit.models import Movement
 from lawsuit.forms import LawSuitForm
 from lawsuit.models import Movement, LawSuit, Folder, TypeMovement
-from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
+from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter, \
+    TaskCheckinReportFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
     ImportTaskListForm, TaskBulkCreateForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
@@ -2224,8 +2225,20 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         return JsonResponse({'message': 'Registro atualizado com sucesso'})
 
 
+class TaskCheckinReportBase(CustomLoginRequiredView, TemplateView):
+    template_name = 'task/reports/checkin.html'
+
+
 class TaskCheckinReportView(CustomLoginRequiredView, View):
+    filter_class = TaskCheckinReportFilter
+    model = Task
+
     def get(self, request, *args, **kwargs):
-        tasks = Task.objects.all()[:10]
-        tasks_serializer = TaskCheckinSerializer(tasks, many=True)
+        tasks = self.filter_class(request.GET, queryset=self.get_queryset())
+        tasks_serializer = TaskCheckinSerializer(tasks.qs, many=True)
         return JsonResponse(tasks_serializer.data, safe=False)
+
+    def get_queryset(self):
+        office = get_office_session(self.request)
+        return self.model.objects.filter(office=office, task_status__in=[TaskStatus.DONE, TaskStatus.FINISHED,
+                                                                         TaskStatus.BLOCKEDPAYMENT])

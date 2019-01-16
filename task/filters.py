@@ -1,6 +1,6 @@
 from django.forms import Select, Textarea, RadioSelect
-from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, BooleanFilter
-
+from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, \
+    BooleanFilter
 from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
@@ -193,6 +193,7 @@ class TaskFilter(FilterSet):
         fields = []
         order_by = ['final_deadline_date']
 
+
 class BatchChangTaskFilter(TaskFilter):
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
         super().__init__(data, queryset, prefix, strict, request)
@@ -256,3 +257,16 @@ class TypeTaskMainFilter(filters.FilterSet):
     class Meta:
         model = TypeTaskMain
         fields = ['is_hearing', 'name']
+
+
+class TaskCheckinReportFilter(FilterSet):
+    finished_date = MDDateTimeRangeFilter(name='finished_date')
+    execution_date = MDDateTimeRangeFilter(name='execution_date')
+    task_executed_by = CharFilter(name='executed_by_checkin__create_user__person__legal_name',
+                                  lookup_expr='unaccent__icontains')
+    task_company_representative = CharFilter(name='company_representative_checkin__create_user__person__legal_name',
+                                             lookup_expr='unaccent__icontains')
+
+    class Meta:
+        model = Task
+        fields = ['finished_date', 'execution_date', 'task_executed_by', 'task_company_representative']

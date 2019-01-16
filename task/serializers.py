@@ -81,6 +81,25 @@ class TaskToPaySerializer(serializers.ModelSerializer):
 
 
 class TaskCheckinSerializer(serializers.ModelSerializer):
+    task_executed_by = serializers.SerializerMethodField()
+    date_executed_by_checkin = serializers.SerializerMethodField()
+    task_company_representative = serializers.SerializerMethodField()
+    date_company_representative_checkin = serializers.SerializerMethodField()
+
     class Meta:
         model = Task
-        fields = ('pk', 'task_number', 'final_deadline_date', 'executed_by_checkin', 'company_representative_checkin')
+        fields = ('pk', 'task_number', 'final_deadline_date', 'task_executed_by', 'date_executed_by_checkin',
+                  'task_company_representative', 'date_company_representative_checkin')
+
+    def get_task_executed_by(self, obj):
+        return obj.executed_by_checkin.create_user.person.legal_name if obj.executed_by_checkin else None
+
+    def get_date_executed_by_checkin(self, obj):
+        return obj.executed_by_checkin.create_date if obj.executed_by_checkin else None
+
+    def get_task_company_representative(self, obj):
+        return obj.company_representative_checkin.create_user.person.legal_name if obj.company_representative_checkin \
+            else None
+
+    def get_date_company_representative_checkin(self, obj):
+        return obj.company_representative_checkin.create_date if obj.company_representative_checkin else None
