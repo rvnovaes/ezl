@@ -50,7 +50,7 @@ class DashboardStatusTable(tables.Table):
                  delegation_date='Delegação',
                  client="Cliente",
                  law_suit_number="Processo",
-                 type_service="Serviço",
+                 type_task="Serviço",
                  opposing_party="Parte adversa",
                  title="",
                  status="",
@@ -58,7 +58,7 @@ class DashboardStatusTable(tables.Table):
         super().__init__(*args, **kwargs)
         self.base_columns['client'].verbose_name = client
         self.base_columns['law_suit_number'].verbose_name = law_suit_number
-        self.base_columns['type_service'].verbose_name = type_service
+        self.base_columns['type_task'].verbose_name = type_task
         self.base_columns['opposing_party'].verbose_name = opposing_party
         self.base_columns['task_number'].verbose_name = 'Nº da OS'
         self.base_columns['origin_code'].verbose_name = 'OS Original'
@@ -68,7 +68,7 @@ class DashboardStatusTable(tables.Table):
         self.length = self.rows.__len__()
 
     client = tables.Column(orderable=True)
-    type_service = tables.Column(orderable=True)
+    type_task = tables.Column(orderable=True)
     opposing_party = tables.Column(accessor='movement.law_suit.opposing_party')
     origin_code = tables.Column(order_by=('parent_task_number', 'legacy_code'))
     status = tables.TemplateColumn(
@@ -77,7 +77,7 @@ class DashboardStatusTable(tables.Table):
     class Meta:
         model = DashboardViewModel
         fields = [
-            'status', 'task_number', 'final_deadline_date', 'type_service',
+            'status', 'task_number', 'final_deadline_date', 'type_task',
             'law_suit_number', 'client', 'opposing_party', 'origin_code'
         ]
         empty_text = "Não existem providências a serem exibidas"
