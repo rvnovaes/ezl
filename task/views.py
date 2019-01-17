@@ -62,7 +62,9 @@ from survey.models import SurveyPermissions
 from babel.numbers import format_currency
 from task import signals
 from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
+from dal import autocomplete
 import logging
+import operator
 logger = logging.getLogger(__name__)
 
 mapOrder = {'asc': '', 'desc': '-'}
@@ -1210,9 +1212,11 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     ]
                     task_dynamic_query.add(Q(task_status__in=status), Q.AND)
                 if data['type_task']:
+                    list_of_type_task_main = [list(type_task.type_task_main.all()) for type_task in data['type_task']]
+                    list_of_type_task_main = reduce(operator.concat, list_of_type_task_main)
                     task_dynamic_query.add(
-                        Q(Q(type_task=data['type_task']) |
-                          Q(type_task__type_task_main__in=data['type_task'].type_task_main.all())), Q.AND)
+                        Q(Q(type_task__in=data['type_task']) |
+                          Q(type_task__type_task_main__in=list_of_type_task_main)), Q.AND)
                 if data['court']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__organ=data['court']), Q.AND)
@@ -2216,3 +2220,13 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         pre_save.connect(signals.pre_save_task, sender=Task)
         post_save.connect(signals.post_save_task, sender=Task) 
         return JsonResponse({'message': 'Registro atualizado com sucesso'})
+
+
+class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return TypeTask.objects.none()
+        qs = TypeTask.objects.filter(is_active=True, office=get_office_session(self.request))
+        if self.q: 
+            qs = qs.filter(name__unaccent__icontains=self.q)
+        return qs

@@ -56,10 +56,10 @@ class TaskFilter(FilterSet):
         required=False,
         choices=[(task_status.name, task_status.value)
                  for task_status in TaskStatus])
-    type_task = ModelChoiceFilter(
-        queryset=filter_valid_choice_form(
-            TypeTask.objects.filter(is_active=True)),
-        label=u"Tipo de Serviço")
+    type_task = ModelMultipleChoiceFilter(
+        queryset=TypeTask.objects.filter(is_active=True), 
+        label='Tipo de Serviço', 
+        widget=autocomplete.ModelSelect2Multiple(url='type-task-autocomplete'))
     cost_center = ModelChoiceFilter(
         queryset=filter_valid_choice_form(
             CostCenter.objects.filter(is_active=True)),
