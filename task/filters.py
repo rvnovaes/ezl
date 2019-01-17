@@ -76,15 +76,11 @@ class TaskFilter(FilterSet):
     law_suit_number = CharFilter(label=u"Nº do processo")
     task_number = NumberFilter(label=u"Nº da OS")
     task_legacy_code = CharFilter(label=u"Nº da OS de origem")
-    task_origin_code = NumberFilter(label=u"Nº da OS de origem")   
-    client = CharFilter(
-        label="Cliente",
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Person,
-            field_related='legal_name',
-            name='client',
-            url='/client_form'))
+    task_origin_code = NumberFilter(label=u"Nº da OS de origem")
+    client = ModelMultipleChoiceFilter(
+        queryset=Person.objects.filter(is_active=True, is_customer=True), 
+        label='Cliente',
+        widget=autocomplete.ModelSelect2Multiple(url='get_client_2'))
     office_executed_by = CharFilter(
         label='Escritório contratado',
         required=False,

@@ -1234,7 +1234,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                             'folder_legacy_code']), Q.AND)
                 if data['client']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__folder__person_customer__id=data[
+                        Q(movement__law_suit__folder__person_customer__id__in=data[
                             'client']), Q.AND)
                 if data['law_suit_number']:
                     task_dynamic_query.add(
