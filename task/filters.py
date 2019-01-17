@@ -1,6 +1,7 @@
 from django.forms import Select, Textarea, RadioSelect
 from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter
+from django.db.models import Q
 from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
@@ -266,7 +267,28 @@ class TaskCheckinReportFilter(FilterSet):
                                   lookup_expr='unaccent__icontains', label='Correspondente/Escritório contratado')
     task_company_representative = CharFilter(name='company_representative_checkin__create_user__person__legal_name',
                                              lookup_expr='unaccent__icontains', label='Preposto')
+    has_checkin = ChoiceFilter(
+        empty_label='Todas',
+        label='Por checkin',
+        method='has_checkin_filter',
+        choices=(
+            (0, 'Somente com checkin realizado'),
+            (1, 'Somente sem checkin realizado'),
+        ))
 
     class Meta:
         model = Task
-        fields = ['finished_date', 'execution_date', 'task_executed_by', 'task_company_representative']
+        fields = ['finished_date', 'execution_date', 'task_executed_by', 'task_company_representative', 'has_checkin']
+
+    def has_checkin_filter(self, queryset, name, value):
+        if value == '0':
+            return queryset.filter(Q(
+                Q(executed_by_checkin__isnull=int(value)) |
+                Q(company_representative_checkin__isnull=int(value))
+            ))
+        elif value == '1':
+            return queryset.filter(Q(
+                Q(executed_by_checkin__isnull=int(value)),
+                Q(company_representative_checkin__isnull=int(value))
+            ))
+        return queryset

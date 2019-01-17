@@ -65,6 +65,9 @@
                                 </script>
                             </div>
                         </div>
+                        <div class="row">
+                            {% bootstrap_field filter.form.has_checkin form_group_class="form-group col-sm-6" bound_css_class='' %}
+                        </div>
                     </fieldset>
                     <div class="panel-footer text-center">
                          <button class="btn btn-default waves-effect waves-light" type="button"
@@ -130,6 +133,7 @@
 
     <script type="text/javascript">
         var report = new CheckinReport();
+        report.openFilters();
     </script>
 {% endblock %}
 

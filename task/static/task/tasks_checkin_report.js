@@ -3,6 +3,7 @@ class CheckinReport {
 		this.form = $("form");
 		this.btnFilter = $('#btn-filter');
 		this.elTableBody = $('#os-table-body');
+		this.elFilterContent = $('#filter_content');
 	    this.count = 0;
 	    this.htmlTable = ``;
 		this.onClickBtnFilter();
@@ -40,6 +41,16 @@ class CheckinReport {
         return date;
 	}
 
+	static formatTimeDiff(timeList){
+		if (timeList[1] >= 60){timeList[1] = timeList[1] % 60}
+		if (timeList[2] >= 60){timeList[2] = timeList[2] % 60}
+		let i = 0;
+		for (i = 0; i < timeList.length; i++) {
+		  timeList[i] = (`${timeList[i]}`.length === 1) ? `0${timeList[i]}` : `${timeList[i]}`;
+		}
+		return timeList
+	}
+
 	static isCheckinLate(baseDate, compareDate, diffLimit=30, datePart='n'){
 		baseDate = this.setDefaultOfNull(baseDate);
 		compareDate = this.setDefaultOfNull(compareDate);
@@ -47,7 +58,7 @@ class CheckinReport {
 		if(baseDate !== '' && compareDate !== ''){
 			baseDate = this.getDateFromString(baseDate);
 			compareDate = this.getDateFromString(compareDate);
-			if (this.getDateDiff(baseDate - compareDate, datePart) <= diffLimit){
+			if (this.getDateDiff(baseDate, compareDate, datePart) <= diffLimit){
 				isLate = false;
 			}
 		}
@@ -72,8 +83,14 @@ class CheckinReport {
 		let strExecutedByCheckin = this.setDefaultOfNull(task.date_executed_by_checkin);
 		let strCompanyRepresentativeCheckin = this.setDefaultOfNull(task.date_company_representative_checkin);
 		if(strExecutedByCheckin && strCompanyRepresentativeCheckin){
-			return this.getDateDiff(this.getDateFromString(strExecutedByCheckin),
-									this.getDateFromString(strCompanyRepresentativeCheckin));
+			let hour = this.getDateDiff(this.getDateFromString(strExecutedByCheckin),
+				this.getDateFromString(strCompanyRepresentativeCheckin), 'h');
+			let minutes = this.getDateDiff(this.getDateFromString(strExecutedByCheckin),
+				this.getDateFromString(strCompanyRepresentativeCheckin));
+			let seconds = this.getDateDiff(this.getDateFromString(strExecutedByCheckin),
+				this.getDateFromString(strCompanyRepresentativeCheckin), 's');
+			let timeList = this.formatTimeDiff([hour, minutes, seconds]);
+			return `${timeList[0]}:${timeList[1]}:${timeList[2]}`;
 		} else {
 			return '--';
 		}
@@ -181,5 +198,10 @@ class CheckinReport {
 		    });
 		}
 		this.writeTable();
+	}
+
+	openFilters(){
+		this.clear();
+		this.elFilterContent.collapse('show');
 	}
 }

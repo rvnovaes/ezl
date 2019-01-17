@@ -98,14 +98,14 @@ class TaskCheckinSerializer(serializers.ModelSerializer):
                   'law_suit_number', 'person_customer')
 
     def get_date_executed_by_checkin(self, obj):
-        return obj.executed_by_checkin.create_date if obj.executed_by_checkin else None
+        return obj.executed_by_checkin.date if obj.executed_by_checkin else None
 
     def get_task_company_representative(self, obj):
         return obj.company_representative_checkin.create_user.person.legal_name if obj.company_representative_checkin \
             else None
 
     def get_date_company_representative_checkin(self, obj):
-        return obj.company_representative_checkin.create_date if obj.company_representative_checkin else None
+        return obj.company_representative_checkin.date if obj.company_representative_checkin else None
 
     def get_os_executor(self, obj):
         return obj.os_executor
