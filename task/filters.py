@@ -38,15 +38,10 @@ class TaskFilter(FilterSet):
             State.objects.filter(is_active=True)),
         label="UF", 
         widget=autocomplete.ModelSelect2Multiple(url='state-autocomplete'))
-    court_district = CharFilter(
-        label="Comarca",
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=CourtDistrict,
-            field_related='name',
-            forward='state',
-            name='court_district',
-            url='/processos/courtdistrict_autocomplete'))
+    court_district = ModelMultipleChoiceFilter(
+        queryset=filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)), 
+        label='Comarca', 
+        widget=autocomplete.ModelSelect2Multiple(url='courtdistrict_select2'))
     court_district_complement = CharFilter(
         label="Complemento de Comarca",
         required=False,

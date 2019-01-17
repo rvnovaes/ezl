@@ -1198,7 +1198,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                             'state']), Q.AND)
                 if data['court_district']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__court_district=data[
+                        Q(movement__law_suit__court_district__in=data[
                             'court_district']), Q.AND)
                 if data['court_district_complement']:
                     task_dynamic_query.add(
