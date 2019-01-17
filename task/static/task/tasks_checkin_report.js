@@ -1,18 +1,10 @@
 class CheckinReport {
 	constructor() {
 		this.form = $("form");
-		this.btnDownloadXlsx = $('#btn-download-xlsx');
 		this.btnFilter = $('#btn-filter');
 		this.elTableBody = $('#os-table-body');
-		this.elTableFoot = $('#os-table-foot');
 	    this.count = 0;
 	    this.htmlTable = ``;
-	    this.elTaskExecutedBy = $('#id_task_executed_by');
-	    this.elTaskCompanyRepresentative = $('#id_task_company_representative');
-	    this.elFinishedDate0 = $("#finished_date_0");
-	    this.elFinishedDate1 = $("#finished_date_1");
-	    this.elExecutionDate0 = $("#execution_date_0");
-	    this.elExecutionDate1 = $("#execution_date_1");
 		this.onClickBtnFilter();
 	}
 
@@ -27,41 +19,64 @@ class CheckinReport {
 		return new Date(strDate);
 	}
 
+	static getDateDiff(fromdate, todate, datepart='n', absolute=true) {
+		datepart = datepart.toLowerCase();
+  		let diff = todate - fromdate;
+  		let divideBy = { w:604800000,
+			d:86400000,
+			h:3600000,
+			n:60000,
+			s:1000
+  		};
+  		return (absolute) ? Math.abs(Math.floor( diff/divideBy[datepart])) : Math.floor( diff/divideBy[datepart]);
+	}
+
 	static formatLocalDateTime(strDate) {
-		let date = CheckinReport.setDefaultOfNull(strDate);
+		let date = this.setDefaultOfNull(strDate);
 		if (date !== '') {
-            date = CheckinReport.getDateFromString(date);
+            date = this.getDateFromString(date);
             return `${date.toLocaleString('pt-BR')}`;
         }
         return date;
 	}
 
-	static isCheckinLate(strTaskDate, strCheckinDate){
-		let taskDate = CheckinReport.setDefaultOfNull(strTaskDate);
-		let checkinDate = CheckinReport.setDefaultOfNull(strCheckinDate);
+	static isCheckinLate(baseDate, compareDate, diffLimit=30, datePart='n'){
+		baseDate = this.setDefaultOfNull(baseDate);
+		compareDate = this.setDefaultOfNull(compareDate);
 		let isLate = true;
-		if(taskDate !== '' && checkinDate !== ''){
-			taskDate = CheckinReport.getDateFromString(taskDate);
-			checkinDate = CheckinReport.getDateFromString(checkinDate);
-			if (Math.abs(Math.floor((taskDate - checkinDate)/60000)) <= 30){
+		if(baseDate !== '' && compareDate !== ''){
+			baseDate = this.getDateFromString(baseDate);
+			compareDate = this.getDateFromString(compareDate);
+			if (this.getDateDiff(baseDate - compareDate, datePart) <= diffLimit){
 				isLate = false;
 			}
 		}
-		if(checkinDate === ''){
+		if(compareDate === ''){
 			isLate = false;
 		}
 		return isLate;
 	}
 
-	static getCheckinClass(task, field=''){
-		if(field !== '') {
-            if (CheckinReport.isCheckinLate(task.final_deadline_date, task[field])) {
-                return 'label-danger';
-            } else if(task[field]){
-            	return 'label-success';
+	static getCheckinClass(baseCheckin, compareCheckin){
+		if(compareCheckin !== '') {
+            if (this.isCheckinLate(baseCheckin, compareCheckin)) {
+                return 'label label-danger';
+            } else if(compareCheckin){
+            	return 'label label-success';
 			}
         }
 		return '';
+	}
+
+	static compareCheckins(task){
+		let strExecutedByCheckin = this.setDefaultOfNull(task.date_executed_by_checkin);
+		let strCompanyRepresentativeCheckin = this.setDefaultOfNull(task.date_company_representative_checkin);
+		if(strExecutedByCheckin && strCompanyRepresentativeCheckin){
+			return this.getDateDiff(this.getDateFromString(strExecutedByCheckin),
+									this.getDateFromString(strCompanyRepresentativeCheckin));
+		} else {
+			return '--';
+		}
 	}
 
 	get formData() {
@@ -106,17 +121,21 @@ class CheckinReport {
 		let dateExecutedByCheckin = CheckinReport.formatLocalDateTime(task.date_executed_by_checkin);
         let dateCompanyRepresentativeCheckin = CheckinReport.formatLocalDateTime(task.date_company_representative_checkin);
 	    return `
-	          <tr role="row" id="${task.task_id}">
-	                <td>${task.task_number}</td>
+	          <tr role="row" id="${task.pk}">
+	                <td><a href="/dashboard/${task.pk}" target="_blank">${task.task_number}</a></td>
 					<td>${task.type_task_name}</td>
 					<td>${finalDeadlineDate}</td>
 					<td>${CheckinReport.setDefaultOfNull(task.os_executor)}</td>
-					<td><span class="font-12 label ${CheckinReport.getCheckinClass(task, 'date_executed_by_checkin')}">
+					<td><span class="font-12 ${CheckinReport.getCheckinClass(task.final_deadline_date, 
+																			 task.date_executed_by_checkin)}">
 						${dateExecutedByCheckin}</span></td>
 					<td>${CheckinReport.setDefaultOfNull(task.task_company_representative)}</td>
-					<td><span class="font-12 label ${CheckinReport.getCheckinClass(task, 'date_company_representative_checkin')}">
+					<td><span class="font-12 ${CheckinReport.getCheckinClass(task.final_deadline_date, 
+																			 task.date_company_representative_checkin)}">
 						${dateCompanyRepresentativeCheckin}</span></td>
-					<td>Diferença entre marcações</td>
+					<td><span class="font-12 ${CheckinReport.getCheckinClass(task.date_executed_by_checkin, 
+																			 task.date_company_representative_checkin)}">
+						${CheckinReport.compareCheckins(task)}</span></td>
 					<td>${CheckinReport.setDefaultOfNull(task.person_customer)}</td>
 					<td>${CheckinReport.setDefaultOfNull(task.law_suit_number)}</td>
 	            </tr>`;
