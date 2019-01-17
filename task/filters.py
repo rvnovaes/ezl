@@ -1,6 +1,6 @@
 from django.forms import Select, Textarea, RadioSelect
-from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, BooleanFilter
-
+from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, BooleanFilter, ModelMultipleChoiceFilter
+from dal import autocomplete
 from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
@@ -33,10 +33,11 @@ class TaskApiFilter(FilterSet):
 
 
 class TaskFilter(FilterSet):
-    state = ModelChoiceFilter(
+    state = ModelMultipleChoiceFilter(
         queryset=filter_valid_choice_form(
             State.objects.filter(is_active=True)),
-        label="UF")
+        label="UF", 
+        widget=autocomplete.ModelSelect2Multiple(url='state-autocomplete'))
     court_district = CharFilter(
         label="Comarca",
         required=False,

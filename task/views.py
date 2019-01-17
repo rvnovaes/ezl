@@ -1194,7 +1194,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         ), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__court_district__state=data[
+                        Q(movement__law_suit__court_district__state__in=data[
                             'state']), Q.AND)
                 if data['court_district']:
                     task_dynamic_query.add(
@@ -1411,7 +1411,6 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return query_set, task_filter
 
     def get_queryset(self, **kwargs):
-
         task_list, task_filter = self.query_builder()
         self.filter = task_filter
 

@@ -2555,3 +2555,14 @@ class CustomGoogleOAuth2Adapter(GoogleOAuth2Adapter):
 
 oauth2_login = OAuth2LoginView.adapter_view(CustomGoogleOAuth2Adapter)
 oauth2_callback = OAuth2CallbackView.adapter_view(CustomGoogleOAuth2Adapter)
+
+
+
+class StateAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return State.objects.none()
+        qs = State.objects.all()
+        if self.q:
+            qs = qs.filter(name__unaccent__icontains=self.q)
+        return qs
