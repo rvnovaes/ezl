@@ -179,7 +179,7 @@ class FolderTask(luigi.Task):
         return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield CostCenterTask(self.date_interval)
+        yield ConfigTask(self.date_interval)
 
     def run(self):
         self.output().open("w").close()
@@ -221,7 +221,7 @@ class MovementTask(luigi.Task):
         return luigi.LocalTarget(path=get_target_path(self))
 
     def requires(self):
-        yield TypeMovementTask(self.date_interval)
+        yield LawsuitTask(self.date_interval)
 
     def run(self):
         self.output().open("w").close()

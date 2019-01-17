@@ -13,8 +13,9 @@ class LawsuitETL(GenericETL):
     advwin_table = 'Jurid_Pastas'
 
     _import_query = """
-                    SELECT
-                          p.OutraParte                             AS opposing_party,
+                    SELECT  DISTINCT
+							a.Ident,                          
+							cast(p.OutraParte as char(255))                             AS opposing_party,
                           p.Codigo_Comp                            AS folder_legacy_code,
                           CASE WHEN (d.D_Atual IS NULL)
                             THEN 'False'
@@ -42,22 +43,34 @@ class LawsuitETL(GenericETL):
                               p.Varas
                           ELSE d.D_Vara END                        AS court_division_legacy_code,
                           d.D_NumPrc                               AS law_suit_number
-                    FROM Jurid_Pastas AS p
-                          LEFT JOIN Jurid_Distribuicao AS d ON
-                                                              p.Codigo_Comp = d.Codigo_Comp
-                          INNER JOIN Jurid_ProcMov AS pm ON
+                    FROM Jurid_agenda_table AS a
+                          inner JOIN Jurid_Pastas AS p ON
+                                                               p.Codigo_Comp = a.Pasta
+                          inner JOIN Jurid_Distribuicao AS d ON
+                                                              p.Codigo_Comp = d.Codigo_Comp and
+                                                              d.D_Atual = 1
+                          inner JOIN Jurid_ProcMov AS pm ON
                                                            pm.Codigo_Comp = p.Codigo_Comp
-                          INNER JOIN Jurid_agenda_table AS a ON
-                                                               pm.Ident = a.Mov
-                          INNER JOIN Jurid_CodMov AS cm ON
+                          inner JOIN Jurid_CodMov AS cm ON
                                                           a.CodMov = cm.Codigo
                     WHERE
-                          (p.Status = 'Ativa' OR p.Status = 'Especial') AND
                           cm.UsarOS = 1 AND
-                          p.Cliente IS NOT NULL AND p.Cliente <> '' AND
-                          (a.SubStatus = 10 OR a.SubStatus = 11) AND
-                          a.Status = '0' AND -- STATUS ATIVO
-                          p.Cliente IN ('{cliente}')
+                    a.Ident IN (2622474	,
+								2473981	,
+								2303529	,
+								2391979	,
+								2381056	,
+								2264799	,
+								2251917	,
+								2369180	,
+								2622910	,
+								2733154	,
+								2519977	,
+								2623158	,
+								2989869	,
+								2004275	,
+								1899787	
+								)
                           AND
                           ((p.Codigo_Comp IS NOT NULL AND p.Codigo_Comp <> '') OR
                            (d.Codigo_Comp IS NOT NULL AND d.Codigo_Comp <> '')) AND

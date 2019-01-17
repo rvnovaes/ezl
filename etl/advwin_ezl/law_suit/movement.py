@@ -16,20 +16,32 @@ class MovementETL(GenericETL):
                   pm.Ident          AS legacy_code,
                   pm.Advogado       AS person_lawyer_legacy_code,
                   pm.CodMov         AS type_movement_legacy_code
-                from Jurid_ProcMov AS pm
-                INNER JOIN Jurid_Pastas as p on
-                  p.Codigo_Comp = pm.Codigo_Comp
-                INNER JOIN Jurid_agenda_table as a ON
+                from Jurid_agenda_table as a
+                left JOIN Jurid_Pastas as p on
+                  p.Codigo_Comp = a.Pasta
+                left JOIN Jurid_ProcMov AS pm ON
                   pm.Ident = a.Mov
-                LEFT JOIN Jurid_CodMov as cm ON
+                left JOIN Jurid_CodMov as cm ON
                   a.CodMov = cm.Codigo
                 WHERE
-                  cm.UsarOS = 1 and
-                  (p.Status = 'Ativa' OR p.Status = 'Especial') AND
-                  (a.SubStatus = 10 OR a.SubStatus = 11) AND
-                  a.Status = '0' AND -- STATUS ATIVO
-                  p.Cliente IN ('{cliente}')
-                  """
+                    cm.UsarOS = 1 AND
+                    a.Ident IN (2622474	,
+								2473981	,
+								2303529	,
+								2391979	,
+								2381056	,
+								2264799	,
+								2251917	,
+								2369180	,
+								2622910	,
+								2733154	,
+								2519977	,
+								2623158	,
+								2989869	,
+								2004275	,
+								1899787	
+								)
+"""
 
     model = Movement
     advwin_table = "Jurid_ProcMov"
