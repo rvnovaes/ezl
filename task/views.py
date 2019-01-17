@@ -1159,7 +1159,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
-                query_set = DashboardViewModel.objects.filter(q)
+                query_set = DashboardViewModel.objects.filter(q, office=get_office_session(self.request))
             else:
                 task_dynamic_query = Q()
                 client_query = Q()
