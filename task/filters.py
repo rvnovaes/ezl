@@ -41,7 +41,7 @@ class TaskFilter(FilterSet):
     court_district = ModelMultipleChoiceFilter(
         queryset=filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)), 
         label='Comarca', 
-        widget=autocomplete.ModelSelect2Multiple(url='courtdistrict_select2'))
+        widget=autocomplete.ModelSelect2Multiple(url='courtdistrict_select2', forward=['state']))
     court_district_complement = CharFilter(
         label="Complemento de Comarca",
         required=False,
