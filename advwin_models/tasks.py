@@ -460,6 +460,7 @@ def export_task(self, task_id, task=None, execute=True):
     table = JuridAgendaTable.__table__
     values = {}
 
+    import pdb;pdb.set_trace()
     if task.task_status == TaskStatus.ACCEPTED_SERVICE.value:
         values = {
             'SubStatus': 11,
@@ -496,11 +497,16 @@ def export_task(self, task_id, task=None, execute=True):
         if task.get_child:
             delegated_office = task.get_child.office
             delegated_to = delegated_office.legal_name
-            for user in {user for user, perms in
-                         get_users_with_perms(delegated_office, attach_perms=True).items() if 'group_admin' in perms}:
-                if user.person.legacy_code:
-                    advwin_advogado = user.person.legacy_code
-                    break
+            office_office_relation = task.office.from_offices.filter(to_office=delegated_office).first()
+            if office_office_relation and office_office_relation.person_reference:
+                advwin_advogado = office_office_relation.person_reference.legacy_code
+            else:
+                for user in {user for user, perms in
+                             get_users_with_perms(delegated_office, attach_perms=True).items() if
+                             'group_admin' in perms}:
+                    if user.person.legacy_code:
+                        advwin_advogado = user.person.legacy_code
+                        break
         else:
             advwin_advogado = task.person_executed_by.legacy_code
             delegated_to = task.person_executed_by.auth_user.username
