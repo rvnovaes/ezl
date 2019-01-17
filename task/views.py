@@ -1199,9 +1199,14 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         Q(movement__law_suit__court_district__state__in=data[
                             'state']), Q.AND)
                 if data['court_district']:
-                    task_dynamic_query.add(
-                        Q(movement__law_suit__court_district__in=data[
-                            'court_district']), Q.AND)
+                    if self.request.GET.get('court_district_option') == 'EXCEPT':
+                        task_dynamic_query.add(
+                            ~Q(movement__law_suit__court_district__in=data[
+                                'court_district']), Q.AND)
+                    else:
+                        task_dynamic_query.add(
+                            Q(movement__law_suit__court_district__in=data[
+                                'court_district']), Q.AND)
                 if data['court_district_complement']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__court_district_complement=data[
@@ -1233,9 +1238,14 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         Q(movement__law_suit__folder__legacy_code=data[
                             'folder_legacy_code']), Q.AND)
                 if data['client']:
-                    task_dynamic_query.add(
-                        Q(movement__law_suit__folder__person_customer__id__in=data[
-                            'client']), Q.AND)
+                    if self.request.GET.get('client_option') == 'EXCEPT':
+                        task_dynamic_query.add(
+                            ~Q(movement__law_suit__folder__person_customer__id__in=data[
+                                'client']), Q.AND)
+                    else: 
+                        task_dynamic_query.add(
+                            Q(movement__law_suit__folder__person_customer__id__in=data[
+                                'client']), Q.AND)                  
                 if data['law_suit_number']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__law_suit_number=data[
