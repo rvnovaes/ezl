@@ -325,3 +325,66 @@ class TaskMail(object):
                 logging.info('Header do E-MAIL: {}'.format(response.headers))
             except Exception as e:
                 logging.error(traceback.format_exc())
+
+
+class TaskNewCompanyRepresentativeMail(object):
+    def __init__(self, email, task, template_id):
+        self.sg = sendgrid.SendGridAPIClient(
+            apikey=settings.EMAIL_HOST_PASSWORD
+        )
+        self.task = task
+        self.email = [{"email": email_address} for email_address in list(set(email))]
+        self.template_id = template_id
+        self.dynamic_template_data = self.get_dynamic_template_data()
+        to_email = self.email
+        original_recipient = None
+        # if settings.DEFAULT_TO_EMAIL:
+        #     to_email = [{"email": settings.DEFAULT_TO_EMAIL}]
+        #     original_recipient = self.email
+        self.data = {
+            "personalizations": [{
+                "to": to_email,
+                "subject":
+                    "Sending with SendGrid is Fun",
+                "dynamic_template_data":
+                    self.dynamic_template_data
+            }],
+            "from": {
+                "email": "contato@ezlawyer.com.br"
+            },
+            "template_id":
+                self.template_id
+        }
+
+        if original_recipient:
+            self.data['mail_settings'] = {
+                "footer": {
+                    "enable": True,
+                    "html": "<p>Destinatário(s) originais: {}".format(original_recipient)
+                }
+            }
+
+    def get_dynamic_template_data(self):
+        project_link = '{}{}'.format(
+            get_project_link(self.task),
+            reverse('task_detail', kwargs={'pk': self.task.pk}))
+        return {
+            "task":
+                "{task_number} - {type_task} ".format(
+                    task_number=self.task.task_number,
+                    type_task=self.task.type_task.name),
+            "task_url": project_link,
+            "name": self.task.person_company_representative.legal_name
+        }            
+
+    def send_mail(self):
+        if self.dynamic_template_data:
+            try:
+                response = self.sg.client.mail.send.post(
+                    request_body=self.data)
+                logging.info('Status do E-MAIL: {}'.format(
+                    response.status_code))
+                logging.info('Body do E-MAIL: {}'.format(response.body))
+                logging.info('Header do E-MAIL: {}'.format(response.headers))
+            except Exception as e:
+                logging.error(traceback.format_exc())        

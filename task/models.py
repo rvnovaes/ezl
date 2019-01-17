@@ -19,6 +19,7 @@ from decimal import Decimal
 from .schemas import *
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.forms import MultipleChoiceField
+from .mail import TaskNewCompanyRepresentativeMail
 
 
 class ChoiceArrayField(ArrayField):
@@ -509,12 +510,23 @@ class Task(Audit, LegacyCode, OfficeMixin):
     def use_upload(self):
         return False
 
+    def on_change_person_company_representative(self): 
+        if self.pk:        
+            if self.person_company_representative != Task.objects.get(pk=self.pk).person_company_representative: 
+                email = TaskNewCompanyRepresentativeMail(self.person_company_representative.get_emails(), self, 'd-edf08ba833514b3a99311f092eba7cc7')
+                if Task.objects.get(pk=self.pk).person_company_representative:
+                    print('enviar e-mail para antigo preposto {}'.format(Task.objects.get(pk=self.pk).person_company_representative))
+        else: 
+            if self. person_company_representative:
+                print('enviar e-mail para novo preposto {}'.format(self.person_company_representative))
+
     def save(self, *args, **kwargs):
         self._skip_signal = kwargs.pop('skip_signal', False)
         self._skip_mail = kwargs.pop('skip_mail', False)
         self._from_parent = kwargs.pop('from_parent', False)
         if not self.task_number:
             self.task_number = self.get_task_number()
+        self.on_change_person_company_representative()
         return super().save(*args, **kwargs)
 
     @property
