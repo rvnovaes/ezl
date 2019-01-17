@@ -71,7 +71,7 @@
                                 onclick="javascript:window.open('{{ request.META.PATH_INFO }}', '_self')">
                             <span class="btn-label"><i class="fa fa-trash-o"></i></span>Limpar
                          </button>
-                         <button class="btn btn-success waves-effect waves-light" type="submit">
+                         <button class="btn btn-success waves-effect waves-light" type="button" id="btn-filter">
                              <span class="btn-label"><i class="fa fa-filter"></i></span>Filtrar
                          </button>
                     </div>
@@ -84,8 +84,6 @@
             <h6 class="panel-title">
                 <i class="mdi mdi-map-marker"></i>Relatório de Checkin
                 <span id="loading-data"></span>
-                <button id="btn-download-xlsx" class="pull-right btn btn-success" style="display: none"> <i class="fa fa-file-excel-o"></i>
-  Exportar para o Excel </button>
             </h6>
         </div>
         <div class="panel-body page-content">
@@ -117,3 +115,37 @@
         </div>
     </div>
 {% endblock content %}
+
+{% block extra_scripts %}
+    {{ filter.form.media }}
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.html5.min.js"></script>
+    <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.print.min.js"></script>
+    <script src="{% static 'task/tasks_checkin_report.js' %}"></script>
+
+    <script type="text/javascript">
+        var report = new CheckinReport();
+    </script>
+{% endblock %}
+
+{% block extra_stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% static 'skeleton/plugins/bower_components/bootstrap-daterangepicker/daterangepicker.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/select2.css' %}" />
+    <style>
+        .page-content{
+            margin-top: -25px;
+        }
+
+        #os-table-body{
+            font-size: 12px;
+        }
+
+    </style>
+    <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+{% endblock extra_stylesheets %}

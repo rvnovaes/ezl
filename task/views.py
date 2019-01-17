@@ -4,7 +4,7 @@ import csv
 import pickle
 import io
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from zipfile import ZipFile
 from django.contrib import messages
@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When, CharField, IntegerField, Count, TextField
+from django.db.models import Q, Case, When, CharField, Count, TextField, Max, Subquery, OuterRef
 from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse_lazy, reverse
@@ -2239,8 +2239,16 @@ class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
 
     def get_queryset(self):
         office = get_office_session(self.request)
-        return self.model.objects.filter(office=office, task_status__in=[TaskStatus.DONE, TaskStatus.FINISHED,
-                                                                         TaskStatus.BLOCKEDPAYMENT])
+        office_corresp = Task.objects.filter(id=OuterRef('child')).order_by('-id')
+        return self.model.objects.select_related('movement__law_suit')\
+            .select_related('movement__law_suit__folder__person_customer') \
+            .select_related('type_task') \
+            .filter(Q(office=office),
+                    Q(task_status__in=[TaskStatus.DONE, TaskStatus.FINISHED,
+                                       TaskStatus.BLOCKEDPAYMENT]),)\
+            .annotate(filho=Max('child'))\
+            .annotate(office_exec=Subquery(office_corresp.values('office__legal_name')[:1]))\
+            .annotate(os_executor=Coalesce('person_executed_by__legal_name', 'office_exec'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
