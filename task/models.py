@@ -19,7 +19,7 @@ from decimal import Decimal
 from .schemas import *
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.forms import MultipleChoiceField
-from .mail import TaskNewCompanyRepresentativeMail
+from .mail import TaskCompanyRepresentativeChangeMail
 
 
 class ChoiceArrayField(ArrayField):
@@ -510,15 +510,35 @@ class Task(Audit, LegacyCode, OfficeMixin):
     def use_upload(self):
         return False
 
+    @staticmethod
+    def person_company_representative_has_change(old_instance, new_instance):
+        if old_instance.person_company_representative != new_instance.person_company_representative:
+            return True
+        return False
+
+    @staticmethod    
+    def send_mail_new_company_representative(instance):
+        if instance.person_company_representative and instance.person_company_representative.get_emails():
+            email = TaskCompanyRepresentativeChangeMail(
+                instance.person_company_representative.get_emails(), instance, 'd-edf08ba833514b3a99311f092eba7cc7')
+            email.send_mail()
+
+    @staticmethod
+    def send_mail_old_company_representative(instance):
+        if instance.person_company_representative and instance.person_company_representative.get_emails():
+            email = TaskCompanyRepresentativeChangeMail(
+                instance.person_company_representative.get_emails(), instance, 'd-77a5f2906dca4f3cbd51b98a464eabb1')
+            email.send_mail()        
+
     def on_change_person_company_representative(self): 
-        if self.pk:        
-            if self.person_company_representative != Task.objects.get(pk=self.pk).person_company_representative: 
-                email = TaskNewCompanyRepresentativeMail(self.person_company_representative.get_emails(), self, 'd-edf08ba833514b3a99311f092eba7cc7')
-                if Task.objects.get(pk=self.pk).person_company_representative:
-                    print('enviar e-mail para antigo preposto {}'.format(Task.objects.get(pk=self.pk).person_company_representative))
-        else: 
-            if self. person_company_representative:
-                print('enviar e-mail para novo preposto {}'.format(self.person_company_representative))
+        if not self.pk and self.person_company_representative:
+            self.send_mail_new_company_representative(self)
+        else:
+            old_instance = Task.objects.get(pk=self.pk)
+            if self.person_company_representative_has_change(old_instance=old_instance, new_instance=self):
+                self.send_mail_old_company_representative(old_instance)
+                self.send_mail_new_company_representative(self)
+
 
     def save(self, *args, **kwargs):
         self._skip_signal = kwargs.pop('skip_signal', False)

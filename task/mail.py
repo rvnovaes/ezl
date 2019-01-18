@@ -9,7 +9,7 @@ from sendgrid.helpers.mail import Attachment, Mail
 from django.conf import settings
 from datetime import datetime
 from core.models import EMAIL, PHONE, CustomSettings
-from task.models import TaskStatus
+from task import models as task_models
 import base64
 import traceback
 import logging
@@ -251,12 +251,12 @@ class TaskMail(object):
         self.email = [{"email": email_address} for email_address in list(set(email))]
         self.template_id = template_id
         self.email_status = {
-            TaskStatus.REFUSED_SERVICE: TaskRefusedServiceMailTemplate,
-            TaskStatus.REFUSED: TaskRefusedMailTemplate,
-            TaskStatus.RETURN: TaskReturnMailTemplate,
-            TaskStatus.ACCEPTED: TaskAcceptedMailTemplate,
-            TaskStatus.OPEN: TaskOpenMailTemplate,
-            TaskStatus.FINISHED: TaskFinishedEmail,
+            task_models.TaskStatus.REFUSED_SERVICE: TaskRefusedServiceMailTemplate,
+            task_models.TaskStatus.REFUSED: TaskRefusedMailTemplate,
+            task_models.TaskStatus.RETURN: TaskReturnMailTemplate,
+            task_models.TaskStatus.ACCEPTED: TaskAcceptedMailTemplate,
+            task_models.TaskStatus.OPEN: TaskOpenMailTemplate,
+            task_models.TaskStatus.FINISHED: TaskFinishedEmail,
         }
         self.template_class = self.email_status.get(self.task.status)(task, by_person)
         self.attachments = self.get_task_attachments()
@@ -327,7 +327,7 @@ class TaskMail(object):
                 logging.error(traceback.format_exc())
 
 
-class TaskNewCompanyRepresentativeMail(object):
+class TaskCompanyRepresentativeChangeMail(object):
     def __init__(self, email, task, template_id):
         self.sg = sendgrid.SendGridAPIClient(
             apikey=settings.EMAIL_HOST_PASSWORD
@@ -338,9 +338,9 @@ class TaskNewCompanyRepresentativeMail(object):
         self.dynamic_template_data = self.get_dynamic_template_data()
         to_email = self.email
         original_recipient = None
-        # if settings.DEFAULT_TO_EMAIL:
-        #     to_email = [{"email": settings.DEFAULT_TO_EMAIL}]
-        #     original_recipient = self.email
+        if settings.DEFAULT_TO_EMAIL:
+            to_email = [{"email": settings.DEFAULT_TO_EMAIL}]
+            original_recipient = self.email
         self.data = {
             "personalizations": [{
                 "to": to_email,
@@ -387,4 +387,4 @@ class TaskNewCompanyRepresentativeMail(object):
                 logging.info('Body do E-MAIL: {}'.format(response.body))
                 logging.info('Header do E-MAIL: {}'.format(response.headers))
             except Exception as e:
-                logging.error(traceback.format_exc())        
+                logging.error(traceback.format_exc())
