@@ -460,7 +460,6 @@ def export_task(self, task_id, task=None, execute=True):
     table = JuridAgendaTable.__table__
     values = {}
 
-    import pdb;pdb.set_trace()
     if task.task_status == TaskStatus.ACCEPTED_SERVICE.value:
         values = {
             'SubStatus': 11,

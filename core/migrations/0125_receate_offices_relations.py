@@ -29,7 +29,7 @@ def recreate_offices_relations(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0122_auto_20181217_1120'),
+        ('core', '0124_auto_20181217_1120'),
     ]
 
     operations = [
