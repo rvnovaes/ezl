@@ -6,6 +6,10 @@ class CheckinReport {
 		this.elFilterContent = $('#filter_content');
 	    this.count = 0;
 	    this.htmlTable = ``;
+	    this.elFinishedDate0 = $("#finished_date_0");
+	    this.elFinishedDate1 = $("#finished_date_1");
+		this.elExecutionDate0 = $("#execution_date_0");
+	    this.elExecutionDate1 = $("#execution_date_1");
 		this.onClickBtnFilter();
 	}
 
@@ -96,6 +100,22 @@ class CheckinReport {
 		}
 	}
 
+	get finishedDate0() {
+		return this.elFinishedDate0.val();
+	}
+
+	get finishedDate1() {
+		return this.elFinishedDate1.val();
+	}
+
+	get executionDate0() {
+		return this.elExecutionDate0.val();
+	}
+
+	get executionDate1() {
+		return this.elExecutionDate1.val();
+	}
+
 	get formData() {
 		return this.form.serializeArray();
 	}
@@ -111,7 +131,9 @@ class CheckinReport {
 
 	onClickBtnFilter() {
 		this.btnFilter.on('click', () => {
-			this.start();
+			if(this.checkDates()){
+				this.start();
+			}
 		});
 	}
 
@@ -203,5 +225,17 @@ class CheckinReport {
 	openFilters(){
 		this.clear();
 		this.elFilterContent.collapse('show');
+	}
+
+	checkDates(){
+		if (!(this.finishedDate0 && this.finishedDate1) && !(this.executionDate0 && this.executionDate1)){
+			swal({
+				 type: 'error',
+				title: "Filtros por data",
+				html: '<h3>Favor informar um período de Finalização ou de Cumprimento para filtrar o relatório</h3>'
+			});
+			return false
+		}
+		return true
 	}
 }

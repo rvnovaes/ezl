@@ -33,7 +33,7 @@
                         </div>
                         <div class="row">
                             <div class="form-group col-sm-12 col-md-6">
-                                {% bootstrap_label "Finalizadas entre: " %}
+                                {% bootstrap_label "Finalizadas entre: " label_class='ezl-required' %}
                                 {% bootstrap_field filter.form.finished_date form_group_class="" bound_css_class='' show_label=False %}
                                 <script>
                                     $(document).ready(function () {
@@ -49,7 +49,7 @@
                                 </script>
                             </div>
                             <div class="form-group col-sm-12 col-md-6">
-                                {% bootstrap_label "Cumpridas entre: "  %}
+                                {% bootstrap_label "Cumpridas entre: " label_class='ezl-required' %}
                                 {% bootstrap_field filter.form.execution_date form_group_class="" bound_css_class='' show_label=False %}
                                 <script>
                                     $(document).ready(function () {
