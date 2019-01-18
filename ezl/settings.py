@@ -12,6 +12,9 @@ import moneyed
 from moneyed.localization import _FORMATTER, DEFAULT
 from celery.schedules import crontab
 
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -37,6 +40,7 @@ try:
     use_l10n = config['django_application'].getboolean('use_l10n')
     use_tz = config['django_application'].getboolean('use_tz')
     datetime_format = config['django_application']['datetime_format']
+    log_date_format = config['django_application']['log_date_format']
     secret_key = config['django_application']['secret_key']
     internal_ips = config['django_application']['internal_ips']
     project_name = config['django_application']['project_name']
@@ -66,6 +70,14 @@ try:
     aws_s3_file_overwrite = config['aws'].getboolean('aws_s3_file_overwrite')
     aws_storage_bucket_url = config['aws']['aws_storage_bucket_url']
 
+    rest_page_size = config['rest_framework']['page_size']
+    rest_access_token_expire = config['rest_framework']['access_token_expire']
+
+    socialaccount_adapter = config['social_auth']['socialaccount_adapter']
+    account_authentication_method = config['social_auth']['account_authentication_method']
+    socialaccount_query_email = config['social_auth'].getboolean('socialaccount_query_email')
+    account_email_required = config['social_auth'].getboolean('account_email_required')
+
 except KeyError as e:
     print('Invalid settings. Check ini files on ezl/config')
     print(e)
@@ -74,8 +86,14 @@ except KeyError as e:
 MUST_LOGIN = True
 DATETIME_FORMAT = datetime_format
 
-CELERY_BROKER_URL = 'amqp://{user}{password}@{host}:{port}/'.format(user=celery_user,password=celery_password,host=celery_host, port=celery_port)
-CELERY_RESULT_BACKEND = 'amqp://{user}:{password}@{host}:{port}/'.format(user=celery_user,password=celery_password,host=celery_host, port=celery_port)
+CELERY_BROKER_URL = 'amqp://{user}:{password}@{host}:{port}/'.format(user=celery_user,
+                                                                     password=celery_password,
+                                                                     host=celery_host,
+                                                                     port=celery_port)
+CELERY_RESULT_BACKEND = 'amqp://{user}:{password}@{host}:{port}/'.format(user=celery_user,
+                                                                         password=celery_password,
+                                                                         host=celery_host,
+                                                                         port=celery_port)
 CELERY_ENABLE_UTC = celery_enable_utc
 CELERY_TIMEZONE = timezone
 CELERY_TASK_ALWAYS_EAGER = celery_task_always_eager
@@ -92,21 +110,10 @@ CELERY_BEAT_SCHEDULE = {
 CELERY_SEND_TASK_EMAILS = celery_send_task_emails
 CELERY_TASK_IGNORE_RESULT = celery_task_ignore_result
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = secret_key
 
-# SECURITY WARNING: don't run with debug turned on in production!
-
 WORKFLOW_URL_EMAIL = os.environ.get('WORKFLOW_EMAIL', 'http://localhost:8000')
-
-if environment in ['debug', 'development']:
-    DEBUG = True
-else:
-    DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 CORS_ORIGIN_ALLOW_ALL = True
@@ -115,23 +122,27 @@ CSRF_TRUSTED_ORIGINS = ['.ezlawyer.com.br']
 # Application definition
 
 INSTALLED_APPS = [
-    'material.theme.teal',
-    'material',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'django.contrib.postgres',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.staticfiles',
+    # Project apps
     'advwin_models',
+    'billing.apps.BillingConfig',
+    'chat.apps.ChatConfig',
     'core.apps.CoreConfig',
-    'lawsuit.apps.LawsuitConfig',
-    'task.apps.TaskConfig',
+    'dashboard.apps.DashboardConfig',
+    'ecm.apps.EcmConfig',
     'etl.apps.EtlConfig',
     'financial.apps.FinancialConfig',
+    'lawsuit.apps.LawsuitConfig',
     'survey.apps.SurveyConfig',
-    'django.contrib.sites',
+    'task.apps.TaskConfig',
+
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -152,18 +163,16 @@ INSTALLED_APPS = [
     'dal_queryset_sequence',
     # Test
     'localflavor',
+    # TODO: Verificar necessidade de manter o material, com a troca do tema para o Ample
+    'material',
+    'material.theme.teal',
     # Sequences
     'sequences.apps.SequencesConfig',
     'channels',
-    'chat.apps.ChatConfig',
-    'ecm',
-    'dashboard',
     'codemirror',
     'guardian',
-    'billing',
     'djmoney',
     'rest_framework',
-    'rest_framework_swagger',
     'oauth2_provider',
     'import_export',
     'django_dbconn_retry',
@@ -187,16 +196,14 @@ SITE_ID = 1
 
 TEMPLATES = [
     {
-        'BACKEND':
-        'django.template.backends.django.DjangoTemplates',
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
             os.path.join(BASE_DIR, 'core/templates'),
             os.path.join(BASE_DIR, 'core/templates/core/http_errors'),
             os.path.join(BASE_DIR, 'ecm/templates')
         ],
-        'APP_DIRS':
-        True,
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -247,6 +254,7 @@ CACHES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
+# SECURITY WARNING: don't run with debug turned on in production!
 if environment in ['debug', 'development']:
     AUTH_PASSWORD_VALIDATORS = [
         {
@@ -353,6 +361,7 @@ else:
     LOG_DIR = '/var/log/ezl'
 
 LOG_FILE_TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+LOG_DATE_FORMAT = log_date_format
 
 LOGGING = {
     'version': 1,
@@ -368,13 +377,12 @@ LOGGING = {
     'formatters': {
         'simple': {
             'format': '[%(asctime)s] %(levelname)s %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
+            'datefmt': LOG_DATE_FORMAT
         },
         'verbose': {
             'format':
             '[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s',
-            'datefmt':
-            '%Y-%m-%d %H:%M:%S'
+            'datefmt': LOG_DATE_FORMAT
         },
     },
     'handlers': {
@@ -473,15 +481,12 @@ LOGGING = {
 UPLOAD_DIRECTORY = 'uploads'
 # ADMINS = [('EZL Erros', 'erros.ezlawyer@gmail.com')]
 
+# Configurações para a API
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES':
-    ('oauth2_provider.contrib.rest_framework.OAuth2Authentication', ),
-    'DEFAULT_FILTER_BACKENDS':
-    ('django_filters.rest_framework.DjangoFilterBackend', ),
-    'DEFAULT_PAGINATION_CLASS':
-    'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE':
-    30,
+    'DEFAULT_AUTHENTICATION_CLASSES': ('oauth2_provider.contrib.rest_framework.OAuth2Authentication', ),
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend', ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': int(rest_page_size),
 }
 
 OAUTH2_PROVIDER = {
@@ -492,22 +497,10 @@ OAUTH2_PROVIDER = {
         'write': 'Write scope',
         'groups': 'Access to your groups'
     },
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
+    'ACCESS_TOKEN_EXPIRE_SECONDS': int(rest_access_token_expire),
 }
 
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'core.ExternalApplication'
-
-SWAGGER_SETTINGS = {
-    'LOGIN_URL': 'rest_framework:login',
-    'LOGOUT_URL': 'rest_framework:logout',
-    'USE_SESSION_AUTH': True,
-    'DOC_EXPANSION': 'list',
-    'APIS_SORTER': 'alpha',
-    'SECURITY_DEFINITIONS': None,
-    'JSON_EDITOR': True,
-    'OPERATIONS_SORTER': 'method',
-    'SHOW_REQUEST_HEADERS': True,
-}
 
 # configuração para o django_import_export
 DATETIME_INPUT_FORMATS = (
@@ -515,9 +508,8 @@ DATETIME_INPUT_FORMATS = (
     datetime_format,
 )
 
-
-
-SOCIALACCOUNT_ADAPTER = 'core.account.adapter.EzlSocialAccountAdapter'
-ACCOUNT_AUTHENTICATION_METHOD = "username"
-SOCIALACCOUNT_QUERY_EMAIL = True
-ACCOUNT_EMAIL_REQUIRED = True
+# configurações de autenticação via google API
+SOCIALACCOUNT_ADAPTER = socialaccount_adapter
+ACCOUNT_AUTHENTICATION_METHOD = account_authentication_method
+SOCIALACCOUNT_QUERY_EMAIL = socialaccount_query_email
+ACCOUNT_EMAIL_REQUIRED = account_email_required
