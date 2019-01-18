@@ -63,6 +63,7 @@ from core.tasks import import_xls_city_list
 from allauth.socialaccount.providers.oauth2.views import *
 from allauth.socialaccount.providers.google.views import *
 
+
 class AutoCompleteView(autocomplete.Select2QuerySetView):
     model = abstractproperty()
     lookups = abstractproperty()
@@ -1486,7 +1487,7 @@ class InviteUpdateView(UpdateView):
             }
             for group in groups_list:
                 if group not in invite.person.auth_user.groups.all() and \
-                    group.name.startswith(invite.office.CORRESPONDENT_GROUP):
+                        group.name.startswith(invite.office.CORRESPONDENT_GROUP):
                     invite.person.auth_user.groups.add(group)
 
         invite.save()
@@ -2379,7 +2380,7 @@ class OfficeProfileDataView(View):
     def post(self, request, *args, **kwargs):
         office_serializer = OfficeSerializer(data=request.POST, instance=get_office_session(request))
         if office_serializer.is_valid():
-            office_serializer.save();
+            office_serializer.save()
             return JsonResponse(office_serializer.data)
         return JsonResponse({'error': office_serializer.errors})            
 
@@ -2467,6 +2468,7 @@ class OfficeProfileAddressCreateView(ViewRelatedMixin, CreateView):
     def get_success_url(self):
         return reverse('office_profile')    
 
+
 class OfficeProfileAddressUpdateView(CustomLoginRequiredView, UpdateView):
     model = Address
     form_class = AddressForm
@@ -2489,6 +2491,7 @@ class OfficeProfileAddressDeleteView(CustomLoginRequiredView, View):
         address_ids = request.POST.getlist('ids[]')
         Address.objects.filter(pk__in=address_ids).delete()
         return JsonResponse({'status': 'ok'})
+
 
 class OfficeProfileAddressDataView(CustomLoginRequiredView, View):
     def get(self, request, pk, *args, **kwargs):        
@@ -2521,6 +2524,7 @@ class OfficeProfileContactMechanismCreateView(ViewRelatedMixin, CreateView):
     def get_success_url(self):
         return reverse('office_profile')
 
+
 class OfficeProfileContactMechanismUpdateView(CustomLoginRequiredView, UpdateView):
     model = ContactMechanism
     form_class = ContactMechanismForm
@@ -2533,7 +2537,6 @@ class OfficeProfileContactMechanismUpdateView(CustomLoginRequiredView, UpdateVie
         form.instance.office = get_office_session(self.request)
         self.object = form.save()        
         return JsonResponse(ContactMechanismSerializer(form.instance).data)
-
 
     def get_success_url(self):
         return reverse('office_profile')        

@@ -73,10 +73,6 @@ set_env_teste:
 	@rm docker-compose.override.yml || true
 	ln -s docker-compose.teste.yml docker-compose.override.yml
 
-set_env_demo:
-	@rm docker-compose.override.yml || true
-	ln -s docker-compose.demo.yml docker-compose.override.yml
-
 shell:
 	docker-compose run web bash
 
