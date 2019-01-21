@@ -1,6 +1,6 @@
 from django.forms import Select, Textarea, RadioSelect
-from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, BooleanFilter
-
+from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, BooleanFilter, ModelMultipleChoiceFilter
+from dal import autocomplete
 from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
@@ -33,19 +33,15 @@ class TaskApiFilter(FilterSet):
 
 
 class TaskFilter(FilterSet):
-    state = ModelChoiceFilter(
+    state = ModelMultipleChoiceFilter(
         queryset=filter_valid_choice_form(
             State.objects.filter(is_active=True)),
-        label="UF")
-    court_district = CharFilter(
-        label="Comarca",
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=CourtDistrict,
-            field_related='name',
-            forward='state',
-            name='court_district',
-            url='/processos/courtdistrict_autocomplete'))
+        label="UF", 
+        widget=autocomplete.ModelSelect2Multiple(url='state-autocomplete'))
+    court_district = ModelMultipleChoiceFilter(
+        queryset=filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)), 
+        label='Comarca', 
+        widget=autocomplete.ModelSelect2Multiple(url='courtdistrict_select2', forward=['state']))
     court_district_complement = CharFilter(
         label="Complemento de Comarca",
         required=False,
@@ -60,10 +56,10 @@ class TaskFilter(FilterSet):
         required=False,
         choices=[(task_status.name, task_status.value)
                  for task_status in TaskStatus])
-    type_task = ModelChoiceFilter(
-        queryset=filter_valid_choice_form(
-            TypeTask.objects.filter(is_active=True)),
-        label=u"Tipo de Serviço")
+    type_task = ModelMultipleChoiceFilter(
+        queryset=TypeTask.objects.filter(is_active=True), 
+        label='Tipo de Serviço', 
+        widget=autocomplete.ModelSelect2Multiple(url='type-task-autocomplete'))
     cost_center = ModelChoiceFilter(
         queryset=filter_valid_choice_form(
             CostCenter.objects.filter(is_active=True)),
@@ -80,15 +76,11 @@ class TaskFilter(FilterSet):
     law_suit_number = CharFilter(label=u"Nº do processo")
     task_number = NumberFilter(label=u"Nº da OS")
     task_legacy_code = CharFilter(label=u"Nº da OS de origem")
-    task_origin_code = NumberFilter(label=u"Nº da OS de origem")   
-    client = CharFilter(
-        label="Cliente",
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Person,
-            field_related='legal_name',
-            name='client',
-            url='/client_form'))
+    task_origin_code = NumberFilter(label=u"Nº da OS de origem")
+    client = ModelMultipleChoiceFilter(
+        queryset=Person.objects.filter(is_active=True, is_customer=True), 
+        label='Cliente',
+        widget=autocomplete.ModelSelect2Multiple(url='get_client_2'))
     office_executed_by = CharFilter(
         label='Escritório contratado',
         required=False,
