@@ -499,3 +499,23 @@ ACCOUNT_AUTHENTICATION_METHOD = "username"
 SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_QUERY_EMAIL = True
+
+
+
+
+""" 
+Todo, levar estas configuracoes para os arquivos .conf organizados pelo Roberto 
+na tarefa EZL-1198. 
+"""
+if environment == 'development':
+    GERENCIANET_CREDENTIALS = {
+        'client_id': 'Client_Id_f6db389974a3fc3b378efc90fffb67b154ae26ca', 
+        'client_secret': 'Client_Secret_d408879045f6f877a44cd62e542eef24f0f387ce', 
+        'sandbox': True
+    }
+else:
+    GERENCIANET_CREDENTIALS = {
+        'client_id': 'Client_Id_de299c3f0fe9c4bd607871a714665db65b54b23b', 
+        'client_secret': 'Client_Secret_44cdc45c058e90bc1783d73f18e27ba47732f22d', 
+        'sandbox': False
+    }    

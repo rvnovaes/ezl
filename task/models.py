@@ -15,6 +15,7 @@ from sequences import get_next_value
 from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings, EmailTemplate
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
+from billing.models import Charge
 from decimal import Decimal
 from .schemas import *
 from django.contrib.postgres.fields import JSONField, ArrayField
@@ -405,6 +406,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
         blank=True,
         null=True,
         verbose_name='Preposto', related_name='tasks_to_person_representative')
+    charge = models.ForeignKey(Charge, on_delete=models.PROTECT, blank=True, null=True)
+
     """
     Os campos a seguir armazenam o checkin dos atores da OS, independente de terem sido feitos 
     pela OS pai, ou por outra OS da cadeia.

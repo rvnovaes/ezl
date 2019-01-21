@@ -67,6 +67,9 @@ urlpatterns = [
     url(r'^ajax_get_correspondent_table/$',
         login_required(views.ajax_get_correspondents_table),
         name='ajax_get_correspondent_table'),
+    url(r'^ajax_bulk_create_update_status/$',
+        login_required(views.ajax_bulk_create_update_status),
+        name='ajax_get_correspondent_table'),
 
     # Filtros
     url(r'^filtros/listar/$',

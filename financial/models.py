@@ -6,6 +6,40 @@ from django.db.models import Q
 from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office, OfficeNetwork
 from decimal import Decimal
 from task.metrics import get_office_correspondent_metrics
+from enum import Enum
+
+
+class CategoryPrice(Enum):
+    PREPAID = 'Pré-pago'
+    POSTPAID = 'Pós-pago'
+    PUBLIC = 'Público'
+    NETWORK = 'Rede'
+
+    def __str__(self):
+        return self.name
+
+
+class BillingMoment(Enum):
+    PRE_PAID = 'Pré-pago'
+    POST_PAID = 'Pós-pago'
+
+    def __str__(self):
+        return self.name
+
+
+class PolicyPrice(Audit, OfficeMixin):
+    name = models.CharField(verbose_name='Nome', max_length=255)
+    category = models.CharField(verbose_name='Categoria', max_length=255, choices=[(x.name, x.value) for x in CategoryPrice])
+    billing_moment = models.CharField(verbose_name='Momento do faturamento', max_length=255, choices=((x.name, x.value) for x in BillingMoment))
+    objects = OfficeManager()
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Tipo de Preço'
+        verbose_name_plural = 'Tipos de Preço'
+        ordering = ['name']
 
 
 class CostCenter(Audit, LegacyCode, OfficeMixin):
@@ -92,6 +126,14 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         related_name='%(class)s_city',
         verbose_name='Cidade'
     )
+    policy_price = models.ForeignKey(
+        PolicyPrice,
+        null=False,
+        blank=False,
+        on_delete=models.PROTECT,
+        related_name='service_prices',
+        verbose_name='Tipo de preço'
+    )
 
     objects = OfficeManager()
 
@@ -173,3 +215,5 @@ class ImportServicePriceTable(Audit, OfficeMixin):
 
     class Meta:
         verbose_name = 'Arquivos Importados de Tabela de Preços'
+
+
