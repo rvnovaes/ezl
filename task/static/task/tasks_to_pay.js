@@ -1,6 +1,6 @@
 // Classe base do relatorio que deve ser herdada
 class ReportToPay {
-	constructor() {		
+	constructor() {
 		this.btnDownloadXlsx = $('#btn-download-xlsx');
 		this.elTableBody = $('#os-table-body');
 		this.elTableFoot = $('#os-table-foot');
@@ -16,20 +16,18 @@ class ReportToPay {
 	    this.elInputClient = $('[name=client]');
 	    this.elFinishedDate0 = $("#finished_in_0");
 	    this.elFinishedDate1 = $("#finished_in_1");
+	    this.unsetOnClickDownloadXls();
+	    this.startOnClickDownloadXls();
 
 	}	
 
 	showBtnDownloadXlsxFile() {
 		this.btnDownloadXlsx.show();
-		this.btnDownloadXlsx.on('click', ()=>{
-			this.disableBtnDownloadXlsx();
-			this.getXlsx();
-		});
 	}
 
 	getBillingDate(billingData) {
 	    if (!billingData) {
-	        return ''
+	        return '';
 	    }
 	    return this.formatLocalDateTime(billingData)
 	}
@@ -54,8 +52,8 @@ class ReportToPay {
 		let formData = this.formData;
 		let data = {};
 		$(formData ).each(function(index, obj){
-		        data[obj.name] = obj.value;
-		    });		
+			data[obj.name] = obj.value;
+		});
 		return data;
 	}
 
@@ -67,10 +65,21 @@ class ReportToPay {
 		return this.elFinishedDate1.val()
 	}
 
+	unsetOnClickDownloadXls() {
+		this.btnDownloadXlsx.prop("onclick", null).off("click");
+	}
+
+	startOnClickDownloadXls() {
+		this.btnDownloadXlsx.on('click', ()=>{
+			this.disableBtnDownloadXlsx();
+			this.getXlsx();
+		});
+	}
+
 	startOnCheckAllItems() {
 		this.elCheckAllItems.on('change', function() {
 			$('#os-table input:checkbox').not(this).prop('checked', this.checked);
-		})
+		});
 	}
 
 	startOnCheckItem(){
@@ -78,7 +87,7 @@ class ReportToPay {
         $('#os-table input:checkbox').on('change', function(){
             if ($(this).attr('id') === 'checkAll') {
                 if ($(this).is(':checked')) {
-                    self.tasksToPay = self.allTaskIds
+                    self.tasksToPay = self.allTaskIds;
                 } else {
                     self.tasksToPay = [];
                 }
@@ -436,8 +445,8 @@ class ReportToPayGroupByClient extends ReportToPay {
 		super();
 		this.currentOffice;
 		this.currentClient;
-		this.totalByClient = {}
-		this.totalOfficeByClient = {}
+		this.totalByClient = {};
+		this.totalOfficeByClient = {};
 	}
 
 	getTrClient(clientId, clientName, clientRefunds){
