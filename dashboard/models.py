@@ -47,6 +47,13 @@ class DoughnutChart(Component):
                        null=True, default=json.dumps(DOUGHNUT, indent=4))
 
 
+class BarChart(Component):
+    dashboards = models.ManyToManyField(
+        Dashboard, related_name='bar_charts', through='DashboardBarChart', blank=True)
+    schema = JSONField(verbose_name=u'Schema', blank=True,
+                       null=True, default=json.dumps(BAR, indent=4))
+
+
 class DashboardComponent(models.Model):
     dashboard = models.ForeignKey(
         Dashboard, on_delete=models.CASCADE, blank=True)
@@ -68,3 +75,7 @@ class DashboardCard(DashboardComponent):
 class DashboardDoughnutChart(DashboardComponent):
     doughnut_chart = models.ForeignKey(
         DoughnutChart, on_delete=models.CASCADE, blank=True)
+
+
+class DashboardBarChart(DashboardComponent):
+    bar_chart = models.ForeignKey(BarChart, on_delete=models.CASCADE, blank=True)
