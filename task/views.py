@@ -696,11 +696,11 @@ class ToPayTaskReportView(View):
             if data['office']:
                 if isinstance(self, ToReceiveTaskReportView):
                     query.add(
-                        Q(parent__office__name__unaccent__icontains=data[
+                        Q(parent__office__legal_name__unaccent__icontains=data[
                             'office']), Q.AND)
-                else:
+                else:                    
                     query.add(
-                        Q(office__name__unaccent__icontains=data['office']),
+                        Q(office__legal_name__unaccent__icontains=data['office']),
                         Q.AND)            
 
             if data['finished_in']:
