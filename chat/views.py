@@ -6,15 +6,11 @@ from core.views import CustomLoginRequiredView
 from django.http import JsonResponse
 from django.views.generic import View
 from django.db.models import Count, Q
-from django.core import serializers
 import json
-from core.models import Person
 from core.models import Office
 from core.utils import get_office_session
-from guardian.core import ObjectPermissionChecker
-from guardian.shortcuts import get_groups_with_perms
 from django.shortcuts import render
-from task.models import Task
+from task.models import Task, TaskStatus
 from django.forms.models import model_to_dict
 
 
@@ -209,7 +205,9 @@ class ChatMenssage(View):
             model_to_dict(
                 chat, fields=([field.name for field in chat._meta.fields])),
             "task":
-            task_id
+            task_id,
+            "can_send": task.task_status not in [TaskStatus.REFUSED_SERVICE.value, TaskStatus.REFUSED.value],
+            "status": task.task_status
         }
         return JsonResponse(data, safe=False)
 
@@ -225,14 +223,16 @@ class InternalChatOffices(View):
                 'office_pk':
                 task.office.pk,  #"Deve ser o pk do office do parent"
                 'name': task.company_chat.company.name,
-                'logo': task.company_chat.company.logo.url
+                'logo': task.company_chat.company.logo.url,
+                'can_send': True
             })
         if task.parent:
             data.append({
                 'chat': task.chat.pk,  # "Deve ser o pk da propria task"
                 'office_pk':
                 task.parent.office.pk,  # "Deve ser o pk do office do parent"
-                'name': task.parent.office.legal_name
+                'name': task.parent.office.legal_name,
+                'can_send': True
             })
         if task.get_child:
             task_child = task.get_child
@@ -240,13 +240,26 @@ class InternalChatOffices(View):
                 'chat':
                 task_child.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task_child.office.pk,
-                'name': task_child.office.legal_name
+                'name': task_child.office.legal_name,
+                'can_send': True
             })
+        if task.child.filter(task_status__in=[TaskStatus.REFUSED.value, TaskStatus.REFUSED_SERVICE.value]):
+            for task_child in task.child.filter(task_status__in=
+                                                [TaskStatus.REFUSED.value, TaskStatus.REFUSED_SERVICE.value]):
+                if task_child.chat.messages.all():
+                    data.append({
+                        'chat':
+                            task_child.chat.pk,  # "Deve ser o pk do chat da task filha"
+                        'office_pk': task_child.office.pk,
+                        'name': task_child.office.legal_name,
+                        'can_send': False
+                    })
         if not all([task.parent, task.get_child]):
             data.append({
                 'chat': task.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task.office.pk,
-                'name': task.office.legal_name
+                'name': task.office.legal_name,
+                'can_send': True
             })
         return JsonResponse(data, safe=False)
 
