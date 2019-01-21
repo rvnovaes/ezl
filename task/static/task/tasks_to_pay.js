@@ -22,6 +22,7 @@ class ReportToPay {
 	showBtnDownloadXlsxFile() {
 		this.btnDownloadXlsx.show();
 		this.btnDownloadXlsx.on('click', ()=>{
+			this.disableBtnDownloadXlsx();
 			this.getXlsx();
 		});
 	}
@@ -149,6 +150,7 @@ class ReportToPay {
 		swal({
 			title: 'Exportando para o Excel',
 	        html: '<h3>Aguarde...</h3>',
+			allowOutsideClick: false,
 			onOpen: ()=>{
 				swal.showLoading();
 			}
@@ -160,23 +162,24 @@ class ReportToPay {
 		request.open('GET', url, true);
 		request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 		request.responseType = 'blob';
-		request.onload = function(e) {
-		    if (this.status === 200) {
-		        var blob = this.response;
+		request.onload = (e) => {
+		    if (e.target.status === 200) {
+		        let blob = e.target.response;
 		        if(window.navigator.msSaveOrOpenBlob) {
 		            window.navigator.msSaveBlob(blob, fileName);
-		        }
-		        else{
-		            var downloadLink = window.document.createElement('a');
-		            var contentTypeHeader = request.getResponseHeader("Content-Type");
+		        } else {
+		            let downloadLink = window.document.createElement('a');
+		            let contentTypeHeader = request.getResponseHeader("Content-Type");
 		            downloadLink.href = window.URL.createObjectURL(new Blob([blob], { type: contentTypeHeader }));
 		            downloadLink.download = fileName;
 		            document.body.appendChild(downloadLink);
 		            downloadLink.click();
 		            document.body.removeChild(downloadLink);
+		            window.URL.revokeObjectURL(downloadLink.href);
 		           }
-		       }
-		       swal.close();
+		       	}
+		       	swal.close();
+				this.enableBtnDownloadXlsx();
 		   };
 		   request.send();				
 	}
@@ -280,6 +283,7 @@ class ReportToPay {
 		swal({
 	        title: "Carregando OS's",
 	        html: '<h3>Aguarde...</h3>',
+			allowOutsideClick: false,
 	        onOpen: ()=> {
 	        	swal.showLoading()
 	        }
@@ -313,6 +317,14 @@ class ReportToPay {
 	    this.allTaskIds = [] ;  
 	    this.htmlTable = ``;		
 	}
+
+	disableBtnDownloadXlsx(){
+		this.btnDownloadXlsx.attr('disabled', true);
+    }
+
+	enableBtnDownloadXlsx(){
+	    this.btnDownloadXlsx.attr('disabled', false);
+    }
 }
 
 // Gera o relatorio agrupado por office

@@ -145,7 +145,10 @@
               </div>
             </ul>
           </div>
-          <div class="send-chat-box">
+          <pre>
+          {{ messages.can_send }} {{ message }}
+          </pre>
+          <div class="send-chat-box" ng-if="messages.can_send">
               <div class="input-message">
                   <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" ng-model="message" ui-event="{ keypress: 'onEnterKey($event)' }">
                   <div class="custom-send p-r-10 p-b-10">
