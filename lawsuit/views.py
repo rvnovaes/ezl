@@ -812,6 +812,9 @@ class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
 class CourtDistrictSelect2Autocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True))
+        states = self.forwarded.get('state', None)
+        if states:
+            qs = qs.filter(state__in=states)
         if self.q:
             filters = Q(name__unaccent__icontains=self.q)
             filters |= Q(state__initials__unaccent__icontains=self.q)
