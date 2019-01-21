@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.core.exceptions import MultipleObjectsReturned
 from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm
 from django.conf import settings
-from task.models import Task, Ecm, EcmTask, TaskStatus, TaskHistory
+from task.models import Task, Ecm, EcmTask, TaskStatus, TaskHistory, TaskGeolocation
 from task.utils import task_send_mail, create_ecm_task
 from task.workflow import get_parent_status, get_child_status, get_parent_fields, get_child_recipients, \
     get_parent_recipients
@@ -432,3 +432,25 @@ def pre_save_task(sender, instance, **kwargs):
         raise e
     finally:
         pre_save.connect(pre_save_task, sender=sender)
+
+
+@receiver(post_save, sender=TaskGeolocation)
+def post_save_geolocation(sender, instance, **kwargs):
+    pre_save.disconnect(pre_save_task, sender=Task)
+    post_save.disconnect(post_save_task, sender=Task)
+
+    task = instance.task
+    create_user = instance.create_user
+    checkin_type = 'executed_by_checkin'
+    if task.person_company_representative and create_user == task.person_company_representative.auth_user:
+        checkin_type = 'company_representative_checkin'
+
+    setattr(task, checkin_type, instance)
+    task.save()
+    while task.parent:
+        task = task.parent
+        setattr(task, checkin_type, instance)
+        task.save()
+
+    pre_save.connect(pre_save_task, sender=Task)
+    post_save.connect(post_save_task, sender=Task)

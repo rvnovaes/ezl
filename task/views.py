@@ -47,6 +47,7 @@ from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTa
 from task.tasks import import_xls_task_list
 from task.rules import RuleViewTask
 from task.workflow import CorrespondentsTable
+from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task
@@ -1242,10 +1243,10 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         task_dynamic_query.add(
                             ~Q(movement__law_suit__folder__person_customer__id__in=data[
                                 'client']), Q.AND)
-                    else: 
+                    else:
                         task_dynamic_query.add(
                             Q(movement__law_suit__folder__person_customer__id__in=data[
-                                'client']), Q.AND)                  
+                                'client']), Q.AND)
                 if data['law_suit_number']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__law_suit_number=data[
@@ -2209,6 +2210,7 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         except Exception as e:
             return JsonResponse({'error': e})
 
+
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):        
         task = Task.objects.get(pk=request.POST.get('task_id'))
@@ -2222,7 +2224,10 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         if child_task:
             child_task.amount = task.amount
             child_task.save()
-        msg = "Valor alterado de {} para {} pelo escritório {}".format(format_currency(current_amount, 'R$', locale='pt_BR'), format_currency(task.amount, 'R$', locale='pt_BR'), get_office_session(request).legal_name)
+        msg = "Valor alterado de {} para {} pelo escritório {}".format(
+            format_currency(current_amount, 'R$', locale='pt_BR'),
+            format_currency(task.amount, 'R$', locale='pt_BR'),
+            get_office_session(request).legal_name)
         TaskHistory.objects.create(create_user=request.user, task=task, notes=msg, status=task.status.value)
         if child_task:
             TaskHistory.objects.create(create_user=request.user, task=child_task, notes=msg, status=task.status.value)
@@ -2237,6 +2242,13 @@ class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated():
             return TypeTask.objects.none()
         qs = TypeTask.objects.filter(is_active=True, office=get_office_session(self.request))
-        if self.q: 
+        if self.q:
             qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
+
+
+class TaskCheckinReportView(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        tasks = Task.objects.all()[:10]
+        tasks_serializer = TaskCheckinSerializer(tasks, many=True)
+        return JsonResponse(tasks_serializer.data, safe=False)

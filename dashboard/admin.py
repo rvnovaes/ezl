@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Dashboard, Card, DoughnutChart, LineChart
-from .forms import DashboardForm, CardForm, DoughnutChartForm, LineChartForm
+from .models import Dashboard, Card, DoughnutChart, LineChart, BarChart
+from .forms import DashboardForm, CardForm, DoughnutChartForm, LineChartForm, BarChartForm
 
 
 class CardsInline(admin.TabularInline):
@@ -15,13 +15,18 @@ class LineChartInline(admin.TabularInline):
     model = Dashboard.line_charts.through
 
 
+class BarChartInline(admin.TabularInline):
+    model = Dashboard.bar_charts.through
+
+
 @admin.register(Dashboard)
 class DashboardModelAdmin(admin.ModelAdmin):
     fields = ['company', 'logo', 'refresh']
     inlines = [
         CardsInline,
         DoughnutChartInline,
-        LineChartInline
+        LineChartInline,
+        BarChartInline
     ]
 
 
@@ -43,3 +48,9 @@ class DoughnutChartAdmin(ComponentAdmin):
 @admin.register(LineChart)
 class LineChartAdmin(ComponentAdmin):
     form = LineChartForm
+
+
+@admin.register(BarChart)
+class BarChartAdmin(ComponentAdmin):
+    form = BarChartForm
+
