@@ -14,10 +14,19 @@ from task.workflow import get_parent_status, get_child_status, get_parent_fields
 from chat.models import Chat, UserByChat
 from chat.utils import create_users_company_by_chat
 from lawsuit.models import CourtDistrict
-from core.utils import check_environ
+from core.utils import check_environ, get_office_session
 from core.models import CustomSettings
 from task.mail import TaskMail
 import logging
+from core.utils import get_office_session
+from simple_history.models import HistoricalRecords
+from simple_history.signals import (
+    pre_create_historical_record,
+    post_create_historical_record
+)
+from simple_history.utils import update_change_reason
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -432,3 +441,13 @@ def pre_save_task(sender, instance, **kwargs):
         raise e
     finally:
         pre_save.connect(pre_save_task, sender=sender)
+
+
+@receiver(pre_create_historical_record)
+def pre_create_historical_record_callback(sender, **kwargs):
+    history_instance = kwargs.get('history_instance')
+    history_instance.history_office = get_office_session(HistoricalRecords.thread.request)
+
+@receiver(post_create_historical_record)
+def post_create_historical_record_callback(sender, **kwargs):
+    update_change_reason(kwargs.get('instance'), 'Testando')

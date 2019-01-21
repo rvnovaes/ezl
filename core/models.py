@@ -824,3 +824,11 @@ class AreaOfExpertise(models.Model):
 
     def __str__(self):
         return self.area
+
+class OfficeHistoricalModel(models.Model):
+    history_office = models.ForeignKey(Office, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+

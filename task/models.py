@@ -19,6 +19,8 @@ from decimal import Decimal
 from .schemas import *
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.forms import MultipleChoiceField
+from simple_history.models import HistoricalRecords
+from core.models import OfficeHistoricalModel
 
 
 class ChoiceArrayField(ArrayField):
@@ -405,6 +407,14 @@ class Task(Audit, LegacyCode, OfficeMixin):
         blank=True,
         null=True,
         verbose_name='Preposto', related_name='tasks_to_person_representative')
+    history = HistoricalRecords(
+        bases=[OfficeHistoricalModel], 
+        excluded_fields=['parent', 'task_number', 'person_asked_by', 
+        'person_executed_by', 'person_distributed_by', 'type_task', 'delegation_date', 
+        'acceptance_date', 'final_deadline_date', 'execution_date', 'requested_date', 
+        'acceptance_service_date', 'refused_service_date', 'return_date', 'blocked_payment_date', 
+        'finished_date', 'description', 'survey_result', 'chat', 'company_chat', 'billing_date', 
+        'receipt_date', 'performance_place', 'person_company_representative'])
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
