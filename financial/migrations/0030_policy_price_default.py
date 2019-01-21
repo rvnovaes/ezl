@@ -16,36 +16,52 @@ def create_default_policy(apps, schema_editor):
     admin_user = User.objects.get(username='admin')    
     # Criando politicas de preco
     for office in Office.objects.all():
-        policy_pre_paid = PolicyPrice(
+        default_pre_paid = PolicyPrice(
             office=office, 
             create_user_id=admin_user.pk,
-            name='Pré-Pago',
-            category=CategoryPrice.PREPAID,
+            name='Padrão pré-pago',
+            category=CategoryPrice.DEFAULT,
             billing_moment=BillingMoment.PRE_PAID)
-        policys_price.append(policy_pre_paid)
-        policy_post_paid = PolicyPrice(
+        policys_price.append(default_pre_paid)
+        default_post_paid = PolicyPrice(
             office=office,
             create_user_id=admin_user.pk,
-            name='Pós-Pago',
-            category=CategoryPrice.POSTPAID,
+            name='Padrão pós-pago',
+            category=CategoryPrice.DEFAULT,
             billing_moment=BillingMoment.POST_PAID)
-        policys_price.append(policy_post_paid)
-        policy_public = PolicyPrice(
+        policys_price.append(default_post_paid)
+        public_pre_paid = PolicyPrice(
             office=office, 
             create_user_id=admin_user.pk,
-            name='Público',
+            name='Público pré-pago',
             category=CategoryPrice.PUBLIC,
             billing_moment=BillingMoment.PRE_PAID
         )
-        policys_price.append(policy_public)
-        policy_network = PolicyPrice(
+        policys_price.append(public_pre_paid)
+        public_post_paid = PolicyPrice(
             office=office,
             create_user_id=admin_user.pk,
-            name='Rede',
+            name='Público pós-pago',
+            category=CategoryPrice.PUBLIC,
+            billing_moment=BillingMoment.POST_PAID
+        )
+        policys_price.append(public_post_paid)
+        network_pre_paid = PolicyPrice(
+            office=office,
+            create_user_id=admin_user.pk,
+            name='Rede pré-pago',
             category=CategoryPrice.NETWORK,
             billing_moment=BillingMoment.PRE_PAID
         )
-        policys_price.append(policy_network)
+        policys_price.append(network_pre_paid)
+        network_post_paid = PolicyPrice(
+            office=office,
+            create_user_id=admin_user.pk,
+            name='Rede pós-pago',
+            category=CategoryPrice.NETWORK,
+            billing_moment=BillingMoment.POST_PAID
+        )
+        policys_price.append(network_post_paid)
         logging.info('CRIADO TIPOS DE PRECO PARA O ESCRITORIO {}'.format(office.legal_name))
     PolicyPrice.objects.bulk_create(policys_price)
 
