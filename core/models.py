@@ -217,6 +217,7 @@ class AbstractPerson(Audit, LegacyCode):
     SERVICE_GROUP = 'Service'
     SUPERVISOR_GROUP = 'Supervisor'
     COMPANY_REPRESENTATIVE = 'Preposto'
+    FINANCE_GROUP = 'Financeiro'
     legal_name = models.CharField(
         max_length=255, blank=False, verbose_name='Razão social/Nome completo')
     name = models.CharField(

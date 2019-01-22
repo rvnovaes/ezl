@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 from django.core.validators import ValidationError
 from django.core.exceptions import NON_FIELD_ERRORS, ObjectDoesNotExist
 from django.db import models
@@ -6,6 +7,11 @@ from django.db.models import Q
 from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office, OfficeNetwork
 from decimal import Decimal
 from task.metrics import get_office_correspondent_metrics
+
+
+class FinancialPermissions(Enum):
+    view_financial_report = 'View financial reports'
+    billing_task = 'Change task billing date'
 
 
 class CostCenter(Audit, LegacyCode, OfficeMixin):
