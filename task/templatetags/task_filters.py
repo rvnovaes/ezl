@@ -100,3 +100,9 @@ def show_edit_amount(task):
     if task.status.name in ['RETURN', 'OPEN', 'ACCEPTED', 'DONE']:
         return True
     return False
+
+@register.filter
+def get_office_cache(history):
+    if hasattr(history, '_office_cache'):
+        return history._office_cache
+    return ''

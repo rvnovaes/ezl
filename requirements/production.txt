@@ -30,6 +30,8 @@ django-dbconn-retry==0.1.5
 Pillow==5.2.0
 django-pandas==0.5.1
 django-import-export==1.1.0
+django-simple-history==2.7.0
+
 
 # Django channels
 channels==1.1.8
