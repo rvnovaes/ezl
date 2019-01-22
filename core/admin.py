@@ -1,8 +1,9 @@
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate
 #Todo: Remover office
 from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings, Company, CompanyUser, City, \
-    State, Country, AreaOfExpertise, OfficeNetwork
+    State, Country, AreaOfExpertise, OfficeNetwork, OfficeOffices
 from task.models import TaskWorkflow, TaskShowStatus
 
 
@@ -65,11 +66,58 @@ class ContactMechanism(admin.ModelAdmin):
         verbose_name_plural = 'Mecanismos de Contato'
 
 
+class VersionFilter(SimpleListFilter):
+    title = 'Escritório de Origem'
+    parameter_name = 'from_office__legal_name'
+    template = 'admin/input_filter.html'
+
+    def lookups(self, request, model_admin):
+        qs = model_admin.get_queryset(request)
+        return [(i, i) for i in qs.values_list('from_office__legal_name',
+                                               flat=True).distinct().order_by('from_office__legal_name')]
+
+    def choices(self, changelist):
+        # Grab only the "all" option.
+        all_choice = next(super().choices(changelist))
+        all_choice['query_parts'] = (
+            (k, v)
+            for k, v in changelist.get_filters_params().items()
+            if k == self.parameter_name
+        )
+        yield all_choice
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(from_office__legal_name__unaccent__icontains=self.value())
+
+
+@admin.register(OfficeOffices)
+class OfficeOfficesAdmin(admin.ModelAdmin):
+    list_display = ['from_office', 'to_office', 'person_reference']
+    search_fields = ['from_office__legal_name', 'to_office__legal_name']
+    list_filter = (VersionFilter,)
+    readonly_fields = ('from_office', 'to_office')
+    exclude = ('is_active',)
+
+    def get_field_queryset(self, db, db_field, request):
+        ret = super().get_field_queryset(db, db_field, request)
+        if db_field.name == 'person_reference':
+            office_office_id = list(request.resolver_match.args)
+            if office_office_id:
+                office = OfficeOffices.objects.get(pk__in=office_office_id).from_office
+                ret = db_field.remote_field.model._default_manager.using(db).filter(
+                    offices=office).order_by('legal_name')
+        return ret
+
+    def has_add_permission(self, request):
+        return False
+
+
 @admin.register(Office)
 class OfficeAdmin(admin.ModelAdmin):
     filter_horizontal = ['persons', 'offices']
-    search_fields = ['legal_name']
-    list_display = ['legal_name', 'name', 'cpf_cnpj']
+    search_fields = ['legal_name', 'name']
+    list_display = ['legal_name', 'cpf_cnpj']
 
 
 @admin.register(Invite)
@@ -110,6 +158,7 @@ class StateAdmin(admin.ModelAdmin):
 @admin.register(AreaOfExpertise)
 class AreaOfExpertiseAdmin(admin.ModelAdmin):
     search_fields = ['area']
+
 
 @admin.register(OfficeNetwork)
 class OfficeNetworkAdmin(admin.ModelAdmin):
