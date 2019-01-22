@@ -6,12 +6,7 @@
     <script type="text/javascript">
     $(document).ready(function(){
         servicePriceTable = new ServicePriceTable('{{object.office.pk}}', {{ policy_prices_categories|safe }});
-        if (servicePriceTable.officeNetwork) {
-            servicePriceTable.disableOfficeCorrespondent();
-        }
-        if (servicePriceTable.officeCorrespondent) {
-            servicePriceTable.disableOfficeNetwork();
-        }
+        servicePriceTable.validatePolicyPrice(false);
     });
     </script>
 {% endblock %}

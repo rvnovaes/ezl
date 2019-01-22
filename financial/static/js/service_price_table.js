@@ -208,6 +208,10 @@ class ServicePriceTable {
                     this.insertFormErrors(errorMsg);
                     this.officeCorrespondent = '';
                 }
+                if(this.officeCorrespondent == ''){
+                    errorMsg = 'Para tipo de preço padrão é obrigatória a escolha de um Escritório correspondente.';
+                    this.insertFormErrors(errorMsg);
+                }
                 ServicePriceTable.disableSelecElement(this.elOfficeCorrespondent, this.officeSessionId);
                 this.disableOfficeNetwork();
                 break;
