@@ -102,7 +102,7 @@
             if ($(this).is(':checked')){
                 tasksToDelegate.push($(this).attr('id'))
             } else {
-                tasksToDelegate.splice(tasksToDelegate.indexOf($(this).attr('id'), 1))
+                tasksToDelegate.splice(tasksToDelegate.indexOf($(this).attr('id')), 1)
             }             
         });
     });
