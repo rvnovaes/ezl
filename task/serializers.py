@@ -73,7 +73,14 @@ class OfficeToPaySerializer(serializers.ModelSerializer):
         model = Office
         fields = ('pk', 'legal_name')
 
+
 class TaskToPaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ('pk', 'amount' , 'parent')
+        fields = ('pk', 'amount', 'parent')
+
+
+class TaskCheckinSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ('pk', 'task_number', 'final_deadline_date', 'executed_by_checkin', 'company_representative_checkin')

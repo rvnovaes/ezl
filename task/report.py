@@ -88,7 +88,7 @@ class TaskToPayXlsx(DefaultXlsFile):
             worksheet.write(row_num, 7, item.get('client_name'), self.base_cell_format.cell_format)
             worksheet.write(row_num, 8, format_boolean(item.get('client_refunds')), self.base_cell_format.cell_format)
             worksheet.write(row_num, 9, item.get('opposing_party'), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 10, item.get('legacy_code', item.get('parent_task_number')),
+            worksheet.write(row_num, 10, item.get('task_legacy_code', item.get('parent_task_number')),
                             self.base_cell_format.cell_format)
             worksheet.write(row_num, 11, format_boolean(item.get('billing_date')), self.base_cell_format.cell_format)
             worksheet.write(row_num, 12, item.get('amount'), self.money_format.cell_format)

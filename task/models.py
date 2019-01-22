@@ -406,6 +406,20 @@ class Task(Audit, LegacyCode, OfficeMixin):
         blank=True,
         null=True,
         verbose_name='Preposto', related_name='tasks_to_person_representative')
+    """
+    Os campos a seguir armazenam o checkin dos atores da OS, independente de terem sido feitos 
+    pela OS pai, ou por outra OS da cadeia.
+    """
+    executed_by_checkin = models.ForeignKey('task.TaskGeolocation',
+                                            on_delete=models.PROTECT,
+                                            blank=True,
+                                            null=True,
+                                            related_name='task_executed_by')
+    company_representative_checkin = models.ForeignKey('task.TaskGeolocation',
+                                                       on_delete=models.PROTECT,
+                                                       blank=True,
+                                                       null=True,
+                                                       related_name='task_company_representative')
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -589,11 +603,11 @@ class Task(Audit, LegacyCode, OfficeMixin):
                 task_id_list.append(self.get_child.pk)
             pending_survey_company_representative = pending_survey = False
             if survey_dict.get('survey', None):
-                pending_survey = not TaskSurveyAnswer.objects.filter(task__in=task_id_list,
+                pending_survey = not TaskSurveyAnswer.objects.filter(tasks__in=task_id_list,
                                                                      survey=survey_dict.get('survey')).first()
             if self.person_company_representative and survey_dict.get('survey_company_representative', None):
                 pending_survey_company_representative = not TaskSurveyAnswer.objects.filter(
-                    task=self, survey=survey_dict.get('survey_company_representative'),
+                    tasks=self, survey=survey_dict.get('survey_company_representative'),
                     create_user=self.person_company_representative.auth_user).first()
             return pending_survey_company_representative or pending_survey
 
@@ -867,8 +881,6 @@ class DashboardViewModel(Audit, OfficeMixin):
         verbose_name='Número do Processo')
     parent_task_number = models.PositiveIntegerField(
         default=0, verbose_name='OS Original')
-    survey_result = JSONField(
-        verbose_name=u'Respotas do Formulário', blank=True, null=True)
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -988,6 +1000,6 @@ class TaskShowStatus(Audit):
 
 
 class TaskSurveyAnswer(Audit):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
+    tasks = models.ManyToManyField(Task, blank=True)
     survey = models.ForeignKey('survey.Survey', on_delete=models.CASCADE, null=True, blank=True)
     survey_result = JSONField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
