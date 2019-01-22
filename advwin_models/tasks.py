@@ -476,6 +476,7 @@ def export_task(self, task_id, task=None, execute=True):
             'prazo_lido': 1,
             'Data_backoffice': timezone.localtime(task.refused_service_date),
             'envio_alerta': 0,
+            'substatus_prazo': 2,
             'Obs': get_task_observation(task, 'Recusada por Back Office', 'refused_service_date'),
         }
     elif task.task_status == TaskStatus.RETURN.value:
@@ -532,6 +533,7 @@ def export_task(self, task_id, task=None, execute=True):
             'Ag_StatusExecucao': '',
             'Data_cumprimento': timezone.localtime(task.execution_date),
             'Data_correspondente': timezone.localtime(task.acceptance_date),
+            'substatus_prazo': 3,
             'Obs': get_task_observation(task, TaskObservation.DONE.value, 'execution_date'),
         }
     elif task.task_status == TaskStatus.REFUSED.value:
@@ -540,6 +542,7 @@ def export_task(self, task_id, task=None, execute=True):
             'status_correspondente': 1,
             'Advogado': task.person_distributed_by.legacy_code,
             'Data_correspondente': task.refused_date,
+            'substatus_prazo': 2,
             'Obs': get_task_observation(task, 'Ordem de serviço recusada por', 'refused_date'),
         }
     elif task.task_status == TaskStatus.BLOCKEDPAYMENT.value:
@@ -562,6 +565,7 @@ def export_task(self, task_id, task=None, execute=True):
             'Data_confirmacao': timezone.localtime(task.finished_date),
             'Data_Fech': timezone.localtime(task.finished_date),
             'valor_agenda': task.amount,
+            'substatus_prazo': 3,
             'Obs': get_task_observation(task, 'Diligência devidamente cumprida por',
                                         'finished_date')
         }
