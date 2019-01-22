@@ -36,6 +36,7 @@ CONTACT_MECHANISM_TYPE = ((INVALIDO, 'INVÁLIDO'), (PHONE, 'TELEFONE'),
 
 class CorePermissions(Enum):
     group_admin = 'Group Administrator'
+    view_reports = 'View Reports menu'
 
 
 class LegalType(Enum):
@@ -447,6 +448,10 @@ class Office(AbstractPerson):
         return self.legal_name
 
     @property
+    def ordered_groups(self):
+        return self.office_groups.order_by('group__name')
+
+    @property
     def states_of_practice(self):
         return self.office_correspondent.filter(state__isnull=False).order_by('state').distinct('state__name').values_list('state__name', flat=True)
 
@@ -494,6 +499,9 @@ class OfficeRelGroup(models.Model):
     class Meta:
         verbose_name = 'Grupo por escritório'
         verbose_name_plural = 'Grupos por escritório'
+
+    def __str__(self):
+        return self.group.name
 
 
 class DefaultOffice(OfficeMixin, Audit):
