@@ -127,6 +127,10 @@ class ServicePriceTable {
         return this.elPolicyPrice.val();
     }
 
+    set policyPrice(value){
+        return this.elPolicyPrice.val(value);
+    }
+
     get pricePolicyCategory(){
         return (this.policyPrice) ? this.policyPricesCategories[this.policyPrice] : null;
     }
@@ -207,11 +211,19 @@ class ServicePriceTable {
                 ServicePriceTable.disableSelecElement(this.elOfficeCorrespondent, this.officeSessionId);
                 this.disableOfficeNetwork();
                 break;
+            default:
+                this.policyPrice = '';
+                this.officeCorrespondent = '';
+                this.officeNetwork = '';
+                ServicePriceTable.enableElement(this.elOfficeNetwork);
+                ServicePriceTable.enableRequired(this.elOfficeNetwork);
+                ServicePriceTable.enableElement(this.elOfficeCorrespondent);
+                ServicePriceTable.enableRequired(this.elOfficeCorrespondent);
         }
         if (!this.policyPrice){
             this.insertFormErrors('Favor selecionar um Tipo de preço');
         }
-        if (!(this.officeCorrespondent || this.officeNetwork)){
+        if (!(this.officeCorrespondent || this.officeNetwork) && this.policyPrice === ''){
             this.insertFormErrors('Favor selecionar um Escritório Correspondente ou uma Rede de escritórios');
         }
         if (showAlert && this.formErrors.length > 0){
