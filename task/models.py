@@ -409,8 +409,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
         verbose_name='Preposto', related_name='tasks_to_person_representative')
     history = HistoricalRecords(
         bases=[OfficeHistoricalModel], 
-        excluded_fields=['parent', 'task_number', 'person_asked_by', 
-        'person_executed_by', 'person_distributed_by', 'type_task', 'delegation_date', 
+        excluded_fields=['person_asked_by', 'person_executed_by', 'person_distributed_by', 'delegation_date', 
         'acceptance_date', 'final_deadline_date', 'execution_date', 'requested_date', 
         'acceptance_service_date', 'refused_service_date', 'return_date', 'blocked_payment_date', 
         'finished_date', 'description', 'survey_result', 'chat', 'company_chat', 'billing_date', 

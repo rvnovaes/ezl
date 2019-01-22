@@ -450,4 +450,5 @@ def pre_create_historical_record_callback(sender, **kwargs):
 
 @receiver(post_create_historical_record)
 def post_create_historical_record_callback(sender, **kwargs):
-    update_change_reason(kwargs.get('instance'), 'Testando')
+    pass
+
