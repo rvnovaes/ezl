@@ -212,8 +212,8 @@ class TaskToPayFilter(TaskReportFilterBase):
     status = ChoiceFilter(
         empty_label='Todas',
         choices=(
-            ('true', 'Somente faturadas'),
-            ('false', 'Somente não faturadas'),
+            (0, 'Somente faturadas'),
+            (1, 'Somente não faturadas'),
         ))
     group_by_tasks = ChoiceFilter(
         empty_label=None,

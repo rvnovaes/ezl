@@ -684,8 +684,8 @@ class ToPayTaskReportView(View):
             finished_query = Q()
 
             if data['status']:
-                key = "{}__isnull".format(self.datetime_field)
-                query.add(Q(**{key: data['status'] != 'true'}), Q.AND)
+                key = "parent__{}__isnull".format(self.datetime_field)
+                query.add(Q(**{key: int(data['status'])}), Q.AND)
 
             if data['client']:
                 query.add(
