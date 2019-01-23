@@ -545,13 +545,10 @@ class Task(Audit, LegacyCode, OfficeMixin):
             email.send_mail()        
 
     def on_change_person_company_representative(self): 
-        if not self.pk and self.person_company_representative:
+        old_instance = Task.objects.get(pk=self.pk)
+        if self.person_company_representative_has_change(old_instance=old_instance, new_instance=self):
+            self.send_mail_old_company_representative(old_instance)
             self.send_mail_new_company_representative(self)
-        else:
-            old_instance = Task.objects.get(pk=self.pk)
-            if self.person_company_representative_has_change(old_instance=old_instance, new_instance=self):
-                self.send_mail_old_company_representative(old_instance)
-                self.send_mail_new_company_representative(self)
 
 
     def save(self, *args, **kwargs):
@@ -560,6 +557,10 @@ class Task(Audit, LegacyCode, OfficeMixin):
         self._from_parent = kwargs.pop('from_parent', False)
         if not self.task_number:
             self.task_number = self.get_task_number()
+        if not self.pk and self.person_company_representative:
+            res = super().save(*args, **kwargs)
+            self.send_mail_new_company_representative(self)
+            return res
         self.on_change_person_company_representative()
         return super().save(*args, **kwargs)
 
