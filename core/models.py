@@ -427,7 +427,7 @@ class Office(AbstractPerson):
     logo = models.ImageField(verbose_name='Logo', null=True, blank=True)
     persons = models.ManyToManyField(
         Person, blank=True, related_name='offices', through='OfficeMembership')
-    offices = models.ManyToManyField('self', blank=True)
+    offices = models.ManyToManyField('self', blank=True, through='OfficeOffices', symmetrical=False)
     public_office = models.BooleanField(
         default=False, verbose_name='Escritório público')
     use_service = models.BooleanField(
@@ -471,6 +471,23 @@ class OfficeMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class OfficeOffices(Audit):
+    from_office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name='from_offices',
+                                    verbose_name='Escritório de Origem')
+    to_office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name='to_offices',
+                                  verbose_name='Escritório Relacionado')
+    person_reference = models.ForeignKey(Person, on_delete=models.CASCADE, blank=True, null=True,
+                                         verbose_name='Pessoa de Referência')
+
+    class Meta:
+        verbose_name = 'Relacionamento entre Escritórios'
+        verbose_name_plural = 'Relacionamentos entre Escritórios'
+        ordering = ('from_office__legal_name', 'to_office__legal_name')
+
+    def __str__(self):
+        return '{} - {}'.format(self.from_office, self.to_office)
 
 
 class OfficeMembership(Audit):
@@ -591,7 +608,8 @@ class InviteOffice(Audit, OfficeMixin):
         return self.office_invite.legal_name
 
     class Meta:
-        verbose_name = 'Convites para escritórios'
+        verbose_name = 'Convite para escritório'
+        verbose_name_plural = 'Convites para escritórios'
 
 
 class Address(Audit):

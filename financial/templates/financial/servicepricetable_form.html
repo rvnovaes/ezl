@@ -5,10 +5,10 @@
     <script src="{% static 'js/service_price_table.js' %}"></script>
     <script type="text/javascript">
     $(document).ready(function(){
-        servicePriceTable = new ServicePriceTable();
+        servicePriceTable = new ServicePriceTable('{{office_session.pk}}', {{ policy_prices_categories|safe }});
     });
     </script>
 {% endblock %}
-{% block extra_content %}
+{% block extra_content %}	
     {% include 'core/mask_selector.html' %}
 {% endblock extra_content %}

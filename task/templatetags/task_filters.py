@@ -102,7 +102,16 @@ def show_edit_amount(task):
     return False
 
 @register.filter
-def get_office_cache(history):
-    if hasattr(history, '_office_cache'):
-        return history._office_cache
-    return ''
+def show_button_accepted(task):
+    # A checagem do status se da caso a os tenha sido recusada pelo office correspondente
+    # E atribuida ao invés de delegada posteriormente
+    if task.get_child and task.get_child.status.name not in ['REFUSED_SERVICE', 'REFUSED']:
+        return False
+    return True
+
+@register.filter
+def show_button_done(task):
+    if task.get_child and task.get_child.status.name in ['ACCEPTED_SERVICE', 'OPEN', 'ACCEPTED', 'DONE']:
+        return False
+    return True
+
