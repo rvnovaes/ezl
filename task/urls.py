@@ -69,7 +69,7 @@ urlpatterns = [
         name='ajax_get_correspondent_table'),
     url(r'^ajax_bulk_create_update_status/$',
         login_required(views.ajax_bulk_create_update_status),
-        name='ajax_get_correspondent_table'),
+        name='ajax_bulk_create_update_status'),
 
     # Filtros
     url(r'^filtros/listar/$',

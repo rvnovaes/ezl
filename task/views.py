@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When, CharField, IntegerField, Count, TextField
+from django.db.models import Q, Case, When, CharField, IntegerField, Count, TextField, Prefetch
 from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse_lazy, reverse
@@ -912,11 +912,13 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             if isinstance(survey_result, str):
                 survey_result = json.loads(survey_result)
             survey = TaskSurveyAnswer()
-            survey.task = form.instance
             survey.survey = form.instance.type_task.survey
             survey.create_user = self.request.user
             survey.survey_result = survey_result
             survey.save()
+            survey.tasks.add(form.instance)
+            if form.instance.parent:
+                survey.tasks.add(form.instance.parent)
         send_notes_execution_date.send(
             sender=self.__class__,
             notes=notes,
@@ -990,7 +992,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             context['form'].fields['type_task_field'] = type_task_field
         checker = ObjectPermissionChecker(self.request.user)
         if checker.has_perm('can_see_tasks_company_representative', office_session):
-            if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
+            if not TaskSurveyAnswer.objects.filter(tasks=self.object, create_user=self.request.user):
                 if (self.object.type_task.survey_company_representative):
                     context['not_answer_questionnarie'] = True
                     if self.object.type_task.survey_company_representative:
@@ -1476,8 +1478,12 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return response
 
     def _export_answers(self, request):
-        task_ids = self.get_queryset().filter(survey_result__isnull=False).values_list('id', flat=True)
-        answers = TaskSurveyAnswer.objects.filter(task_id__in=task_ids).select_related('task')
+        tasks = self.get_queryset()
+        task_ids = tasks.values_list('id', flat=True)
+        office_list = list(set(tasks.values_list('office', flat=True)))
+        answers = TaskSurveyAnswer.objects.filter(tasks__id__in=task_ids).prefetch_related(
+            Prefetch('tasks', queryset=Task.objects.filter(office__in=office_list), to_attr='answers_office'))
+
         columns = self._get_answers_columns(answers)
         all_columns = [
             'N° da OS',
@@ -1494,7 +1500,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return xlsx.get_http_response()
 
     def _export_answers_write_task(self, xlsx, answer, columns):
-        task = answer.task
+        task = answer.answers_office[0]
         base_fields = [task.task_number, task.legacy_code, str(task.type_task), answer.create_user.username]
         answers = ['' for x in range(len(columns))]
         survey_result = answer.survey_result
@@ -2193,7 +2199,7 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         self.filter = task_filter
         return task_list.filter(
             person_company_representative=self.request.user.person).exclude(
-            pk__in=self.request.user.tasksurveyanswer_create_user.values_list('task_id', flat=True))
+            pk__in=self.request.user.tasksurveyanswer_create_user.values_list('tasks__id', flat=True))
 
     def get_context_data(self):
         context = super().get_context_data()
@@ -2208,9 +2214,12 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         try:
             task = Task.objects.get(pk=request.POST.get('task_id'))
             survey_result = json.loads(request.POST.get('survey'))
-            survey = TaskSurveyAnswer(create_user=request.user, task=task,
+            survey = TaskSurveyAnswer(create_user=request.user,
                                       survey=task.type_task.survey_company_representative, survey_result=survey_result)
             survey.save()
+            survey.tasks.add(task)
+            if task.parent:
+                survey.tasks.add(task.parent)
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'error': e})
@@ -2240,3 +2249,43 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         pre_save.connect(signals.pre_save_task, sender=Task)
         post_save.connect(signals.post_save_task, sender=Task) 
         return JsonResponse({'message': 'Registro atualizado com sucesso'})
+
+
+class TaskCheckinReportView(CustomLoginRequiredView, View):
+    def get(self, request, *args, **kwargs):
+        tasks = Task.objects.all()[:10]
+        import pdb;pdb.set_trace()
+        tasks_serializer = TaskCheckinSerializer(tasks, many=True)
+        return JsonResponse(tasks_serializer.data, safe=False)
+
+
+@login_required
+def ajax_bulk_create_update_status(request):
+    task_id = request.POST.get('task_id', 0)
+    status = 200
+    data = {
+        "updated": False,
+    }
+    if task_id:
+        task = Task.objects.filter(pk=task_id).first()
+        if task and task.task_status == 'Solicitada':
+            task.task_status = TaskStatus.ACCEPTED_SERVICE
+            task.save()
+            data = {
+                "updated": True,
+            }
+        else:
+            status = 500
+    else:
+        status = 400
+    return JsonResponse(data, status=status)
+
+
+class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return TypeTask.objects.none()
+        qs = TypeTask.objects.filter(is_active=True, office=get_office_session(self.request))
+        if self.q:
+            qs = qs.filter(name__unaccent__icontains=self.q)
+        return qs

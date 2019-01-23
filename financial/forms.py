@@ -83,7 +83,7 @@ class ServicePriceTableForm(BaseModelForm):
 
     class Meta:
         model = ServicePriceTable
-        fields = ('office', 'office_correspondent', 'office_network', 'policy_price', 'client', 'type_task', 'state',
+        fields = ('office', 'policy_price', 'office_correspondent', 'office_network', 'client', 'type_task', 'state',
                   'court_district', 'court_district_complement', 'city', 'value', 'is_active')
 
     def clean_value(self):

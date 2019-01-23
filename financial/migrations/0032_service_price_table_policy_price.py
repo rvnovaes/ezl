@@ -12,9 +12,17 @@ def update_service_price_table(apps, schema_editor):
     ServicePriceTable = apps.get_model('financial', 'ServicePriceTable')
     for service_price in ServicePriceTable.objects.all():
         if service_price.office == service_price.office_correspondent:
-            service_price.policy_price = PolicyPrice.objects.filter(office=service_price.office, category=CategoryPrice.PUBLIC).first()
+            service_price.policy_price = PolicyPrice.objects.filter(office=service_price.office,
+                                                                    category=CategoryPrice.PUBLIC,
+                                                                    billing_moment=BillingMoment.PRE_PAID).first()
+        elif service_price.office_network:
+            service_price.policy_price = PolicyPrice.objects.filter(office=service_price.office,
+                                                                    category=CategoryPrice.NETWORK,
+                                                                    billing_moment=BillingMoment.POST_PAID).first()
         else:
-            service_price.policy_price = PolicyPrice.objects.filter(office=service_price.office, category=CategoryPrice.POSTPAID).first()
+            service_price.policy_price = PolicyPrice.objects.filter(office=service_price.office,
+                                                                    category=CategoryPrice.DEFAULT,
+                                                                    billing_moment=BillingMoment.POST_PAID).first()
         service_price.save()        
         logging.info('ALTERADO TIPO DE PRECO NA TABLEA DE PRECOS: ID-{}'.format(service_price.pk))
 

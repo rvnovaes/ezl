@@ -17,32 +17,22 @@ class ServicePriceTable {
         swal({
             type: type,
             title: title,
-            html: html
+            html: `<h4>${html}</h4>`
         });
-    }
-
-    clearFormErrors(){
-	    this.formErrors.splice(0, this.formErrors.length);
-    }
-
-    insertFormErrors(error){
-        this.formErrors.push(error);
     }
 
     static formatError(message){
 	    return `<li>${message}</li>`;
     }
 
-    getErrors(){
-	    let liErrors = ``;
-        this.formErrors.forEach((error) => {
-            liErrors += ServicePriceTable.formatError(error);
-        });
-        return `
-            <ul style="text-align: left;">
-            ${liErrors}
-            </ul>
-        `;
+    static disableSelecElement(element, optionValue){
+        $(`${element.selector} option[value=${optionValue}]`)
+            .attr('disabled', 'disabled').addClass('text-muted');
+    }
+
+    static enableSelecElement(element, optionValue){
+        $(`${element.selector} option[value=${optionValue}]`)
+            .removeAttr('disabled').removeClass('text-muted');
     }
 
     static enableRequired(element){
@@ -61,6 +51,26 @@ class ServicePriceTable {
         element.attr('disabled', true);
     }
 
+    clearFormErrors(){
+	    this.formErrors.splice(0, this.formErrors.length);
+    }
+
+    insertFormErrors(error){
+        this.formErrors.push(error);
+    }
+
+    getErrors(){
+	    let liErrors = ``;
+        this.formErrors.forEach((error) => {
+            liErrors += ServicePriceTable.formatError(error);
+        });
+        return `
+            <ul style="text-align: left;">
+            ${liErrors}
+            </ul>
+        `;
+    }
+
     disableOfficeCorrespondent(){
         if (this.officeCorrespondent !== this.office) {
             this.officeCorrespondent = '';
@@ -73,6 +83,24 @@ class ServicePriceTable {
         this.officeNetwork = '';
         ServicePriceTable.disableElement(this.elOfficeNetwork);
         ServicePriceTable.disableRequired(this.elOfficeNetwork);
+    }
+
+    disablePolicyPriceOptionsByCategory(category){
+        for (let key in this.policyPricesCategories) {
+            if (!this.policyPricesCategories.hasOwnProperty(key)) {continue;}
+            if(this.policyPricesCategories[key] !== category){
+                ServicePriceTable.disableSelecElement(this.elPolicyPrice, key);
+            } else {
+                ServicePriceTable.enableSelecElement(this.elPolicyPrice, key);
+            }
+        }
+    }
+
+    enablePolicyPriceOptions(){
+        for (let key in this.policyPricesCategories) {
+            if (!this.policyPricesCategories.hasOwnProperty(key)) {continue;}
+            ServicePriceTable.enableSelecElement(this.elPolicyPrice, key);
+        }
     }
 
     get officeNetwork(){
@@ -99,6 +127,10 @@ class ServicePriceTable {
         return this.elPolicyPrice.val();
     }
 
+    set policyPrice(value){
+        return this.elPolicyPrice.val(value);
+    }
+
     get pricePolicyCategory(){
         return (this.policyPrice) ? this.policyPricesCategories[this.policyPrice] : null;
     }
@@ -107,9 +139,11 @@ class ServicePriceTable {
 	    this.elOfficeNetwork.on('change',()=>{
             if (this.officeNetwork) {
                 this.disableOfficeCorrespondent();
+                this.disablePolicyPriceOptionsByCategory('NETWORK');
             } else {
                 ServicePriceTable.enableElement(this.elOfficeCorrespondent);
                 ServicePriceTable.enableRequired(this.elOfficeCorrespondent);
+                this.enablePolicyPriceOptions();
             }
         });
     }
@@ -122,6 +156,12 @@ class ServicePriceTable {
                 ServicePriceTable.enableElement(this.elOfficeNetwork);
                 ServicePriceTable.enableRequired(this.elOfficeNetwork);
             }
+            this.validatePolicyPrice(false);
+        });
+    }
+
+    onChangePolicyPrice() {
+        this.elPolicyPrice.on('change', (event)=>{
             this.validatePolicyPrice(false);
         });
     }
@@ -140,39 +180,59 @@ class ServicePriceTable {
     }
 
     validatePolicyPrice(showAlert) {
-        let officeCorrespondentId = this.elOfficeCorrespondent.val();
         let pricePolicyCategory = this.pricePolicyCategory;
         let errorMsg = '';
         this.clearFormErrors();
-        if (!(this.officeCorrespondent || this.officeNetwork)){
+        ServicePriceTable.enableSelecElement(this.elOfficeCorrespondent, this.officeSessionId);
+        switch (pricePolicyCategory) {
+            case 'PUBLIC':
+                this.officeCorrespondent = this.officeSessionId;
+                this.disableOfficeCorrespondent();
+                this.disableOfficeNetwork();
+                break;
+            case 'NETWORK':
+                this.officeCorrespondent = '';
+                this.disableOfficeCorrespondent();
+                ServicePriceTable.enableElement(this.elOfficeNetwork);
+                ServicePriceTable.enableRequired(this.elOfficeNetwork);
+                if (!this.officeNetwork) {
+                    errorMsg = 'Para tipo de preço rede é obrigatório o preenchimento da rede de escritórios.';
+                    this.insertFormErrors(errorMsg);
+                }
+                break;
+            case 'DEFAULT':
+                ServicePriceTable.enableElement(this.elOfficeCorrespondent);
+                ServicePriceTable.enableRequired(this.elOfficeCorrespondent);
+                if(this.officeCorrespondent == this.officeSessionId){
+                    errorMsg = 'Para tipo de preço padrão o escritório correspondente não pode ser o mesmo escritório atual.';
+                    this.insertFormErrors(errorMsg);
+                    this.officeCorrespondent = '';
+                }
+                if(this.officeCorrespondent == ''){
+                    errorMsg = 'Para tipo de preço padrão é obrigatória a escolha de um Escritório correspondente.';
+                    this.insertFormErrors(errorMsg);
+                }
+                ServicePriceTable.disableSelecElement(this.elOfficeCorrespondent, this.officeSessionId);
+                this.disableOfficeNetwork();
+                break;
+            default:
+                this.policyPrice = '';
+                this.officeCorrespondent = '';
+                this.officeNetwork = '';
+                ServicePriceTable.enableElement(this.elOfficeNetwork);
+                ServicePriceTable.enableRequired(this.elOfficeNetwork);
+                ServicePriceTable.enableElement(this.elOfficeCorrespondent);
+                ServicePriceTable.enableRequired(this.elOfficeCorrespondent);
+        }
+        if (!this.policyPrice){
+            this.insertFormErrors('Favor selecionar um Tipo de preço');
+        }
+        if (!(this.officeCorrespondent || this.officeNetwork) && this.policyPrice === ''){
             this.insertFormErrors('Favor selecionar um Escritório Correspondente ou uma Rede de escritórios');
-        }
-        if (pricePolicyCategory === 'PUBLIC' && officeCorrespondentId !== this.officeSessionId) {
-            this.elOfficeCorrespondent.val(this.officeSessionId);
-            errorMsg = 'Para tipo de preço público o escritório correspondente deve ser o mesmo em que está logado.';
-            this.insertFormErrors(errorMsg);
-        }
-        if (pricePolicyCategory === 'NETWORK'){
-            this.disableOfficeCorrespondent();
-            ServicePriceTable.enableElement(this.elOfficeNetwork);
-            ServicePriceTable.enableRequired(this.elOfficeNetwork);
-            if (!this.officeNetwork) {
-                errorMsg = 'Para tipo de preço rede é obrigatório o preenchimento da rede de escritórios.';
-                this.insertFormErrors(errorMsg);
-            }
-        } else{
-            ServicePriceTable.enableElement(this.elOfficeCorrespondent);
-            ServicePriceTable.enableRequired(this.elOfficeCorrespondent);
         }
         if (showAlert && this.formErrors.length > 0){
             let errorsHTML = this.getErrors();
             ServicePriceTable.showSwal('error', 'Atenção!', errorsHTML);
         }
-    }
-
-    onChangePolicyPrice() {
-        this.elPolicyPrice.on('change', (event)=>{
-            this.validatePolicyPrice(false);
-        });
     }
 }

@@ -26,7 +26,7 @@
                 <span class="btn-label"><i class="mdi mdi-account-location"></i></span> Delegar
             </button>
         {% endif %}
-        {% if 'view_delegated_tasks' in office_session_perms %}
+        {% if 'view_delegated_tasks' in office_session_perms and task|show_button_accepted %}
             <button type="button" id="ACCEPTED" onclick="taskDetail.makeTaskAction(this)" data-toggle="" data-target="#confirmAction"
                     class="text-white btn btn-ezl-accepted {% if not form.instance.status.name == 'OPEN' %}hidden{% endif %}">
                 <span class="btn-label"><i class="mdi mdi-calendar-clock"></i></span> Aceitar
@@ -77,11 +77,13 @@
                             data-checkpointtype="Checkin" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">
                         <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin</span>
                     </button>
-                {% endif %}               
-                <button type="button" onclick="taskDetail.makeTaskAction(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
-                        class="text-white btn btn-ezl-done">
-                    <span class="btn-label"><i class="mdi mdi-checkbox-marked-circle-outline"></i></span> Cumprir
-                </button>
+                {% endif %}
+                {% if task|show_button_done %}
+                    <button type="button" onclick="taskDetail.makeTaskAction(this)" id="DONE" type="submit" data-toggle="" data-target="#confirmAction"
+                            class="text-white btn btn-ezl-done">
+                        <span class="btn-label"><i class="mdi mdi-checkbox-marked-circle-outline"></i></span> Cumprir
+                    </button>
+                {% endif %}
             {% endif %}
         {% endif %}
         {% if 'can_see_tasks_company_representative' in office_session_perms  and task.person_company_representative == request.user.person and form.instance.task_status|show_company_representative_buttons %}

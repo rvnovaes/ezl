@@ -40,7 +40,8 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     DELETE_SUCCESS_MESSAGE, ADDRESS_UPDATE_ERROR_MESSAGE, ADDRESS_UPDATE_SUCCESS_MESSAGE, \
     USER_CREATE_SUCCESS_MESSAGE, person_cpf_cnpj_already_exists
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
-    OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser, CustomSettings
+    OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser, CustomSettings, \
+    OfficeOffices
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
@@ -1489,7 +1490,7 @@ class InviteUpdateView(UpdateView):
             }
             for group in groups_list:
                 if group not in invite.person.auth_user.groups.all() and \
-                    group.name.startswith(invite.office.CORRESPONDENT_GROUP):
+                        group.name.startswith(invite.office.CORRESPONDENT_GROUP):
                     invite.person.auth_user.groups.add(group)
 
         invite.save()
@@ -1502,7 +1503,9 @@ class InviteOfficeUpdateView(UpdateView):
             pk=int(request.POST.get('invite_pk')))
         invite.status = request.POST.get('status')
         if invite.status == 'A':
-            invite.office.offices.add(invite.office_invite)
+            OfficeOffices(from_office=invite.office,
+                          to_office=invite.office_invite,
+                          create_user=self.request.user).save()
             service_price_table = ServicePriceTable.objects.filter(
                 office=invite.office,
                 office_correspondent=invite.office_invite)
@@ -1948,8 +1951,8 @@ class OfficeOfficesInactiveView(UpdateView):
                             office=record.pk):
                         current_office = Office.objects.get(
                             pk=self.kwargs['office_pk'])
-                        current_office.offices.remove(record)
-                        current_office.save()
+                        OfficeOffices.objects.filter(from_office=current_office,
+                                                     to_office=record).delete()
 
                         service_price_table = ServicePriceTable.objects.filter(
                             office=self.kwargs['office_pk'],

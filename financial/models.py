@@ -10,8 +10,7 @@ from enum import Enum
 
 
 class CategoryPrice(Enum):
-    PREPAID = 'Pré-pago'
-    POSTPAID = 'Pós-pago'
+    DEFAULT = 'Padrão'
     PUBLIC = 'Público'
     NETWORK = 'Rede'
 

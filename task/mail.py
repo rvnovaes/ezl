@@ -168,14 +168,15 @@ class TaskRefusedServiceMailTemplate(object):
         project_link = '{}{}'.format(
             get_project_link(self.task),
             reverse('task_detail', kwargs={'pk': self.task.pk}))
+        task_number = self.task.task_number if not self.task.parent else self.task.parent.task_number
         return {
             "task_number":
-                self.task.task_number,
+                task_number,
             "type_task":
                 self.task.type_task.name,
             "title_type_service":
                 "OS {task_number} - {type_task} ".format(
-                    task_number=self.task.task_number,
+                    task_number=task_number,
                     type_task=self.task.type_task.name),
             "person_distributed_by":
                 str(self.task.person_distributed_by).title(),
@@ -196,14 +197,15 @@ class TaskRefusedMailTemplate(object):
         project_link = '{}{}'.format(
             get_project_link(self.task),
             reverse('task_detail', kwargs={'pk': self.task.pk}))
+        task_number = self.task.task_number if not self.task.parent else self.task.parent.task_number
         return {
             "task_number":
-                self.task.task_number,
+                task_number,
             "type_task":
                 self.task.type_task.name,
             "title_type_service":
                 "OS {task_number} - {type_task} ".format(
-                    task_number=self.task.task_number,
+                    task_number=task_number,
                     type_task=self.task.type_task.name),
             "person_executed_by":
                 str(self.task.person_executed_by).title(),
