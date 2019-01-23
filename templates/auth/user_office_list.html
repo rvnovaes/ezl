@@ -25,7 +25,7 @@
                                         id="office-group-{{ office_session.pk }}"
                                         office="{{ office_session.pk }}"
                                         data-placeholder="Selecione...">
-                                    {% for office_group in office_session.office_groups.all %}
+                                    {% for office_group in office_session.ordered_groups %}
                                         <option value="{{ office_group.group.id }}">
                                             {{ office_group.group.name|get_permission_label }}
                                         </option>
@@ -52,7 +52,7 @@
                                                 id="office-group-{{ office.pk }}"
                                                 office="{{ office.pk }}"
                                                 data-placeholder="Selecione...">
-                                            {% for office_group in office.office_groups.all %}
+                                            {% for office_group in office.ordered_groups %}
                                                 <option value="{{ office_group.group.id }}"
                                                     {{ object|get_selected_state_group:office_group.group }}>
                                                     {{ office_group.group.name|get_permission_label }}
@@ -60,7 +60,7 @@
                                             {% endfor %}
                                            </select>
                                     {% else %}
-                                        {% for office_group in office.office_groups.all %}
+                                        {% for office_group in office.ordered_groups %}
                                             {% if object|get_selected_state_group:office_group.group == 'selected' %}
                                                 <span class="label label-success">{{ office_group.group.name|get_permission_label }}</span>
                                             {% endif %}

@@ -23,4 +23,8 @@ urlpatterns = [
     url(r'^ajax_get_log_import_service_price_table_data_table/$', 
         views.ajax_get_log_import_service_price_table_data_table,
         name='ajax_get_log_import_service_price_table_data_table'),    
+    url(r'^politica-de-precos/$', views.PolicyPriceView.as_view(), name='policyprice_list'),
+    url(r'^politica-de-precos/criar/$', views.PolicyPriceCreateView.as_view(), name='policyprice_add'),
+    url(r'^politica-de-precos/(?P<pk>[0-9]+)/$', views.PolicyPriceUpdateView.as_view(), name='policyprice_update'),
+    url(r'^politica-de-precos/excluir$', views.PolicyPriceDeleteView.as_view(), name='policyprice_delete'),    
 ]

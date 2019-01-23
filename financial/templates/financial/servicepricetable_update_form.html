@@ -5,13 +5,8 @@
     <script src="{% static 'js/service_price_table.js' %}"></script>
     <script type="text/javascript">
     $(document).ready(function(){
-        insServicePriceTable = new ServicePriceTable();
-        if (insServicePriceTable.officeNetwork) {
-            insServicePriceTable.disableOfficeCorrespondent();
-        }
-        if (insServicePriceTable.officeCorrespondent) {
-            insServicePriceTable.disableOfficeNetwork();
-        }
+        servicePriceTable = new ServicePriceTable('{{object.office.pk}}', {{ policy_prices_categories|safe }});
+        servicePriceTable.validatePolicyPrice(false);
     });
     </script>
 {% endblock %}

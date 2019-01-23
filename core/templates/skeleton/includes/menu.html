@@ -75,13 +75,15 @@
 
         </ul>
     </li>
-    {% if perms.core.view_all_tasks %}
+    {% endif %}
+    {% if 'view_reports' in office_session_perms %}
     <li id="id_relatorios">
         <a href="javascript:void(0)" class="waves-effect">
             <i class="mdi mdi-chart-bar fa-fw"></i>
             <span class="hide-menu">Relatórios<span class="fa arrow"></span></span>
         </a>
         <ul class="nav nav-second-level">
+            {% if 'view_financial_report' in office_session_perms %}
             <li>
                 <a href="{% url 'task_report_to_pay' %}" target="_self">
                     <i class="fa fa-dollar fa-fw"></i>
@@ -94,9 +96,11 @@
                     <span class="hide-menu">OS's a receber</span>
                 </a>
             </li>
+            {% endif %}
         </ul>
     </li>
     {% endif %}
+    {% if 'can_access_general_data' in office_session_perms %}
     <li id="id_administracao"> <!-- ADMINISTRAÇÃO -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-folder-o fa-fw" data-icon="v"></i>
@@ -160,6 +164,12 @@
                 </a>
             </li>
             {% if 'group_admin' in office_session_perms or request.user.is_superuser %}
+            <li><!-- TIPOS DE PRECO -->
+                <a href="{% url 'policyprice_list' %}" target="_self">
+                    <i class="fa fa-usd fa-fw"></i>
+                    <span class="hide-menu">Tipos de preço</span>
+                </a>
+            </li>            
             <li><!-- TIPOS DE TASK -->
                 <a href="{% url 'typetask_list' %}" target="_self">
                     <i class="fa fa-code-fork fa-fw"></i>
