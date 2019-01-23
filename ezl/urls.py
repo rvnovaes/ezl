@@ -14,13 +14,10 @@ from core.views import (
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, \
     TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView, ToPayTaskReportTemplateView, ToPayTaskReportXlsxView
-from rest_framework_swagger.views import get_swagger_view
 from core.views import oauth2_login, oauth2_callback
 
 
-schema_view = get_swagger_view(title='API para integração com o Ezlawyer')
 urlpatterns = [
-    url(r'^docs/$', schema_view),
     url(r'^the-cool-upload-method/', include('django_file_form.urls')),
     url(r'^', include('core.urls')),
     url(r'^admin/', admin.site.urls),

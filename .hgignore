@@ -12,6 +12,7 @@ celerybeat*
 
 config/general.ini
 etl/advwin_ezl/tmp/**
+validators/.pytest_cache/*
 syntax: regexp
 ^.idea/
 docker-compose.override.yml
