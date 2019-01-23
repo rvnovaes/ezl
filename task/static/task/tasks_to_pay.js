@@ -18,7 +18,6 @@ class ReportToPay {
 	    this.elFinishedDate1 = $("#finished_in_1");
 	    this.unsetOnClickDownloadXls();
 	    this.startOnClickDownloadXls();
-
 	}	
 
 	showBtnDownloadXlsxFile() {
@@ -206,7 +205,7 @@ class ReportToPay {
 
 	getTrTask(task) {    
 	    let elBilling = '';
-	    if (!task.billing_date) {
+	    if (!task.billing_date && this.elCheckAllItems.length > 0) {
 	        elBilling = `<input type="checkbox" value="${task.task_id}"/>`;
 	    } 
 	    return `

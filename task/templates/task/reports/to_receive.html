@@ -124,7 +124,7 @@
                 <table class="table table-striped table-hover" id="os-table">
                     <thead>
                         <tr role="row">
-                            <th><input type="checkbox" id="checkAll" title="Marcar ou desmarcar todos"/></th>
+                            <th>{% if 'billing_task' in office_session_perms %}<input type="checkbox" id="checkAll" title="Marcar ou desmarcar todos"/>{% endif %}</th>
                             <th></th>
                             <th></th>
                             <th>O.S.</th>
@@ -161,7 +161,7 @@
                                     <td></td>
                                     <td></td>
                                     <td>
-                                        {% if not task.receipt_date %}
+                                        {% if not task.receipt_date and 'billing_task' in office_session_perms %}
                                             <input type="checkbox" value="{{ task.id }}"/>
                                         {% endif %}
                                     </td>
@@ -198,7 +198,7 @@
             </div>
             <div class="row">
                 <div class="text-center" style="padding-top: 10px">
-                    {% if offices_report %}
+                    {% if offices_report and 'billing_task' in office_session_perms %}
                     <button class="btn btn-success" id="btn-faturar">Confirmar recebimento</button>
                     {% endif %}
                 </div>

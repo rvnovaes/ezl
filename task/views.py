@@ -422,7 +422,7 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView,
 
 class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
                      TemplateView):
-    permission_required = ('core.view_all_tasks', )
+    permission_required = ('core.view_financial_report', )
     template_name = None
     filter_class = None
     datetime_field = None
