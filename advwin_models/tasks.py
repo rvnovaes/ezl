@@ -533,7 +533,6 @@ def export_task(self, task_id, task=None, execute=True):
             'Ag_StatusExecucao': '',
             'Data_cumprimento': timezone.localtime(task.execution_date),
             'Data_correspondente': timezone.localtime(task.acceptance_date),
-            'substatus_prazo': 3,
             'Obs': get_task_observation(task, TaskObservation.DONE.value, 'execution_date'),
         }
     elif task.task_status == TaskStatus.REFUSED.value:
