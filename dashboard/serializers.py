@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Dashboard, Card, DashboardCard, DashboardDoughnutChart, \
-    DashboardLineChart
+from .models import Dashboard, Card, DashboardCard, DashboardDoughnutChart, DashboardLineChart, DashboardBarChart
 from .utils import exec_code
 from core.models import Company
 from django.db import transaction
@@ -37,18 +36,27 @@ class DashboardLineChartSerializer(DashboardComponentSerializer):
         return exec_code(self, obj.line_chart, 'code')
 
 
+class DashboardBarChartSerializer(DashboardComponentSerializer):
+    class Meta(DashboardComponentSerializer.Meta):
+        model = DashboardBarChart
+
+    def get_code(self, obj):
+        return exec_code(self, obj.bar_chart, 'code')
+
+
 class DashboardSerializer(serializers.ModelSerializer):
     company_name = serializers.SerializerMethodField()
     dashboardcard_set = DashboardCardSerializer(many=True, read_only=True)
     dashboarddoughnutchart_set = DashboardDoughnutChartSerializer(
         many=True, read_only=True)
     dashboardlinechart_set = DashboardLineChartSerializer(many=True, read_only=True)
+    dashboardbarchart_set = DashboardBarChartSerializer(many=True, read_only=True)
 
     class Meta:
         model = Dashboard
         fields = ('id', 'company', 'logo', 'refresh', 'company_name',
                   'dashboardcard_set', 'dashboarddoughnutchart_set',
-                  'dashboardlinechart_set')
+                  'dashboardlinechart_set', 'dashboardbarchart_set')
 
     def get_company_name(self, obj):
         return obj.company.name

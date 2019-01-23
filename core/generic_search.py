@@ -2,7 +2,7 @@ from functools import wraps
 from itertools import groupby
 from datetime import datetime
 from django.contrib.auth.models import User
-from financial.utils import remove_caracter_especial
+from financial.utils import remove_special_char
 from core.utils import get_office_session
 from decimal import Decimal
 
@@ -213,7 +213,7 @@ class GenericSearchForeignKey(GenericSearch):
         if value:
             model_query_set = 'self.model.{0}.get_queryset()'.format(param)
             return list(map(lambda x: x.id,
-                            list(filter(lambda i: remove_caracter_especial(value.lower()) in
-                                remove_caracter_especial(i.__str__().lower()),
+                            list(filter(lambda i: remove_special_char(value.lower()) in
+                                                  remove_special_char(i.__str__().lower()),
                                         eval(model_query_set)))))
         return []

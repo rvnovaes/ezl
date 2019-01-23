@@ -1,4 +1,4 @@
-{% if 'can_access_settings' in office_session_perms or 'can_distribute_tasks' in office_session_perms or 'group_admin' in office_session_perms or request.user.is_superuser %}
+{% if 'can_distribute_tasks' in office_session_perms or 'group_admin' in office_session_perms or request.user.is_superuser %}
 <li>
     <a href="javascript:void(0)" class="waves-effect" id="menu-batch-change-tasks">
         <i class="fa fa-exchange" data-icon="v"></i>

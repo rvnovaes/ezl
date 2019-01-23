@@ -116,7 +116,7 @@ def get_office_field(request, profile=None):
             initial = queryset.first().id
         else:
             queryset = request.user.person.offices.active_offices()
-            initial = None
+            initial = none
     except Exception as e:
         queryset = Office.objects.none()
         initial = None
@@ -141,6 +141,8 @@ def get_office_related_office_field(request):
                 'legal_name') | Office.objects.filter(public_office=True)
         else:
             queryset = office.offices.all().order_by('legal_name')
+            queryset |= Office.objects.filter(pk=office.pk)
+            queryset = queryset.distinct()
 
     return forms.ModelChoiceField(
         queryset=queryset,
