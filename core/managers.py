@@ -14,6 +14,9 @@ class PersonManager(Manager):
     def requesters(self, *ar, **kw):
         return self.get_queryset().requesters(*ar, **kw)
 
+    def finances(self, *ar, **kw):
+        return self.get_queryset().finances(*ar, **kw)
+
     def services(self, *ar, **kw):
         return self.get_queryset().services(*ar, **kw)
 
@@ -45,6 +48,16 @@ class PersonManagerQuerySet(QuerySet):
 
         return self.filter(
             auth_user__groups__name__startswith='{}-'.format(self.model.REQUESTER_GROUP)).order_by(
+            'name', 'auth_user').distinct('name', 'auth_user')
+
+    def finances(self, office_id=False):
+        if office_id:
+            return self.filter(
+                auth_user__groups__name__startswith='{}-{}'.format(self.model.FINANCE_GROUP, str(office_id))
+            ).order_by('name', 'auth_user').distinct('name', 'auth_user')
+
+        return self.filter(
+            auth_user__groups__name__startswith='{}-'.format(self.model.FINANCE_GROUP)).order_by(
             'name', 'auth_user').distinct('name', 'auth_user')
 
     def services(self, office_id=False):

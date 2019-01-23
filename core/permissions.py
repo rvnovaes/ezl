@@ -1,37 +1,68 @@
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from core.models import Person, OfficeRelGroup
+from core.models import Person, OfficeRelGroup, CorePermissions
 from task.models import Permissions
 from survey.models import SurveyPermissions
-from core.models import CorePermissions
+from financial.models import FinancialPermissions
 from guardian.shortcuts import assign_perm, remove_perm
 
 GROUP_PERMISSIONS = {
-    Person.ADMINISTRATOR_GROUP:
-    (Permissions.view_all_tasks, Permissions.return_all_tasks,
-     Permissions.validate_all_tasks, Permissions.block_payment_tasks,
-     Permissions.can_access_general_data, SurveyPermissions.can_edit_surveys,
-     SurveyPermissions.can_view_survey_results,
-     Permissions.can_distribute_tasks, CorePermissions.group_admin),
-    Person.SUPERVISOR_GROUP:
-    (Permissions.can_access_settings, Permissions.block_payment_tasks,
-     Permissions.can_access_general_data, SurveyPermissions.can_edit_surveys,
-     SurveyPermissions.can_view_survey_results,
-     Permissions.can_distribute_tasks, Permissions.view_distributed_tasks,
-     Permissions.view_requested_tasks, Permissions.view_delegated_tasks,
-     Permissions.can_see_tasks_from_team_members),
-    Person.SERVICE_GROUP:
-    (Permissions.view_distributed_tasks, Permissions.return_all_tasks,
-     Permissions.validate_all_tasks, Permissions.block_payment_tasks,
-     Permissions.can_access_general_data, SurveyPermissions.can_edit_surveys,
-     SurveyPermissions.can_view_survey_results,
-     Permissions.can_distribute_tasks),
-    Person.CORRESPONDENT_GROUP: (Permissions.view_delegated_tasks, ),
-    Person.REQUESTER_GROUP:
-    (Permissions.return_all_tasks, Permissions.validate_all_tasks,
-     Permissions.view_requested_tasks, Permissions.block_payment_tasks,
-     Permissions.can_access_general_data),
-    Person.COMPANY_REPRESENTATIVE: (Permissions.can_see_tasks_company_representative, ),
+    Person.ADMINISTRATOR_GROUP: (
+        CorePermissions.group_admin,
+        CorePermissions.view_reports,
+        FinancialPermissions.view_financial_report,
+        FinancialPermissions.billing_task,
+        Permissions.view_all_tasks,
+        Permissions.return_all_tasks,
+        Permissions.validate_all_tasks,
+        Permissions.block_payment_tasks,
+        Permissions.can_access_general_data,
+        Permissions.can_distribute_tasks,
+        SurveyPermissions.can_edit_surveys,
+        SurveyPermissions.can_view_survey_results,
+    ),
+    Person.SUPERVISOR_GROUP: (
+        CorePermissions.view_reports,
+        FinancialPermissions.view_financial_report,
+        Permissions.can_access_settings,
+        Permissions.block_payment_tasks,
+        Permissions.can_access_general_data,
+        Permissions.can_distribute_tasks,
+        Permissions.view_distributed_tasks,
+        Permissions.view_requested_tasks,
+        Permissions.view_delegated_tasks,
+        Permissions.can_see_tasks_from_team_members,
+        SurveyPermissions.can_edit_surveys,
+        SurveyPermissions.can_view_survey_results,
+    ),
+    Person.SERVICE_GROUP: (
+        Permissions.view_distributed_tasks,
+        Permissions.return_all_tasks,
+        Permissions.validate_all_tasks,
+        Permissions.block_payment_tasks,
+        Permissions.can_access_general_data,
+        Permissions.can_distribute_tasks,
+        SurveyPermissions.can_edit_surveys,
+        SurveyPermissions.can_view_survey_results,
+    ),
+    Person.CORRESPONDENT_GROUP: (
+        Permissions.view_delegated_tasks,
+    ),
+    Person.REQUESTER_GROUP: (
+        Permissions.return_all_tasks,
+        Permissions.validate_all_tasks,
+        Permissions.view_requested_tasks,
+        Permissions.block_payment_tasks,
+        Permissions.can_access_general_data,
+    ),
+    Person.COMPANY_REPRESENTATIVE: (
+        Permissions.can_see_tasks_company_representative,
+    ),
+    Person.FINANCE_GROUP: (
+        CorePermissions.view_reports,
+        FinancialPermissions.view_financial_report,
+        FinancialPermissions.billing_task,
+    )
 }
 
 
