@@ -4,7 +4,7 @@ import csv
 import pickle
 import io
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from zipfile import ZipFile
 from django.contrib import messages
@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When, CharField, IntegerField, Count, TextField, Prefetch
+from django.db.models import Q, Case, When, CharField, Count, TextField, Max, Subquery, OuterRef, Prefetch
 from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse_lazy, reverse
@@ -35,7 +35,8 @@ from core.xlsx import XLSXWriter
 from lawsuit.models import Movement
 from lawsuit.forms import LawSuitForm
 from lawsuit.models import Movement, LawSuit, Folder, TypeMovement
-from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
+from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter, \
+    TaskCheckinReportFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
     ImportTaskListForm, TaskBulkCreateForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
@@ -698,7 +699,7 @@ class ToPayTaskReportView(View):
                     query.add(
                         Q(parent__office__legal_name__unaccent__icontains=data[
                             'office']), Q.AND)
-                else:                    
+                else:
                     query.add(
                         Q(office__legal_name__unaccent__icontains=data['office']),
                         Q.AND)            
@@ -2256,8 +2257,32 @@ class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
-class TaskCheckinReportView(CustomLoginRequiredView, View):
+class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
+    template_name = 'task/reports/checkin.html'
+    filter_class = TaskCheckinReportFilter
+    model = Task
+
     def get(self, request, *args, **kwargs):
-        tasks = Task.objects.all()[:10]
-        tasks_serializer = TaskCheckinSerializer(tasks, many=True)
+        if not request.GET:
+            return super().get(request, *args, **kwargs)
+        tasks = self.filter_class(request.GET, queryset=self.get_queryset())
+        tasks_serializer = TaskCheckinSerializer(tasks.qs, many=True)
         return JsonResponse(tasks_serializer.data, safe=False)
+
+    def get_queryset(self):
+        office = get_office_session(self.request)
+        office_corresp = Task.objects.filter(id=OuterRef('child')).order_by('-id')
+        return self.model.objects.select_related('movement__law_suit')\
+            .select_related('movement__law_suit__folder__person_customer') \
+            .select_related('type_task') \
+            .filter(Q(office=office),
+                    Q(task_status__in=[TaskStatus.DONE, TaskStatus.FINISHED,
+                                       TaskStatus.BLOCKEDPAYMENT]),)\
+            .annotate(filho=Max('child'))\
+            .annotate(office_exec=Subquery(office_corresp.values('office__legal_name')[:1]))\
+            .annotate(os_executor=Coalesce('person_executed_by__legal_name', 'office_exec'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filter_class
+        return context

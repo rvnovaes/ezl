@@ -54,6 +54,7 @@ class Permissions(Enum):
     can_distribute_tasks = 'Can distribute tasks to another user'
     can_see_tasks_from_team_members = 'Can see tasks from your team members'
     can_see_tasks_company_representative = 'Can see tasks your company representative'
+    view_checkin_report = 'Can view checkin report'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
