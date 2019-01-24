@@ -28,7 +28,7 @@ def change_task_to_many_2_many(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0132_task_charge'),
+        ('task', '0131_auto_20181212_1550'),
     ]
 
     operations = [

@@ -118,8 +118,10 @@ class ServicePriceTableCreateView(AuditFormMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['office_session'] = get_office_session(self.request)
-        context['policy_prices_categories'] = json.dumps({policy_price.id: policy_price.category for
-                                               policy_price in context['form'].fields['policy_price'].queryset})
+        context['policy_prices_categories'] = json.dumps(
+            {policy_price.id: {'category': policy_price.category,
+                               'billing_moment': policy_price.billing_moment} for
+             policy_price in context['form'].fields['policy_price'].queryset})
         return context
 
     def post(self, request, *args, **kwargs):
@@ -155,9 +157,10 @@ class ServicePriceTableUpdateView(AuditFormMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['policy_prices_categories'] = json.dumps({policy_price.id: policy_price.category for
-                                                          policy_price in
-                                                          context['form'].fields['policy_price'].queryset})
+        context['policy_prices_categories'] = json.dumps(
+            {policy_price.id: {'category': policy_price.category,
+                               'billing_moment': policy_price.billing_moment} for
+             policy_price in context['form'].fields['policy_price'].queryset})
         return context
 
     def post(self, request, *args, **kwargs):

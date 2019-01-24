@@ -71,8 +71,8 @@ class TaskDetail {
 
     checkPaymentPending() {
         if (this.chargeId) {
-            this.billing.checkout.chargeId = this.chargeId            
-            this.billing.checkout.getPaymentStatus()
+            this.billing.checkout.chargeId = this.chargeId;
+            this.billing.checkout.getPaymentStatus();
         }
     }
 
@@ -93,7 +93,9 @@ class TaskDetail {
             task_id: this.taskId, 
             service_price_table_id: this.servicePriceTableId,
             name: this._elTaskTitle.text() + ' para ' + this.officeToDelegateName, 
-            value: parseInt(this.officeToDelegate.data('value').replace('.', '').replace(', ', ''))
+            value: parseInt(String(this.officeToDelegate.data('value'))
+                .replace('.', '')
+                .replace(', ', ''))
           };         
     }
 

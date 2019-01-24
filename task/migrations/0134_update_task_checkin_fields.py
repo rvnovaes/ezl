@@ -28,7 +28,7 @@ def update_task_checkin_fields(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0134_dashboardviewmodel_remove_survey_answers'),
+        ('task', '0133_dashboardviewmodel_remove_survey_answers'),
     ]
 
     operations = [

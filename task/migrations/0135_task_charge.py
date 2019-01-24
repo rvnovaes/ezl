@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('billing', '0003_charge_chargeitem'),
-        ('task', '0131_auto_20181212_1550'),
+        ('task', '0134_update_task_checkin_fields'),
     ]
 
     operations = [
