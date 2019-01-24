@@ -293,8 +293,8 @@ class Checkout {
 		this._elBtnPay.on('click', (evt)=> {
 			if (this.validateForm()) {
 				swal({
-					title: 'Processando pagamento', 
-					text: 'Aguarde...',
+					title: 'Processando o pagamento',
+	                html: '<h4>Aguarde...</h4>',
 					onOpen: ()=>{
 						swal.showLoading();
 					}
