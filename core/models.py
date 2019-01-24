@@ -36,6 +36,7 @@ CONTACT_MECHANISM_TYPE = ((INVALIDO, 'INVÁLIDO'), (PHONE, 'TELEFONE'),
 
 class CorePermissions(Enum):
     group_admin = 'Group Administrator'
+    view_reports = 'View Reports menu'
 
 
 class LegalType(Enum):
