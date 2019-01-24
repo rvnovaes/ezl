@@ -548,12 +548,12 @@ class Task(Audit, LegacyCode, OfficeMixin):
                 instance.person_company_representative.get_emails(), instance, 'd-77a5f2906dca4f3cbd51b98a464eabb1')
             email.send_mail()        
 
-    def on_change_person_company_representative(self): 
-        old_instance = Task.objects.get(pk=self.pk)
-        if self.person_company_representative_has_change(old_instance=old_instance, new_instance=self):
-            self.send_mail_old_company_representative(old_instance)
-            self.send_mail_new_company_representative(self)
-
+    def on_change_person_company_representative(self):
+        if self.pk:
+            old_instance = Task.objects.get(pk=self.pk)
+            if self.person_company_representative_has_change(old_instance=old_instance, new_instance=self):
+                self.send_mail_old_company_representative(old_instance)
+                self.send_mail_new_company_representative(self)
 
     def save(self, *args, **kwargs):
         self._skip_signal = kwargs.pop('skip_signal', False)
