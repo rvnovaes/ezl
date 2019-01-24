@@ -329,6 +329,14 @@
             }
         }
 
+        function createListItens(listItems) {
+            htmlListItens = '';
+            for (var i = 0; i < listItems.length; i++) {
+                htmlListItens += `<li>${listItems[i]}</li>`;
+            }
+            return htmlListItens;
+        }
+
         function getId(value) {
             var task_status = value.id;
             {% if custom_settings %}
@@ -337,11 +345,17 @@
             var office_work_alone = false;
             {% endif %}
 
-            if(value.id === 'FINISHED' && {{ pending_survey|lower }}){
+            let pending_surveys = {{ pending_surveys.status|lower }};
+            let pending_list = {{ pending_surveys.pending_list|safe }};
+
+            if(value.id === 'FINISHED' && pending_surveys){
+                let htmlList = `<ul class='font-15 text-left'>${createListItens(pending_list)}</ul>`;
+                let html = `<h4>A OS não pode ser finalizada porque os questionários dos participantes a seguir não foram respondidos:</h4>
+                            <br />${htmlList}`;
                 swal({
                     type: 'error',
                     title: 'Questionário',
-                    html: "<h4>A OS não pode ser finalizada porque o preposto não respondeu o questionário.</h4>"
+                    html: html
                 });
                 return false;
             }

@@ -551,7 +551,6 @@ class Task(Audit, LegacyCode, OfficeMixin):
             self.send_mail_old_company_representative(old_instance)
             self.send_mail_new_company_representative(self)
 
-
     def save(self, *args, **kwargs):
         self._skip_signal = kwargs.pop('skip_signal', False)
         self._skip_mail = kwargs.pop('skip_mail', False)
@@ -611,7 +610,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
                 pending_survey_company_representative = not TaskSurveyAnswer.objects.filter(
                     tasks=self, survey=survey_dict.get('survey_company_representative'),
                     create_user=self.person_company_representative.auth_user).first()
-            return pending_survey_company_representative or pending_survey
+            return {'survey_company_representative': pending_survey_company_representative,
+                    'survey_executed_by': pending_survey}
 
 
 class TaskFeedback(models.Model):

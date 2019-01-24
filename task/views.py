@@ -974,7 +974,14 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         context['task_history'] = \
             TaskHistory.objects.filter(
                 task_id=self.object.id).order_by('-create_date')
-        context['pending_survey'] = self.object.have_pending_surveys
+        pending_surveys = self.object.have_pending_surveys
+        pending_list = []
+        if pending_surveys.get('survey_company_representative'):
+            pending_list.append('Preposto')
+        if pending_surveys.get('survey_executed_by'):
+            pending_list.append('Correspondente')
+        context['pending_surveys'] = {'status': True if pending_list else False,
+                                      'pending_list': pending_list}
         context['survey_data'] = (self.object.type_task.survey.data
                                   if self.object.type_task.survey else None)
         if self.object.parent:
