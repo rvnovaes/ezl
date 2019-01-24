@@ -84,6 +84,12 @@
         </a>
         <ul class="nav nav-second-level">
             <li>
+                <a href="{% url 'task_checkin_report' %}" target="_self">
+                    <i class="mdi mdi-map-marker"></i>
+                    <span class="hide-menu">Gestão de check-in</span>
+                </a>
+            </li>
+            <li>
                 <a href="{% url 'task_report_to_pay' %}" target="_self">
                     <i class="fa fa-dollar fa-fw"></i>
                     <span class="hide-menu">OS's a pagar</span>
@@ -96,12 +102,6 @@
                 </a>
             </li>
             {% if 'view_checkin_report' in office_session_perms %}
-            <li>
-                <a href="{% url 'task_checkin_report' %}" target="_self">
-                    <i class="mdi mdi-map-marker"></i>
-                    <span class="hide-menu">Gestão de checkin</span>
-                </a>
-            </li>
             {% endif %}
         </ul>
     </li>

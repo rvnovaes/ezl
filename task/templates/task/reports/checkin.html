@@ -3,7 +3,7 @@
 {% load bootstrap3 %}
 
 {% block page_title %}
-    {% with "Gestão do Checkin" as object %}
+    {% with "Gestão do Check-in" as object %}
         {% with "Relatórios" as page_title %}
             {{block.super}}
         {% endwith %}
@@ -85,7 +85,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <h6 class="panel-title">
-                <i class="mdi mdi-map-marker"></i>Relatório de Checkin
+                <i class="mdi mdi-map-marker"></i>Relatório de Check-in
                 <span id="loading-data"></span>
             </h6>
         </div>

@@ -262,11 +262,11 @@ class TaskCheckinReportFilter(FilterSet):
                                              lookup_expr='unaccent__icontains', label='Preposto')
     has_checkin = ChoiceFilter(
         empty_label='Todas',
-        label='Por checkin',
+        label='Por check-in',
         method='has_checkin_filter',
         choices=(
-            (0, 'Somente com checkin realizado'),
-            (1, 'Somente sem checkin realizado'),
+            (0, 'Somente realizado'),
+            (1, 'Somente não realizado'),
         ))
 
     class Meta:
