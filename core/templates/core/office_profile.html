@@ -60,6 +60,7 @@
                         <li role="presentation" class=""><a href="#tab-mechanism-contact" aria-controls="settings" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-trash"></i></span> <span class="hidden-xs">Contato</span></a></li>
                         <li role="presentation" class=""><a href="#tab-invite-users" aria-controls="settings" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-trash"></i></span> <span class="hidden-xs">Relacionamento com usuário</span></a></li>
                         <li role="presentation" class=""><a href="#tab-invite-office" aria-controls="settings" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-trash"></i></span> <span class="hidden-xs">Relacionamento com escritórios</span></a></li>
+                        <li role="presentation" class=""><a href="#tab-billign-details" aria-controls="settings" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-trash"></i></span> <span class="hidden-xs">Detalhes de cobrança</span></a></li>
                     </ul>
                 </div>
                 <div class="white-box custom-white-box p-0">
@@ -481,6 +482,65 @@
                                 </div>
                             </div>
                         </div>
+                        <div role="tabpanel" class="tab-pane fade" id="tab-billign-details">
+                            <div class="col-md-12">
+								<div class="p-20 row">
+	                                <div class="col-sm-6">
+	                                    <h3 class="m-t-0">Detalhes de cobrança cadastrados</h3>
+	                                </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="address">
+                                            <div id="endereco">
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped table-hover" paginate-fixed id="billing-details-table">
+                                                        <thead>
+                                                            <tr>
+                                                                {% for column in table_billing_details.columns %}
+                                                                    {% if column.orderable %}
+                                                                <th {{ column.attrs.th.as_html }}><a href="{% querystring table_billing_details.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header|lower|capfirst }}</a>
+                                                                </th>
+                                                                {% else %} {% if not column.attrs.selectable == True %}
+                                                                <th {{ column.attrs.th.as_html }}>{{ column.header }}</th>
+                                                                {% else %}
+                                                                <th {{ column.attrs.th.as_html }}>{{ column.header }}</th>
+                                                                {% endif %} {% endif %} {% endfor %}
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for row in table_billing_details.page.object_list|default:table_billing_details.rows %}
+                                                            <tr class="{% cycle " odd " "even " %}" id="{{ row.attrs.pk }}" pk="{{ row.attrs.pk }}">
+                                                                {% for column, cell in row.items %}
+                                                                <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
+                                                                {% endfor %}
+                                                            </tr>
+                                                            {% empty %} {% if table_billing_details.empty_text %}
+                                                            <tr>
+                                                                <td colspan="{{ table_billing_details.columns|length }}">{{ table_billing_details.empty_text }}</td>
+                                                            </tr>
+                                                            {% endif %} {% endfor %}
+                                                        </tbody>
+                                                        <tfoot></tfoot>
+                                                    </table>
+                                                </div>
+							                    <div class="text-right btn-table-actions">
+							                        <div class="text-right" style="">
+							                            <div class="fixed-btn">
+							                                <button type="button" class="btn btn-danger" id="btn-delete-billing-detail">Remover
+							                                </button>
+							                                <button class="btn btn-success" id="btn-add-billing-detail">
+							                                    Adicionar</button>
+							                            </div>
+							                        </div>
+							                    </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -490,14 +550,17 @@
 {% include 'core/modal/office_profile_basic.html' %}
 {% include 'core/modal/office_profile_address.html' %}
 {% include 'core/modal/office_profile_contact_mechanism.html' with form=form_contact_mechanism %}
+{% include 'core/modal/office_profile_billing_details.html' with form=form_billing_details %}
 {%endblock%}
 
 {% block extra_scripts %}
-    <!-- Custom Theme JavaScript -->        
+    <!-- Custom Theme JavaScript -->
+    <script src="{% static 'skeleton/js/jquery.mask.min.js' %}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'core/js/controller/office.js' %}"></script>
     <script src="{% static 'core/js/controller/address.js' %}"></script>
     <script src="{% static 'core/js/controller/contact_mechanism.js' %}"></script>
+    <script src="{% static 'core/js/controller/billing-details.js' %}"></script>
     {% if view.model.use_upload %}
         <!-- UPLOADS SCRIPTS  -->
         {% include 'ecm/javascripts.html' %}
@@ -517,6 +580,7 @@
         var office = new Office('{{office.pk}}');
         var address = new Address("{{office.pk}}");
         var contactMechanism = new ContactMechanism();
+        var billingDetail = new BillingDetail("{{office.pk}}");
         var menuOpen = true;
         $(document).ready(function () {
 		    $(".open-close").on("click", function () {

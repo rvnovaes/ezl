@@ -87,12 +87,17 @@ class OfficeSerializer(serializers.ModelSerializer):
 
 class AddressSerializer(serializers.ModelSerializer):
     city_name = serializers.SerializerMethodField()
+    state_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Address        
         fields = '__all__'
 
     def get_city_name(self, obj):
         return obj.city.__str__()
+
+    def get_state_name(self, obj):
+        return obj.city.state.initials
 
 
 class ContactMechanismSerializer(serializers.ModelSerializer):

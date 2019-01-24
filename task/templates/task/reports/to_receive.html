@@ -93,6 +93,7 @@
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
                             <th>Recebida</th>
+                            <th>Transação via cartão</th>
                             <th>Valor</th>
                         </tr>
                     </thead>
@@ -115,6 +116,7 @@
                                         <td>{{ task.legacy_code }}</td>
                                     {% endif %}
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
+                                    <td>{{task.parent.charge.charge_id}}</td>
                                     <td>{{ task.amount }}</td>
                                 </tr>
                             {% endfor %}
@@ -136,6 +138,7 @@
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
                             <th>Recebida</th>
+                            <th>Transação via cartão</th>
                             <th>Valor (R$)</th>
                         </tr>
                     </thead>
@@ -143,7 +146,7 @@
                         {% for office in offices_report %}
                             {% ifchanged office.office_name %}
                                 <tr>
-                                    <th colspan="11">{{ office.office_name }}</th>
+                                    <th colspan="12">{{ office.office_name }}</th>
                                     <th></th>
                                     <th><center>{{office.office_total}}</center></th>
                                 </tr>
@@ -152,7 +155,7 @@
                             {% ifchanged office.client_name or office.office_name %}
                                 <tr>
                                     <th></th>
-                                    <th colspan="11">{{ office.client_name }}</th>
+                                    <th colspan="12">{{ office.client_name }}</th>
                                     <th><center>{{office.client_total}}</center></th>
                                 </tr>
                             {% endifchanged %}
@@ -178,6 +181,7 @@
                                         <td>{{ task.legacy_code }}</td>
                                     {% endif %}
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
+                                    <td>{{task.parent.charge.charge_id}}</td>
                                     <td class="text-center"><center>{{ task.amount }}</center></td>
                                 </tr>
                             {% endfor %}
@@ -188,7 +192,7 @@
                         {% endfor %}
                         {% if total %}
                             <tr class="total-container">
-                                <th colspan="11" class="text-right" >Total Geral (R$)</th>
+                                <th colspan="12" class="text-right" >Total Geral (R$)</th>
                                 <th colspan="2" class="text-right">{{total}}</th>
                             </tr>
                         {% endif %}

@@ -47,7 +47,7 @@ class ServicePriceTableTaskTable(tables.Table):
     city = tables.Column(orderable=False, verbose_name='Cidade')
     state = tables.Column(orderable=False, verbose_name='UF')
     client = tables.Column(orderable=False, verbose_name='Cliente')    
-    value = tables.Column(orderable=False, verbose_name='Valor')
+    value = tables.Column(orderable=False, verbose_name='Valor*')
     office_rating = tables.Column(orderable=False, verbose_name='Avaliação*')
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')
 

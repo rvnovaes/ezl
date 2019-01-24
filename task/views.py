@@ -65,6 +65,7 @@ from babel.numbers import format_currency
 from task import signals
 from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
 from dal import autocomplete
+from billing.gerencianet_api import api as gn_api
 import logging
 import operator
 logger = logging.getLogger(__name__)
@@ -1000,6 +1001,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                         context['survey_company_representative'] = ''
         context['show_company_representative_in_tab'] = self.show_company_representative_in_tab(checker, office_session)
         context['show_person_executed_by_in_tab'] = self.show_person_executed_by_in_tab(checker, office_session)        
+        context['ENV'] = os.environ.get('ENV')
         return context
 
     def show_company_representative_in_tab(self, checker, office_session):
@@ -1429,6 +1431,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return query_set, task_filter
 
     def get_queryset(self, **kwargs):
+
         task_list, task_filter = self.query_builder()
         self.filter = task_filter
 
@@ -2245,6 +2248,28 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         pre_save.connect(signals.pre_save_task, sender=Task)
         post_save.connect(signals.post_save_task, sender=Task) 
         return JsonResponse({'message': 'Registro atualizado com sucesso'})
+
+
+@login_required
+def ajax_bulk_create_update_status(request):
+    task_id = request.POST.get('task_id', 0)
+    status = 200
+    data = {
+        "updated": False,
+    }
+    if task_id:
+        task = Task.objects.filter(pk=task_id).first()
+        if task and task.task_status == 'Solicitada':
+            task.task_status = TaskStatus.ACCEPTED_SERVICE
+            task.save()
+            data = {
+                "updated": True,
+            }
+        else:
+            status = 500
+    else:
+        status = 400
+    return JsonResponse(data, status=status)
 
 
 class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
