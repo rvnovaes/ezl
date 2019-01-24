@@ -10,7 +10,7 @@ class CheckinReport {
 	    this.elFinishedDate1 = $("#finished_date_1");
 		this.elExecutionDate0 = $("#execution_date_0");
 	    this.elExecutionDate1 = $("#execution_date_1");
-		this.onClickBtnFilter();
+		this.startOnSubmit();
 	}
 
 	static setDefaultOfNull(value){
@@ -55,30 +55,20 @@ class CheckinReport {
 		return timeList
 	}
 
-	static isCheckinLate(baseDate, compareDate, diffLimit=30, datePart='n'){
-		baseDate = this.setDefaultOfNull(baseDate);
-		compareDate = this.setDefaultOfNull(compareDate);
-		let isLate = true;
-		if(baseDate !== '' && compareDate !== ''){
-			baseDate = this.getDateFromString(baseDate);
-			compareDate = this.getDateFromString(compareDate);
-			if (this.getDateDiff(baseDate, compareDate, datePart) <= diffLimit){
-				isLate = false;
+	static getCheckinClass(baseCheckin, compareCheckin, absolute=false){
+		if(this.setDefaultOfNull(compareCheckin) !== '' && this.setDefaultOfNull(baseCheckin) !== '') {
+			let baseDate = this.getDateFromString(this.setDefaultOfNull(baseCheckin));
+			let compareDate = this.getDateFromString(this.setDefaultOfNull(compareCheckin));
+			let dateDiff = this.getDateDiff(baseDate, compareDate, 'n', absolute);
+			if (absolute){
+				return (dateDiff > 30) ? 'label label-danger' : '';
 			}
-		}
-		if(compareDate === ''){
-			isLate = false;
-		}
-		return isLate;
-	}
-
-	static getCheckinClass(baseCheckin, compareCheckin){
-		if(compareCheckin !== '') {
-            if (this.isCheckinLate(baseCheckin, compareCheckin)) {
-                return 'label label-danger';
-            } else if(compareCheckin){
-            	return 'label label-success';
+			if(dateDiff > 0){
+				return 'label label-danger';
+			} else if(dateDiff >= -30){
+				return 'label label-warning';
 			}
+            return '';
         }
 		return '';
 	}
@@ -129,8 +119,9 @@ class CheckinReport {
 		return data;
 	}
 
-	onClickBtnFilter() {
-		this.btnFilter.on('click', () => {
+	startOnSubmit() {
+		$("form").submit((e) => {
+			e.preventDefault();
 			if(this.checkDates()){
 				this.start();
 			}
@@ -173,7 +164,8 @@ class CheckinReport {
 																			 task.date_company_representative_checkin)}">
 						${dateCompanyRepresentativeCheckin}</span></td>
 					<td><span class="font-12 ${CheckinReport.getCheckinClass(task.date_executed_by_checkin, 
-																			 task.date_company_representative_checkin)}">
+																			 task.date_company_representative_checkin, 
+																			 true)}">
 						${CheckinReport.compareCheckins(task)}</span></td>
 					<td>${CheckinReport.setDefaultOfNull(task.person_customer)}</td>
 					<td>${CheckinReport.setDefaultOfNull(task.law_suit_number)}</td>
