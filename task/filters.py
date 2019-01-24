@@ -1,6 +1,7 @@
 from django.forms import Select, Textarea, RadioSelect
 from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter
+    BooleanFilter, ModelMultipleChoiceFilter
+from dal import autocomplete
 from django.db.models import Q
 from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
