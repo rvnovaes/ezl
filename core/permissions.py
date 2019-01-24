@@ -17,7 +17,7 @@ GROUP_PERMISSIONS = {
      SurveyPermissions.can_edit_surveys,
      SurveyPermissions.can_view_survey_results,
      Permissions.can_distribute_tasks,
-     CorePermissions.group_admin),
+     CorePermissions.group_admin,),
     Person.SUPERVISOR_GROUP:
     (Permissions.block_payment_tasks,
      Permissions.can_access_general_data,

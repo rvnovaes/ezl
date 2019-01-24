@@ -1,6 +1,7 @@
 from django.forms import Select, Textarea, RadioSelect
-from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, BooleanFilter, ModelMultipleChoiceFilter
-from dal import autocomplete
+from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, \
+    BooleanFilter
+from django.db.models import Q
 from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
 from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
@@ -36,11 +37,11 @@ class TaskFilter(FilterSet):
     state = ModelMultipleChoiceFilter(
         queryset=filter_valid_choice_form(
             State.objects.filter(is_active=True)),
-        label="UF", 
+        label="UF",
         widget=autocomplete.ModelSelect2Multiple(url='state-autocomplete'))
     court_district = ModelMultipleChoiceFilter(
-        queryset=filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)), 
-        label='Comarca', 
+        queryset=filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)),
+        label='Comarca',
         widget=autocomplete.ModelSelect2Multiple(url='courtdistrict_select2', forward=['state']))
     court_district_complement = CharFilter(
         label="Complemento de Comarca",
@@ -57,8 +58,8 @@ class TaskFilter(FilterSet):
         choices=[(task_status.name, task_status.value)
                  for task_status in TaskStatus])
     type_task = ModelMultipleChoiceFilter(
-        queryset=TypeTask.objects.filter(is_active=True), 
-        label='Tipo de Serviço', 
+        queryset=TypeTask.objects.filter(is_active=True),
+        label='Tipo de Serviço',
         widget=autocomplete.ModelSelect2Multiple(url='type-task-autocomplete'))
     cost_center = ModelChoiceFilter(
         queryset=filter_valid_choice_form(
@@ -78,7 +79,7 @@ class TaskFilter(FilterSet):
     task_legacy_code = CharFilter(label=u"Nº da OS de origem")
     task_origin_code = NumberFilter(label=u"Nº da OS de origem")
     client = ModelMultipleChoiceFilter(
-        queryset=Person.objects.filter(is_active=True, is_customer=True), 
+        queryset=Person.objects.filter(is_active=True, is_customer=True),
         label='Cliente',
         widget=autocomplete.ModelSelect2Multiple(url='get_client_2'))
     office_executed_by = CharFilter(
@@ -185,6 +186,7 @@ class TaskFilter(FilterSet):
         fields = []
         order_by = ['final_deadline_date']
 
+
 class BatchChangTaskFilter(TaskFilter):
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
         super().__init__(data, queryset, prefix, strict, request)
@@ -248,3 +250,37 @@ class TypeTaskMainFilter(filters.FilterSet):
     class Meta:
         model = TypeTaskMain
         fields = ['is_hearing', 'name']
+
+
+class TaskCheckinReportFilter(FilterSet):
+    finished_date = MDDateTimeRangeFilter(name='finished_date', label='TESTE')
+    execution_date = MDDateTimeRangeFilter(name='execution_date')
+    task_executed_by = CharFilter(name='executed_by_checkin__create_user__person__legal_name',
+                                  lookup_expr='unaccent__icontains', label='Correspondente/Escritório contratado')
+    task_company_representative = CharFilter(name='company_representative_checkin__create_user__person__legal_name',
+                                             lookup_expr='unaccent__icontains', label='Preposto')
+    has_checkin = ChoiceFilter(
+        empty_label='Todas',
+        label='Por checkin',
+        method='has_checkin_filter',
+        choices=(
+            (0, 'Somente com checkin realizado'),
+            (1, 'Somente sem checkin realizado'),
+        ))
+
+    class Meta:
+        model = Task
+        fields = ['finished_date', 'execution_date', 'task_executed_by', 'task_company_representative', 'has_checkin']
+
+    def has_checkin_filter(self, queryset, name, value):
+        if value == '0':
+            return queryset.filter(Q(
+                Q(executed_by_checkin__isnull=int(value)) |
+                Q(company_representative_checkin__isnull=int(value))
+            ))
+        elif value == '1':
+            return queryset.filter(Q(
+                Q(executed_by_checkin__isnull=int(value)),
+                Q(company_representative_checkin__isnull=int(value))
+            ))
+        return queryset
