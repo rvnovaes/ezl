@@ -4,7 +4,7 @@ class TaskDetail {
         this.taskId = taskId;
         this.taskStatus = taskStatus;
         this.chargeId = chargeId;
-        this.officeWorkAlone = officeWorkAlone;
+        this.officeWorkAlone = (officeWorkAlone === 'True');
         this.pendingSurveys = pendingSurveys;
         this.pendingList = pendingList;
         this.surveyCompanyRepresentative=surveyCompanyRepresentative;
@@ -166,7 +166,7 @@ class TaskDetail {
     }
 
     makeRatingProccess(status) {
-        if ((status === 'BLOCKEDPAYMENT' || status == 'FINISHED') && !(this.officeWorkAlone)) {
+        if ((status === 'BLOCKEDPAYMENT' || status === 'FINISHED') && !(this.officeWorkAlone)) {
             this.showRatingContainer();
         } else {
             this.hideRatingContainer();
