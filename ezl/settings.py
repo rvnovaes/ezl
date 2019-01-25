@@ -78,6 +78,10 @@ try:
     socialaccount_query_email = config['social_auth'].getboolean('socialaccount_query_email')
     account_email_required = config['social_auth'].getboolean('account_email_required')
 
+    gerencianet_client_id = config['gerencianet']['client_id']
+    gerencianet_client_secret = config['gerencianet']['client_secret']
+    gerencianet_sandbox = config['gerencianet'].getboolean('sandbox')
+
 except KeyError as e:
     print('Invalid settings. Check ini files on ezl/config')
     print(e)
@@ -514,22 +518,8 @@ ACCOUNT_AUTHENTICATION_METHOD = account_authentication_method
 SOCIALACCOUNT_QUERY_EMAIL = socialaccount_query_email
 ACCOUNT_EMAIL_REQUIRED = account_email_required
 
-
-
-
-""" 
-Todo, levar estas configuracoes para os arquivos .conf organizados pelo Roberto 
-na tarefa EZL-1198. 
-"""
-if environment == 'development':
-    GERENCIANET_CREDENTIALS = {
-        'client_id': 'Client_Id_f6db389974a3fc3b378efc90fffb67b154ae26ca', 
-        'client_secret': 'Client_Secret_d408879045f6f877a44cd62e542eef24f0f387ce', 
-        'sandbox': True
-    }
-else:
-    GERENCIANET_CREDENTIALS = {
-        'client_id': 'Client_Id_de299c3f0fe9c4bd607871a714665db65b54b23b', 
-        'client_secret': 'Client_Secret_44cdc45c058e90bc1783d73f18e27ba47732f22d', 
-        'sandbox': False
-    }    
+GERENCIANET_CREDENTIALS = {
+    'client_id': gerencianet_client_id,
+    'client_secret': gerencianet_client_secret,
+    'sandbox': gerencianet_sandbox
+}
