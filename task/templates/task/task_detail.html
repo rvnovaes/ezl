@@ -350,7 +350,7 @@
 
             if(value.id === 'FINISHED' && pending_surveys){
                 let htmlList = `<ul class='font-15 text-left'>${createListItens(pending_list)}</ul>`;
-                let html = `<h4>A OS não pode ser finalizada porque os questionários dos participantes a seguir não foram respondidos:</h4>
+                let html = `<h4>A OS não pode ser finalizada porque o questionário do(s) participante(s) a seguir não foi respondido:</h4>
                             <br />${htmlList}`;
                 swal({
                     type: 'error',
