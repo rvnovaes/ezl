@@ -436,21 +436,22 @@ def pre_save_task(sender, instance, **kwargs):
 
 @receiver(post_save, sender=TaskGeolocation)
 def post_save_geolocation(sender, instance, **kwargs):
-    pre_save.disconnect(pre_save_task, sender=Task)
-    post_save.disconnect(post_save_task, sender=Task)
+    if instance.checkpointtype == 'Checkin':
+        pre_save.disconnect(pre_save_task, sender=Task)
+        post_save.disconnect(post_save_task, sender=Task)
 
-    task = instance.task
-    create_user = instance.create_user
-    checkin_type = 'executed_by_checkin'
-    if task.person_company_representative and create_user == task.person_company_representative.auth_user:
-        checkin_type = 'company_representative_checkin'
+        task = instance.task
+        create_user = instance.create_user
+        checkin_type = 'executed_by_checkin'
+        if task.person_company_representative and create_user == task.person_company_representative.auth_user:
+            checkin_type = 'company_representative_checkin'
 
-    setattr(task, checkin_type, instance)
-    task.save()
-    while task.parent:
-        task = task.parent
         setattr(task, checkin_type, instance)
         task.save()
+        while task.parent:
+            task = task.parent
+            setattr(task, checkin_type, instance)
+            task.save()
 
-    pre_save.connect(pre_save_task, sender=Task)
-    post_save.connect(post_save_task, sender=Task)
+        pre_save.connect(pre_save_task, sender=Task)
+        post_save.connect(post_save_task, sender=Task)

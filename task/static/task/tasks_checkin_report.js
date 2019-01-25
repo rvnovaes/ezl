@@ -226,8 +226,8 @@ class CheckinReport {
 				title: "Filtros por data",
 				html: '<h3>Favor informar um período de Finalização ou de Cumprimento para filtrar o relatório</h3>'
 			});
-			return false
+			return false;
 		}
-		return true
+		return true;
 	}
 }
