@@ -74,6 +74,7 @@ def get_checkpoint_type(geolocation, user):
         return 'CHECKOUT'
     return 'CHECKIN'
 
+
 @register.filter
 def get_checkpoint_type_by_task(dashboard_task, user):
     checkin_exist = Task.objects.get(pk=dashboard_task.pk).geolocation.filter(

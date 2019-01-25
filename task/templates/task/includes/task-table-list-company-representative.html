@@ -5,12 +5,12 @@
     <td>    	
 	    {% if row.record|get_checkpoint_type_by_task:request.user == 'CHECKOUT' %}
 	        <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
-	                data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary GEOLOCATION">
+	                data-checkpointtype="Checkout" id="GEOLOCATION-{{ row.record.pk }}" type="button" data-toggle="" data-target="" class="text-white btn btn-primary GEOLOCATION">
 	            <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkout</span>
 	        </button>
 	    {% elif row.record|get_checkpoint_type_by_task:request.user == 'CHECKIN' %}
 	        <button type="button" onclick="getLocation()" data-url="/providencias/providencias/geolocation/checkin"
-	                data-checkpointtype="Checkin" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary GEOLOCATION">
+	                data-checkpointtype="Checkin" id="GEOLOCATION-{{ row.record.pk }}" type="button" data-toggle="" data-target="" class="text-white btn btn-primary GEOLOCATION">
 	            <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin</span>
 	        </button>
 	    {% endif %}     	
