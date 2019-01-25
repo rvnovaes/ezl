@@ -270,7 +270,7 @@ class TaskDetail {
                 } else {
                     swal({
                         title: 'Delegando', 
-                        text: 'Aguarde...',
+			            html: '<h4>Aguarde...</h4>',
                         onOpen: () => {
                             swal.showLoading();
                             $('#task_detail').unbind('submit').submit();            

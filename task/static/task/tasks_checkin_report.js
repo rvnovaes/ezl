@@ -190,7 +190,7 @@ class CheckinReport {
 		this.clear();
 		swal({
 	        title: "Carregando OS's",
-	        html: '<h3>Aguarde...</h3>',
+	        html: '<h4>Aguarde...</h4>',
 	        onOpen: ()=> {
 	        	swal.showLoading()
 	        }

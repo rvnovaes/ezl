@@ -158,7 +158,7 @@ class ReportToPay {
 	getXlsx() {
 		swal({
 			title: 'Exportando para o Excel',
-	        html: '<h3>Aguarde...</h3>',
+	        html: '<h4>Aguarde...</h4>',
 			allowOutsideClick: false,
 			onOpen: ()=>{
 				swal.showLoading();
@@ -292,7 +292,7 @@ class ReportToPay {
 	async start(){
 		swal({
 	        title: "Carregando OS's",
-	        html: '<h3>Aguarde...</h3>',
+	        html: '<h4>Aguarde...</h4>',
 			allowOutsideClick: false,
 	        onOpen: ()=> {
 	        	swal.showLoading()
