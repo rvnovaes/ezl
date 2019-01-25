@@ -3,7 +3,7 @@ from core.models import Person, State, City
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field, get_office_session
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from task.models import TypeTask
-from .models import CostCenter, ServicePriceTable, ImportServicePriceTable
+from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, PolicyPrice, CategoryPrice, BillingMoment
 from decimal import Decimal
 from core.forms import BaseModelForm, XlsxFileField
 from core.widgets import TypeaHeadForeignKeyWidget
@@ -69,7 +69,12 @@ class ServicePriceTableForm(BaseModelForm):
         required=False,
         label=u"Tipo de Serviço",
     )
-
+    policy_price = forms.ModelChoiceField(
+        queryset=PolicyPrice.objects.all(),
+        empty_label='',
+        required=True,
+        label='Tipo de preço'
+    )
     value = forms.CharField(label="Valor",
                             localize=True,
                             required=False,
@@ -78,8 +83,8 @@ class ServicePriceTableForm(BaseModelForm):
 
     class Meta:
         model = ServicePriceTable
-        fields = ('office', 'office_correspondent', 'office_network', 'client', 'type_task', 'state', 'court_district',
-                  'court_district_complement', 'city', 'value', 'is_active')
+        fields = ('office', 'policy_price', 'office_correspondent', 'office_network', 'client', 'type_task', 'state',
+                  'court_district', 'court_district_complement', 'city', 'value', 'is_active')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
@@ -118,9 +123,30 @@ class ServicePriceTableForm(BaseModelForm):
 
 class ImportServicePriceTableForm(forms.ModelForm):
     file_xls = XlsxFileField(label='Arquivo', required=True,
-                             headers_to_check=['Correspondente', 'Serviço', 'Cliente', 'UF', 'Comarca',
-                                               'Complemento de comarca', 'Cidade', 'Valor'])
+                             headers_to_check=['Correspondente/Rede', 'Tipo de preço', 'Serviço', 'Cliente', 'UF',
+                                               'Comarca', 'Complemento de comarca', 'Cidade', 'Valor'])
 
     class Meta:
         model = ImportServicePriceTable
         fields = ('file_xls', )
+
+
+class PolicyPriceForm(BaseModelForm):  
+    category = forms.ChoiceField(
+        label='Categoria',
+        choices=[(x.name, x.value) for x in CategoryPrice],
+        required=True,
+    )
+    billing_moment = forms.ChoiceField(
+        label='Momento do faturamento',
+        choices=((x.name, x.value) for x in BillingMoment),
+        required=True,
+    )
+
+    class Meta:
+        model = PolicyPrice
+        fields = ('office', 'name', 'category', 'billing_moment', 'is_active')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['office'] = get_office_field(self.request)

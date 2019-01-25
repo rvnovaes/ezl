@@ -67,6 +67,9 @@ urlpatterns = [
     url(r'^ajax_get_correspondent_table/$',
         login_required(views.ajax_get_correspondents_table),
         name='ajax_get_correspondent_table'),
+    url(r'^ajax_bulk_create_update_status/$',
+        login_required(views.ajax_bulk_create_update_status),
+        name='ajax_bulk_create_update_status'),
 
     # Filtros
     url(r'^filtros/listar/$',
@@ -118,7 +121,7 @@ urlpatterns = [
     url(r'^type-task-autocomplete/$', views.TypeTaskAutocomplete.as_view(), name='type-task-autocomplete'),
 
     # Relatórios
-    url(r'^task_checkin_list/$',
+    url(r'^task_checkin_report/$',
         login_required(views.TaskCheckinReportView.as_view()),
-        name='task_checkin_list'),
+        name='task_checkin_report'),
 ]

@@ -25,7 +25,6 @@ services:
     depends_on:
       - builder
       - db
-      - tunnel
       - queues
   ws:
     image: ezl:latest
@@ -78,7 +77,6 @@ services:
     depends_on:
       - builder
       - db
-      - tunnel
       - queues
   tasks2:
     environment:
@@ -96,7 +94,6 @@ services:
     depends_on:
       - builder
       - db
-      - tunnel
       - queues
   tasks3:
     environment:
@@ -114,7 +111,6 @@ services:
     depends_on:
       - builder
       - db
-      - tunnel
       - queues
 
   tasks-schedule:
@@ -127,16 +123,6 @@ services:
       - /mnt/windows_ecm/Pastas:/app/media/ECM/Pastas      
       - ./media/service_price_table:/app/media/service_price_table
       - ezl-logs:/var/log/ezl      
-
-  tunnel:
-    image: ezl:latest
-    command: python -m sshtunnel -U dev -P dev@2016 -L 0.0.0.0:2000 -R 192.168.249.14:1433 -p 22 201.86.113.86
-    ports:
-      - "2000:2000"
-    volumes:
-      - .:/app
-    depends_on:
-      - builder
 
   nginx:
     ports:
@@ -161,3 +147,7 @@ services:
     ports:
       - "8083:15672"
       - "5672:5672"
+
+  redis:
+    ports:
+      - "57003:6379"

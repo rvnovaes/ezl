@@ -175,6 +175,7 @@ def delegate_child_task(object_parent, office_correspondent):
     new_task.person_distributed_by = None
     new_task.delegation_date = None
     new_task.person_company_representative = None
+    new_task.charge = None
     new_task.office = office_correspondent
     new_task.task_status = TaskStatus.REQUESTED
     new_task.parent = object_parent

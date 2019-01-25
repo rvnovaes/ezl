@@ -18,12 +18,3 @@ $('[data-toggle=tagsinput]').each(function(){
         }
     });
 });
-// {% for office in object.person.offices.all %}
-//   {% for office_group in office.office_groups.all %}
-//       {% for group in object.groups.all %}
-//           {% if group == office_group.group %}
-//
-//           {% endif %}
-//       {% endfor %}
-//   {% endfor %}
-// {% endfor %}
