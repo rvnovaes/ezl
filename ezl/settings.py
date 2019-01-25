@@ -68,6 +68,7 @@ try:
     aws_secret_access_key = config['aws']['aws_secret_access_key']
     aws_querystring_auth = config['aws'].getboolean('aws_querystring_auth')
     aws_s3_file_overwrite = config['aws'].getboolean('aws_s3_file_overwrite')
+    aws_storage_bucket_name = config['aws']['aws_storage_bucket_name']
     aws_storage_bucket_url = config['aws']['aws_storage_bucket_url']
 
     rest_page_size = config['rest_framework']['page_size']
@@ -332,6 +333,7 @@ AWS_ACCESS_KEY_ID = aws_access_key_id
 AWS_SECRET_ACCESS_KEY = aws_secret_access_key
 AWS_QUERYSTRING_AUTH = aws_querystring_auth
 AWS_S3_FILE_OVERWRITE = aws_s3_file_overwrite
+AWS_STORAGE_BUCKET_NAME = aws_storage_bucket_name
 AWS_STORAGE_BUCKET_URL = aws_storage_bucket_url
 
 LOGIN_REDIRECT_URL = reverse_lazy('inicial')
