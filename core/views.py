@@ -67,6 +67,7 @@ from billing.tables import BillingDetailsTable
 from billing.forms import BillingDetailsForm, BillingAddressCombinedForm
 
 
+
 class AutoCompleteView(autocomplete.Select2QuerySetView):
     model = abstractproperty()
     lookups = abstractproperty()
@@ -2401,7 +2402,7 @@ class OfficeProfileDataView(View):
     def post(self, request, *args, **kwargs):
         office_serializer = OfficeSerializer(data=request.POST, instance=get_office_session(request))
         if office_serializer.is_valid():
-            office_serializer.save();
+            office_serializer.save()
             return JsonResponse(office_serializer.data)
         return JsonResponse({'error': office_serializer.errors})            
 
@@ -2492,6 +2493,7 @@ class OfficeProfileAddressCreateView(ViewRelatedMixin, CreateView):
     def get_success_url(self):
         return reverse('office_profile')    
 
+
 class OfficeProfileAddressUpdateView(CustomLoginRequiredView, UpdateView):
     model = Address
     form_class = AddressForm
@@ -2547,6 +2549,7 @@ class OfficeProfileContactMechanismCreateView(ViewRelatedMixin, CreateView):
     def get_success_url(self):
         return reverse('office_profile')
 
+
 class OfficeProfileContactMechanismUpdateView(CustomLoginRequiredView, UpdateView):
     model = ContactMechanism
     form_class = ContactMechanismForm
@@ -2559,7 +2562,6 @@ class OfficeProfileContactMechanismUpdateView(CustomLoginRequiredView, UpdateVie
         form.instance.office = get_office_session(self.request)
         self.object = form.save()        
         return JsonResponse(ContactMechanismSerializer(form.instance).data)
-
 
     def get_success_url(self):
         return reverse('office_profile')        
