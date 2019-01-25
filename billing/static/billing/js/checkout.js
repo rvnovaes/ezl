@@ -34,6 +34,12 @@ class Checkout {
 			discover: /^(6011|622|64|65)/, 
 			jcb: /^35/, 
 		};
+		this.regexCheck = {
+			name: /^[ ]*(.+[ ]+)+.+[ ]*$/,
+			phoneNumber: /^[1-9]{2}9?[0-9]{8}$/,
+			email: /^[A-Za-z0-9_\\-]+(?:[.][A-Za-z0-9_\\-]+)*@[A-Za-z0-9_]+(?:[-.][A-Za-z0-9_]+)*.[A-Za-z0-9_]+$/,
+			state: /^(?:A[CLPM]|BA|CE|DF|ES|GO|M[ATSG]|P[RBAEI]|R[JNSOR]|S[CEP]|TO)$/
+		};
 		this.onClickBtnPay();		
 		this.onChangeZipcode();		
 		this.onKeyUpCardNumber();
@@ -142,7 +148,7 @@ class Checkout {
 	}
 
 	get state() {
-		return this._elState.val();
+		return this._elState.val().toUpperCase();
 	}
 
 	set state(value) {
@@ -257,7 +263,7 @@ class Checkout {
 				xhr.setRequestHeader("X-CSRFToken", self.csrfToken)
 			}, 
 		});
-	} 
+	}
 
 	onChangeZipcode() {
 		this._elInputZipcode.on('change', (evt)=> {
@@ -275,14 +281,80 @@ class Checkout {
 		});
 	}
 
+	CPFValidation(strCPF) {
+		let rest;
+		let sum = 0;
+		let wrongCPFList = ['00000000000', 
+			'11111111111', 
+			'22222222222', 
+			'33333333333', 
+			'44444444444', 
+			'55555555555', 
+			'66666666666', 
+			'77777777777', 
+			'88888888888', 
+			'99999999999'
+		];
+		if (wrongCPFList.indexOf(strCPF) !== -1) {
+			return false;
+		}
+		let i;
+		for (i=1; i<=9; i++) {
+			sum = sum + parseInt(strCPF.substring(i-1, i)) * (11 - i);
+		}
+		rest = (sum * 10) % 11;
+
+		if ((rest === 10) || (rest === 11)) {
+			rest = 0;
+		}
+		if (rest !== parseInt(strCPF.substring(9, 10)) ) {
+			return false;
+		}
+		sum = 0;
+		for (i = 1; i <= 10; i++) {
+			sum = sum + parseInt(strCPF.substring(i-1, i)) * (12 - i);
+		}
+		rest = (sum * 10) % 11;
+		if ((rest === 10) || (rest === 11)) {
+			rest = 0;
+		}
+		return rest === parseInt(strCPF.substring(10, 11));
+	}
+
 	validateForm() {
-		let formValid = true
+		let formValid = true;
 		$('#form-checkout').find('input').each(function(el) {
 			if ($(this).prop('required') && $(this).val().length === 0) {
 				$(this).parent().addClass('has-error');
 				formValid = false;
+			} else {
+				$(this).parent().removeClass('has-error');
 			}
 		});
+		if (!this.regexCheck.name.test(this.name)){
+			this._elInputName.parent().addClass('has-error');
+			formValid = false;
+		}
+		if (!this.regexCheck.phoneNumber.test(this.phoneNumber)){
+			this._elInputPhoneNumber.parent().addClass('has-error');
+			formValid = false;
+		}
+		if (!this.regexCheck.email.test(this.email)){
+			this._elInputEmail.parent().addClass('has-error');
+			formValid = false;
+		}
+		if (!this.regexCheck.state.test(this.state)){
+			this._elState.parent().addClass('has-error');
+			formValid = false;
+		}
+		if (!this.CPFValidation(this.cpf)){
+			this._elInputCPF.parent().addClass('has-error');
+			formValid = false;
+		}
+		if (this.zipcode.length !== 8 ){
+			this._elInputZipcode.parent().addClass('has-error');
+			formValid = false;
+		}
 		return formValid;
 	}
 
@@ -332,7 +404,14 @@ class Checkout {
 						expiration_year: this.cardExpirationDate.slice(3,7)
 					}, this.paymentCallback)
 				}
-			}			
+			} else {
+				swal({
+					title: 'Atenção!',
+					html : '<h4>Erro no preenchimento do formulário.<br />Favor verificar os campos marcados em vermelho.</h4>',
+					type: 'error',
+					confirmButtonText: 'OK'
+				});
+			}
 		});
 	}
 
