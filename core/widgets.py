@@ -1,3 +1,4 @@
+import datetime
 from dal.widgets import QuerySetSelectMixin
 from django import forms
 from django.forms.widgets import boolean_check, Input, DateTimeBaseInput, ChoiceWidget
@@ -180,6 +181,20 @@ class MDDateTimeRangeFilter(RangeFilter):
         # self.field.widget = MDRangeWidget(format=self.format)
         kwargs['format'] = self.format
         super(MDDateTimeRangeFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if self.format != 'DD/MM/YYYY':
+            return super().filter(qs, value)
+        if value:
+            if value.start is not None and value.stop is not None:
+                lookup = '%s__range' % self.name
+                return self.get_method(qs)(**{lookup: (
+                    datetime.datetime.combine(value.start, datetime.time.min),
+                    datetime.datetime.combine(value.stop, datetime.time.max)
+                )})
+            else:
+                return super().filter(qs, value)
+        return qs
 
 
 class MDSelect(ModelSelect2):

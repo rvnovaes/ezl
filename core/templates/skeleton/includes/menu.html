@@ -75,13 +75,20 @@
 
         </ul>
     </li>
-    {% if perms.core.view_all_tasks %}
+    {% endif %}
+    {% if 'view_reports' in office_session_perms %}
     <li id="id_relatorios">
         <a href="javascript:void(0)" class="waves-effect">
             <i class="mdi mdi-chart-bar fa-fw"></i>
             <span class="hide-menu">Relatórios<span class="fa arrow"></span></span>
         </a>
         <ul class="nav nav-second-level">
+            <li>
+                <a href="{% url 'task_checkin_report' %}" target="_self">
+                    <i class="mdi mdi-map-marker"></i>
+                    <span class="hide-menu">Gestão de check-in</span>
+                </a>
+            </li>
             <li>
                 <a href="{% url 'task_report_to_pay' %}" target="_self">
                     <i class="fa fa-dollar fa-fw"></i>
@@ -94,9 +101,12 @@
                     <span class="hide-menu">OS's a receber</span>
                 </a>
             </li>
+            {% if 'view_checkin_report' in office_session_perms %}
+            {% endif %}
         </ul>
     </li>
     {% endif %}
+    {% if 'can_access_general_data' in office_session_perms %}
     <li id="id_administracao"> <!-- ADMINISTRAÇÃO -->
         <a href="javascript:void(0)" class="waves-effect">
             <i class="fa fa-folder-o fa-fw" data-icon="v"></i>

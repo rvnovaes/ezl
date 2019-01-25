@@ -118,7 +118,7 @@ urlpatterns = [
     url(r'^type-task-autocomplete/$', views.TypeTaskAutocomplete.as_view(), name='type-task-autocomplete'),
 
     # Relatórios
-    url(r'^task_checkin_list/$',
+    url(r'^task_checkin_report/$',
         login_required(views.TaskCheckinReportView.as_view()),
-        name='task_checkin_list'),
+        name='task_checkin_report'),
 ]
