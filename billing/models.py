@@ -1,6 +1,6 @@
 from django.db import models
 from djmoney.models.fields import MoneyField
-from core.models import Audit, Office
+from core.models import Audit, Office, OfficeMixin, Address
 
 
 class Plan(Audit):
@@ -59,3 +59,53 @@ class PlanOffice(Audit):
     def __str__(self):
         return '{} - {} - {}'.format(self.office.legal_name, self.plan.name,
                                      self.subscription_date)
+
+
+class Charge(Audit):
+    custom_id = models.CharField(verbose_name='Custom id', max_length=255, blank=True, null=True)
+    charge_id = models.CharField(verbose_name='Transacao', max_length=255, blank=True, null=True)
+    status = models.CharField(verbose_name='Status', max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(verbose_name='Data da transacao', blank=True, null=True)
+
+    class Meta:
+        ordering = ['-pk']
+
+    def __str__(self):
+        return self.charge_id or ''
+
+
+class ChargeItem(Audit):
+    charge = models.ForeignKey(Charge, verbose_name='Transacao', related_name='items', blank=True, null=True)
+    name = models.CharField(verbose_name='Item', max_length=255)
+    value = models.IntegerField(verbose_name='Valor')
+    amount = models.IntegerField(verbose_name='Quantidade')
+
+    def __str__(self):
+        return self.name or ''
+
+
+class BillingDetails(Audit, OfficeMixin):
+    card_name = models.CharField(
+        verbose_name='Nome no cartão',
+        max_length=255,
+    )
+    email = models.EmailField(
+        verbose_name='E-mail',
+        max_length=255,
+    )
+    cpf_cnpj = models.CharField(
+        max_length=255,
+        verbose_name='CPF/CNPJ'
+    )
+    birth_date = models.DateField(verbose_name='Data de nascimento')
+    phone_number = models.CharField(
+        verbose_name='Telefone',
+        max_length=15
+    )
+    billing_address = models.ForeignKey(Address, verbose_name='Endereço de cobrança')
+
+    class Meta:
+        ordering = ['office', 'card_name']
+
+    def __str__(self):
+        return '{} - {}'.format(self.office, self.card_name)

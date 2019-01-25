@@ -63,6 +63,10 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from core.tasks import import_xls_city_list
 from allauth.socialaccount.providers.oauth2.views import *
 from allauth.socialaccount.providers.google.views import *
+from billing.tables import BillingDetailsTable
+from billing.forms import BillingDetailsForm, BillingAddressCombinedForm
+
+
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
     model = abstractproperty()
@@ -1726,6 +1730,22 @@ class CitySelect2Autocomplete(autocomplete.Select2QuerySetView):
         return "{}".format(result.__str__())
 
 
+class ZipCodeCitySelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = City.objects.none()
+        if self.q:
+            q_list = self.q.split('|')
+            if q_list and len(q_list) == 2:
+                qs = filter_valid_choice_form(City.objects.filter(is_active=True))
+                filters = Q(name__unaccent__icontains=q_list[0])
+                filters &= Q(state__initials__unaccent__icontains=q_list[1])
+                qs = qs.filter(filters)
+        return qs.order_by('name')
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
+
+
 class ClientAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
@@ -2382,7 +2402,7 @@ class OfficeProfileDataView(View):
     def post(self, request, *args, **kwargs):
         office_serializer = OfficeSerializer(data=request.POST, instance=get_office_session(request))
         if office_serializer.is_valid():
-            office_serializer.save();
+            office_serializer.save()
             return JsonResponse(office_serializer.data)
         return JsonResponse({'error': office_serializer.errors})            
 
@@ -2414,6 +2434,8 @@ class OfficeProfileView(TemplateView):
             'table_contact_mechanism':
             ContactMechanismOfficeTable(
                 self.object.contactmechanism_set.all()),
+            'table_billing_details': BillingDetailsTable(
+                self.object.billingdetails_office.all()),
         })
         data = super().get_context_data(**kwargs)
         data['inviteofficeform'] = InviteForm(self.request.POST) \
@@ -2428,6 +2450,7 @@ class OfficeProfileView(TemplateView):
         data['form_office'] = self.form_class(instance=data['office']) 
         data['form_address'] = AddressForm()      
         data['form_contact_mechanism'] = ContactMechanismForm()
+        data['form_billing_details'] = BillingAddressCombinedForm
         return data
 
 
@@ -2470,6 +2493,7 @@ class OfficeProfileAddressCreateView(ViewRelatedMixin, CreateView):
     def get_success_url(self):
         return reverse('office_profile')    
 
+
 class OfficeProfileAddressUpdateView(CustomLoginRequiredView, UpdateView):
     model = Address
     form_class = AddressForm
@@ -2492,6 +2516,7 @@ class OfficeProfileAddressDeleteView(CustomLoginRequiredView, View):
         address_ids = request.POST.getlist('ids[]')
         Address.objects.filter(pk__in=address_ids).delete()
         return JsonResponse({'status': 'ok'})
+
 
 class OfficeProfileAddressDataView(CustomLoginRequiredView, View):
     def get(self, request, pk, *args, **kwargs):        
@@ -2524,6 +2549,7 @@ class OfficeProfileContactMechanismCreateView(ViewRelatedMixin, CreateView):
     def get_success_url(self):
         return reverse('office_profile')
 
+
 class OfficeProfileContactMechanismUpdateView(CustomLoginRequiredView, UpdateView):
     model = ContactMechanism
     form_class = ContactMechanismForm
@@ -2536,7 +2562,6 @@ class OfficeProfileContactMechanismUpdateView(CustomLoginRequiredView, UpdateVie
         form.instance.office = get_office_session(self.request)
         self.object = form.save()        
         return JsonResponse(ContactMechanismSerializer(form.instance).data)
-
 
     def get_success_url(self):
         return reverse('office_profile')        

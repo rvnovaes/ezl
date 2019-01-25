@@ -1,12 +1,14 @@
 class ServicePriceTable {
-    constructor(officeSessionId, policyPricesCategories){
+    constructor(officeSessionId, policyPrices){
+        this.minValue = 500;
         this.formErrors = [];
         this.officeSessionId = officeSessionId;
-        this.policyPricesCategories = policyPricesCategories;
+        this.policyPrices = policyPrices;
         this.elOfficeNetwork = $('#id_office_network');
         this.elOfficeCorrespondent = $('#id_office_correspondent');
         this.elOffice = $('#id_office');
         this.elPolicyPrice = $('select[name=policy_price]');
+        this.elTaskValue = $('#id_value');
         this.onChangeOfficeNetwork();
         this.onChangeOfficeCorrespondent();
         this.onSaveSubmit();
@@ -71,6 +73,18 @@ class ServicePriceTable {
         `;
     }
 
+    checkMinValue() {
+        if(isNaN(parseInt(this.taskValue.replace(',', '').replace('.', '')))){
+            return false;
+        }
+        return parseInt(this.taskValue.replace(',', '').replace('.', '')) >= this.minValue;
+    }
+
+    formatedMinValue(){
+        let strMinValue = String(this.minValue)
+        return `R$ ${strMinValue.substr(0, strMinValue.length - 2)},${strMinValue.substr(strMinValue.length - 2)}`;
+    }
+
     disableOfficeCorrespondent(){
         if (this.officeCorrespondent !== this.office) {
             this.officeCorrespondent = '';
@@ -86,9 +100,9 @@ class ServicePriceTable {
     }
 
     disablePolicyPriceOptionsByCategory(category){
-        for (let key in this.policyPricesCategories) {
-            if (!this.policyPricesCategories.hasOwnProperty(key)) {continue;}
-            if(this.policyPricesCategories[key] !== category){
+        for (let key in this.policyPrices) {
+            if (!this.policyPrices.hasOwnProperty(key)) {continue;}
+            if(this.policyPrices[key].category !== category){
                 ServicePriceTable.disableSelecElement(this.elPolicyPrice, key);
             } else {
                 ServicePriceTable.enableSelecElement(this.elPolicyPrice, key);
@@ -97,8 +111,8 @@ class ServicePriceTable {
     }
 
     enablePolicyPriceOptions(){
-        for (let key in this.policyPricesCategories) {
-            if (!this.policyPricesCategories.hasOwnProperty(key)) {continue;}
+        for (let key in this.policyPrices) {
+            if (!this.policyPrices.hasOwnProperty(key)) {continue;}
             ServicePriceTable.enableSelecElement(this.elPolicyPrice, key);
         }
     }
@@ -131,8 +145,16 @@ class ServicePriceTable {
         return this.elPolicyPrice.val(value);
     }
 
+    get taskValue(){
+        return this.elTaskValue.val();
+    }
+
     get pricePolicyCategory(){
-        return (this.policyPrice) ? this.policyPricesCategories[this.policyPrice] : null;
+        return (this.policyPrice) ? this.policyPrices[this.policyPrice].category : null;
+    }
+
+    get priceBillingMoment(){
+        return (this.policyPrice) ? this.policyPrices[this.policyPrice].billing_moment : null;
     }
 
     onChangeOfficeNetwork(){
@@ -181,6 +203,7 @@ class ServicePriceTable {
 
     validatePolicyPrice(showAlert) {
         let pricePolicyCategory = this.pricePolicyCategory;
+        let pricePolicyBillingMoment = this.priceBillingMoment;
         let errorMsg = '';
         this.clearFormErrors();
         ServicePriceTable.enableSelecElement(this.elOfficeCorrespondent, this.officeSessionId);
@@ -223,6 +246,9 @@ class ServicePriceTable {
                 ServicePriceTable.enableRequired(this.elOfficeNetwork);
                 ServicePriceTable.enableElement(this.elOfficeCorrespondent);
                 ServicePriceTable.enableRequired(this.elOfficeCorrespondent);
+        }
+        if(pricePolicyBillingMoment === 'PRE_PAID' && !this.checkMinValue()){
+            this.insertFormErrors(`O valor mínimo para o tipo de preço pré-pago é ${this.formatedMinValue()}`);
         }
         if (!this.policyPrice){
             this.insertFormErrors('Favor selecionar um Tipo de preço');

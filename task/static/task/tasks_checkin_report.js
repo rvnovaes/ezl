@@ -138,10 +138,10 @@ class CheckinReport {
 
 	async getData() {
 		const response = await $.ajax({
-	        method: 'GET', 
+	        method: 'GET',
 	        url: window.location.href,
-	        data: this.query, 
-	        dataType: 'json', 	        
+	        data: this.query,
+	        dataType: 'json',
 		});
 		return response;
 	}
@@ -173,9 +173,9 @@ class CheckinReport {
 	}
 
 
-	async mountTable(data){		
+	async mountTable(data){
 		this.mountTrTask(data);
-	}	
+	}
 
 
 	async mountTrTask(task){
@@ -202,7 +202,7 @@ class CheckinReport {
 
 	clear() {
 		this.elTableBody.empty();
-	    this.htmlTable = ``;		
+	    this.htmlTable = ``;
 	}
 
 	async makeReport(data) {

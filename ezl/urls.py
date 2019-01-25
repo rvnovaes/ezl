@@ -14,15 +14,12 @@ from core.views import (
 from django.conf import settings
 from task.views import DashboardView, TaskDetailView, DashboardSearchView, DashboardStatusCheckView, \
     TaskBulkCreateView, ToReceiveTaskReportView, ToPayTaskReportView, ToPayTaskReportTemplateView, ToPayTaskReportXlsxView
-from rest_framework_swagger.views import get_swagger_view
 from core.views import oauth2_login, oauth2_callback
 
 
-schema_view = get_swagger_view(title='API para integração com o Ezlawyer')
 urlpatterns = [
-    url(r'^docs/$', schema_view),
     url(r'^the-cool-upload-method/', include('django_file_form.urls')),
-    url(r'^', include('core.urls')),
+    url(r'^', include('core.urls')),    
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/login/$', LoginCustomView.as_view(), name='account_login'),
     url(r'^accounts/social_register/$', SocialRegister.as_view(), name='social_register'),
@@ -38,6 +35,7 @@ urlpatterns = [
     url(r'^processos/', include('lawsuit.urls'), name='lawsuit'),
     url(r'^v1/lawsuit/', include('lawsuit.urls_api'), name='lawsuit_api'),
     url(r'^providencias/', include('task.urls'), name='task'),
+    url(r'^billing/', include('billing.urls')),
     url(r'^dashboard/$',
         login_required(DashboardView.as_view()),
         name='dashboard'),

@@ -99,7 +99,7 @@ class Office {
         $('#os-table input:checkbox').on('change', function(){
             if ($(this).attr('id') === 'checkAll') {
                 if ($(this).is(':checked')) {
-                    self.tasksToPay = self.allTaskIds
+                    self.tasksToPay = self.allTaskIds;
                 } else {
                     self.tasksToPay = [];
                 }

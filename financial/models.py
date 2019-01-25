@@ -126,11 +126,11 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         verbose_name='Cidade'
     )
     policy_price = models.ForeignKey(
-        PolicyPrice, 
-        null=False, 
-        blank=False,        
-        on_delete=models.PROTECT, 
-        related_name='service_prices', 
+        PolicyPrice,
+        null=False,
+        blank=False,
+        on_delete=models.PROTECT,
+        related_name='service_prices',
         verbose_name='Tipo de preço'
     )
 
