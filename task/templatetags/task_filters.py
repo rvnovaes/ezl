@@ -101,6 +101,7 @@ def show_edit_amount(task):
         return True
     return False
 
+
 @register.filter
 def show_button_accepted(task):
     # A checagem do status se da caso a os tenha sido recusada pelo office correspondente
@@ -108,6 +109,7 @@ def show_button_accepted(task):
     if task.get_child and task.get_child.status.name not in ['REFUSED_SERVICE', 'REFUSED']:
         return False
     return True
+
 
 @register.filter
 def show_button_done(task):

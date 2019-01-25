@@ -475,14 +475,15 @@ class TaskDetail {
     }
 
     delegateTaskPaid(gnData, intervalCheck) {
-        if (gnData.status === 'paid' && this.taskStatus === 'ACCEPTED_SERVICE' || this.taskStatus === 'REQUESTED') {
-            clearInterval(intervalCheck)
+        if (gnData.status === 'paid' &&
+            (this.taskStatus === 'ACCEPTED_SERVICE' || this.taskStatus === 'REQUESTED')) {
+            clearInterval(intervalCheck);
             $.ajax({
                 method: 'GET', 
                 url: `/financeiro/tabelas-de-precos/detalhes/${gnData.custom_id}/`, 
                 success: (response) => {
                     this.servicePriceTable = response;
-                    console.log(response)
+                    console.log(response);
                     $.ajax({
                         method: 'post', 
                         url: `/providencias/${this.taskId}/batch/delegar`, 

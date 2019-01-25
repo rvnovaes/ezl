@@ -9,6 +9,7 @@ class PolicyPriceSerializer(serializers.ModelSerializer, CreateUserSerializerMix
         model = PolicyPrice
         fields = '__all__'
 
+
 class ServicePriceTableSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
     policy_price = PolicyPriceSerializer(many=False, read_only=True)
 
