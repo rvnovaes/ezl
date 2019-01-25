@@ -81,6 +81,40 @@ class TaskToPaySerializer(serializers.ModelSerializer):
 
 
 class TaskCheckinSerializer(serializers.ModelSerializer):
+    date_executed_by_checkin = serializers.SerializerMethodField()
+    task_company_representative = serializers.SerializerMethodField()
+    date_company_representative_checkin = serializers.SerializerMethodField()
+    os_executor = serializers.SerializerMethodField()
+    law_suit_number = serializers.SerializerMethodField()
+    person_customer = serializers.SerializerMethodField()
+    type_task_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Task
-        fields = ('pk', 'task_number', 'final_deadline_date', 'executed_by_checkin', 'company_representative_checkin')
+        depth = 0
+        fields = ('pk', 'task_number', 'type_task_name', 'final_deadline_date',
+                  'os_executor', 'date_executed_by_checkin',
+                  'task_company_representative', 'date_company_representative_checkin',
+                  'law_suit_number', 'person_customer')
+
+    def get_date_executed_by_checkin(self, obj):
+        return obj.executed_by_checkin.date if obj.executed_by_checkin else None
+
+    def get_task_company_representative(self, obj):
+        return obj.company_representative_checkin.create_user.person.legal_name if obj.company_representative_checkin \
+            else None
+
+    def get_date_company_representative_checkin(self, obj):
+        return obj.company_representative_checkin.date if obj.company_representative_checkin else None
+
+    def get_os_executor(self, obj):
+        return obj.os_executor
+
+    def get_law_suit_number(self, obj):
+        return obj.lawsuit_number
+
+    def get_person_customer(self, obj):
+        return obj.movement.law_suit.folder.person_customer.legal_name
+
+    def get_type_task_name(self, obj):
+        return obj.type_task.name

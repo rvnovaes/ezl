@@ -83,6 +83,14 @@
             <span class="hide-menu">Relatórios<span class="fa arrow"></span></span>
         </a>
         <ul class="nav nav-second-level">
+            {% if 'view_checkin_report' in office_session_perms %}
+            <li>
+                <a href="{% url 'task_checkin_report' %}" target="_self">
+                    <i class="mdi mdi-map-marker"></i>
+                    <span class="hide-menu">Gestão de check-in</span>
+                </a>
+            </li>
+            {% endif %}
             {% if 'view_financial_report' in office_session_perms %}
             <li>
                 <a href="{% url 'task_report_to_pay' %}" target="_self">

@@ -157,7 +157,7 @@ class ReportToPay {
 	getXlsx() {
 		swal({
 			title: 'Exportando para o Excel',
-	        html: '<h3>Aguarde...</h3>',
+	        html: '<h4>Aguarde...</h4>',
 			allowOutsideClick: false,
 			onOpen: ()=>{
 				swal.showLoading();
@@ -228,6 +228,7 @@ class ReportToPay {
 	                <td>${task.opposing_party}</td>
 	                <td>${this.setDefaultOfNull(task.task_legacy_code)}</td>
 	                <td>${this.getBillingDate(task.billing_date)}</td>
+	                <td>${task.charge_id}</td>
 	                <td class="text-center"><center>${this.formatMoney(task.amount)}</center></td>
 	            </tr>`;
 	}
@@ -235,7 +236,7 @@ class ReportToPay {
 	getTrfoot() {
 	    return `
 	        <tr class="total-container">
-	            <th colspan="11" class="text-right" >Total Geral (R$)</th>
+	            <th colspan="12" class="text-right" >Total Geral (R$)</th>
 	            <th colspan="2" class="text-right">${this.formatMoney(this.totalToPay.toFixed(2))}</th>
 	        </tr>`;
 		};   	
@@ -290,7 +291,7 @@ class ReportToPay {
 	async start(){
 		swal({
 	        title: "Carregando OS's",
-	        html: '<h3>Aguarde...</h3>',
+	        html: '<h4>Aguarde...</h4>',
 			allowOutsideClick: false,
 	        onOpen: ()=> {
 	        	swal.showLoading()
@@ -348,7 +349,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	getTrOffice(officeId, officeName){
 	    return `
 	        <tr>
-	            <th colspan="11">${officeName}</th>
+	            <th colspan="12">${officeName}</th>
 	            <th></th>
 	            <th><center><span office-id="${officeId}">|office=${officeId}|</span></center></th>
 	        </tr>
@@ -359,7 +360,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	    return `
 	        <tr>
 	            <th></th>
-	            <th colspan="11">
+	            <th colspan="12">
 	                <div class="col-xs-10">
 	                    ${clientName}                            
 	                </div>
@@ -451,7 +452,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 	getTrClient(clientId, clientName, clientRefunds){
 	    return `
 	        <tr>
-	            <th colspan="11">
+	            <th colspan="12">
 	            	<div class="col-xs-10">
 	            		${clientName}
 	            	</div>	
@@ -467,7 +468,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 	    return `
 	        <tr>
 	            <th></th>
-	            <th colspan="11">
+	            <th colspan="12">
 	                <div class="col-xs-10">
 	                    ${officeName}                            
 	                </div>

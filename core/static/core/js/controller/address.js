@@ -21,8 +21,8 @@ class Address {
 	}
 
 	get form() {
-		return $("#form-address")
-	}	
+		return $("#form-address");
+	}
 
 	setSelect2(text, value, element) {
 	    if(text && value) {
@@ -41,7 +41,7 @@ class Address {
 		    });
 		this.form.find('input[type=checkbox]').each(function(){
 			data[$(this).attr('name')] = $(this).prop('checked')
-		})				
+		});
 		return data;
 	}
 
@@ -49,17 +49,17 @@ class Address {
 	onClickBtnAddAddress(){
 		this._elBtnAddAddress.on('click', ()=> {
 			this.showOfficeAddressForm();
-		})
+		});
 	}
 
 	showOfficeAddressForm() {
 		this.form.attr(`action', '/office_profile_address_create/${this.officeId}/`)
 		this._modalOfficeAddress.modal('show');
-	};	    
+	}
 
 	hideOfficeAddressForm() {
 		this._modalOfficeAddress.modal('hide');
-	};	
+	}
 
 	onSubmitForm() {
 		this.form.on('submit', (event)=>{	
@@ -76,7 +76,7 @@ class Address {
 						data: self.query,
 						success: (response)=> {
 							swal.close();
-							showToast('success', 'Perfil atualizado com sucesso', '', 3000, true);							
+							showToast('success', 'Perfil atualizado com sucesso', '', 3000, true);
 							self.hideOfficeAddressForm();
 							location.reload();
 						}, 
@@ -86,30 +86,30 @@ class Address {
 									swal.close();
 									showToast('error', self.form.find(`[name=${key}]`).siblings('label').text(), e, 0, false);
 								})
-							})																				
+							});
 						}
-					})					
+					});
 				}
-			})
-		})
+			});
+		});
 	}
 
 	onClickBtnDeleteAddress() {
 		this._elBtnDeleteAddress.on('click', ()=>{
 			this.deleteAddress();
-		})
+		});
 	}
 
 	onCheckItem(){
 		let self = this;
         $('#address-table input:checkbox').on('change', function(){
             if ($(this).is(':checked')) {
-                self.addressSelected.push($(this).val())    
+                self.addressSelected.push($(this).val());
             } else {
-                self.addressSelected.splice(self.addressSelected.indexOf($(this).val(), 1))
+                self.addressSelected.splice(self.addressSelected.indexOf($(this).val(), 1));
             }                            
-        })		
-	}	
+        });
+	}
 
 	deleteAddress() {
 		swal({
@@ -135,16 +135,16 @@ class Address {
 					      title: 'Endereços deletados com sucesso!',				      
 					      type: 'success'				    	
 				    	}
-				    )	                
+				    );
 	            },
 	            beforeSend: function (xhr, settings) {
 	                xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
 	            },
 	            dataType: 'json'	  			
-	  		})
+	  		});
 		  }
-		})
-	}	
+		});
+	}
 
 	onClickTr(){
 		let self = this;
@@ -156,21 +156,21 @@ class Address {
 					url: `/office_profile_address_data/${addressId}/`, 
 					method: 'GET', 
 					success: (response)=>{
-						self.form.attr('action', `/office_profile_address_update/${response.id}/`)					
+						self.form.attr('action', `/office_profile_address_update/${response.id}/`);
 						Object.keys(response).forEach((key)=>{
 							if (key == 'city') {
-								self.setSelect2(response['city_name'], response[key], self.elCity)							
+								self.setSelect2(response['city_name'], response[key], self.elCity);
 							}
 							if (typeof response[key] == 'boolean') {
 								self.form.find(`[name=${key}]`).prop('checked', response[key]);
 							} else {
 								self.form.find(`[name=${key}]`).val(response[key])
 							}
-						})
+						});
 					}
-				})				
+				});
 			}
-		})
+		});
 	}
 
 }

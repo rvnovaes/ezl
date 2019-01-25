@@ -31,7 +31,7 @@ class ContactMechanism {
 		    });
 		this.form.find('input[type=checkbox]').each(function(){
 			data[$(this).attr('name')] = $(this).prop('checked')
-		})				
+		});
 		return data;
 	}	
 
@@ -66,37 +66,37 @@ class ContactMechanism {
 						success: (response)=> {
 							swal.close();
 							location.reload();
-							showToast('success', 'Perfil atualizado com sucesso', '', 3000, true);							
+							showToast('success', 'Perfil atualizado com sucesso', '', 3000, true);
 						}, 
 						error: (request, status, error)=> {
 							Object.keys(request.responseJSON.errors).forEach((key)=>{
 								request.responseJSON.errors[key].forEach((e)=>{
 									swal.close();
 									showToast('error', self.form.find(`[name=${key}]`).siblings('label').text(), e, 0, false);
-								})
-							})																				
+								});
+							});
 						}
-					})					
+					});
 				}
-			})
-		})
+			});
+		});
 	}
 
 	onClickBtnDeleteContactMechanism() {
 		this._elBtnDeleteContactMechanism.on('click', ()=>{
 			this.deleteContactMechanism();
-		})
+		});
 	}
 
 	onCheckItem(){
 		let self = this;
         $('#contact-mechanism-table input:checkbox').on('change', function(){
             if ($(this).is(':checked')) {
-                self.contactMechanismSelected.push($(this).val())    
+                self.contactMechanismSelected.push($(this).val());
             } else {
-                self.contactMechanismSelected.splice(self.contactMechanismSelected.indexOf($(this).val(), 1))
+                self.contactMechanismSelected.splice(self.contactMechanismSelected.indexOf($(this).val(), 1));
             }                            
-        })		
+        });
 	}			
 
 	deleteContactMechanism() {
@@ -123,15 +123,15 @@ class ContactMechanism {
 					      title: 'Contatos deletados com sucesso!',				      
 					      type: 'success'				    	
 				    	}
-				    )	                
+				    );
 	            },
 	            beforeSend: function (xhr, settings) {
 	                xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
 	            },
 	            dataType: 'json'	  			
-	  		})
+	  		});
 		  }
-		})
+		});
 	}
 
 	onClickTr(){
@@ -148,12 +148,12 @@ class ContactMechanism {
 						if (typeof response[key] == 'boolean') {
 							self.form.find(`[name=${key}]`).prop('checked', response[key]);
 						} else {
-							self.form.find(`[name=${key}]`).val(response[key])
+							self.form.find(`[name=${key}]`).val(response[key]);
 						}
-					})
+					});
 				}
-			})
-		})
+			});
+		});
 	}
 
 }
