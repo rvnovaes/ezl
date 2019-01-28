@@ -165,9 +165,10 @@ class TaskRefusedServiceMailTemplate(object):
         self.by_person = by_person
 
     def get_dynamic_template_data(self):
+        task_pk = self.task.pk if not self.task.parent else self.task.parent.pk
         project_link = '{}{}'.format(
             get_project_link(self.task),
-            reverse('task_detail', kwargs={'pk': self.task.pk}))
+            reverse('task_detail', kwargs={'pk': task_pk}))
         task_number = self.task.task_number if not self.task.parent else self.task.parent.task_number
         return {
             "task_number":

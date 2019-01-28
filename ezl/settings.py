@@ -33,7 +33,7 @@ try:
     email_host_user = config['django_application']['email_host_user']
     email_host_password = config['django_application']['email_host_password']
     email_default_from_email = config['django_application']['email_default_from_email']
-    email_default_to_email = config['django_application']['email_default_to_email']
+    email_default_to_email = config['django_application'].get('email_default_to_email', None)
     language_code = config['django_application']['language_code']
     timezone = config['django_application']['timezone']
     use_i18n = config['django_application'].getboolean('use_i18n')
