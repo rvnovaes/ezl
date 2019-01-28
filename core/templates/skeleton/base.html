@@ -65,7 +65,6 @@
             {% get_model_instance 'core' 'office' office_session_id as office_session %}
             {% get_obj_perms request.user for office_session as "office_session_perms" %}
             {% block navbar %}
-                <p>TESTE {{ office_session_perms }}</p>
                 <!-- Topbar header - style you can find in pages.scss -->
                 {% include 'skeleton/includes/navbar.html' %}
                 <!-- End Top Navigation -->
