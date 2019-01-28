@@ -467,7 +467,7 @@ def post_create_historical_record_callback(sender, **kwargs):
     status = get_child_status(instance.status) if instance.get_child else False
     request = HistoricalRecords.thread.request
     msg = request.POST.get('notes', '')
-    # Todo: Separa o código
+    # Todo: Separar o código abaixo
     if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
         msg = """
         A OS {} foi recusada pelo escritório pelo motivo: {}
