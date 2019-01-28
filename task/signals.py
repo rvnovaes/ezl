@@ -2,13 +2,11 @@ from django.db import transaction
 from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
 from django.dispatch import receiver, Signal
 from django.utils import timezone
-from django.urls import reverse
 from django.db.models import Q
 from django.core.exceptions import MultipleObjectsReturned
 from advwin_models.tasks import export_ecm, export_task, export_task_history, delete_ecm
-from django.conf import settings
 from task.models import Task, Ecm, EcmTask, TaskStatus, TaskHistory, TaskGeolocation
-from task.utils import task_send_mail, create_ecm_task
+from task.utils import create_ecm_task
 from task.workflow import get_parent_status, get_child_status, get_parent_fields, get_child_recipients, \
     get_parent_recipients
 from chat.models import Chat, UserByChat
@@ -18,14 +16,14 @@ from core.utils import check_environ, get_office_session
 from core.models import CustomSettings
 from task.mail import TaskMail
 import logging
-from core.utils import get_office_session
 from simple_history.models import HistoricalRecords
 from simple_history.signals import (
     pre_create_historical_record,
     post_create_historical_record
 )
 from simple_history.utils import update_change_reason
-
+import sys
+import traceback
 
 
 logger = logging.getLogger(__name__)
@@ -90,6 +88,7 @@ def create_or_update_user_by_chat(task, task_to_fields, fields):
                     user_by_chat=user, chat=task.chat).first()
             user = user.user_by_chat
 
+
 def create_company_chat(sender, instance, created, **kwargs):
     if not instance.parent and instance.client.company:
         label = 'company-task-{}'.format(instance.pk)
@@ -145,8 +144,8 @@ def create_or_update_chat(sender, instance, created, **kwargs):
                 'title': title,
                 'back_url': '/dashboard/{}'.format(instance.pk),
             })
-        instance.chat = chat
-        instance.chat.offices.add(instance.office)
+        chat.task_set.add(instance)
+        chat.offices.add(instance.office)
         create_or_update_user_by_chat(
             instance, instance,
             ['person_asked_by', 'person_executed_by', 'person_distributed_by'])
@@ -156,13 +155,11 @@ def create_or_update_chat(sender, instance, created, **kwargs):
                 'person_asked_by', 'person_executed_by',
                 'person_distributed_by'
             ])
-        instance.save(**{
-            'skip_signal': True,
-            'skip_mail': True,
-            'from_parent': True
-        })
-    except:
-        pass
+    except Exception as e:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        logger.error('ERRO AO CHAMAR O METODO create_or_update_chat')
+        logger.error(traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=2, file=sys.stdout))
 
 
 def set_status_by_workflow(instance, custom_settings):
@@ -183,8 +180,11 @@ def workflow_task(sender, instance, created, **kwargs):
             office=instance.office).first()
         if custom_settings:
             set_status_by_workflow(instance, custom_settings)
-    except:
-        pass
+    except Exception as e:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        logger.error('ERRO AO CHAMAR O METODO workflow_task')
+        logger.error(traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=2, file=sys.stdout))
 
 
 def workflow_send_mail(sender, instance, created, **kwargs):
@@ -369,7 +369,7 @@ def update_status_parent_task(sender, instance, **kwargs):
     :param kwargs:
     :return:
     """
-    if instance.parent and not instance.task_status == TaskStatus.REQUESTED and instance.task_status != instance.__previous_status:    
+    if instance.parent and not instance.task_status == TaskStatus.REQUESTED and instance.task_status != instance.__previous_status:
         if not get_parent_status(instance.status) == TaskStatus(instance.parent.__previous_status) \
                 and not getattr(instance, '_from_parent'):
             instance.parent.task_status = get_parent_status(instance.status)
@@ -407,13 +407,6 @@ def update_status_child_task(sender, instance, **kwargs):
         setattr(instance, '_skip_signal', True)
     if instance.get_child and status:
         child = instance.get_child
-        if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
-            if not getattr(instance, '__external_task', False):
-                setattr(
-                    child, '__notes',
-                    'A OS {} foi recusada pelo escritório contratante {} pelo motivo {}'
-                    .format(child.task_number, instance.office.legal_name,
-                            getattr(instance, '__notes', '')))
         child.task_status = status
         child._mail_attrs = get_child_recipients(instance.task_status)
         setattr(child, '_TaskDetailView__server',
@@ -461,12 +454,24 @@ def post_save_geolocation(sender, instance, **kwargs):
     pre_save.connect(pre_save_task, sender=Task)
     post_save.connect(post_save_task, sender=Task)
 
+
 @receiver(pre_create_historical_record)
 def pre_create_historical_record_callback(sender, **kwargs):
     history_instance = kwargs.get('history_instance')
+    instance = kwargs.get('instance')
+    request = HistoricalRecords.thread.request
     history_instance.history_office = get_office_session(HistoricalRecords.thread.request)
+
 
 @receiver(post_create_historical_record)
 def post_create_historical_record_callback(sender, **kwargs):
-    pass
-
+    instance = kwargs.get('instance')
+    status = get_child_status(instance.status) if instance.get_child else False
+    request = HistoricalRecords.thread.request
+    msg = request.POST.get('notes', '')
+    # Todo: Separa o código
+    if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
+        msg = """
+        A OS {} foi recusada pelo escritório pelo motivo: {}
+        """.format(instance.get_child.task_number, msg)
+    update_change_reason(instance, msg)

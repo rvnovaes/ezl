@@ -6,13 +6,13 @@ import uuid
 import pickle
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls.base import reverse
 from django.utils import timezone
 from sequences import get_next_value
-from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings, EmailTemplate
+from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings, \
+    EmailTemplate
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
 from decimal import Decimal
@@ -21,6 +21,7 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 from django.forms import MultipleChoiceField
 from simple_history.models import HistoricalRecords
 from core.models import OfficeHistoricalModel
+import inspect
 
 
 class ChoiceArrayField(ArrayField):
@@ -220,7 +221,7 @@ class TypeTaskMain(models.Model):
         default=json.dumps(CHARACTERISTICS, indent=4))
 
     class Meta:
-        ordering = ('name', )
+        ordering = ('name',)
         verbose_name = 'Tipo de Serviço Principal'
         verbose_name_plural = 'Tipos de Serviço Principais'
 
@@ -263,7 +264,7 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
 
     class Meta:
         db_table = 'type_task'
-        ordering = ('name', )
+        ordering = ('name',)
         verbose_name = 'Tipo de Serviço'
         verbose_name_plural = 'Tipos de Serviço'
 
@@ -421,13 +422,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                                        blank=True,
                                                        null=True,
                                                        related_name='task_company_representative')
-    history = HistoricalRecords(
-        bases=[OfficeHistoricalModel], 
-        excluded_fields=['person_asked_by', 'person_executed_by', 'person_distributed_by', 'delegation_date', 
-        'acceptance_date', 'final_deadline_date', 'execution_date', 'requested_date', 
-        'acceptance_service_date', 'refused_service_date', 'return_date', 'blocked_payment_date', 
-        'finished_date', 'description', 'survey_result', 'chat', 'company_chat', 'billing_date', 
-        'receipt_date', 'performance_place', 'person_company_representative'])
+    history = HistoricalRecords(bases=[OfficeHistoricalModel])
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -501,29 +496,29 @@ class Task(Audit, LegacyCode, OfficeMixin):
         """JSON representation of object"""
         data = {
             "id":
-            self.id,
+                self.id,
             "url":
-            self.get_absolute_url(),
+                self.get_absolute_url(),
             "task_number":
-            self.task_number,
+                self.task_number,
             "lawsuit_number":
-            self.lawsuit_number,
+                self.lawsuit_number,
             "client":
-            self.client.simple_serialize(),
+                self.client.simple_serialize(),
             "opposing_party":
-            self.opposing_party,
+                self.opposing_party,
             "status":
-            str(self.status),
+                str(self.status),
             "type_task": {
                 "name": self.type_task.name,
                 "id": self.type_task.id
             },
             "final_deadline_date":
-            self.final_deadline_date.strftime(settings.DATETIME_FORMAT)
-            if self.final_deadline_date else "",
+                self.final_deadline_date.strftime(settings.DATETIME_FORMAT)
+                if self.final_deadline_date else "",
             "delegation_date":
-            self.delegation_date.strftime(settings.DATETIME_FORMAT)
-            if self.delegation_date else ""
+                self.delegation_date.strftime(settings.DATETIME_FORMAT)
+                if self.delegation_date else ""
         }
         return data
 
@@ -533,6 +528,10 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return False
 
     def save(self, *args, **kwargs):
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        print('caller name:', calframe[1][3])
+        print('salvando')
         self._skip_signal = kwargs.pop('skip_signal', False)
         self._skip_mail = kwargs.pop('skip_mail', False)
         self._from_parent = kwargs.pop('from_parent', False)
@@ -543,8 +542,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
     @property
     def get_child(self):
         if self.child.exists() and self.child.latest('pk').task_status not in [
-                TaskStatus.REFUSED.__str__(),
-                TaskStatus.REFUSED_SERVICE.__str__()
+            TaskStatus.REFUSED.__str__(),
+            TaskStatus.REFUSED_SERVICE.__str__()
         ]:
             return self.child.latest('pk')
         return None
@@ -934,7 +933,7 @@ class Filter(Audit):
     class Meta:
         verbose_name = 'Filtro'
         verbose_name_plural = 'Filtros'
-        unique_together = (('create_user', 'name'), )
+        unique_together = (('create_user', 'name'),)
 
 
 class TaskWorkflow(Audit):
