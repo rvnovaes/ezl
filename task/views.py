@@ -2223,9 +2223,6 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
             format_currency(current_amount, 'R$', locale='pt_BR'),
             format_currency(task.amount, 'R$', locale='pt_BR'),
             get_office_session(request).legal_name)
-        TaskHistory.objects.create(create_user=request.user, task=task, notes=msg, status=task.status.value)
-        if child_task:
-            TaskHistory.objects.create(create_user=request.user, task=child_task, notes=msg, status=task.status.value)
         pre_save.connect(signals.change_status, sender=Task)
         pre_save.connect(signals.pre_save_task, sender=Task)
         post_save.connect(signals.post_save_task, sender=Task)
