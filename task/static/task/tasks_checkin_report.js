@@ -33,7 +33,7 @@ class CheckinReport {
 			n:60000,
 			s:1000
   		};
-  		return (absolute) ? Math.abs(Math.floor( diff/divideBy[datepart])) : Math.floor( diff/divideBy[datepart]);
+  		return (absolute) ? Math.floor(Math.abs( diff/divideBy[datepart])) : Math.floor( diff/divideBy[datepart]);
 	}
 
 	static formatLocalDateTime(strDate) {
