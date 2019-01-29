@@ -463,6 +463,7 @@ def pre_create_historical_record_callback(sender, **kwargs):
 
 @receiver(post_create_historical_record)
 def post_create_historical_record_callback(sender, **kwargs):
+    history_instance = kwargs.get('history_instance')
     instance = kwargs.get('instance')
     status = get_child_status(instance.status) if instance.get_child else False
     request = HistoricalRecords.thread.request
@@ -472,4 +473,5 @@ def post_create_historical_record_callback(sender, **kwargs):
         msg = """
         A OS {} foi recusada pelo escritório pelo motivo: {}
         """.format(instance.get_child.task_number, msg)
-    update_change_reason(instance, msg)
+    history_instance.history_change_reason = msg
+    history_instance.save()

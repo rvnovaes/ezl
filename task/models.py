@@ -458,9 +458,11 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return folder.person_customer
 
     def __str__(self):
-        import pdb
-        pdb.set_trace()
-        return self.type_task.name
+        # Feito desta forma para controlar problema no django-simple-history
+        try:
+            return self.type_task.name
+        except Exception:
+            return Task.objects.get(pk=self.pk).type_task.name
 
     @property
     def court_division(self):
