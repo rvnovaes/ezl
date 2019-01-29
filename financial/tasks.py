@@ -33,7 +33,6 @@ class ColumnIndex(Enum):
 def get_office_correspondent(row, xls_file):
     # escritorio correspondente
     office_correspondent = False
-
     if row[ColumnIndex.correspondent.value].value:
         office_name = remove_special_char(str(row[ColumnIndex.correspondent.value].value).strip())
         office_correspondent = Office.objects.filter(legal_name__unaccent__iexact=office_name).first()
@@ -45,7 +44,6 @@ def get_office_correspondent(row, xls_file):
 
 def get_policy_price(row, xls_file, office_session):
     # Tipo de Preço
-    policy_price = False
     if row[ColumnIndex.policy_price.value].value:
         name_policy_price = remove_special_char(str(row[ColumnIndex.policy_price.value].value).strip())
         policy_price = PolicyPrice.objects.filter(office=office_session,
