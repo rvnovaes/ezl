@@ -71,15 +71,16 @@
             
             $('.GEOLOCATION').each(function(el){
                 $(this).on('click', function(event) {
-                    event.stopPropagation()
+                    event.stopPropagation();
                     taskId = $(this).parent().parent().attr('tr-data-id');
+                    let elButtonGeolocation = $(`#GEOLOCATION-${taskId}`);
                     var data = {};
-                    var checkpointtype = $('#GEOLOCATION').data("checkpointtype");
+                    var checkpointtype = elButtonGeolocation.data("checkpointtype");
                     data['latitude'] = geolocation.latitude;
                     data['longitude'] = geolocation.longitude;
-                    data['task_id'] = taskId
+                    data['task_id'] = taskId;
                     data['checkpointtype'] = checkpointtype;
-                    var url = $('#GEOLOCATION').data("url");
+                    var url = elButtonGeolocation.data("url");
                     $.ajax({
                         type: 'POST',
                         url: url,

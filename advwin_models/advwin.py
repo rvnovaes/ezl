@@ -381,6 +381,7 @@ class JuridAgendaTable(Base):
         Float(24), nullable=False, server_default=text("((0))"))
     lon_cumpri_prazo = Column(
         Float(24), nullable=False, server_default=text("((0))"))
+    substatus_prazo = Column(Integer)
 
 
 class JuridCorrespondenteHist(Base):

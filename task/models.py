@@ -15,10 +15,12 @@ from sequences import get_next_value
 from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings, EmailTemplate
 from lawsuit.models import Movement, Folder
 from chat.models import Chat
+from billing.models import Charge
 from decimal import Decimal
 from .schemas import *
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.forms import MultipleChoiceField
+from .mail import TaskCompanyRepresentativeChangeMail
 
 
 class ChoiceArrayField(ArrayField):
@@ -53,6 +55,7 @@ class Permissions(Enum):
     can_distribute_tasks = 'Can distribute tasks to another user'
     can_see_tasks_from_team_members = 'Can see tasks from your team members'
     can_see_tasks_company_representative = 'Can see tasks your company representative'
+    view_checkin_report = 'Can view checkin report'
 
 
 # Dicionário para retornar o icone referente ao status da providencia
@@ -405,6 +408,22 @@ class Task(Audit, LegacyCode, OfficeMixin):
         blank=True,
         null=True,
         verbose_name='Preposto', related_name='tasks_to_person_representative')
+    charge = models.ForeignKey(Charge, on_delete=models.PROTECT, blank=True, null=True)
+
+    """
+    Os campos a seguir armazenam o checkin dos atores da OS, independente de terem sido feitos 
+    pela OS pai, ou por outra OS da cadeia.
+    """
+    executed_by_checkin = models.ForeignKey('task.TaskGeolocation',
+                                            on_delete=models.PROTECT,
+                                            blank=True,
+                                            null=True,
+                                            related_name='task_executed_by')
+    company_representative_checkin = models.ForeignKey('task.TaskGeolocation',
+                                                       on_delete=models.PROTECT,
+                                                       blank=True,
+                                                       null=True,
+                                                       related_name='task_company_representative')
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -509,12 +528,44 @@ class Task(Audit, LegacyCode, OfficeMixin):
     def use_upload(self):
         return False
 
+    @staticmethod
+    def person_company_representative_has_change(old_instance, new_instance):
+        if old_instance.person_company_representative != new_instance.person_company_representative:
+            return True
+        return False
+
+    @staticmethod    
+    def send_mail_new_company_representative(instance):
+        if instance.person_company_representative and instance.person_company_representative.get_emails():
+            email = TaskCompanyRepresentativeChangeMail(
+                instance.person_company_representative.get_emails(), instance, 'd-edf08ba833514b3a99311f092eba7cc7')
+            email.send_mail()
+
+    @staticmethod
+    def send_mail_old_company_representative(instance):
+        if instance.person_company_representative and instance.person_company_representative.get_emails():
+            email = TaskCompanyRepresentativeChangeMail(
+                instance.person_company_representative.get_emails(), instance, 'd-77a5f2906dca4f3cbd51b98a464eabb1')
+            email.send_mail()        
+
+    def on_change_person_company_representative(self):
+        if self.pk:
+            old_instance = Task.objects.get(pk=self.pk)
+            if self.person_company_representative_has_change(old_instance=old_instance, new_instance=self):
+                self.send_mail_old_company_representative(old_instance)
+                self.send_mail_new_company_representative(self)
+
     def save(self, *args, **kwargs):
         self._skip_signal = kwargs.pop('skip_signal', False)
         self._skip_mail = kwargs.pop('skip_mail', False)
         self._from_parent = kwargs.pop('from_parent', False)
         if not self.task_number:
             self.task_number = self.get_task_number()
+        if not self.pk and self.person_company_representative:
+            res = super().save(*args, **kwargs)
+            self.send_mail_new_company_representative(self)
+            return res
+        self.on_change_person_company_representative()
         return super().save(*args, **kwargs)
 
     @property
@@ -557,13 +608,14 @@ class Task(Audit, LegacyCode, OfficeMixin):
                 task_id_list.append(self.get_child.pk)
             pending_survey_company_representative = pending_survey = False
             if survey_dict.get('survey', None):
-                pending_survey = not TaskSurveyAnswer.objects.filter(task__in=task_id_list,
+                pending_survey = not TaskSurveyAnswer.objects.filter(tasks__in=task_id_list,
                                                                      survey=survey_dict.get('survey')).first()
             if self.person_company_representative and survey_dict.get('survey_company_representative', None):
                 pending_survey_company_representative = not TaskSurveyAnswer.objects.filter(
-                    task=self, survey=survey_dict.get('survey_company_representative'),
+                    tasks=self, survey=survey_dict.get('survey_company_representative'),
                     create_user=self.person_company_representative.auth_user).first()
-            return pending_survey_company_representative or pending_survey
+            return {'survey_company_representative': pending_survey_company_representative,
+                    'survey_executed_by': pending_survey}
 
 
 class TaskFeedback(models.Model):
@@ -835,8 +887,6 @@ class DashboardViewModel(Audit, OfficeMixin):
         verbose_name='Número do Processo')
     parent_task_number = models.PositiveIntegerField(
         default=0, verbose_name='OS Original')
-    survey_result = JSONField(
-        verbose_name=u'Respotas do Formulário', blank=True, null=True)
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -956,6 +1006,6 @@ class TaskShowStatus(Audit):
 
 
 class TaskSurveyAnswer(Audit):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
+    tasks = models.ManyToManyField(Task, blank=True)
     survey = models.ForeignKey('survey.Survey', on_delete=models.CASCADE, null=True, blank=True)
     survey_result = JSONField(verbose_name=u'Respotas do Formulário', blank=True, null=True)

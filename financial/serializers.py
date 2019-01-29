@@ -1,10 +1,17 @@
-from .models import ServicePriceTable, CostCenter
+from .models import ServicePriceTable, CostCenter, PolicyPrice, BillingMoment
 from rest_framework import serializers
 from .utils import valid_court_district, check_service_price_table_unique, check_office_correspondent_relation
 from core.serializers import CreateUserSerializerMixin, OfficeSerializerMixin
 
 
+class PolicyPriceSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin): 
+    class Meta: 
+        model = PolicyPrice
+        fields = '__all__'
+
+
 class ServicePriceTableSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
+    policy_price = PolicyPriceSerializer(many=False, read_only=True)
 
     class Meta:
         model = ServicePriceTable

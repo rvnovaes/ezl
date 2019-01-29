@@ -63,10 +63,11 @@ numpy==1.15.1
 pandas==0.23.4
 sendgrid==5.6.0
 
-# docs
-django-rest-swagger==2.2.0
-
 # Oauth
 django-oauth-toolkit==1.1.2
 rest-condition==1.0.3
 django-rest-auth==0.9.3
+
+py-moneyed==0.8.0
+# Gerencianet
+gerencianet==1.0.9

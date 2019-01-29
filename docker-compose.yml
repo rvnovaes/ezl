@@ -107,7 +107,7 @@ services:
 
   tasks-schedule:
     image: ezl:latest
-    command: celery -A ezl beat -l info
+    command: celery -A ezl beat -l info --pidfile=celeryd.pid
     volumes:
       - .:/app
       - ezl-logs:/var/log/ezl

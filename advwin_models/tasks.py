@@ -476,6 +476,7 @@ def export_task(self, task_id, task=None, execute=True):
             'prazo_lido': 1,
             'Data_backoffice': timezone.localtime(task.refused_service_date),
             'envio_alerta': 0,
+            'substatus_prazo': 2,
             'Obs': get_task_observation(task, 'Recusada por Back Office', 'refused_service_date'),
         }
     elif task.task_status == TaskStatus.RETURN.value:
@@ -496,11 +497,16 @@ def export_task(self, task_id, task=None, execute=True):
         if task.get_child:
             delegated_office = task.get_child.office
             delegated_to = delegated_office.legal_name
-            for user in {user for user, perms in
-                         get_users_with_perms(delegated_office, attach_perms=True).items() if 'group_admin' in perms}:
-                if user.person.legacy_code:
-                    advwin_advogado = user.person.legacy_code
-                    break
+            office_office_relation = task.office.from_offices.filter(to_office=delegated_office).first()
+            if office_office_relation and office_office_relation.person_reference:
+                advwin_advogado = office_office_relation.person_reference.legacy_code
+            else:
+                for user in {user for user, perms in
+                             get_users_with_perms(delegated_office, attach_perms=True).items() if
+                             'group_admin' in perms}:
+                    if user.person.legacy_code:
+                        advwin_advogado = user.person.legacy_code
+                        break
         else:
             advwin_advogado = task.person_executed_by.legacy_code
             delegated_to = task.person_executed_by.auth_user.username
@@ -540,6 +546,7 @@ def export_task(self, task_id, task=None, execute=True):
             'status_correspondente': 1,
             'Advogado': task.person_distributed_by.legacy_code,
             'Data_correspondente': task.refused_date,
+            'substatus_prazo': 2,
             'Obs': get_task_observation(task, 'Ordem de serviço recusada por', 'refused_date'),
         }
     elif task.task_status == TaskStatus.BLOCKEDPAYMENT.value:
@@ -562,6 +569,7 @@ def export_task(self, task_id, task=None, execute=True):
             'Data_confirmacao': timezone.localtime(task.finished_date),
             'Data_Fech': timezone.localtime(task.finished_date),
             'valor_agenda': task.amount,
+            'substatus_prazo': 3,
             'Obs': get_task_observation(task, 'Diligência devidamente cumprida por',
                                         'finished_date')
         }

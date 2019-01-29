@@ -4,7 +4,7 @@ import csv
 import pickle
 import io
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from zipfile import ZipFile
 from django.contrib import messages
@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When, CharField, IntegerField, Count, TextField
+from django.db.models import Q, Case, When, CharField, Count, TextField, Max, Subquery, OuterRef, Prefetch
 from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse_lazy, reverse
@@ -35,7 +35,8 @@ from core.xlsx import XLSXWriter
 from lawsuit.models import Movement
 from lawsuit.forms import LawSuitForm
 from lawsuit.models import Movement, LawSuit, Folder, TypeMovement
-from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter
+from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter, \
+    TaskCheckinReportFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
     ImportTaskListForm, TaskBulkCreateForm
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
@@ -47,6 +48,7 @@ from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTa
 from task.tasks import import_xls_task_list
 from task.rules import RuleViewTask
 from task.workflow import CorrespondentsTable
+from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task
@@ -63,6 +65,7 @@ from babel.numbers import format_currency
 from task import signals
 from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
 from dal import autocomplete
+from billing.gerencianet_api import api as gn_api
 import logging
 import operator
 logger = logging.getLogger(__name__)
@@ -421,7 +424,7 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView,
 
 class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
                      TemplateView):
-    permission_required = ('core.view_all_tasks', )
+    permission_required = ('core.view_financial_report', )
     template_name = None
     filter_class = None
     datetime_field = None
@@ -697,7 +700,7 @@ class ToPayTaskReportView(View):
                     query.add(
                         Q(parent__office__legal_name__unaccent__icontains=data[
                             'office']), Q.AND)
-                else:                    
+                else:
                     query.add(
                         Q(office__legal_name__unaccent__icontains=data['office']),
                         Q.AND)            
@@ -909,11 +912,13 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             if isinstance(survey_result, str):
                 survey_result = json.loads(survey_result)
             survey = TaskSurveyAnswer()
-            survey.task = form.instance
             survey.survey = form.instance.type_task.survey
             survey.create_user = self.request.user
             survey.survey_result = survey_result
             survey.save()
+            survey.tasks.add(form.instance)
+            if form.instance.parent:
+                survey.tasks.add(form.instance.parent)
         send_notes_execution_date.send(
             sender=self.__class__,
             notes=notes,
@@ -970,7 +975,14 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         context['task_history'] = \
             TaskHistory.objects.filter(
                 task_id=self.object.id).order_by('-create_date')
-        context['pending_survey'] = self.object.have_pending_surveys
+        pending_surveys = self.object.have_pending_surveys
+        pending_list = []
+        if pending_surveys.get('survey_company_representative'):
+            pending_list.append('Preposto')
+        if pending_surveys.get('survey_executed_by'):
+            pending_list.append('Correspondente')
+        context['pending_surveys'] = {'status': True if pending_list else False,
+                                      'pending_list': pending_list}
         context['survey_data'] = (self.object.type_task.survey.data
                                   if self.object.type_task.survey else None)
         if self.object.parent:
@@ -987,7 +999,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             context['form'].fields['type_task_field'] = type_task_field
         checker = ObjectPermissionChecker(self.request.user)
         if checker.has_perm('can_see_tasks_company_representative', office_session):
-            if not TaskSurveyAnswer.objects.filter(task=self.object, create_user=self.request.user):
+            if not TaskSurveyAnswer.objects.filter(tasks=self.object, create_user=self.request.user):
                 if (self.object.type_task.survey_company_representative):
                     context['not_answer_questionnarie'] = True
                     if self.object.type_task.survey_company_representative:
@@ -996,6 +1008,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                         context['survey_company_representative'] = ''
         context['show_company_representative_in_tab'] = self.show_company_representative_in_tab(checker, office_session)
         context['show_person_executed_by_in_tab'] = self.show_person_executed_by_in_tab(checker, office_session)        
+        context['ENV'] = os.environ.get('ENV')
         return context
 
     def show_company_representative_in_tab(self, checker, office_session):
@@ -1242,10 +1255,10 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         task_dynamic_query.add(
                             ~Q(movement__law_suit__folder__person_customer__id__in=data[
                                 'client']), Q.AND)
-                    else: 
+                    else:
                         task_dynamic_query.add(
                             Q(movement__law_suit__folder__person_customer__id__in=data[
-                                'client']), Q.AND)                  
+                                'client']), Q.AND)
                 if data['law_suit_number']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__law_suit_number=data[
@@ -1425,6 +1438,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return query_set, task_filter
 
     def get_queryset(self, **kwargs):
+
         task_list, task_filter = self.query_builder()
         self.filter = task_filter
 
@@ -1470,8 +1484,12 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return response
 
     def _export_answers(self, request):
-        task_ids = self.get_queryset().filter(survey_result__isnull=False).values_list('id', flat=True)
-        answers = TaskSurveyAnswer.objects.filter(task_id__in=task_ids).select_related('task')
+        tasks = self.get_queryset()
+        task_ids = tasks.values_list('id', flat=True)
+        office_list = list(set(tasks.values_list('office', flat=True)))
+        answers = TaskSurveyAnswer.objects.filter(tasks__id__in=task_ids).prefetch_related(
+            Prefetch('tasks', queryset=Task.objects.filter(office__in=office_list), to_attr='answers_office'))
+
         columns = self._get_answers_columns(answers)
         all_columns = [
             'N° da OS',
@@ -1488,7 +1506,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return xlsx.get_http_response()
 
     def _export_answers_write_task(self, xlsx, answer, columns):
-        task = answer.task
+        task = answer.answers_office[0]
         base_fields = [task.task_number, task.legacy_code, str(task.type_task), answer.create_user.username]
         answers = ['' for x in range(len(columns))]
         survey_result = answer.survey_result
@@ -2187,7 +2205,7 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         self.filter = task_filter
         return task_list.filter(
             person_company_representative=self.request.user.person).exclude(
-            pk__in=self.request.user.tasksurveyanswer_create_user.values_list('task_id', flat=True))
+            pk__in=self.request.user.tasksurveyanswer_create_user.values_list('tasks__id', flat=True))
 
     def get_context_data(self):
         context = super().get_context_data()
@@ -2202,12 +2220,16 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
         try:
             task = Task.objects.get(pk=request.POST.get('task_id'))
             survey_result = json.loads(request.POST.get('survey'))
-            survey = TaskSurveyAnswer(create_user=request.user, task=task,
+            survey = TaskSurveyAnswer(create_user=request.user,
                                       survey=task.type_task.survey_company_representative, survey_result=survey_result)
             survey.save()
+            survey.tasks.add(task)
+            if task.parent:
+                survey.tasks.add(task.parent)
             return JsonResponse({'status': 'ok'})
         except Exception as e:
             return JsonResponse({'error': e})
+
 
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):        
@@ -2222,7 +2244,10 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         if child_task:
             child_task.amount = task.amount
             child_task.save()
-        msg = "Valor alterado de {} para {} pelo escritório {}".format(format_currency(current_amount, 'R$', locale='pt_BR'), format_currency(task.amount, 'R$', locale='pt_BR'), get_office_session(request).legal_name)
+        msg = "Valor alterado de {} para {} pelo escritório {}".format(
+            format_currency(current_amount, 'R$', locale='pt_BR'),
+            format_currency(task.amount, 'R$', locale='pt_BR'),
+            get_office_session(request).legal_name)
         TaskHistory.objects.create(create_user=request.user, task=task, notes=msg, status=task.status.value)
         if child_task:
             TaskHistory.objects.create(create_user=request.user, task=child_task, notes=msg, status=task.status.value)
@@ -2232,11 +2257,64 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         return JsonResponse({'message': 'Registro atualizado com sucesso'})
 
 
+@login_required
+def ajax_bulk_create_update_status(request):
+    task_id = request.POST.get('task_id', 0)
+    status = 200
+    data = {
+        "updated": False,
+    }
+    if task_id:
+        task = Task.objects.filter(pk=task_id).first()
+        if task and task.task_status == 'Solicitada':
+            task.task_status = TaskStatus.ACCEPTED_SERVICE
+            task.save()
+            data = {
+                "updated": True,
+            }
+        else:
+            status = 500
+    else:
+        status = 400
+    return JsonResponse(data, status=status)
+
+
 class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         if not self.request.user.is_authenticated():
             return TypeTask.objects.none()
         qs = TypeTask.objects.filter(is_active=True, office=get_office_session(self.request))
-        if self.q: 
+        if self.q:
             qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
+
+
+class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
+    template_name = 'task/reports/checkin.html'
+    filter_class = TaskCheckinReportFilter
+    model = Task
+
+    def get(self, request, *args, **kwargs):
+        if not request.GET:
+            return super().get(request, *args, **kwargs)
+        tasks = self.filter_class(request.GET, queryset=self.get_queryset())
+        tasks_serializer = TaskCheckinSerializer(tasks.qs, many=True)
+        return JsonResponse(tasks_serializer.data, safe=False)
+
+    def get_queryset(self):
+        office = get_office_session(self.request)
+        office_corresp = Task.objects.filter(id=OuterRef('child')).order_by('-id')
+        return self.model.objects.select_related('movement__law_suit')\
+            .select_related('movement__law_suit__folder__person_customer') \
+            .select_related('type_task') \
+            .filter(Q(office=office),
+                    Q(task_status__in=[TaskStatus.DONE, TaskStatus.FINISHED,
+                                       TaskStatus.BLOCKEDPAYMENT]),)\
+            .annotate(filho=Max('child'))\
+            .annotate(office_exec=Subquery(office_corresp.values('office__legal_name')[:1]))\
+            .annotate(os_executor=Coalesce('person_executed_by__legal_name', 'office_exec'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filter_class
+        return context
