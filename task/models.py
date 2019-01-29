@@ -422,7 +422,17 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                                        blank=True,
                                                        null=True,
                                                        related_name='task_company_representative')
-    history = HistoricalRecords(bases=[OfficeHistoricalModel])
+    history = HistoricalRecords(bases=[OfficeHistoricalModel],
+                                excluded_fields=['task_hash', 'parent', 'task_number', 'movement', 'person_asked_by',
+                                                 'person_executed_by', 'person_distributed_by', 'delegation_date',
+                                                 'acceptance_date', 'final_deadline_date', 'execution_date',
+                                                 'requested_date', 'acceptance_service_date', 'refused_service_date',
+                                                 'return_date', 'refused_date', 'blocked_payment_date', 'finished_date',
+                                                 'description', 'survey_result', 'chat', 'company_chat',
+                                                 'billing_date', 'receipt_date', 'performance_place',
+                                                 'person_company_representative', 'executed_by_checkin',
+                                                 'company_representative_checkin', 'create_date', 'alter_date',
+                                                 'legacy_code', 'system_prefix', 'is_active'])
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
@@ -448,6 +458,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
         return folder.person_customer
 
     def __str__(self):
+        import pdb
+        pdb.set_trace()
         return self.type_task.name
 
     @property
