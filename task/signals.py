@@ -32,31 +32,6 @@ send_notes_execution_date = Signal(
     providing_args=['notes', 'instance', 'execution_date'])
 
 
-def new_task(sender, instance, created, **kwargs):
-    try:
-        notes = 'Nova providência' if created else getattr(
-            instance, '__notes', '')
-        user = instance.alter_user if instance.alter_user else instance.create_user
-        if not getattr(instance, '_skip_signal') or created:
-            task_history = TaskHistory()
-            skip_signal = True if created else False
-            task_history.task = instance
-            task_history.create_user = user
-            task_history.status = instance.task_status
-            task_history.create_date = instance.create_date
-            task_history.notes = notes
-            task_history.save(skip_signal=skip_signal)
-            msg = 'HISTORICO SALVO: {task} {username} {status} {create_date} {notes}'.format(
-                task=task_history.task.task_number,
-                username=task_history.create_user,
-                status=task_history.status,
-                create_date=task_history.create_date,
-                notes=task_history.notes)
-            logger.info(msg)
-    except Exception as e:
-        logger.error('ERRO AO SALVAR HISTORICO {}'.format(e))
-
-
 @check_environ
 def ezl_export_task_to_advwin(sender, instance, **kwargs):
     try:
@@ -242,7 +217,6 @@ def post_save_task(sender, instance, created, **kwargs):
     seguintes.
     """
     try:
-        new_task(sender, instance, created, **kwargs)
         ezl_export_task_to_advwin(sender, instance, **kwargs)
         workflow_task(sender, instance, created, **kwargs)
         workflow_send_mail(sender, instance, created, **kwargs)

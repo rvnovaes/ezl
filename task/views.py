@@ -54,6 +54,7 @@ from django.shortcuts import render
 import os
 from django.conf import settings
 from urllib.parse import urljoin
+from babel.numbers import format_currency
 from task import signals
 from django.db.models.signals import pre_save, post_save
 from dal import autocomplete
