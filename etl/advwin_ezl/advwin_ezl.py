@@ -36,7 +36,7 @@ parser = get_parser()
 
 try:
     source = dict(parser.items('etl'))
-    truncate_all_tables = source.getboolean('truncate_all_tables')
+    truncate_all_tables = source['truncate_all_tables']
     create_alter_user = source['user']
     config_connection = source['connection_name']
     source_etl_connection = dict(parser.items(source['connection_name']))
