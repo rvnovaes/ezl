@@ -54,7 +54,6 @@ from django.shortcuts import render
 import os
 from django.conf import settings
 from urllib.parse import urljoin
-from babel.numbers import format_currency
 from task import signals
 from django.db.models.signals import pre_save, post_save
 from dal import autocomplete
@@ -2219,13 +2218,6 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         if child_task:
             child_task.amount = task.amount
             child_task.save()
-        msg = "Valor alterado de {} para {} pelo escritório {}".format(
-            format_currency(current_amount, 'R$', locale='pt_BR'),
-            format_currency(task.amount, 'R$', locale='pt_BR'),
-            get_office_session(request).legal_name)
-        TaskHistory.objects.create(create_user=request.user, task=task, notes=msg, status=task.status.value)
-        if child_task:
-            TaskHistory.objects.create(create_user=request.user, task=child_task, notes=msg, status=task.status.value)
         pre_save.connect(signals.change_status, sender=Task)
         pre_save.connect(signals.pre_save_task, sender=Task)
         post_save.connect(signals.post_save_task, sender=Task)

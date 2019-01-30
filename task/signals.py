@@ -21,9 +21,9 @@ from simple_history.signals import (
     pre_create_historical_record,
     post_create_historical_record
 )
-from simple_history.utils import update_change_reason
 import sys
 import traceback
+from babel.numbers import format_currency
 
 
 logger = logging.getLogger(__name__)
@@ -473,5 +473,12 @@ def post_create_historical_record_callback(sender, **kwargs):
         msg = """
         A OS {} foi recusada pelo escritório pelo motivo: {}
         """.format(instance.get_child.task_number, msg)
+    if history_instance.prev_record:
+        delta = history_instance.diff_against(history_instance.prev_record)
+        for change in delta.changes:
+            if change.field == 'amount' and change.old != change.new:
+                msg += "Valor alterado de {} para {}".format(
+                    format_currency(change.old, 'R$', locale='pt_BR'),
+                    format_currency(change.new, 'R$', locale='pt_BR'))
     history_instance.history_change_reason = msg
     history_instance.save()
