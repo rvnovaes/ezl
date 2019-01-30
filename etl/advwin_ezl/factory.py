@@ -157,7 +157,8 @@ class InvalidObjectFactory(object):
         invalid_type_task, created = TypeTask.objects.get_or_create(
             create_user=user,
             legacy_code=invalid_legacy_code,
-            name=TypeTask._meta.verbose_name.upper() + invalid_registry)
+            name=TypeTask._meta.verbose_name.upper() + invalid_registry,
+            office=default_office)
 
         invalid_task, created = Task.objects.get_or_create(
             create_user=user,
