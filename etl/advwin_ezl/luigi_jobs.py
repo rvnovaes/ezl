@@ -68,7 +68,6 @@ class ConfigTask(luigi.Task):
         signals
         # call_command(migrate.Command(), verbosity=0)
         # sleep(5)
-        InvalidObjectFactory().restart_table_id()
         InvalidObjectFactory.create()
         DefaultOffice.create()
         self.output().open("w").close()
