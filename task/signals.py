@@ -12,7 +12,7 @@ from task.workflow import get_parent_status, get_child_status, get_parent_fields
 from chat.models import Chat, UserByChat
 from chat.utils import create_users_company_by_chat
 from lawsuit.models import CourtDistrict
-from core.utils import check_environ, get_office_session
+from core.utils import check_environ, get_office_session, field_has_changed, get_history_changes
 from core.models import CustomSettings
 from task.mail import TaskMail
 import logging
@@ -442,17 +442,15 @@ def post_create_historical_record_callback(sender, **kwargs):
     status = get_child_status(instance.status) if instance.get_child else False
     request = HistoricalRecords.thread.request
     msg = request.POST.get('notes', '')
-    # Todo: Separar o código abaixo
     if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
         msg = """
         A OS {} foi recusada pelo escritório pelo motivo: {}
         """.format(instance.get_child.task_number, msg)
-    if history_instance.prev_record:
-        delta = history_instance.diff_against(history_instance.prev_record)
-        for change in delta.changes:
-            if change.field == 'amount' and change.old != change.new:
-                msg += "Valor alterado de {} para {}".format(
-                    format_currency(change.old, 'R$', locale='pt_BR'),
-                    format_currency(change.new, 'R$', locale='pt_BR'))
+    if field_has_changed(history_instance, 'amount'):
+        change = get_history_changes(history_instance).get('amount')
+        if change.old != change.new:
+            msg += "Valor alterado de {} para {}".format(
+                format_currency(change.old, 'R$', locale='pt_BR'),
+                format_currency(change.new, 'R$', locale='pt_BR'))
     history_instance.history_change_reason = msg
     history_instance.save()
