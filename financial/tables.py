@@ -3,7 +3,6 @@ import django_tables2 as tables
 
 from core.tables import CheckBoxMaterial
 from .models import CostCenter, ServicePriceTable, PolicyPrice
-from djmoney.money import Money
 
 
 class CostCenterTable(tables.Table):
@@ -47,15 +46,15 @@ class ServicePriceTableTaskTable(tables.Table):
     city = tables.Column(orderable=False, verbose_name='Cidade')
     state = tables.Column(orderable=False, verbose_name='UF')
     client = tables.Column(orderable=False, verbose_name='Cliente')    
-    value = tables.Column(orderable=False, verbose_name='Valor*')
+    value_to_receive = tables.Column(orderable=False, verbose_name='Valor*')
     office_rating = tables.Column(orderable=False, verbose_name='Avaliação*')
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')
 
     class Meta:
         sequence = ('office_correspondent', 'office_network', 'state', 'court_district', 'court_district_complement',
-                    'city', 'client', 'value', 'office_rating', 'office_return_rating')
+                    'city', 'client', 'value_to_receive', 'office_rating', 'office_return_rating')
         model = ServicePriceTable
-        fields = ('office_correspondent', 'office_network', 'court_district', 'state', 'client', 'value',
+        fields = ('office_correspondent', 'office_network', 'court_district', 'state', 'client', 'value_to_receive',
                   'court_district_complement', 'office_rating', 'office_return_rating', 'city')
         attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
         empty_text = "Não existe tabela de preços cadastrada para o tipo de serviço selecionado."
@@ -63,8 +62,8 @@ class ServicePriceTableTaskTable(tables.Table):
         row_attrs = {
             'id': lambda record: 'office-{}'.format(record.pk),
             'data-id': lambda record: record.pk,
-            'data-value': lambda record: record.value,
-            'data-formated-value': lambda record: Money(record.value, 'BRL').__str__(),
+            'data-value': lambda record: record.value_to_receive,
+            'data-formated-value': lambda record: record.value_to_receive.__str__(),
             'data-office-public': lambda record: record.office_correspondent.public_office if record.office_correspondent else False,
             'data-office-txt': lambda record: record.office.__str__(),
             'class': 'tr_select'
@@ -73,6 +72,7 @@ class ServicePriceTableTaskTable(tables.Table):
 
 class PolicyPriceTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
     class Meta: 
         model = PolicyPrice
         fields = ('selection', 'name', 'category', 'billing_moment', 'is_active')
