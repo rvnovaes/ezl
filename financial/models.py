@@ -8,6 +8,7 @@ from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office, O
 from decimal import Decimal
 from task.metrics import get_office_correspondent_metrics
 from enum import Enum
+from djmoney.models.fields import MoneyField
 
 
 class CategoryPrice(Enum):
@@ -27,10 +28,20 @@ class BillingMoment(Enum):
         return self.name
 
 
+class RateType(Enum):
+    PERCENT = 'Percentual'
+    VALUE = 'Valor'
+
+    def __str__(self):
+        return self.name
+
+
 class PolicyPrice(Audit, OfficeMixin):
     name = models.CharField(verbose_name='Nome', max_length=255)
-    category = models.CharField(verbose_name='Categoria', max_length=255, choices=[(x.name, x.value) for x in CategoryPrice])
-    billing_moment = models.CharField(verbose_name='Momento do faturamento', max_length=255, choices=((x.name, x.value) for x in BillingMoment))
+    category = models.CharField(verbose_name='Categoria', max_length=255,
+                                choices=[(x.name, x.value) for x in CategoryPrice])
+    billing_moment = models.CharField(verbose_name='Momento do faturamento', max_length=255,
+                                      choices=((x.name, x.value) for x in BillingMoment))
     objects = OfficeManager()
 
     def __str__(self):
@@ -115,6 +126,28 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         verbose_name="Valor",
         default=Decimal('0.00')
     )
+    value_to_receive = MoneyField(
+        max_digits=9,
+        decimal_places=2,
+        default_currency='BRL',
+        verbose_name="Valor a receber",
+        default=Decimal('0.00'),
+        null=False,
+        blank=False
+    )
+    value_to_pay = MoneyField(
+        max_digits=9,
+        decimal_places=2,
+        default_currency='BRL',
+        verbose_name="Valor a pagar",
+        default=Decimal('0.00'),
+        null=False,
+        blank=False
+    )
+    rate_type_receive = models.CharField(verbose_name='Tipo de taxa a receber', max_length=10,
+                                         choices=[(x.name, x.value) for x in RateType], default=RateType.PERCENT)
+    rate_type_pay = models.CharField(verbose_name='Tipo de taxa a pagar', max_length=10,
+                                     choices=[(x.name, x.value) for x in RateType], default=RateType.PERCENT)
     court_district_complement = models.ForeignKey(
         'lawsuit.CourtDistrictComplement',
         null=True,
