@@ -21,6 +21,7 @@ from .schemas import *
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.forms import MultipleChoiceField
 from .mail import TaskCompanyRepresentativeChangeMail
+from financial.enums import CategoryPrice
 
 
 class ChoiceArrayField(ArrayField):
@@ -382,6 +383,9 @@ class Task(Audit, LegacyCode, OfficeMixin):
         max_digits=9,
         decimal_places=2,
         default=Decimal('0.00'))
+    # Responsável por armanezar a categoria do preço. Recebe o valor do campo PolicyPrice.category, ao ser delegado
+    price_category = models.CharField(verbose_name='Categoria do preço', max_length=255,
+                                      choices=CategoryPrice.choices(), null=True, blank=True)
     chat = models.ForeignKey(
         Chat,
         verbose_name='Chat',

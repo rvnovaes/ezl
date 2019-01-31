@@ -946,11 +946,12 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 self.request.POST['servicepricetable_id']
                 if self.request.POST['servicepricetable_id'] else None)
             servicepricetable = ServicePriceTable.objects.filter(
-                id=servicepricetable_id).first()
+                id=servicepricetable_id).select_related('policy_price').first()
             get_task_attachment(self, form)
             if servicepricetable:
                 delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
+                form.instance.price_category = servicepricetable.policy_price.category
                 form.instance.person_executed_by = None
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
