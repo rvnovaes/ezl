@@ -36,7 +36,6 @@ parser = get_parser()
 
 try:
     source = dict(parser.items('etl'))
-    truncate_all_tables = source['truncate_all_tables']
     create_alter_user = source['user']
     config_connection = source['connection_name']
     source_etl_connection = dict(parser.items(source['connection_name']))
@@ -142,30 +141,28 @@ class GenericETL(object):
     # inativa todos os registros já existentes para não ter que consultar ativos e inativos do
     # legado
     def deactivate_records(self):
-        if not truncate_all_tables:
-            records = self.model.objects.filter(
-                system_prefix=LegacySystem.ADVWIN.value)
-            for record in records:
-                record.deactivate()
+        records = self.model.objects.filter(
+            system_prefix=LegacySystem.ADVWIN.value)
+        for record in records:
+            record.deactivate()
 
     def deactivate_all(self, default_office):
-        if not truncate_all_tables:
-            if self.model._meta.object_name == 'Person':
+        if self.model._meta.object_name == 'Person':
+            self.model.objects.filter(
+                offices=default_office,
+                system_prefix=LegacySystem.ADVWIN.value).update(
+                    is_active=False)
+        else:
+            try:
+                office_field = self.model._meta.get_field('office')
                 self.model.objects.filter(
-                    offices=default_office,
+                    office=default_office,
                     system_prefix=LegacySystem.ADVWIN.value).update(
                         is_active=False)
-            else:
-                try:
-                    office_field = self.model._meta.get_field('office')
-                    self.model.objects.filter(
-                        office=default_office,
-                        system_prefix=LegacySystem.ADVWIN.value).update(
-                            is_active=False)
-                except:
-                    self.model.objects.filter(
-                        system_prefix=LegacySystem.ADVWIN.value).update(
-                            is_active=False)
+            except:
+                self.model.objects.filter(
+                    system_prefix=LegacySystem.ADVWIN.value).update(
+                        is_active=False)
 
     def config_import(self, rows, user, rows_count, default_office, log=False):
         raise NotImplementedError()

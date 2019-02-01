@@ -51,7 +51,7 @@ class DashboardETL(Audit, OfficeMixin):
         verbose_name='Host do db de origem',
         blank=True,
         null=True,
-        max_length=16)
+        max_length=20)
 
     class Meta:
         db_table = 'dashboard_etl'

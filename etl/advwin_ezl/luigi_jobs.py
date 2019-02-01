@@ -48,8 +48,11 @@ class MigrationTask(luigi.Task):
 
     def run(self):
         # Injeção de contexto (Carrega modulo do signals)
+        print('inicio')
         signals
+        print('meio')
         call_command(migrate.Command(), verbosity=0)
+        print('fim')
         print('Migration finalizada...')
         self.output().open("w").close()
 
@@ -68,7 +71,6 @@ class ConfigTask(luigi.Task):
         signals
         # call_command(migrate.Command(), verbosity=0)
         # sleep(5)
-        InvalidObjectFactory().restart_table_id()
         InvalidObjectFactory.create()
         DefaultOffice.create()
         self.output().open("w").close()
@@ -279,7 +281,6 @@ def main():
 def export_tasks():
     try:
         # Importante ser a ultima tarefa a ser executada pois ela vai executar todas as dependencias
-        load_luigi_scheduler()
         luigi.run(main_task_cls=TaskExport())
     except ParamsException as e:
         print(e)
