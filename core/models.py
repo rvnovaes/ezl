@@ -851,3 +851,13 @@ class AreaOfExpertise(models.Model):
 
     def __str__(self):
         return self.area
+
+
+class BaseHistoricalModel(models.Model):
+    history_office = models.ForeignKey(Office, null=True, blank=True)
+    history_notes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
