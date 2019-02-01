@@ -485,7 +485,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         for office, clients in offices_map.items():
             office_total = 0
             for client, tasks in clients.items():
-                client_total = sum(map(lambda x: x.amount, tasks))
+                client_total = sum(map(lambda x: x.amount_to_receive, tasks))
                 office_total = office_total + client_total
                 offices.append({
                     'office_name': office.name,
@@ -521,7 +521,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         for client, offices in clients_map.items():
             client_total = 0
             for office, tasks in offices.items():
-                office_total = sum(map(lambda x: x.amount, tasks))
+                office_total = sum(map(lambda x: x.amount_to_receive, tasks))
                 client_total = client_total + office_total
                 # necessário manter a mesma estrutura do get_os_grouped_by_office para não mexer no template.
                 clients.append({

@@ -117,7 +117,7 @@
                                     {% endif %}
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
                                     <td>{{task.parent.charge.charge_id}}</td>
-                                    <td>{{ task.amount }}</td>
+                                    <td>{{ task.amount_to_receive }}</td>
                                 </tr>
                             {% endfor %}
                         {% endfor %}
@@ -182,7 +182,7 @@
                                     {% endif %}
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
                                     <td>{{task.parent.charge.charge_id}}</td>
-                                    <td class="text-center"><center>{{ task.amount }}</center></td>
+                                    <td class="text-center">{{ task.amount_to_receive }}</td>
                                 </tr>
                             {% endfor %}
                         {% empty %}
