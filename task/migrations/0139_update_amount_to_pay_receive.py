@@ -7,8 +7,7 @@ from django.db.models import F
 
 def update_task(apps, schema_editor):
     Task = apps.get_model('task', 'Task')
-    Task.objects.update(amount_to_pay=F('amount'))
-    Task.objects.update(amount_to_receive=F('amount'))
+    Task.objects.update(amount_to_pay=F('amount'), amount_to_receive=F('amount'))
 
 
 class Migration(migrations.Migration):

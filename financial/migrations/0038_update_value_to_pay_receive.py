@@ -9,8 +9,7 @@ logger = logging.getLogger('0032_service_price_table_policy_price')
 
 def update_service_price_table(apps, schema_editor):
     ServicePriceTable = apps.get_model('financial', 'ServicePriceTable')
-    ServicePriceTable.objects.update(value_to_pay=F('value'))
-    ServicePriceTable.objects.update(value_to_receive=F('value'))
+    ServicePriceTable.objects.update(value_to_pay=F('value'), value_to_receive=F('value'))
 
 
 class Migration(migrations.Migration):
