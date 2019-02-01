@@ -94,22 +94,22 @@
         </div>
     </section>
     <!-- jQuery -->
-    <script src="{% static 'skeleton/plugins/bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/jquery/dist/jquery.min.js' %}?rev={{request.REVIEW}}"></script>
     <!-- Bootstrap Core JavaScript -->
-    <script src="{% static 'skeleton/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'skeleton/bootstrap/dist/js/bootstrap.min.js' %}?rev={{request.REVIEW}}"></script>
     <!-- Menu Plugin JavaScript -->
-    <script src="{% static 'skeleton/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js' %}?rev={{request.REVIEW}}"></script>
     <!--slimscroll JavaScript -->
-    <script src="{% static 'skeleton/js/jquery.slimscroll.js' %}"></script>
+    <script src="{% static 'skeleton/js/jquery.slimscroll.js' %}?rev={{request.REVIEW}}"></script>
     <!--Wave Effects -->
-    <script src="{% static 'skeleton/js/waves.js' %}"></script>
+    <script src="{% static 'skeleton/js/waves.js' %}?rev={{request.REVIEW}}"></script>
     <!-- Custom Theme JavaScript -->
-    <script src="{% static 'skeleton/js/custom.js' %}"></script>
+    <script src="{% static 'skeleton/js/custom.js' %}?rev={{request.REVIEW}}"></script>
     <!--Style Switcher -->
-    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}?rev={{request.REVIEW}}"></script>
     <!-- Swal  -->
-    <script src="{% static 'skeleton/plugins/bower_components/sweetalert2/dist/sweetalert2.all.min.js' %}"></script>    
-    <script type="text/javascript" src="{% static 'js/register.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/sweetalert2/dist/sweetalert2.all.min.js' %}?rev={{request.REVIEW}}"></script>    
+    <script type="text/javascript" src="{% static 'js/register.js' %}?rev={{request.REVIEW}}"></script>
     <script type="text/javascript">
         var register;
         $(document).ready(function(){

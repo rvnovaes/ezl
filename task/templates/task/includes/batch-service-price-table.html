@@ -107,7 +107,7 @@
 {% block extra_scripts %} 
     {% include 'core/mask_selector.html' %}
     <!-- datatables -->
-    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}?rev={{request.REVIEW}}"></script>
     <script type="text/javascript">  
         var correspondentTable;  
         var chosenPrice = {};
