@@ -66,6 +66,7 @@ class TaskToPayXlsx(DefaultXlsFile):
                     {'label': 'Faturada', 'size': 10}, 
                     {'label': 'Transação via cartão', 'size': 10},
                     {'label': 'Valor', 'size': 10}, 
+                    {'label': 'Comissão', 'size': 10},
                 ]
 
     def get_report(self): 
@@ -94,6 +95,7 @@ class TaskToPayXlsx(DefaultXlsFile):
             worksheet.write(row_num, 11, format_boolean(item.get('billing_date')), self.base_cell_format.cell_format)
             worksheet.write(row_num, 12, item.get('charge_id'), self.base_cell_format.cell_format)
             worksheet.write(row_num, 13, item.get('amount'), self.money_format.cell_format)
+            worksheet.write(row_num, 14, item.get('amount_to_receive'), self.money_format.cell_format)
         self.workbook.close()
         self.output.seek(0)
         return self.output
