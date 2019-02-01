@@ -81,10 +81,14 @@ class ServicePriceTableForm(BaseModelForm):
                             # O valor pode ser 0.00 porque os correspondentes internos não cobram para fazer serviço
                             widget=forms.TextInput(attrs={'mask': 'money'}))
 
+    value_to_receive = forms.CharField(widget=forms.HiddenInput())
+    value_to_pay = forms.CharField(widget=forms.HiddenInput())
+
     class Meta:
         model = ServicePriceTable
         fields = ('office', 'policy_price', 'office_correspondent', 'office_network', 'client', 'type_task', 'state',
-                  'court_district', 'court_district_complement', 'city', 'value', 'is_active')
+                  'court_district', 'court_district_complement', 'city', 'value', 'is_active', 'value_to_receive',
+                  'value_to_pay')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
@@ -92,8 +96,28 @@ class ServicePriceTableForm(BaseModelForm):
         value = value.replace(',', '.')
         return Decimal(value)
 
+    def recalculate_values(self):
+        if 'value' in self.changed_data:
+            instance = self.instance
+            diff_to_pay = abs(instance.value_to_pay.amount - instance.value)
+            diff_to_receive = abs(instance.value_to_receive.amount - instance.value)
+            new_value = Decimal(self.cleaned_data['value'])
+            if instance.rate_type_pay == 'PERCENT':
+                diff_to_pay = round(1 - (diff_to_pay / instance.value), 2)
+                value_to_pay = round(new_value * diff_to_pay, 0)
+            else:
+                value_to_pay = round(new_value - diff_to_pay, 0)
+            self.cleaned_data['value_to_pay'] = Decimal('{}.00'.format(value_to_pay))
+            if instance.rate_type_receive == 'PERCENT':
+                diff_to_receive = round(1 + (diff_to_receive / instance.value), 2)
+                value_to_receive = round(new_value * diff_to_receive, 0)
+            else:
+                value_to_receive = round(new_value + diff_to_receive, 0)
+            self.cleaned_data['value_to_receive'] = Decimal('{}.00'.format(value_to_receive))
+
     def clean(self):
         cleaned_data = super().clean()
+        self.recalculate_values()
         if not cleaned_data["court_district"] and cleaned_data["court_district_complement"]:
             cleaned_data["court_district"] = self.cleaned_data["court_district_complement"].court_district
         if not cleaned_data["state"] and cleaned_data['court_district']:
@@ -119,6 +143,7 @@ class ServicePriceTableForm(BaseModelForm):
             office=office_session.id).order_by('name'))
         self.fields['office_network'].queryset = self.fields['office_network'].queryset.filter(members=office_session)
         self.fields['office_network'].required = True
+
 
 
 class ImportServicePriceTableForm(forms.ModelForm):
