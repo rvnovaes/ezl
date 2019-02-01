@@ -732,17 +732,17 @@ class ToPayTaskReportView(View):
     def get_queryset(self):
         office = get_office_session(self.request)
         queryset = Task.objects \
-        .select_related('office') \
-        .select_related('type_task') \
-        .select_related('movement__type_movement') \
-        .select_related('movement__folder') \
-        .select_related('movement__folder__person_customer') \
-        .select_related('movement__law_suit__court_district') \
-        .select_related('parent__type_task') \
-        .filter(
-            parent__office=office,
-            parent__task_status=TaskStatus.FINISHED,
-            parent__isnull=False)
+            .select_related('office') \
+            .select_related('type_task') \
+            .select_related('movement__type_movement') \
+            .select_related('movement__folder') \
+            .select_related('movement__folder__person_customer') \
+            .select_related('movement__law_suit__court_district') \
+            .select_related('parent__type_task') \
+            .filter(
+                parent__office=office,
+                parent__task_status=TaskStatus.FINISHED,
+                parent__isnull=False)
         queryset = self.filter_queryset(queryset)
         return queryset
 
@@ -939,7 +939,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 form.instance.person_distributed_by = self.request.user.person
             default_amount = Decimal(
                 '0.00') if not form.instance.amount else form.instance.amount
-            form.instance.amount = (form.cleaned_data['amount']
+            form.instance.amount_to_pay = (form.cleaned_data['amount']
                                     if form.cleaned_data['amount'] else
                                     default_amount)
             servicepricetable_id = (
@@ -952,6 +952,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
                 form.instance.price_category = servicepricetable.policy_price.category
+                form.instance.amount = servicepricetable.value
+                form.instance.amount_to_receive = Decimal(servicepricetable.value_to_receive.amount)
                 form.instance.person_executed_by = None
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
