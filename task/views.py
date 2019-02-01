@@ -1670,11 +1670,12 @@ def ajax_get_correspondents_table(request):
             'court_district': x.court_district.name if x.court_district else '—',
             'state': x.state.name if x.state else '—',
             'client': x.client.legal_name if x.client else '—',
-            'value': x.value,
+            'value': x.value_to_receive.amount,
             'formated_value': Money(x.value, 'BRL').__str__(),
             'office_rating': x.office_rating if x.office_rating else '0.00',
             'office_return_rating': x.office_return_rating if x.office_return_rating else '0.00',
-            'office_public': x.office_correspondent.public_office
+            'office_public': x.office_correspondent.public_office,
+            'price_category': x.policy_price.category
         }, correspondents_table.data.data))
     data = {
         "correspondents_table": correspondents_table_list,
@@ -2161,7 +2162,8 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 },
                 'office_rating': price.office_rating,
                 'office_return_rating': price.office_return_rating,
-                'value': price.value_to_receive.amount
+                'value': price.value_to_receive.amount,
+                'price_category': price.policy_price.category
 
             } for price in price_table.correspondents_qs]
 
