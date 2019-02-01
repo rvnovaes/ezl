@@ -157,7 +157,7 @@
                 $('#table-service-price tbody tr').on('click', function() {
                     $(this).addClass("ezl-bg-open");
                     $(this).siblings().removeClass("ezl-bg-open");
-                    amount = correspondentTable.row(this).data()[6];
+                    amount = correspondentTable.row(this).data()[7];
                     $('#value').val(amount.replace(".", ","));
                     $('#value').focus();
 

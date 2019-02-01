@@ -2127,7 +2127,7 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
         for task in tasks:
             price_table = CorrespondentsTable(task, task.office)
             cheapest_correspondent = price_table.get_cheapest_correspondent()
-            prices = [ {
+            prices = [{
                 'id': price.id,
                 'court_district': {
                     'id': price.court_district.pk if price.court_district else '-',
@@ -2159,7 +2159,7 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 },
                 'office_rating': price.office_rating,
                 'office_return_rating': price.office_return_rating,
-                'value': price.value
+                'value': price.value_to_receive.amount
 
             } for price in price_table.correspondents_qs]
 
