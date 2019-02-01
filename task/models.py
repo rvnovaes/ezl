@@ -20,7 +20,7 @@ from .schemas import *
 from django.contrib.postgres.fields import JSONField, ArrayField
 from django.forms import MultipleChoiceField
 from simple_history.models import HistoricalRecords
-from core.models import OfficeHistoricalModel
+from core.models import BaseHistoricalModel
 import inspect
 
 
@@ -422,7 +422,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                                        blank=True,
                                                        null=True,
                                                        related_name='task_company_representative')
-    history = HistoricalRecords(bases=[OfficeHistoricalModel],
+    history = HistoricalRecords(bases=[BaseHistoricalModel],
                                 excluded_fields=['task_hash', 'parent', 'task_number', 'movement', 'person_asked_by',
                                                  'person_executed_by', 'person_distributed_by', 'delegation_date',
                                                  'acceptance_date', 'final_deadline_date', 'execution_date',

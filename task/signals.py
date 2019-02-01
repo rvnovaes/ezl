@@ -327,14 +327,6 @@ def change_status(sender, instance, **kwargs):
         instance.alter_date = now_date
 
 
-@receiver(post_save, sender=TaskHistory)
-@check_environ
-def ezl_export_taskhistory_to_advwin(sender, instance, **kwargs):
-    if not getattr(instance, '_skip_signal',
-                   None) and instance.task.legacy_code:
-        export_task_history.delay(instance.pk)
-
-
 def update_status_parent_task(sender, instance, **kwargs):
     """
     Responsavel por alterar o status da OS pai, quando o status da OS filha e modificado
@@ -452,5 +444,7 @@ def post_create_historical_record_callback(sender, **kwargs):
             msg += "Valor alterado de {} para {}".format(
                 format_currency(change.old, 'R$', locale='pt_BR'),
                 format_currency(change.new, 'R$', locale='pt_BR'))
-    history_instance.history_change_reason = msg
+    history_instance.history_notes = msg
     history_instance.save()
+    if instance.legacy_code:
+        export_task_history.delay(history_instance.pk)

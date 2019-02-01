@@ -8,7 +8,7 @@
            aria-controls="collapseHistory"><i class="panel-title mdi mdi-history"></i> Histórico </a> </div>
     <div id="collapseHistory" class="panel-collapse collapse" role="tabpanel" aria-labelledby="panelHistory" aria-expanded="false" style="height: 0px;">
         <div class="panel-body ">
-            {% if not task_history %}
+            {% if not task.history.all %}
                 {% bootstrap_alert 'Nenhum histórico disponível' %}
             {% else %}            
                 <table class="table table-striped table-hover">
@@ -27,7 +27,7 @@
                             <td>{{ history.history_office }}</td>
                             <td>{{ history.history_user }}</td>
                             <td class="text-center">{{ history.task_status }}</td>
-                            <td>{{ history.history_change_reason }}</td>
+                            <td>{{ history.history_notes }}</td>
                         </tr>
                     {% endfor %}
                 </table>
