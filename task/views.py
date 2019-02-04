@@ -51,7 +51,7 @@ from task.workflow import CorrespondentsTable
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
-from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task
+from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -983,13 +983,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             pending_list.append('Correspondente')
         context['pending_surveys'] = {'status': True if pending_list else False,
                                       'pending_list': pending_list}
-        context['survey_data'] = (self.object.type_task.survey.data
-                                  if self.object.type_task.survey else None)
-        if self.object.parent:
-            context['survey_data'] = (self.object.parent.type_task.survey.data
-                                      if self.object.parent.type_task.survey
-                                      else None)
-
+        # Pega o ultimo parent, se nao tiver parent retorna o proprio objeto
+        last_parent = get_last_parent(self.object) 
+        context['survey_data'] = (last_parent.type_task.survey.data
+                                  if last_parent.type_task.survey else None)
         office_session = get_office_session(self.request)
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
@@ -1000,10 +997,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         checker = ObjectPermissionChecker(self.request.user)
         if checker.has_perm('can_see_tasks_company_representative', office_session):
             if not TaskSurveyAnswer.objects.filter(tasks=self.object, create_user=self.request.user):
-                if (self.object.type_task.survey_company_representative):
+                if (last_parent.type_task.survey_company_representative):
                     context['not_answer_questionnarie'] = True
-                    if self.object.type_task.survey_company_representative:
-                        context['survey_company_representative'] = self.object.type_task.survey_company_representative.data
+                    if last_parent.type_task.survey_company_representative:
+                        context['survey_company_representative'] = last_parent.type_task.survey_company_representative.data
                     else:
                         context['survey_company_representative'] = ''
         context['show_company_representative_in_tab'] = self.show_company_representative_in_tab(checker, office_session)
