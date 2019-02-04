@@ -2,8 +2,8 @@
 
 {% block extra_scripts %}
     {{ filter.form.media }}
-    <script src="{% static 'skeleton/plugins/bower_components/multiselect/js/jquery.multi-select.js' %}"></script>
-    <script src="{% static 'task/task_filter.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/multiselect/js/jquery.multi-select.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'task/task_filter.js' %}?rev={{request.REVIEW}}"></script>
     <script>
         $(document).ready(function(){
         	if ($('#id_task_status').attr('type') !== 'hidden') {
