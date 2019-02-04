@@ -202,6 +202,7 @@ def update_or_create_service_price_table(xls_file, office_session, user_session,
                                            "{} para {}".format(office_correspondent, type_task,
                                                                service_price_table.value, value)) + ";"
             service_price_table.value = value
+            service_price_table.is_active = True
             service_price_table.save()
 
 
