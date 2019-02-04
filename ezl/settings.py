@@ -2,9 +2,10 @@ import datetime
 import os
 import sys
 import tempfile
+import hglib
 
 # Todas as variáveis de configuração devem ser criadas nos arquivos da pasta ezl/config
-from config.config import get_parser
+from config.config import get_parser, get_rev
 
 from django.urls import reverse_lazy
 from decimal import ROUND_HALF_EVEN
@@ -87,6 +88,8 @@ except KeyError as e:
     print('Invalid settings. Check ini files on ezl/config')
     print(e)
     sys.exit(0)
+
+REVIEW = get_rev() # Revisao atual do repositorio
 
 MUST_LOGIN = True
 DATETIME_FORMAT = datetime_format
@@ -194,6 +197,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.ReviewRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'ezl.urls'

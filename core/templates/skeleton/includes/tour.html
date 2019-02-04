@@ -1,6 +1,6 @@
 {% load static %}
-<script src="{% static 'libs/anno/anno.js' %}" type="text/javascript"></script>
-<script src="{% static 'libs/anno/jquery.scrollintoview.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'libs/anno/anno.js' %}?rev={{request.REVIEW}}" type="text/javascript"></script>
+<script src="{% static 'libs/anno/jquery.scrollintoview.min.js' %}?rev={{request.REVIEW}}" type="text/javascript"></script>
 <link href="{% static 'libs/anno/anno.css' %}" rel="stylesheet" type="text/css" />
 
 <script>
