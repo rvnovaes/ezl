@@ -436,11 +436,11 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         context['filter'] = self.task_filter
         try:
             if self.request.GET['group_by_tasks'] == OFFICE:
-                office_list, total = self.get_os_grouped_by_office()
+                office_list, total, total_to_pay = self.get_os_grouped_by_office()
             else:
-                office_list, total = self.get_os_grouped_by_client()
+                office_list, total, total_to_pay = self.get_os_grouped_by_client()
         except:
-            office_list, total = self.get_os_grouped_by_office()
+            office_list, total, total_to_pay = self.get_os_grouped_by_office()
         context['offices_report'] = office_list
         context['total'] = total
         return context
@@ -472,6 +472,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map = {}
         tasks = self.get_queryset()
         total = 0
+        total_to_pay = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
@@ -484,30 +485,36 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map_total = {}
         for office, clients in offices_map.items():
             office_total = 0
+            office_total_to_pay = 0
             for client, tasks in clients.items():
-                client_total = sum(map(lambda x: x.amount_to_receive, tasks))
+                client_total = sum(map(lambda x: x.amount, tasks))
+                client_total_to_pay = sum(map(lambda x: x.amount_to_pay, tasks))
                 office_total = office_total + client_total
+                office_total_to_pay += client_total_to_pay
                 offices.append({
                     'office_name': office.name,
                     'client_name': client.name,
                     'client_refunds': client.refunds_correspondent_service,
                     'tasks': tasks,
                     "client_total": client_total,
+                    "client_total_to_pay": client_total_to_pay,
                     "office_total": 0,
                 })
-            offices_map_total[office.name] = office_total
+            offices_map_total[office.name] = {'total': office_total, 'total_to_pay': office_total_to_pay}
             total = total + office_total
+            total_to_pay += office_total_to_pay
 
         for item in offices:
             item['office_total'] = offices_map_total[item['office_name']]
 
-        return offices, total
+        return offices, total, total_to_pay
 
     def get_os_grouped_by_client(self):
         clients = []
         clients_map = {}
         tasks = self.get_queryset()
         total = 0
+        total_to_pay = 0
         for task in tasks:
             client = self._get_related_client(task)
             if client not in clients_map:
@@ -520,24 +527,29 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         clients_map_total = {}
         for client, offices in clients_map.items():
             client_total = 0
+            client_total_to_pay = 0
             for office, tasks in offices.items():
-                office_total = sum(map(lambda x: x.amount_to_receive, tasks))
+                office_total = sum(map(lambda x: x.amount, tasks))
+                office_total_to_pay = sum(map(lambda x: x.amount_to_pay, tasks))
                 client_total = client_total + office_total
+                client_total_to_pay += office_total_to_pay
                 # necessário manter a mesma estrutura do get_os_grouped_by_office para não mexer no template.
                 clients.append({
                     'office_name': client.name,
                     'client_name': office.name,
                     'tasks': tasks,
                     "client_total": office_total,
+                    "client_total": office_total_to_pay,
                     "office_total": 0,
                 })
-            clients_map_total[client.name] = client_total
+            clients_map_total[client.name] = {'total': client_total, 'total_to_pay': client_total_to_pay}
             total = total + client_total
+            total_to_pay += client_total_to_pay
 
         for item in clients:
             item['office_total'] = clients_map_total[item['office_name']]
 
-        return clients, total
+        return clients, total, total_to_pay
 
     def _get_related_client(self, task):
         return task.client
@@ -954,6 +966,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 form.instance.price_category = servicepricetable.policy_price.category
                 form.instance.amount = servicepricetable.value
                 form.instance.amount_to_receive = Decimal(servicepricetable.value_to_receive.amount)
+                form.instance.amount_to_pay = Decimal(servicepricetable.value_to_pay.amount)
                 form.instance.person_executed_by = None
 
         feedback_rating = form.cleaned_data.get('feedback_rating')

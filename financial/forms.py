@@ -99,24 +99,43 @@ class ServicePriceTableForm(BaseModelForm):
     def recalculate_values(self):
         if 'value' in self.changed_data:
             instance = self.instance
-            diff_to_pay = abs(instance.value_to_pay.amount - instance.value)
-            diff_to_receive = abs(instance.value_to_receive.amount - instance.value)
-            new_value = Decimal(self.cleaned_data['value'])
-            if instance.rate_type_pay == 'PERCENT':
-                diff_to_pay = round(1 - (diff_to_pay / instance.value), 2)
-                value_to_pay = round(new_value * diff_to_pay, 0)
-            else:
-                value_to_pay = round(new_value - diff_to_pay, 0)
-            self.cleaned_data['value_to_pay'] = Decimal('{}.00'.format(value_to_pay))
-            if instance.rate_type_receive == 'PERCENT':
-                diff_to_receive = round(1 + (diff_to_receive / instance.value), 2)
-                value_to_receive = round(new_value * diff_to_receive, 0)
-            else:
-                value_to_receive = round(new_value + diff_to_receive, 0)
-            self.cleaned_data['value_to_receive'] = Decimal('{}.00'.format(value_to_receive))
+            old_value = instance.value
+            value_to_pay = instance.value_to_pay
+            value_to_receive = instance.value_to_receive
+            new_value = self.cleaned_data['value']
+            rate_type_pay = instance.rate_type_pay
+            rate_type_receive = instance.rate_type_receive
+            self.cleaned_data['value_to_pay'], self.cleaned_data['value_to_receive'] = self.new_values(
+                old_value, value_to_pay, value_to_receive, new_value, rate_type_pay, rate_type_receive
+            )
+        else:
+            self.cleaned_data['value_to_pay'], self.cleaned_data['value_to_receive'] = self.cleaned_data['value']
+
+    @staticmethod
+    def new_values(old_value, value_to_pay, value_to_receive, new_value, rate_type_pay, rate_type_receive):
+        diff_to_pay = abs(value_to_pay.amount - old_value)
+        diff_to_receive = abs(value_to_receive.amount - old_value)
+        new_value = Decimal(new_value)
+        if rate_type_pay == 'PERCENT':
+            diff_to_pay = round(1 - (diff_to_pay / old_value), 2)
+            value_to_pay = round(new_value * diff_to_pay, 0)
+        else:
+            value_to_pay = round(new_value - diff_to_pay, 0)
+        value_to_pay = Decimal('{}.00'.format(value_to_pay))
+        if rate_type_receive == 'PERCENT':
+            diff_to_receive = round(1 + (diff_to_receive / old_value), 2)
+            value_to_receive = round(new_value * diff_to_receive, 0)
+        else:
+            value_to_receive = round(new_value + diff_to_receive, 0)
+        value_to_receive = Decimal('{}.00'.format(value_to_receive))
+        return value_to_pay, value_to_receive
 
     def clean(self):
         cleaned_data = super().clean()
+        if not cleaned_data.get('value_to_pay', None):
+            cleaned_data['value_to_pay'] = cleaned_data['value']
+        if not cleaned_data.get('value_to_receive', None):
+            cleaned_data['value_to_receive'] = cleaned_data['value']
         self.recalculate_values()
         if not cleaned_data["court_district"] and cleaned_data["court_district_complement"]:
             cleaned_data["court_district"] = self.cleaned_data["court_district_complement"].court_district
