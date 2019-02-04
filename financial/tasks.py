@@ -197,13 +197,13 @@ def update_or_create_service_price_table(xls_file, office_session, user_session,
             create_user=user_session
         )
     else:                        
-        if value != service_price_table.value:
+        if Decimal(value) != service_price_table.value:
             xls_file.log = xls_file.log + ("Tabela de preço do escritório {}, serviço {} teve seu valor atualizado de "
                                            "{} para {}".format(office_correspondent, type_task,
                                                                service_price_table.value, value)) + ";"
-            service_price_table.value = value
-            service_price_table.is_active = True
-            service_price_table.save()
+        service_price_table.value = value
+        service_price_table.is_active = True
+        service_price_table.save()
 
 
 @shared_task(bind=True)
