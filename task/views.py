@@ -436,11 +436,11 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         context['filter'] = self.task_filter
         try:
             if self.request.GET['group_by_tasks'] == OFFICE:
-                office_list, total = self.get_os_grouped_by_office()
+                office_list, total, total_to_pay = self.get_os_grouped_by_office()
             else:
-                office_list, total = self.get_os_grouped_by_client()
+                office_list, total, total_to_pay = self.get_os_grouped_by_client()
         except:
-            office_list, total = self.get_os_grouped_by_office()
+            office_list, total, total_to_pay = self.get_os_grouped_by_office()
         context['offices_report'] = office_list
         context['total'] = total
         return context
@@ -472,6 +472,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map = {}
         tasks = self.get_queryset()
         total = 0
+        total_to_pay = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
@@ -484,30 +485,36 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map_total = {}
         for office, clients in offices_map.items():
             office_total = 0
+            office_total_to_pay = 0
             for client, tasks in clients.items():
                 client_total = sum(map(lambda x: x.amount, tasks))
+                client_total_to_pay = sum(map(lambda x: x.amount_to_pay, tasks))
                 office_total = office_total + client_total
+                office_total_to_pay += client_total_to_pay
                 offices.append({
                     'office_name': office.name,
                     'client_name': client.name,
                     'client_refunds': client.refunds_correspondent_service,
                     'tasks': tasks,
                     "client_total": client_total,
+                    "client_total_to_pay": client_total_to_pay,
                     "office_total": 0,
                 })
-            offices_map_total[office.name] = office_total
+            offices_map_total[office.name] = {'total': office_total, 'total_to_pay': office_total_to_pay}
             total = total + office_total
+            total_to_pay += office_total_to_pay
 
         for item in offices:
             item['office_total'] = offices_map_total[item['office_name']]
 
-        return offices, total
+        return offices, total, total_to_pay
 
     def get_os_grouped_by_client(self):
         clients = []
         clients_map = {}
         tasks = self.get_queryset()
         total = 0
+        total_to_pay = 0
         for task in tasks:
             client = self._get_related_client(task)
             if client not in clients_map:
@@ -520,24 +527,29 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         clients_map_total = {}
         for client, offices in clients_map.items():
             client_total = 0
+            client_total_to_pay = 0
             for office, tasks in offices.items():
                 office_total = sum(map(lambda x: x.amount, tasks))
+                office_total_to_pay = sum(map(lambda x: x.amount_to_pay, tasks))
                 client_total = client_total + office_total
+                client_total_to_pay += office_total_to_pay
                 # necessário manter a mesma estrutura do get_os_grouped_by_office para não mexer no template.
                 clients.append({
                     'office_name': client.name,
                     'client_name': office.name,
                     'tasks': tasks,
                     "client_total": office_total,
+                    "client_total": office_total_to_pay,
                     "office_total": 0,
                 })
-            clients_map_total[client.name] = client_total
+            clients_map_total[client.name] = {'total': client_total, 'total_to_pay': client_total_to_pay}
             total = total + client_total
+            total_to_pay += client_total_to_pay
 
         for item in clients:
             item['office_total'] = clients_map_total[item['office_name']]
 
-        return clients, total
+        return clients, total, total_to_pay
 
     def _get_related_client(self, task):
         return task.client
@@ -732,17 +744,17 @@ class ToPayTaskReportView(View):
     def get_queryset(self):
         office = get_office_session(self.request)
         queryset = Task.objects \
-        .select_related('office') \
-        .select_related('type_task') \
-        .select_related('movement__type_movement') \
-        .select_related('movement__folder') \
-        .select_related('movement__folder__person_customer') \
-        .select_related('movement__law_suit__court_district') \
-        .select_related('parent__type_task') \
-        .filter(
-            parent__office=office,
-            parent__task_status=TaskStatus.FINISHED,
-            parent__isnull=False)
+            .select_related('office') \
+            .select_related('type_task') \
+            .select_related('movement__type_movement') \
+            .select_related('movement__folder') \
+            .select_related('movement__folder__person_customer') \
+            .select_related('movement__law_suit__court_district') \
+            .select_related('parent__type_task') \
+            .filter(
+                parent__office=office,
+                parent__task_status=TaskStatus.FINISHED,
+                parent__isnull=False)
         queryset = self.filter_queryset(queryset)
         return queryset
 
@@ -939,18 +951,22 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 form.instance.person_distributed_by = self.request.user.person
             default_amount = Decimal(
                 '0.00') if not form.instance.amount else form.instance.amount
-            form.instance.amount = (form.cleaned_data['amount']
+            form.instance.amount_to_pay = (form.cleaned_data['amount']
                                     if form.cleaned_data['amount'] else
                                     default_amount)
             servicepricetable_id = (
                 self.request.POST['servicepricetable_id']
                 if self.request.POST['servicepricetable_id'] else None)
             servicepricetable = ServicePriceTable.objects.filter(
-                id=servicepricetable_id).first()
+                id=servicepricetable_id).select_related('policy_price').first()
             get_task_attachment(self, form)
             if servicepricetable:
                 delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
+                form.instance.price_category = servicepricetable.policy_price.category
+                form.instance.amount = servicepricetable.value
+                form.instance.amount_to_receive = Decimal(servicepricetable.value_to_receive.amount)
+                form.instance.amount_to_pay = Decimal(servicepricetable.value_to_pay.amount)
                 form.instance.person_executed_by = None
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
@@ -1667,11 +1683,12 @@ def ajax_get_correspondents_table(request):
             'court_district': x.court_district.name if x.court_district else '—',
             'state': x.state.name if x.state else '—',
             'client': x.client.legal_name if x.client else '—',
-            'value': x.value,
+            'value': x.value_to_receive.amount,
             'formated_value': Money(x.value, 'BRL').__str__(),
             'office_rating': x.office_rating if x.office_rating else '0.00',
             'office_return_rating': x.office_return_rating if x.office_return_rating else '0.00',
-            'office_public': x.office_correspondent.public_office
+            'office_public': x.office_correspondent.public_office,
+            'price_category': x.policy_price.category
         }, correspondents_table.data.data))
     data = {
         "correspondents_table": correspondents_table_list,
@@ -2126,7 +2143,7 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
         for task in tasks:
             price_table = CorrespondentsTable(task, task.office)
             cheapest_correspondent = price_table.get_cheapest_correspondent()
-            prices = [ {
+            prices = [{
                 'id': price.id,
                 'court_district': {
                     'id': price.court_district.pk if price.court_district else '-',
@@ -2158,7 +2175,8 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 },
                 'office_rating': price.office_rating,
                 'office_return_rating': price.office_return_rating,
-                'value': price.value
+                'value': price.value_to_receive.amount,
+                'price_category': price.policy_price.category
 
             } for price in price_table.correspondents_qs]
 

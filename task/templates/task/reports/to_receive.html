@@ -95,6 +95,7 @@
                             <th>Recebida</th>
                             <th>Transação via cartão</th>
                             <th>Valor</th>
+                            <th>Comissão</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -118,6 +119,7 @@
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
                                     <td>{{task.parent.charge.charge_id}}</td>
                                     <td>{{ task.amount }}</td>
+                                    <td>{{ task.amount_to_pay }}</td>
                                 </tr>
                             {% endfor %}
                         {% endfor %}
@@ -140,6 +142,7 @@
                             <th>Recebida</th>
                             <th>Transação via cartão</th>
                             <th>Valor (R$)</th>
+                            <th>Comissão (R$)</th>
                         </tr>
                     </thead>
                     <tbody id="os-table-body">
@@ -148,7 +151,8 @@
                                 <tr>
                                     <th colspan="12">{{ office.office_name }}</th>
                                     <th></th>
-                                    <th><center>{{office.office_total}}</center></th>
+                                    <th class="text-center">{{office.office_total.total}}</th>
+                                    <th class="text-center">{{office.office_total.total_to_pay}}</th>
                                 </tr>
                             {% endifchanged %}
 
@@ -156,7 +160,8 @@
                                 <tr>
                                     <th></th>
                                     <th colspan="12">{{ office.client_name }}</th>
-                                    <th><center>{{office.client_total}}</center></th>
+                                    <th class="text-center">{{office.client_total}}</th>
+                                    <th class="text-center">{{office.client_total_to_pay}}</th>
                                 </tr>
                             {% endifchanged %}
                             {% for task in office.tasks %}
@@ -182,7 +187,8 @@
                                     {% endif %}
                                     <td>{{ task.receipt_date|date:"d/m/Y" }}</td>
                                     <td>{{task.parent.charge.charge_id}}</td>
-                                    <td class="text-center"><center>{{ task.amount }}</center></td>
+                                    <td class="text-center">{{ task.amount }}</td>
+                                    <td class="text-center">{{ task.amount_to_pay }}</td>
                                 </tr>
                             {% endfor %}
                         {% empty %}

@@ -385,18 +385,25 @@ class TaskDetail {
             $("#servicepricetable-alert").addClass("hidden");            
             let rowId = $(this).data('id');
             let amount = $(this).data('value').toString();
+            let priceCategory = $(this).data('price-category');
             $('input[name=servicepricetable_id]').val(rowId);
             $('input[name=amount]').val(amount.replace(".", ","));
             $(this).addClass("ezl-bg-open");
             $(this).siblings().removeClass("ezl-bg-open");
-            $('input[name=amount]').focus();
+            if (priceCategory === 'NETWORK'){
+                $('input[name=amount]').attr("disabled", "disabled");
+            } else {
+                $('input[name=amount]').removeAttr("disabled");
+                $('input[name=amount]').focus();
+            }
             self.setBillingItem();
-        });        
+        });
     };    
 
     ajax_get_correspondents(type_task) {
         let tmplRowCorrespondent = '<tr id="office-${pk}" data-id="${pk}" ' +
                             'data-value="${value}" data-formated-value="${formated_value}" ' +
+                            'data-price-category="${price_category}" ' +
                             'data-office-public="${office_public}" class="tr_select" role="row">\n' +
                 '<td class="office_correspondent">${office_correspondent}</td>\n' +
                 '<td class="office_correspondent">${office_network}</td>\n' +
