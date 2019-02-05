@@ -132,7 +132,8 @@
         let elTable = $(`#table-batch-change-tasks [data-id=${chosenPrice.taskId}]`);
         $(elTable).find('tr').attr('service-price-id', chosenPrice.servicePriceTableId );
         $(elTable).find('td [td-correspondent]').text(chosenPrice.correspondenteName);
-        $(elTable).find('td [td-correspondent-value]').text(formatPrice(chosenPrice.correspondenteValue))   
+        $(elTable).find('td [td-correspondent-value]').text(formatPrice(chosenPrice.correspondenteValue))
+        return elTable
     };
 
     var setCorrespondents = function(taskIds) {         
@@ -153,12 +154,7 @@
                     };
                     servicePrices[data.task.id]=data;
                     setChosenPrice(data.chosenPrice);
-                    if (data.prices.length > 1) {
-                        $(`td [btn-data-id=${data.task.id}]`).attr('disabled', false);                        
-                    }
-                    if (data.cheapest_correspondent.count === 1) {
-                        $(elTable).find('td [btn-data-id]').css('display', 'none');
-                    }                    
+                    $(`td [btn-data-id=${data.task.id}]`).attr('disabled', false);
                 })                                             
             },
             error: function(error) {
