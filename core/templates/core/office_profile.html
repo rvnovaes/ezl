@@ -709,6 +709,19 @@
                 $("#" + source.form.id + " #delete_button").attr('disabled', true);
             }
         }
+        function showDeleteButton(source) {
+            if (source.checked) {
+                pk_list.push(source.id);
+            } else {
+                pk_list.pop();
+                $("#" + source.form.id + " #selection_header").attr('checked', false);
+            }
+
+            if (pk_list.length > 0)
+                $("#" + source.form.id + " #delete_button").attr('disabled', false);
+            else
+                $("#" + source.form.id + " #delete_button").attr('disabled', true);
+        }
     </script>
     <!-- DataTables -->    
     
