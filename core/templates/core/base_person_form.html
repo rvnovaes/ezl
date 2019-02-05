@@ -15,7 +15,7 @@
 {% block extrajs%}
     {{ block.super }}
 
-    <script src="{% static "js/jquery-2.1.1.min.js" %}"></script>
+    <script src="{% static "js/jquery-2.1.1.min.js" %}?rev={{request.REVIEW}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/survey-jquery/0.12.23/survey.jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     {% include 'material/includes/material_js.html' %}
@@ -23,10 +23,10 @@
 {#    Apesar de repetidos, os scripts a seguir são necessário para renderização do form #}
 {#    TODO: Refatorar os blocos head, extra_head, extra_js #}
 
-    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}"></script>
-    <script src="{% static "chosen/chosen.jquery.min.js" %}"></script>
-    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}"></script>
-    <script src="{% static "libs/jquery-mask-plugin/jquery.maskMoney.min.js" %}"></script>
+    <script src="{% static "libs/bootstrap-material-design-0.5.10/js/material.min.js" %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static "chosen/chosen.jquery.min.js" %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static "libs/jquery-mask-plugin/jquery.mask.min.js" %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static "libs/jquery-mask-plugin/jquery.maskMoney.min.js" %}?rev={{request.REVIEW}}"></script>
 
     {{ form.media }}
 {% endblock extrajs %}

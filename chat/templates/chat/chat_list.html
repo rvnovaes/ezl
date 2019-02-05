@@ -2,13 +2,13 @@
 {% load static %}
 {% block content %}
 <link href="{% static 'chat/css/chat.css' %}" rel="stylesheet">
-<script src="{% static 'chat/vendor/angular/angular.js' %}"></script>
-<script src="{% static 'chat/js/ng-chat-infinite-scroll.js' %}"></script>
-<script src="{% static 'chat/vendor/angular-ui-event/dist/event.min.js' %}"></script>
-<script src="{% static 'chat/js/app.js' %}"></script>
-<script src="{% static 'chat/js/controllers/chatCtrl.js' %}"></script>
-<script src="{% static 'chat/js/services/chatApiService.js'%}"></script>
-<script src="{% static 'chat/js/directives/chatDirective.js'%}"></script>
+<script src="{% static 'chat/vendor/angular/angular.js' %}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/ng-chat-infinite-scroll.js' %}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/vendor/angular-ui-event/dist/event.min.js' %}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/app.js' %}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/controllers/chatCtrl.js' %}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/services/chatApiService.js'%}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/directives/chatDirective.js'%}?rev={{request.REVIEW}}"></script>
 {%verbatim%}
 <section ng-app='app' ng-controller='chatCtrl'>
   <div class="chat-main">
@@ -162,5 +162,5 @@
   </div>
 </section>
 {%endverbatim%}
-<script src="{% static 'skeleton/js/chat.js' %}"></script>
+<script src="{% static 'skeleton/js/chat.js' %}?rev={{request.REVIEW}}"></script>
 {% endblock %}

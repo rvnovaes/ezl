@@ -12,17 +12,17 @@
 {% block extra_scripts %}
     <!-- UPLOADS SCRIPTS  -->
     {% include 'task/includes/upload.html' %}
-    <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
+    <script src="{% static 'libs/survey-0.12.20/survey.js' %}?rev={{request.REVIEW}}"></script>
     <!--Style Switcher -->
-    <script src="{% static 'skeleton/js/cbpFWTabs.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+    <script src="{% static 'skeleton/js/cbpFWTabs.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}?rev={{request.REVIEW}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 
-    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
-    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
-    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
-    <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}?rev={{request.REVIEW}}"></script>
     <script type="text/javascript">
         (function() {
             [].slice.call(document.querySelectorAll('.sttabs')).forEach(function(el) {
