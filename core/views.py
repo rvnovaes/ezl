@@ -1681,20 +1681,20 @@ class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
                  *args, **kwargs):
-        data = []
-        for user in User.objects.filter(
-                Q(person__legal_name__unaccent__icontains=q)
-                | Q(username__unaccent__icontains=q)
-                | Q(email__unaccent__icontains=q)):
-            data.append({
-                'id':
-                user.person.id,
-                'value':
-                user.person.legal_name + ' ({})'.format(user.username),
-                'data-value-txt':
-                user.person.legal_name + ' ({} - {})'.format(
-                    user.username, user.email)
-            })
+        data = []        
+        users = User.objects.filter(
+            Q(person__legal_name__unaccent__icontains=q) 
+            | Q(username__unaccent__icontains=q) | Q(email__unaccent__icontains=q))
+        for user in users:            
+            if hasattr(user, 'person'):
+                data.append(
+                    {
+                        'id': user.person.id,
+                        'value': user.person.legal_name + ' ({})'.format(user.username),
+                        'data-value-txt': user.person.legal_name + ' ({} - {})'.format(
+                            user.username, user.email)
+                    }
+                )
         return list(data)
 
 
