@@ -148,7 +148,7 @@
           <div class="send-chat-box">
               <div class="input-message">
                   <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" ng-model="message" ui-event="{ keypress: 'onEnterKey($event)' }">
-                  <div class="custom-send p-r-10 p-b-10" ng-if="messages.can_send">
+                  <div class="custom-send p-r-10 p-b-10">
                       <button class="btn btn-success btn-lg btn-circle" type="button" ng-click="sendMessage()" id="btnSend" scroll-bottom="scroll-bottom">
                           <i class="fa fa-paper-plane-o"></i></button>
                   </div>
