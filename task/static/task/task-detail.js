@@ -59,7 +59,11 @@ class TaskDetail {
     }
 
     get officeToDelegateValue() {
-        return this.officeToDelegate.data('value')
+        return this.officeToDelegate.data('value');
+    }
+
+    get typeTask() {
+        return this._elTypeTaskField.val();
     }
 
     get nextState() {
@@ -92,8 +96,8 @@ class TaskDetail {
             success: (response) => {
                 this.servicePriceTable = response;
             }
-        })
-    }    
+        });
+    }
 
 
     setBillingItem() {
@@ -233,7 +237,7 @@ class TaskDetail {
                     text: "Não existe formulário cadastrado para este tipo de serviço."
                 });                
             }
-        })
+        });
     }
 
     toogleModals(modalToClose, modalToOpen, status) {
@@ -315,7 +319,14 @@ class TaskDetail {
 
     onChangeTypeTaskField(){
         this._elTypeTaskField.on('change', (event) => {
-            ajax_get_correspondents($(this).val())        
+            swal({
+                title: 'Buscando tabelas de preço',
+                html: '<h4>Aguarde...</h4>',
+                onOpen: () => {
+                    swal.showLoading();
+                }
+            });
+            this.ajax_get_correspondents(this.typeTask).then( (data) => {swal.close();} )
         })
     }
 
@@ -394,7 +405,7 @@ class TaskDetail {
         });        
     };    
 
-    ajax_get_correspondents(type_task) {
+    async ajax_get_correspondents(type_task) {
         let tmplRowCorrespondent = '<tr id="office-${pk}" data-id="${pk}" ' +
                             'data-value="${value}" data-formated-value="${formated_value}" ' +
                             'data-office-public="${office_public}" class="tr_select" role="row">\n' +
@@ -410,7 +421,10 @@ class TaskDetail {
                 '<td class="office_return_rating">${office_return_rating}</td>\n' +
             '</tr>';
         let self = this;
-        $.ajax({
+        // if (!window.table){
+        //     this.setWindowTable();
+        // }
+        const result = await $.ajax({
             type: 'GET',
             url: `/providencias/ajax_get_correspondent_table/?task=${this.taskId}&type_task=${type_task}`,
             success: function (data) {
@@ -421,21 +435,27 @@ class TaskDetail {
                 var tbody = $('#correspondents-table tbody');
                 if(window.table) {
                     window.table.clear().draw();
-                }
-                tbody.html('');
-                if (data.total > 0) {
-                    $.each(data.correspondents_table, function (index, value) {
-                        $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
-                    });
+                    if (data.total > 0) {
+                        $.each(data.correspondents_table, function (index, value) {
+                            window.table.row.add($($.tmpl(tmplRowCorrespondent, value))).draw();
+                        });
+                    }
+                } else {
+                    tbody.html('');
+                    if (data.total > 0) {
+                        $.each(data.correspondents_table, function (index, value) {
+                            $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
+                        });
+                    }
                 }
                 self.correspondents_data_table();
             },
             dataType: 'json'
         });
-        return;
-    };    
+        return result;
+    };
 
-    correspondents_data_table() {
+    setWindowTable() {
         window.table = $('#correspondents-table').DataTable({
             paging: false,
             order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
@@ -446,9 +466,16 @@ class TaskDetail {
                 "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
             },
         });
-        this._elModalActionButton.removeAttr('disabled')        
+    }
+
+    correspondents_data_table() {
+        if (!window.table){
+            this.setWindowTable()
+        }
+        this._elModalActionButton.removeAttr('disabled');
         $("#correspondents-table_filter input").focus();
         this.onClickRowServicePriceTable();
+        swal.close();
         return;
     };   
 
@@ -465,7 +492,7 @@ class TaskDetail {
 	        if(this.taskStatus === 'ACCEPTED_SERVICE') {
                 let url_string = window.location.href;
                 let url = new URL(url_string);
-                let action = url.searchParams.get("action")
+                let action = url.searchParams.get("action");
                 if (action === 'delegate') {
                     $('#OPEN').click();
                 }
