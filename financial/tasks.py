@@ -33,7 +33,6 @@ class ColumnIndex(Enum):
 def get_office_correspondent(row, xls_file):
     # escritorio correspondente
     office_correspondent = False
-
     if row[ColumnIndex.correspondent.value].value:
         office_name = remove_special_char(str(row[ColumnIndex.correspondent.value].value).strip())
         office_correspondent = Office.objects.filter(legal_name__unaccent__iexact=office_name).first()
@@ -45,7 +44,6 @@ def get_office_correspondent(row, xls_file):
 
 def get_policy_price(row, xls_file, office_session):
     # Tipo de Preço
-    policy_price = False
     if row[ColumnIndex.policy_price.value].value:
         name_policy_price = remove_special_char(str(row[ColumnIndex.policy_price.value].value).strip())
         policy_price = PolicyPrice.objects.filter(office=office_session,
@@ -59,12 +57,12 @@ def get_policy_price(row, xls_file, office_session):
     return policy_price
 
 
-def get_type_task(row, xls_file):
+def get_type_task(row, xls_file, office_session):
     # serviço
     type_task = False
     if row[ColumnIndex.type_task.value].value:
         name_service = remove_special_char(str(row[ColumnIndex.type_task.value].value).strip())
-        type_task = TypeTask.objects.filter(name__unaccent__iexact=name_service).first()
+        type_task = office_session.typetask_office.filter(name__unaccent__iexact=name_service).first()
         if not type_task:
             xls_file.log = xls_file.log + ('Tipo de serviço %s não encontrado' % name_service) + ";"
             row[len(row) - 1]['errors'] = True
@@ -108,13 +106,14 @@ def get_court_district(row, xls_file, state):
     return court_district
 
 
-def get_court_district_complement(row, xls_file, court_district):
+def get_court_district_complement(row, xls_file, court_district, office_session):
     # Complemento de Comarca
     court_district_complement = False
     if row[ColumnIndex.court_district_complement.value].value and court_district:
         complement_name = remove_special_char(str(row[ColumnIndex.court_district_complement.value].value).strip())
-        court_district_complement = CourtDistrictComplement.objects.filter(
-            name__unaccent__iexact=complement_name, court_district_id=court_district.pk).first()
+        court_district_complement = office_session.courtdistrictcomplement_office.filter(
+            name__unaccent__iexact=complement_name,
+            court_district_id=court_district.pk).first()
         if not court_district_complement:
             msg_error = '%s - %s' % (complement_name, court_district.name) if court_district else '%s' % complement_name
             xls_file.log = xls_file.log + 'Complemento de comarca ' + msg_error + ' não encontrado' + ";"
@@ -240,10 +239,10 @@ def import_xls_service_price_table(self, file_id):
                 office_network = None
                 if policy_price and policy_price.category == CategoryPrice.NETWORK.name:
                     office_network = get_office_network(row, xls_file, office_session)
-                type_task = get_type_task(row, xls_file)
+                type_task = get_type_task(row, xls_file, office_session)
                 state = get_state(row, xls_file)
                 court_district = get_court_district(row, xls_file, state)
-                court_district_complement = get_court_district_complement(row, xls_file, court_district)
+                court_district_complement = get_court_district_complement(row, xls_file, court_district, office_session)
                 city = get_city(row, xls_file, state)
                 client = get_client(row, xls_file, office_session)
                 if row_is_valid(office_correspondent, policy_price, type_task, row[len(row) - 1]['errors']):
