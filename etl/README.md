@@ -13,10 +13,6 @@
 
 **3. Configurações do arquivo etl/advwin_ezl/settings.py**
 
-* TRUNCATE_ALL_TABLES - Trunca ou não todas as tabelas
-    * **ATENÇÃO:** Se este parametro for True, ao rodar a ETL todos os dados da base ezl configuradas no settings serão deletados e reimportados de acordo com os dados existentes no banco do ADVWin
-
-
 * USER - Usuário do sistema que irá persistir os novos dados no ezl
 
 * host_sftp - Este é o IP do servidor sftp advwin que armazena os arquivos que serão importados para o EZL

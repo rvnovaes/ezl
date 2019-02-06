@@ -157,7 +157,8 @@ class InvalidObjectFactory(object):
         invalid_type_task, created = TypeTask.objects.get_or_create(
             create_user=user,
             legacy_code=invalid_legacy_code,
-            name=TypeTask._meta.verbose_name.upper() + invalid_registry)
+            name=TypeTask._meta.verbose_name.upper() + invalid_registry,
+            office=default_office)
 
         invalid_task, created = Task.objects.get_or_create(
             create_user=user,
@@ -180,13 +181,6 @@ class InvalidObjectFactory(object):
     def get_invalid_model(model):
         return model.objects.get(id=1)
 
-    def restart_table_id(self):
-        if settings['truncate_all_tables']:
-            with connection.cursor() as cursor:
-                for model in self.models:
-                    cursor.execute('TRUNCATE TABLE ' + model._meta.db_table +
-                                   ' RESTART IDENTITY CASCADE;')
-
 
 class DefaultOffice(object):
     @staticmethod
@@ -202,6 +196,5 @@ class DefaultOffice(object):
 
 
 if __name__ == '__main__':
-    InvalidObjectFactory().restart_table_id()
     InvalidObjectFactory.create()
     DefaultOffice.create()

@@ -409,9 +409,10 @@ class TaskDetail {
                 '<td class="office_rating">${office_rating}</td>\n' +
                 '<td class="office_return_rating">${office_return_rating}</td>\n' +
             '</tr>';
+        let self = this;
         $.ajax({
             type: 'GET',
-            url: '/providencias/ajax_get_correspondent_table/?task={{ form.instance.pk }}&type_task='+type_task,
+            url: `/providencias/ajax_get_correspondent_table/?task=${this.taskId}&type_task=${type_task}`,
             success: function (data) {
                 window.total = data.total;
                 window.table_rows = data.total;
@@ -419,7 +420,7 @@ class TaskDetail {
                 $("#type_task").html(data.type_task);
                 var tbody = $('#correspondents-table tbody');
                 if(window.table) {
-                    window.table.destroy();
+                    window.table.clear().draw();
                 }
                 tbody.html('');
                 if (data.total > 0) {
@@ -427,7 +428,7 @@ class TaskDetail {
                         $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
                     });
                 }
-                this.correspondents_data_table();
+                self.correspondents_data_table();
             },
             dataType: 'json'
         });
@@ -447,6 +448,7 @@ class TaskDetail {
         });
         this._elModalActionButton.removeAttr('disabled')        
         $("#correspondents-table_filter input").focus();
+        this.onClickRowServicePriceTable();
         return;
     };   
 

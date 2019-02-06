@@ -3,7 +3,7 @@ import configparser
 import os
 import sys
 import logging
-
+import hglib
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENV = os.environ.get('ENV')
@@ -30,3 +30,13 @@ def get_parser():
         logger.fatal('{} file was not found'.format(variable_config_path))
         sys.exit(1)
     return parser
+
+
+def get_rev():
+    rev = ''
+    try:
+        client = hglib.open('.')
+        rev = client.parents()[0][0]
+    except:
+        pass
+    return rev
