@@ -985,8 +985,10 @@ class UserUpdateView(AuditFormMixin, UpdateView):
     model = User
 
     form_class = UserUpdateForm
-    success_url = reverse_lazy('user_list')
     success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_success_url(self):
+        return self.request.META.get('HTTP_REFERER', reverse_lazy('user_list'))
 
     def get_initial(self):
         self.form_class.declared_fields['password'].disabled = True
@@ -998,7 +1000,7 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         checker = ObjectPermissionChecker(self.request.user)
         if form.is_valid:
             for office in form.instance.person.offices.active_offices():
-                if checker.has_perm('can_access_general_data', office):
+                if checker.has_perm('group_admin', office):
                     groups = self.request.POST.getlist(
                         'office_' + str(office.id), '')
                     if not groups:
