@@ -238,12 +238,10 @@
                     $("#type_task_name").html("<label>Tipo de Serviço: </label> " + $id_type_task_field.find(":selected").text())
                 }
                 window.type_task_id = $id_type_task_field.val();
-                ajax_get_correspondents(window.type_task_id);
+                taskDetail.ajax_get_correspondents(window.type_task_id);
             }
+            taskDetail.onChangeTypeTaskField();
             (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
-            if (table_rows > 0) {
-                taskDetail.correspondents_data_table();
-            }
         });
         $('#confirmAction').on('shown.bs.modal', function (event) {
             if($('#correspondents-table_filter input').length > 0){

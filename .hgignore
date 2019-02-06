@@ -17,3 +17,5 @@ syntax: regexp
 ^.idea/
 docker-compose.override.yml
 media/*
+.vscode/*
+celeryd.pid

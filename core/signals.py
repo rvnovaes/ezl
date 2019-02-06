@@ -14,21 +14,25 @@ from task.models import TaskShowStatus, TaskWorkflow, TaskStatus
 
 
 def create_office_custom_settings(office, i_work_alone):
-    default_customer, created = Person.objects.get_or_create(legal_name=office.legal_name,
-                                                             name=office.legal_name,
-                                                             is_customer=True,
-                                                             defaults={"create_user_id": office.create_user.id,
-                                                                       "is_active": True})
-    if created:
-        OfficeMembership.objects.create(person=default_customer,
-                                        office=office,
-                                        create_user_id=office.create_user.id,
-                                        is_active=True)
+    default_customer = Person.objects.filter(legal_name=office.legal_name,
+                                             name=office.legal_name,
+                                             is_customer=True).first()
+    if not default_customer:
+        default_customer, created = Person.objects.get_or_create(legal_name=office.legal_name,
+                                                                 name=office.legal_name,
+                                                                 is_customer=True,
+                                                                 defaults={"create_user_id": office.create_user.id,
+                                                                           "is_active": True})
+        if created:
+            OfficeMembership.objects.create(person=default_customer,
+                                            office_id=office.id,
+                                            create_user_id=office.create_user.id,
+                                            is_active=True)
     CustomSettings.objects.create(
-        create_user=office.create_user,
+        create_user_id=office.create_user_id,
         default_customer=default_customer,
-        office=office,
-        default_user=office.create_user,
+        office_id=office.id,
+        default_user_id=office.create_user_id,
         email_to_notification=office.create_user.email,
         i_work_alone=i_work_alone,
         is_active=True
@@ -58,10 +62,10 @@ def post_create_office(office):
                 })
     if not office.create_user.is_superuser:
         for group in {
-                group
-                for group, perms in get_groups_with_perms(
-                    office, attach_perms=True).items()
-                if 'group_admin' in perms
+            group
+            for group, perms in get_groups_with_perms(
+            office, attach_perms=True).items()
+            if 'group_admin' in perms
         }:
             office.create_user.groups.add(group)
     create_default_type_tasks(office)
@@ -115,20 +119,20 @@ models.signals.post_save.connect(
 
 @receiver(post_save, sender=Office)
 def office_post_save(sender, instance, created, **kwargs):
+    i_work_alone = getattr(instance, '_i_work_alone', False)
     if created:
         post_create_office(instance)
+        create_office_custom_settings(instance, i_work_alone)
     if created or not get_groups_with_perms(instance):
         create_permission(instance)
         if not instance.create_user.is_superuser:
             for group in {
-                    group
-                    for group, perms in get_groups_with_perms(
-                        instance, attach_perms=True).items()
-                    if 'group_admin' in perms
+                group
+                for group, perms in get_groups_with_perms(
+                instance, attach_perms=True).items()
+                if 'group_admin' in perms
             }:
                 instance.create_user.groups.add(group)
-        i_work_alone = getattr(instance, '_i_work_alone', False)
-        create_office_custom_settings(instance, i_work_alone)
     else:
         for group in get_groups_with_perms(instance):
             group.name = '{}-{}'.format(group.name.split('-')[0], instance.pk)
@@ -147,17 +151,17 @@ def custom_settings_post_save(sender, instance, created, **kwargs):
         status_to_show = [
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.OPEN, send_mail_template=EmailTemplate.objects.filter(
-                            template_id='d-a9f3606fb333406c9b907fee244e30a4').first(), mail_recipients=['NONE']),
+                    template_id='d-a9f3606fb333406c9b907fee244e30a4').first(), mail_recipients=['NONE']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.RETURN, mail_recipients=['NONE']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.REFUSED, mail_recipients=['NONE']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.ACCEPTED, send_mail_template=EmailTemplate.objects.filter(
-                            template_id='d-ae35cc53722345eaa4a4adf521c3bd81').first(), mail_recipients=['NONE']),
+                    template_id='d-ae35cc53722345eaa4a4adf521c3bd81').first(), mail_recipients=['NONE']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.FINISHED, send_mail_template=EmailTemplate.objects.filter(
-                            template_id='d-7af22ba0396943729cdcb87e2e9f787c').first(), mail_recipients=['NONE']),
+                    template_id='d-7af22ba0396943729cdcb87e2e9f787c').first(), mail_recipients=['NONE']),
         ]
     else:
         status_to_show = [
@@ -167,7 +171,7 @@ def custom_settings_post_save(sender, instance, created, **kwargs):
                            status_to_show=TaskStatus.ACCEPTED_SERVICE, mail_recipients=['NONE']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.OPEN, send_mail_template=EmailTemplate.objects.filter(
-                            template_id='d-9233ece106b743c08074d1eb5efac1f3').first(),
+                    template_id='d-9233ece106b743c08074d1eb5efac1f3').first(),
                            mail_recipients=['PERSON_EXECUTED_BY', 'GET_CHILD__OFFICE']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.ACCEPTED, mail_recipients=['NONE']),
@@ -175,24 +179,24 @@ def custom_settings_post_save(sender, instance, created, **kwargs):
                            status_to_show=TaskStatus.DONE, mail_recipients=['NONE']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.RETURN, send_mail_template=EmailTemplate.objects.filter(
-                            template_id='d-5c0f201b780a4b7ea6d3adfc7eae4e49').first(),
+                    template_id='d-5c0f201b780a4b7ea6d3adfc7eae4e49').first(),
                            mail_recipients=['PERSON_EXECUTED_BY', 'PERSON_DISTRIBUTED_BY', 'GET_CHILD__OFFICE']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.FINISHED, mail_recipients=['NONE']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.REFUSED_SERVICE, send_mail_template=EmailTemplate.objects.filter(
-                            template_id='d-a0687119152c4396894274fcf33c94bc').first(),
+                    template_id='d-a0687119152c4396894274fcf33c94bc').first(),
                            mail_recipients=['PERSON_ASKED_BY', 'PARENT__PERSON_DISTRIBUTED_BY']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.REFUSED, send_mail_template=EmailTemplate.objects.filter(
-                            template_id='d-f6188c1006af4193aa66f99af71d070b').first(),
+                    template_id='d-f6188c1006af4193aa66f99af71d070b').first(),
                            mail_recipients=['PERSON_DISTRIBUTED_BY', 'PARENT__PERSON_DISTRIBUTED_BY']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.BLOCKEDPAYMENT, mail_recipients=['NONE']),
         ]
         if instance.office.use_etl:
             status_to_show.append(TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
-                                                 status_to_show=TaskStatus.ERROR),)
+                                                 status_to_show=TaskStatus.ERROR), )
     if created:
         instance.task_status_show.bulk_create(status_to_show)
         if instance.i_work_alone:
