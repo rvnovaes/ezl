@@ -20,7 +20,7 @@
 {% endblock %}
 {% block extra_scripts %}
     <!-- DataTables -->
-    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}?rev={{request.REVIEW}}"></script>
 {% endblock %}
 {% block content %}
     <div class="row">
