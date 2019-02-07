@@ -395,19 +395,27 @@ class TaskDetail {
         $("#correspondents-table tbody tr").on('click', function(){            
             $("#servicepricetable-alert").addClass("hidden");            
             let rowId = $(this).data('id');
-            let amount = $(this).data('value').toString();
+            let amount_to_pay = $(this).data('value').toString();
+            let priceCategory = $(this).data('price-category');
+            let elAmount =$('input[name=amount_to_pay]');
             $('input[name=servicepricetable_id]').val(rowId);
-            $('input[name=amount]').val(amount.replace(".", ","));
+            elAmount.val(amount_to_pay.replace(".", ","));
             $(this).addClass("ezl-bg-open");
             $(this).siblings().removeClass("ezl-bg-open");
-            $('input[name=amount]').focus();
+            if (priceCategory === 'NETWORK'){
+                elAmount.attr("disabled", "disabled");
+            } else {
+                elAmount.removeAttr("disabled");
+                elAmount.focus();
+            }
             self.setBillingItem();
-        });        
+        });
     };    
 
     async ajax_get_correspondents(type_task) {
         let tmplRowCorrespondent = '<tr id="office-${pk}" data-id="${pk}" ' +
                             'data-value="${value}" data-formated-value="${formated_value}" ' +
+                            'data-price-category="${price_category}" ' +
                             'data-office-public="${office_public}" class="tr_select" role="row">\n' +
                 '<td class="office_correspondent">${office_correspondent}</td>\n' +
                 '<td class="office_correspondent">${office_network}</td>\n' +
@@ -480,7 +488,7 @@ class TaskDetail {
     };   
 
     onKeypressAmountField() {
-        $('input[id=id_amount]').keypress(function(e) {
+        $('input[id=id_amount_to_pay]').keypress(function(e) {
             if(e.which == 13) {
               e.preventDefault();
             }
@@ -499,6 +507,7 @@ class TaskDetail {
                 if (action === 'assign') {
                     $('#ASSIGN').click();
                 }
+                this.onKeypressAmountField()
             }
         });
     }

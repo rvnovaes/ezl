@@ -7,6 +7,7 @@ from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, Poli
 from decimal import Decimal
 from core.forms import BaseModelForm, XlsxFileField
 from core.widgets import TypeaHeadForeignKeyWidget
+from financial.utils import recalculate_values
 
 
 class CostCenterForm(BaseModelForm):
@@ -81,10 +82,14 @@ class ServicePriceTableForm(BaseModelForm):
                             # O valor pode ser 0.00 porque os correspondentes internos não cobram para fazer serviço
                             widget=forms.TextInput(attrs={'mask': 'money'}))
 
+    value_to_receive = forms.CharField(widget=forms.HiddenInput())
+    value_to_pay = forms.CharField(widget=forms.HiddenInput())
+
     class Meta:
         model = ServicePriceTable
         fields = ('office', 'policy_price', 'office_correspondent', 'office_network', 'client', 'type_task', 'state',
-                  'court_district', 'court_district_complement', 'city', 'value', 'is_active')
+                  'court_district', 'court_district_complement', 'city', 'value', 'is_active', 'value_to_receive',
+                  'value_to_pay')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
@@ -92,8 +97,24 @@ class ServicePriceTableForm(BaseModelForm):
         value = value.replace(',', '.')
         return Decimal(value)
 
+    def clean_values(self):
+        if 'value' in self.changed_data:
+            instance = self.instance
+            old_value = instance.value
+            value_to_pay = instance.value_to_pay
+            value_to_receive = instance.value_to_receive
+            new_value = self.cleaned_data['value']
+            rate_type_pay = instance.rate_type_pay
+            rate_type_receive = instance.rate_type_receive
+            self.cleaned_data['value_to_pay'], self.cleaned_data['value_to_receive'] = recalculate_values(
+                old_value, value_to_pay, value_to_receive, new_value, rate_type_pay, rate_type_receive
+            )
+        else:
+            self.cleaned_data['value_to_pay'], self.cleaned_data['value_to_receive'] = self.cleaned_data['value']
+
     def clean(self):
         cleaned_data = super().clean()
+        self.clean_values()
         if not cleaned_data["court_district"] and cleaned_data["court_district_complement"]:
             cleaned_data["court_district"] = self.cleaned_data["court_district_complement"].court_district
         if not cleaned_data["state"] and cleaned_data['court_district']:

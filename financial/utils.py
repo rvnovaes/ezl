@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from lawsuit.models import CourtDistrict
 from django.db.models import Q
+from decimal import Decimal
 from .models import ServicePriceTable
 
 
@@ -60,3 +61,22 @@ def check_service_price_table_unique(pk, office, office_correspondent, state, co
 
 def check_office_correspondent_relation(office, office_correspondent):
     return office_correspondent in office.offices.active_offices()
+
+
+def recalculate_values(old_value, value_to_pay, value_to_receive, new_value, rate_type_pay, rate_type_receive):
+    diff_to_pay = abs(value_to_pay.amount - old_value)
+    diff_to_receive = abs(value_to_receive.amount - old_value)
+    new_value = Decimal(new_value)
+    if rate_type_pay == 'PERCENT':
+        diff_to_pay = round(1 - (diff_to_pay / old_value), 2)
+        value_to_pay = round(new_value * diff_to_pay, 2)
+    else:
+        value_to_pay = round(new_value - diff_to_pay, 2)
+    value_to_pay = Decimal(value_to_pay)
+    if rate_type_receive == 'PERCENT':
+        diff_to_receive = round(1 + (diff_to_receive / old_value), 2)
+        value_to_receive = round(new_value * diff_to_receive, 2)
+    else:
+        value_to_receive = round(new_value + diff_to_receive, 2)
+    value_to_receive = Decimal(value_to_receive)
+    return value_to_pay, value_to_receive
