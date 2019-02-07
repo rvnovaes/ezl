@@ -18,3 +18,4 @@ syntax: regexp
 docker-compose.override.yml
 media/*
 .vscode/*
+celeryd.pid
