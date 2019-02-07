@@ -11,7 +11,7 @@ import financial.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('financial', '0036_auto_20190121_1205'),
+        ('financial', '0037_service_price_table_type_task_office'),
     ]
 
     operations = [

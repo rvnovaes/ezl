@@ -69,14 +69,14 @@ def recalculate_values(old_value, value_to_pay, value_to_receive, new_value, rat
     new_value = Decimal(new_value)
     if rate_type_pay == 'PERCENT':
         diff_to_pay = round(1 - (diff_to_pay / old_value), 2)
-        value_to_pay = round(new_value * diff_to_pay, 0)
+        value_to_pay = round(new_value * diff_to_pay, 2)
     else:
-        value_to_pay = round(new_value - diff_to_pay, 0)
-    value_to_pay = Decimal('{}.00'.format(value_to_pay))
+        value_to_pay = round(new_value - diff_to_pay, 2)
+    value_to_pay = Decimal(value_to_pay)
     if rate_type_receive == 'PERCENT':
         diff_to_receive = round(1 + (diff_to_receive / old_value), 2)
-        value_to_receive = round(new_value * diff_to_receive, 0)
+        value_to_receive = round(new_value * diff_to_receive, 2)
     else:
-        value_to_receive = round(new_value + diff_to_receive, 0)
-    value_to_receive = Decimal('{}.00'.format(value_to_receive))
+        value_to_receive = round(new_value + diff_to_receive, 2)
+    value_to_receive = Decimal(value_to_receive)
     return value_to_pay, value_to_receive

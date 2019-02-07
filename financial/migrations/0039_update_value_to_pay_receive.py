@@ -15,7 +15,7 @@ def update_service_price_table(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('financial', '0037_auto_20190131_1343'),
+        ('financial', '0038_auto_20190131_1343'),
     ]
 
     operations = [
