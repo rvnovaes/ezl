@@ -60,8 +60,8 @@ f{% load i18n %}
     window.drsSettings = {{ drs_settings|safe }};
     window.drsSpec = {{ spec|safe }};
   </script>
-  <script src="{% static 'rest_framework_swagger/bundles/vendors.bundle.js' %}"></script>
-  <script src="{% static 'rest_framework_swagger/bundles/app.bundle.js' %}"></script>
+  <script src="{% static 'rest_framework_swagger/bundles/vendors.bundle.js' %}?rev={{request.REVIEW}}"></script>
+  <script src="{% static 'rest_framework_swagger/bundles/app.bundle.js' %}?rev={{request.REVIEW}}"></script>
   {% block extra_scripts %}
   {# -- Add any additional scripts here -- #}
   {% endblock %}

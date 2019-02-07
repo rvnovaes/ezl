@@ -48,7 +48,7 @@
                 <div class="col col-md-6">
                     <div class="panel panel-default"> 
                         <div class="panel-heading ezl-panel"> 
-                            <h3 class="panel-title">Estados em que atua</h3> 
+                            <h3 class="panel-title">Estados em que atua</h3>
                         </div> 
                         <div class="panel-body">
                             {% for state in object.states_of_practice %}
@@ -536,10 +536,10 @@
         <!-- UPLOADS SCRIPTS  -->
         {% include 'ecm/javascripts.html' %}
 
-        <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
-        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
-        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
-        <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}?rev={{request.REVIEW}}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}?rev={{request.REVIEW}}"></script>
+        <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}?rev={{request.REVIEW}}"></script>
+        <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}?rev={{request.REVIEW}}"></script>
         <!-- DIV para o Ajax localizar o local (pelo ID) onde será incluído os novos scripts de deleção
              a medida que for adicionando novos arquivos -->
         <div id="scripts">
@@ -667,7 +667,7 @@
             }
         }
 
-        function showDeleteButton(source) {            
+        function showDeleteButton(source) {
             if (source.checked) {
                 pk_list.push(source.id);
             } else {

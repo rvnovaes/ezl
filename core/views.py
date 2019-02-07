@@ -1895,6 +1895,7 @@ class OfficeMembershipInactiveView(UpdateView):
                                 | Q(person_distributed_by=record.person))):
                         record.is_active = False
                         record.save()
+                        messages.success(self.request, self.success_message)
                         try:
                             DefaultOffice.objects.filter(
                                 auth_user=record.person.auth_user,
@@ -1907,7 +1908,6 @@ class OfficeMembershipInactiveView(UpdateView):
                             "O usuário {} não pode ser desvinculado do escritório, uma vez que"
                             " ainda existem OS a serem cumpridas por ele".
                             format(record.person))
-                messages.success(self.request, self.success_message)
             except ProtectedError as e:
                 qs = e.protected_objects.first()
                 messages.error(
@@ -1922,6 +1922,8 @@ class OfficeMembershipInactiveView(UpdateView):
             return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
+        if self.request.META.get('HTTP_REFERER'):
+            return self.request.META.get('HTTP_REFERER')
         return reverse(
             'office_update', kwargs={'pk': self.kwargs['office_pk']})
 

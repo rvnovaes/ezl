@@ -2,7 +2,7 @@
 {% load static %}
 {% block extra_scripts %}
     {{ block.super }}
-    <script src="{% static 'js/service_price_table.js' %}?date=201901241408"></script>
+    <script src="{% static 'js/service_price_table.js' %}?rev={{request.REVIEW}}"></script>
     <script type="text/javascript">
     $(document).ready(function(){
         servicePriceTable = new ServicePriceTable('{{object.office.pk}}', {{ policy_prices_categories|safe }});
