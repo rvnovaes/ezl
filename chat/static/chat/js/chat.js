@@ -52,7 +52,7 @@ var getCountMessages = function (){
         },
         dataType: "json"
     });
-}
+};
 
 var setBadgeItem = function (items) {
     items.forEach(function (item) {
@@ -81,7 +81,7 @@ var chatReadMessage = function (chat_id, csrf_token) {
             xhr.setRequestHeader("X-CSRFToken", csrf_token);
         },
         dataType: 'json'
-    })
+    });
 };
 
 var chatUnreadMessage = function (chat_id, csrf_token) {
