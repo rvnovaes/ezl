@@ -183,7 +183,7 @@ class TaskDetailForm(ModelForm):
             'id': 'notes_id'
         }))
 
-    amount = forms.CharField(
+    amount_to_pay = forms.CharField(
         required=False,
         label='Valor:',
         widget=forms.TextInput(attrs={'mask': 'money'}))
@@ -197,12 +197,12 @@ class TaskDetailForm(ModelForm):
         required=False,
         widget=forms.Textarea(attrs={"rows": 2}))
 
-    def clean_amount(self):
-        amount = (self.cleaned_data['amount']
-                  if self.cleaned_data['amount'] else str(0))
-        amount = amount.replace('.', '')
-        amount = amount.replace(',', '.')
-        return float(amount)
+    def clean_amount_to_pay(self):
+        amount_to_pay = (self.cleaned_data['amount_to_pay']
+                         if self.cleaned_data['amount_to_pay'] else str(0))
+        amount_to_pay = amount_to_pay.replace('.', '')
+        amount_to_pay = amount_to_pay.replace(',', '.')
+        return float(amount_to_pay)
 
     def clean(self):
         form_data = self.cleaned_data

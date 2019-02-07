@@ -384,17 +384,18 @@ class TaskDetail {
         $("#correspondents-table tbody tr").on('click', function(){            
             $("#servicepricetable-alert").addClass("hidden");            
             let rowId = $(this).data('id');
-            let amount = $(this).data('value').toString();
+            let amount_to_pay = $(this).data('value').toString();
             let priceCategory = $(this).data('price-category');
+            let elAmount =$('input[name=amount_to_pay]');
             $('input[name=servicepricetable_id]').val(rowId);
-            $('input[name=amount]').val(amount.replace(".", ","));
+            elAmount.val(amount_to_pay.replace(".", ","));
             $(this).addClass("ezl-bg-open");
             $(this).siblings().removeClass("ezl-bg-open");
             if (priceCategory === 'NETWORK'){
-                $('input[name=amount]').attr("disabled", "disabled");
+                elAmount.attr("disabled", "disabled");
             } else {
-                $('input[name=amount]').removeAttr("disabled");
-                $('input[name=amount]').focus();
+                elAmount.removeAttr("disabled");
+                elAmount.focus();
             }
             self.setBillingItem();
         });
@@ -460,7 +461,7 @@ class TaskDetail {
     };   
 
     onKeypressAmountField() {
-        $('input[id=id_amount]').keypress(function(e) {
+        $('input[id=id_amount_to_pay]').keypress(function(e) {
             if(e.which == 13) {
               e.preventDefault();
             }
@@ -479,6 +480,7 @@ class TaskDetail {
                 if (action === 'assign') {
                     $('#ASSIGN').click();
                 }
+                this.onKeypressAmountField()
             }
         });
     }
