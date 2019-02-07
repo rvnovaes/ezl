@@ -1,13 +1,13 @@
 {% load static %}
 <link href="{% static 'chat/css/chat-task.css' %}" rel="stylesheet">
-<script src="{% static 'chat/vendor/angular/angular.js' %}"></script>
-<script src="{% static 'chat/vendor/angular-ui-event/dist/event.min.js' %}"></script>
-<script src="{% static 'chat/js/ng-chat-infinite-scroll.js' %}"></script>
-<script src="{% static 'chat/js/app.js' %}"></script>
-<script src="{% static 'chat/js/controllers/chatInternalCtrl.js' %}"></script>
-<script src="{% static 'chat/js/services/chatApiService.js'%}"></script>
-<script src="{% static 'chat/js/directives/chatDirective.js'%}"></script>
-<script src="{% static 'chat/js/directives/chatMessagesDirective.js'%}"></script>
+<script src="{% static 'chat/vendor/angular/angular.js' %}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/vendor/angular-ui-event/dist/event.min.js' %}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/ng-chat-infinite-scroll.js' %}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/app.js' %}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/controllers/chatInternalCtrl.js' %}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/services/chatApiService.js'%}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/directives/chatDirective.js'%}?rev={{request.REVIEW}}"></script>
+<script src="{% static 'chat/js/directives/chatMessagesDirective.js'%}?rev={{request.REVIEW}}"></script>
 <style>
     .kc_fab_main_btn{
         background-color: #12897a;
@@ -76,7 +76,7 @@
               <div class="chat-list" style="overflow: hidden;" tabindex="5005" id="messageList">
                 <div class="slimscroll" ng-if="$ctrl.in_office_list">
                   <div ng-repeat="office in $ctrl.offices track by office.name">
-                    <a href="#" style="color:#000;text-decoration: none;" ng-click="$ctrl.getMessages(office.chat, office.can_send)" class="get-message">
+                    <a href="#" style="color:#000;text-decoration: none;" ng-click="$ctrl.getMessages(office.chat)" class="get-message">
                       <div class="row">
                         <div class="col-md-2">
                         <div class="er-pic" ng-if="office.logo">
@@ -123,7 +123,7 @@
               </ul>
             </div>
           </div>
-          <div class="panel-footer" ng-if="$ctrl.can_send">
+          <div class="panel-footer">
             <div class="row">
               <div class="col-xs-8">
                 {{messageToSend}}

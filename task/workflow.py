@@ -137,6 +137,8 @@ class CorrespondentsTable(object):
             city = task.movement.law_suit.city
             court_district = task.movement.law_suit.court_district
             state = court_district.state if court_district else None
+            if not state:
+                state = city.state if city else None
             client = task.movement.law_suit.folder.person_customer
             offices_related = task.office.offices.all()
             networks = task.office.network_members.all()

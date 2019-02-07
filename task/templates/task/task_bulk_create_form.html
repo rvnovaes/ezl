@@ -199,9 +199,9 @@
 {% block extra_scripts %}
     {{ block.super }}
     {{ form.media }}
-    <script src="{% static 'task/task-bulk-create.js' %}"></script>
-    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
-    <script src="{% static "file_form/file_form.js" %}"></script>
+    <script src="{% static 'task/task-bulk-create.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static "ajaxuploader/js/fileuploader.js" %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static "file_form/file_form.js" %}?rev={{request.REVIEW}}"></script>
     <script>
        $(function() {
            initUploadFields($('#task_form'));

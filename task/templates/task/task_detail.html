@@ -122,32 +122,32 @@
 {% block extra_scripts %}
     <!-- UPLOADS SCRIPTS  -->
     {% include 'task/includes/upload.html' %}
-    <script src="{% static 'billing/js/billing.js' %}"></script>
+    <script src="{% static 'billing/js/billing.js' %}?rev={{request.REVIEW}}"></script>
     {% if ENV == 'production'%}
-        <script src="{% static 'billing/js/gerencianet/production.js' %}"></script>
+        <script src="{% static 'billing/js/gerencianet/production.js' %}?rev={{request.REVIEW}}"></script>
     {% else %}
-        <script src="{% static 'billing/js/gerencianet/dev.js' %}"></script>
+        <script src="{% static 'billing/js/gerencianet/dev.js' %}?rev={{request.REVIEW}}"></script>
     {% endif %}
-    <script src="{% static 'libs/survey-0.12.20/survey.js' %}"></script>
-    <script src="{% static 'libs/bootstrap-rating/bootstrap-rating.min.js' %}"></script>
+    <script src="{% static 'libs/survey-0.12.20/survey.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/bootstrap-rating/bootstrap-rating.min.js' %}?rev={{request.REVIEW}}"></script>
     <!--Style Switcher -->
-    <script src="{% static 'skeleton/js/cbpFWTabs.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}"></script>
+    <script src="{% static 'skeleton/js/cbpFWTabs.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}?rev={{request.REVIEW}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 
-    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}"></script>
-    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}"></script>
-    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}"></script>
-    <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.iframe-transport.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/jquery.fileupload.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}?rev={{request.REVIEW}}"></script>
 
     <!-- datatables -->
-    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}?rev={{request.REVIEW}}"></script>
     {% include 'questionnaire/generic_survey.html' %}
     {% include 'questionnaire/company_representative_questionnarie.html'%}
     {% include 'billing/modal/checkout.html' %}
-    <script src='{% static "task/task-detail.js" %}'></script>
-    <script src="{% static 'billing/js/checkout.js' %}"></script>
+    <script src='{% static "task/task-detail.js" %}?rev={{request.REVIEW}}'></script>
+    <script src="{% static 'billing/js/checkout.js' %}?rev={{request.REVIEW}}"></script>
     <script type="text/javascript">
     var taskDetail;
     var gn_checkout;
@@ -168,7 +168,8 @@
     $(document).ready(function(){
         var checkout = new Checkout('{{csrf_token}}', '{{object.charge.charge_id}}');
         let billing = new Billing(checkout);
-        taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, '{{survey_company_representative|safe}}', '{{csrf_token}}', billing, '{{object.charge.charge_id}}');
+        debugger;
+        taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, `{{survey_company_representative|safe}}`, '{{csrf_token}}', billing, '{{object.charge.charge_id}}');
     })
     </script>
 {% endblock %}
@@ -238,12 +239,10 @@
                     $("#type_task_name").html("<label>Tipo de Serviço: </label> " + $id_type_task_field.find(":selected").text())
                 }
                 window.type_task_id = $id_type_task_field.val();
-                ajax_get_correspondents(window.type_task_id);
+                taskDetail.ajax_get_correspondents(window.type_task_id);
             }
+            taskDetail.onChangeTypeTaskField();
             (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
-            if (table_rows > 0) {
-                taskDetail.correspondents_data_table();
-            }
         });
         $('#confirmAction').on('shown.bs.modal', function (event) {
             if($('#correspondents-table_filter input').length > 0){

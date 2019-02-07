@@ -14,12 +14,12 @@
     <title>{{ title_page }}</title>
     <!-- ============================================================== -->
     <!-- jQuery -->
-    <script src="{% static 'skeleton/plugins/bower_components/jquery/dist/jquery.min.js' %}"></script>
-    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment.js' %}"></script>
-    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment-timezone.min.js' %}"></script>
-    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/locale-pt-br.js' %}"></script>
-    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment-with-locales.js' %}"></script>
-    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js' %}"></script>   
+    <script src="{% static 'skeleton/plugins/bower_components/jquery/dist/jquery.min.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment-timezone.min.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/locale-pt-br.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/moment-with-locales.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'libs/bootstrap3-datetimepicker-4.17.47/js/bootstrap-datetimepicker.min.js' %}?rev={{request.REVIEW}}"></script>   
     <!-- Stylesheets block -->
     {% block extra_stylesheets %}
         {% comment %}

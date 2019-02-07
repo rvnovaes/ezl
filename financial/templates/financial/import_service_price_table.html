@@ -104,9 +104,9 @@
 
 
 {% block extra_scripts %}
-    <script src="{% static 'skeleton/plugins/bower_components/dropify/dist/js/dropify.min.js' %}"></script>    
-    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/dropify/dist/js/dropify.min.js' %}?rev={{request.REVIEW}}"></script>    
+    <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}?rev={{request.REVIEW}}"></script>
     <!-- start - This is for export functionality only -->
     <script src="//cdn.datatables.net/buttons/1.2.2/js/dataTables.buttons.min.js"></script>
     <script src="//cdn.datatables.net/buttons/1.2.2/js/buttons.flash.min.js"></script>

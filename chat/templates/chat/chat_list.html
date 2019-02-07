@@ -21,7 +21,7 @@
               <div class="col-md-12">
                 <button ng-if="!listOffices" ng-click="goToOfficeList()" class="btn btn-block btn-rounded btn-success">
                   <i class="fa fa-arrow-left"></i> Voltar
-                </button>                
+                </button>
               </div>
             </div>
               <div class="form-material">
@@ -63,8 +63,8 @@
                       </li>
                     </div>
                   </ul>
-                 
-                
+
+
                   <ul class="chatonline style-none" ng-show="!listOffices">
                       <div id="list-chat-scroll">
                          <div infinite-scroll='loadMoreChats()' infinite-scroll-distance='0'>
@@ -81,7 +81,7 @@
                                     </div>
                                   </div>
                                   <div class="col-md-10 chat-title">
-                                    <span id="chat-title">                                      
+                                    <span id="chat-title">
                                       {{chat.title}}
                                       <div class="row">
                                         <div class="col-md-6">
@@ -98,7 +98,7 @@
                                 </div>
                               </div>
                           </a>
-                          <hr/>                        
+                          <hr/>
                         </li>
                       </div>
                       </div>
@@ -114,7 +114,7 @@
           <div class="chat-main-header">
               <div class="p-10 b-b">
                   <div class="row">
-                    <div class="col-md-10">                      
+                    <div class="col-md-10">
                       <h3 class="box-title"><a href="/dashboard/{{task}}">{{chat.title}}</a></h3>
                       <span class="heading-description text-wrap">{{ chat.description }}</span>
                     </div>
@@ -145,10 +145,7 @@
               </div>
             </ul>
           </div>
-          <pre>
-          {{ messages.can_send }} {{ message }}
-          </pre>
-          <div class="send-chat-box" ng-if="messages.can_send">
+          <div class="send-chat-box">
               <div class="input-message">
                   <input class="form-control" placeholder="Digite sua mensagem" id="inputMsg" ng-model="message" ui-event="{ keypress: 'onEnterKey($event)' }">
                   <div class="custom-send p-r-10 p-b-10">
