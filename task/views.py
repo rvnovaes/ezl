@@ -321,12 +321,6 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
                 if servicepricetable:
                     delegate_child_task(form.instance, servicepricetable.office_correspondent)
                     form.instance.person_executed_by = None
-                send_notes_execution_date.send(
-                    sender=self.__class__,
-                    notes=note,
-                    instance=form.instance,
-                    execution_date=form.instance.execution_date,
-                    survey_result=form.instance.survey_result)
                 form.save()
                 return JsonResponse({'status': 'ok'})
             return JsonResponse({'status': 'error', 'errors': form})
@@ -937,9 +931,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 id=servicepricetable_id).first()
             get_task_attachment(self, form)
             if servicepricetable:
+                form.instance.person_executed_by = None
                 delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
-                form.instance.person_executed_by = None
+                
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
         feedback_comment = form.cleaned_data.get('feedback_comment')

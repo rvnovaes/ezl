@@ -425,6 +425,10 @@ def post_save_geolocation(sender, instance, **kwargs):
 def pre_create_historical_record_callback(sender, **kwargs):
     history_instance = kwargs.get('history_instance')
     history_instance.history_office = get_office_session(HistoricalRecords.thread.request)
+    instance = kwargs.get('instance')
+    if instance.history.exists():
+        if not get_history_changes(history_instance):
+            history_instance.pk = instance.history.latest('pk').pk
 
 
 @receiver(post_create_historical_record)
