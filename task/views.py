@@ -51,7 +51,7 @@ from task.workflow import CorrespondentsTable
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
-from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent
+from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, has_task_parent
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -917,8 +917,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             survey.survey_result = survey_result
             survey.save()
             survey.tasks.add(form.instance)
-            if form.instance.parent:
-                survey.tasks.add(form.instance.parent)
+            task_to_check_parent = form.instance
+            while has_task_parent(task_to_check_parent):
+                survey.tasks.add(task_to_check_parent.parent)
+                task_to_check_parent = task_to_check_parent.parent
         send_notes_execution_date.send(
             sender=self.__class__,
             notes=notes,

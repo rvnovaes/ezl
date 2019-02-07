@@ -195,3 +195,8 @@ def get_last_parent(task):
         return get_last_parent(task.parent)
     return task
 
+def has_task_parent(task):
+    if task.parent:
+        return True
+    return False
+
