@@ -2292,7 +2292,7 @@ class TypeTaskMainAutocomplete(autocomplete.Select2QuerySetView):
             return TypeTaskMain.objects.none()
         qs = TypeTaskMain.objects.all()
         if self.q:
-            qs = qs.filter(name__unaccent_icontains=self.q)
+            qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
     
 
