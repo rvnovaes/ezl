@@ -937,7 +937,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
 
-
         feedback_rating = form.cleaned_data.get('feedback_rating')
         feedback_comment = form.cleaned_data.get('feedback_comment')
         if feedback_rating and not form.instance.taskfeedback_set.exists():
