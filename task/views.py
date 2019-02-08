@@ -957,9 +957,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             form.instance.delegation_date = timezone.now()
             if not form.instance.person_distributed_by:
                 form.instance.person_distributed_by = self.request.user.person
-            default_amount = Decimal('0.00') if not form.instance.amount_to_receive else form.instance.amount_to_receive
-            form.instance.amount_to_receive = (form.cleaned_data['amount_to_receive']
-                                               if form.cleaned_data['amount_to_receive'] else default_amount)
+            default_amount = Decimal('0.00') if not form.instance.amount else form.instance.amount
+            form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else default_amount)
             servicepricetable_id = (
                 self.request.POST['servicepricetable_id']
                 if self.request.POST['servicepricetable_id'] else None)
@@ -968,7 +967,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             get_task_attachment(self, form)
             if servicepricetable:
                 form.instance.price_category = servicepricetable.policy_price.category
-                form.instance.amount = servicepricetable.value
+                form.instance.amount_to_receive = Decimal(servicepricetable.value_to_receive.amount)
                 form.instance.amount_to_pay = Decimal(servicepricetable.value_to_pay.amount)
                 delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
@@ -2252,15 +2251,15 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.POST.get('task_id'))
-        current_amount = task.amount_to_pay
-        task.amount_to_pay = request.POST.get('amount_to_pay')
+        current_amount = task.amount
+        task.amount = request.POST.get('amount')
         pre_save.disconnect(signals.change_status, sender=Task)
         pre_save.disconnect(signals.pre_save_task, sender=Task)        
         post_save.disconnect(signals.post_save_task, sender=Task)
         task.save()
         child_task = task.get_child
         if child_task:
-            child_task.amount_to_pay = task.amount_to_pay
+            child_task.amount = task.amount
             child_task.save()
         msg = "Valor alterado de {} para {} pelo escritório {}".format(
             format_currency(current_amount, 'R$', locale='pt_BR'),

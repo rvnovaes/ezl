@@ -278,7 +278,7 @@ class TaskDetail {
                         onOpen: () => {
                             swal.showLoading();
                             debugger;
-                            $('input[name=amount_to_receive]').removeAttr('disabled');
+                            $('input[name=amount]').removeAttr('disabled');
                             $('#task_detail').unbind('submit').submit();            
                         }
                     })
@@ -397,11 +397,11 @@ class TaskDetail {
         $("#correspondents-table tbody tr").on('click', function(){            
             $("#servicepricetable-alert").addClass("hidden");            
             let rowId = $(this).data('id');
-            let amount_to_receive = $(this).data('value').toString();
+            let amount = $(this).data('value').toString();
             let priceCategory = $(this).data('price-category');
-            let elAmount =$('input[name=amount_to_receive]');
+            let elAmount =$('input[name=amount]');
             $('input[name=servicepricetable_id]').val(rowId);
-            elAmount.val(amount_to_receive.replace(".", ","));
+            elAmount.val(amount.replace(".", ","));
             $(this).addClass("ezl-bg-open");
             $(this).siblings().removeClass("ezl-bg-open");
             if (priceCategory === 'NETWORK'){
@@ -490,7 +490,7 @@ class TaskDetail {
     };   
 
     onKeypressAmountField() {
-        $('input[id=id_amount_to_receive]').keypress(function(e) {
+        $('input[id=id_amount]').keypress(function(e) {
             if(e.which == 13) {
               e.preventDefault();
             }

@@ -109,7 +109,7 @@
             <tr>
                 <th>Valor</th>
                 <td>
-                    {{ form.instance.amount_to_receive }} {% if not form.instance.parent and form.instance|show_edit_amount %} <button class="btn btn-link" type="button" id="task-edit-amount"><i class="fa fa-edit"> </i> Editar</button> {% endif %}
+                    {{ form.instance.amount }} {% if not form.instance.parent and form.instance|show_edit_amount %} <button class="btn btn-link" type="button" id="task-edit-amount"><i class="fa fa-edit"> </i> Editar</button> {% endif %}
                 </td>
             </tr>
         {% endif %}
@@ -174,7 +174,7 @@
                                       title: 'Informe o valor da ordem de serviço',
                                       input: 'text',
                                       width: '30%', 
-                                      inputValue: '{{form.instance.amount_to_pay}}',
+                                      inputValue: '{{form.instance.amount}}',
                                       inputClass: 'form-control money',
                                       showCancelButton: true,                                      
                                       confirmButtonText: 'Salvar',
@@ -193,7 +193,7 @@
                                     });
 
                                     if (value) {
-                                        let amount_to_pay = $('.money').maskMoney('unmasked')[0]
+                                        let amount = $('.money').maskMoney('unmasked')[0]
                                         swal({
                                             title: 'Aguarde', 
                                             onOpen: ()=>{
@@ -203,7 +203,7 @@
                                         $.ajax({
                                             type: 'POST',
                                             url: '/providencias/task/update/amount',
-                                            data: {task_id: '{{form.instance.pk}}', amount_to_pay: amount_to_pay},
+                                            data: {task_id: '{{form.instance.pk}}', amount: amount},
                                             success: function (response) {
                                                 location.reload();
                                             },
