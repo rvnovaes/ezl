@@ -4,6 +4,7 @@ class Register {
         this.elEmail = $('input[name=email]');
         this.elPassword = $('input[name=password]');        
         this.elName = $('input[name=name]');
+        this.elOfficeCpfCnpj = $('input[name=office_cpf_cnpj]')
         this.elAcceptTerms = $('input[name=accept-terms]'); 
         this.elBtnEye = $('#btn-eye'); 
         this.onSubmit();
@@ -12,6 +13,8 @@ class Register {
         this.onBlurName();
         this.onChangeAcceptTerms();
         this.onClickBtnEye();
+        this.onBlurCpfCnpj();
+        this.onFocusCpfCnpj();
         this.errors = {'acceptTerms': false};
     }
 
@@ -26,6 +29,27 @@ class Register {
                 data[obj.name] = obj.value;
             });     
         return data;
+    }
+
+    onBlurCpfCnpj() {
+        this.elOfficeCpfCnpj.on('blur', (evt)=>{
+            if (this.elOfficeCpfCnpj.val().length <= 11) {
+                this.elOfficeCpfCnpj.mask('000.000.000-00', {reverse: true})
+            } else {
+                this.elOfficeCpfCnpj.mask('00.000.000/0000-00', {reverse: true})
+            }
+        })
+    }
+
+    onFocusCpfCnpj() {
+        try {
+            this.elOfficeCpfCnpj.on('focus', (evt) => {
+                this.elOfficeCpfCnpj.unmask()
+            })            
+        } catch (error) {
+            console.log('Ainda não foi atribuido mascara')
+        }
+
     }
 
     onSubmit() {
