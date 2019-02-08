@@ -440,6 +440,7 @@ class Office(AbstractPerson):
         default=True,
         verbose_name='Possuo processo de importação de dados de outros sistemas'
     )
+    cpf_cnpj = models.CharField(max_length=255, blank=False, null=True, unique=True, verbose_name='CPF/CNPJ')    
 
     class Meta:
         verbose_name = 'Escritório'
