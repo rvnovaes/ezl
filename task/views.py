@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When, CharField, Count, TextField, Max, Subquery, OuterRef, Prefetch
+from django.db.models import Q, Case, When, CharField, Count, TextField, Max, Subquery, OuterRef, Prefetch, F
 from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse_lazy, reverse
@@ -637,7 +637,7 @@ class ToReceiveTaskReportView(TaskReportBase):
 
             if query or finished_query or parent_finished_query:
                 query.add(Q(finished_query), Q.AND).add(Q(parent_finished_query), Q.AND)
-                queryset = queryset.filter(query)
+                queryset = queryset.filter(query).annotate(fee=F('amount') - F('amount_to_pay'))
             else:
                 queryset = Task.objects.none()
         else:
