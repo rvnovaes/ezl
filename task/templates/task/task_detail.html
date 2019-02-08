@@ -251,7 +251,7 @@
         });
         /* Ao fechar o modal, limpar a tabela */
         $('#confirmAction').on('hide.bs.modal', function (event) {
-            if (window.table_rows) {
+            if (window.table) {
                 window.table.destroy();
             }
         });
