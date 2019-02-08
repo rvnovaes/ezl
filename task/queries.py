@@ -25,7 +25,9 @@ def get_tasks_to_pay(task_ids, order):
 			court_district.name as court_district,
 			lawsuit.opposing_party, 
 			parent.billing_date, 
+			parent.amount,
 			parent.amount_to_receive,
+			(parent.amount_to_receive - parent.amount) as fee,
 			client.refunds_correspondent_service as client_refunds,
 			COALESCE(cost_center."name",  '') as cost_center,
 			COALESCE(billing_charge.charge_id, '') as charge_id

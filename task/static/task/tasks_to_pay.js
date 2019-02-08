@@ -230,6 +230,8 @@ class ReportToPay {
 	                <td>${this.setDefaultOfNull(task.task_legacy_code)}</td>
 	                <td>${this.getBillingDate(task.billing_date)}</td>
 	                <td>${task.charge_id}</td>
+	                <td class="text-center">${this.formatMoney(task.amount)}</td>
+	                <td class="text-center">${this.formatMoney(task.fee)}</td>
 	                <td class="text-center">${this.formatMoney(task.amount_to_receive)}</td>
 	            </tr>`;
 	}
@@ -237,7 +239,7 @@ class ReportToPay {
 	getTrfoot() {
 	    return `
 	        <tr class="total-container">
-	            <th colspan="12" class="text-right" >Total Geral (R$)</th>
+	            <th colspan="14" class="text-right" >Total Geral (R$)</th>
 	            <th colspan="2" class="text-right">${this.formatMoney(this.totalToReceive.toFixed(2))}</th>
 	        </tr>`;
 		};   	
@@ -350,7 +352,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	getTrOffice(officeId, officeName){
 	    return `
 	        <tr>
-	            <th colspan="12">${officeName}</th>
+	            <th colspan="14">${officeName}</th>
 	            <th></th>
 	            <th><center><span office-id="${officeId}">|officePay=${officeId}|</span></center></th>
 	        </tr>
@@ -361,7 +363,7 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	    return `
 	        <tr>
 	            <th></th>
-	            <th colspan="12">
+	            <th colspan="14">
 	                <div class="col-xs-10">
 	                    ${clientName}                            
 	                </div>
@@ -453,7 +455,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 	getTrClient(clientId, clientName, clientRefunds){
 	    return `
 	        <tr>
-	            <th colspan="12">
+	            <th colspan="14">
 	            	<div class="col-xs-10">
 	            		${clientName}
 	            	</div>	
@@ -469,7 +471,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 	    return `
 	        <tr>
 	            <th></th>
-	            <th colspan="12">
+	            <th colspan="14">
 	                <div class="col-xs-10">
 	                    ${officeName}                            
 	                </div>
@@ -527,6 +529,7 @@ class ReportToPayGroupByClient extends ReportToPay {
 	async computeTotals(task){
 		this.computeTotalClient(task);
 		this.computeTotalOfficeByClient(task);
+		this.computeTotalToReceive(task);
 	}
 
 	async makeReport(data) {
