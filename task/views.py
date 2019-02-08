@@ -50,6 +50,7 @@ from task.rules import RuleViewTask
 from task.workflow import CorrespondentsTable
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
+from financial.utils import recalculate_values
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, has_task_parent
 from decimal import Decimal
@@ -969,6 +970,18 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 form.instance.price_category = servicepricetable.policy_price.category
                 form.instance.amount_to_receive = Decimal(servicepricetable.value_to_receive.amount)
                 form.instance.amount_to_pay = Decimal(servicepricetable.value_to_pay.amount)
+                form.instance.rate_type_receive = servicepricetable.rate_type_receive
+                form.instance.rate_type_pay = servicepricetable.rate_type_pay
+                if form.instance.amount != servicepricetable.value:
+                    form.instance.amount_to_pay, form.instance.amount_to_receive = recalculate_values(
+                        servicepricetable.value,
+                        form.instance.amount_to_pay,
+                        form.instance.amount_to_receive,
+                        form.instance.amount,
+                        form.instance.rate_type_pay,
+                        form.instance.rate_type_receive
+                    )
+
                 delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None
@@ -2253,6 +2266,14 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         task = Task.objects.get(pk=request.POST.get('task_id'))
         current_amount = task.amount
         task.amount = request.POST.get('amount')
+        task.amount_to_pay, task.amount_to_receive = recalculate_values(
+            current_amount,
+            task.amount_to_pay,
+            task.amount_to_receive,
+            task.amount,
+            task.rate_type_pay,
+            task.rate_type_receive
+        )
         pre_save.disconnect(signals.change_status, sender=Task)
         pre_save.disconnect(signals.pre_save_task, sender=Task)        
         post_save.disconnect(signals.post_save_task, sender=Task)
@@ -2260,6 +2281,8 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         child_task = task.get_child
         if child_task:
             child_task.amount = task.amount
+            child_task.amount_to_pay = task.amount_to_pay
+            child_task.amount_to_receive = task.amount_to_receive
             child_task.save()
         msg = "Valor alterado de {} para {} pelo escritório {}".format(
             format_currency(current_amount, 'R$', locale='pt_BR'),
