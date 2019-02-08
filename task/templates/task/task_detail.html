@@ -75,8 +75,8 @@
                             </div>
                             <br>
                             <div class="form-group" style="margin: auto">
-                                <label>{{ form.amount_to_pay.label }}</label>
-                                {{ form.amount_to_pay }}
+                                <label>{{ form.amount_to_receive.label }}</label>
+                                {{ form.amount_to_receive }}
                             </div>
                             <br>
                         {% endif %}
@@ -168,7 +168,6 @@
     $(document).ready(function(){
         var checkout = new Checkout('{{csrf_token}}', '{{object.charge.charge_id}}');
         let billing = new Billing(checkout);
-        debugger;
         taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, `{{survey_company_representative|safe}}`, '{{csrf_token}}', billing, '{{object.charge.charge_id}}');
     })
     </script>

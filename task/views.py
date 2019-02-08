@@ -316,11 +316,17 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
         try:
             task = Task.objects.get(pk=kwargs.get('pk'))
             amount = request.POST.get('amount').replace('R$', '') if request.POST.get('amount') else '0.00'
+            amount_to_pay = request.POST.get('amount_to_pay').replace('R$', '') \
+                if request.POST.get('amount_to_pay') else '0.00'
+            amount_to_receive = request.POST.get('amount_to_receive').replace('R$', '') \
+                if request.POST.get('amount_to_receive') else '0.00'
             note = request.POST.get('note', '')
             form = TaskDetailForm(request.POST, instance=task)
             if form.is_valid():
                 form.instance.task_status = TaskStatus.OPEN
                 form.instance.amount = Decimal(amount)
+                form.instance.amount_to_pay = Decimal(amount_to_pay)
+                form.instance.amount_to_receive = Decimal(amount_to_receive)
                 get_task_attachment(self, form)
                 form.instance.delegation_date = timezone.now()
                 if not form.instance.person_distributed_by:
@@ -949,10 +955,9 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             form.instance.delegation_date = timezone.now()
             if not form.instance.person_distributed_by:
                 form.instance.person_distributed_by = self.request.user.person
-            default_amount = Decimal('0.00') if not form.instance.amount_to_pay else form.instance.amount_to_pay
-            form.instance.amount_to_pay = (form.cleaned_data['amount_to_pay']
-                                           if form.cleaned_data['amount_to_pay'] else
-                                           default_amount)
+            default_amount = Decimal('0.00') if not form.instance.amount_to_receive else form.instance.amount_to_receive
+            form.instance.amount_to_receive = (form.cleaned_data['amount_to_receive']
+                                               if form.cleaned_data['amount_to_receive'] else default_amount)
             servicepricetable_id = (
                 self.request.POST['servicepricetable_id']
                 if self.request.POST['servicepricetable_id'] else None)
@@ -962,7 +967,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             if servicepricetable:
                 form.instance.price_category = servicepricetable.policy_price.category
                 form.instance.amount = servicepricetable.value
-                form.instance.amount_to_receive = Decimal(servicepricetable.value_to_receive.amount)
+                form.instance.amount_to_pay = Decimal(servicepricetable.value_to_pay.amount)
                 delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None

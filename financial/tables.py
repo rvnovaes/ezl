@@ -62,7 +62,7 @@ class ServicePriceTableTaskTable(tables.Table):
         row_attrs = {
             'id': lambda record: 'office-{}'.format(record.pk),
             'data-id': lambda record: record.pk,
-            'data-value': lambda record: record.value_to_receive,
+            'data-value': lambda record: record.value_to_receive.amount,
             'data-price-category': lambda record: record.policy_price.category,
             'data-formated-value': lambda record: record.value_to_receive.__str__(),
             'data-office-public': lambda record: record.office_correspondent.public_office if record.office_correspondent else False,

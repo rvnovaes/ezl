@@ -252,7 +252,7 @@ class TaskDetail {
         $('#task_detail').submit(function (e) {
             e.preventDefault();
         });
-        $('#actionButton').removeAttr('disabled')
+        $('#actionButton').removeAttr('disabled');
     }        
 
     checkDelegationOffice() {        
@@ -277,6 +277,8 @@ class TaskDetail {
 			            html: '<h4>Aguarde...</h4>',
                         onOpen: () => {
                             swal.showLoading();
+                            debugger;
+                            $('input[name=amount_to_receive]').removeAttr('disabled');
                             $('#task_detail').unbind('submit').submit();            
                         }
                     })
@@ -395,11 +397,11 @@ class TaskDetail {
         $("#correspondents-table tbody tr").on('click', function(){            
             $("#servicepricetable-alert").addClass("hidden");            
             let rowId = $(this).data('id');
-            let amount_to_pay = $(this).data('value').toString();
+            let amount_to_receive = $(this).data('value').toString();
             let priceCategory = $(this).data('price-category');
-            let elAmount =$('input[name=amount_to_pay]');
+            let elAmount =$('input[name=amount_to_receive]');
             $('input[name=servicepricetable_id]').val(rowId);
-            elAmount.val(amount_to_pay.replace(".", ","));
+            elAmount.val(amount_to_receive.replace(".", ","));
             $(this).addClass("ezl-bg-open");
             $(this).siblings().removeClass("ezl-bg-open");
             if (priceCategory === 'NETWORK'){
@@ -488,7 +490,7 @@ class TaskDetail {
     };   
 
     onKeypressAmountField() {
-        $('input[id=id_amount_to_pay]').keypress(function(e) {
+        $('input[id=id_amount_to_receive]').keypress(function(e) {
             if(e.which == 13) {
               e.preventDefault();
             }
@@ -528,7 +530,9 @@ class TaskDetail {
                         data: {
                                 task_id: this.taskId,
                                 servicepricetable_id: response.id,   
-                                amount: response.value, 
+                                amount: response.value,
+                                amount_to_pay: response.value_to_pay,
+                                amount_to_receive: response.value_to_receive,
                                 note: '',                               
                             },
                         success: function(response) {                
