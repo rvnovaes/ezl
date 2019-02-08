@@ -168,7 +168,6 @@
     $(document).ready(function(){
         var checkout = new Checkout('{{csrf_token}}', '{{object.charge.charge_id}}');
         let billing = new Billing(checkout);
-        debugger;
         taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, `{{survey_company_representative|safe}}`, '{{csrf_token}}', billing, '{{object.charge.charge_id}}');
     })
     </script>
@@ -245,6 +244,7 @@
             (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
         });
         $('#confirmAction').on('shown.bs.modal', function (event) {
+            taskDetail.setWindowTable();
             if($('#correspondents-table_filter input').length > 0){
                 $('#correspondents-table_filter input').focus()
             }

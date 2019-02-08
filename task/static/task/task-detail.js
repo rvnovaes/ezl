@@ -410,20 +410,20 @@ class TaskDetail {
                             'data-value="${value}" data-formated-value="${formated_value}" ' +
                             'data-office-public="${office_public}" class="tr_select" role="row">\n' +
                 '<td class="office_correspondent">${office_correspondent}</td>\n' +
-                '<td class="office_correspondent">${office_network}</td>\n' +
+                '<td class="office_networl">${office_network}</td>\n' +
+                '<td class="state">${state}</td>\n' +
                 '<td class="court_district">${court_district}</td>\n' +
                 '<td class="court_district_complement">${court_district_complement}</td>\n' +
                 '<td class="state">${city}</td>\n' +
-                '<td class="state">${state}</td>\n' +
                 '<td class="client">${client}</td>\n' +
                 '<td class="value">${value}</td>\n' +
                 '<td class="office_rating">${office_rating}</td>\n' +
                 '<td class="office_return_rating">${office_return_rating}</td>\n' +
             '</tr>';
         let self = this;
-        // if (!window.table){
-        //     this.setWindowTable();
-        // }
+        if (!window.table){
+            this.setWindowTable();
+        }
         const result = await $.ajax({
             type: 'GET',
             url: `/providencias/ajax_get_correspondent_table/?task=${this.taskId}&type_task=${type_task}`,
