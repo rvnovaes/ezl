@@ -107,7 +107,7 @@
                         <button id="actionButton" rel="gn_lightbox"
                             type="submit"
                             onclick="taskDetail.submitTaskDetail(this, '{{form.instance.office.use_service}}')"
-                            survey={% if form.instance.type_task.survey %}true{% else %}''{% endif %}
+                            survey={% if form.instance|has_survey_correspondent %}true{% else %}''{% endif %}
                             style="width: 100px!important;"
                             class="btn btn-raised btn-success">Sim
                         </button>
@@ -244,13 +244,14 @@
             (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
         });
         $('#confirmAction').on('shown.bs.modal', function (event) {
+            taskDetail.setWindowTable();
             if($('#correspondents-table_filter input').length > 0){
                 $('#correspondents-table_filter input').focus()
             }
         });
         /* Ao fechar o modal, limpar a tabela */
         $('#confirmAction').on('hide.bs.modal', function (event) {
-            if (window.table_rows) {
+            if (window.table) {
                 window.table.destroy();
             }
         });

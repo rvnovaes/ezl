@@ -1,6 +1,7 @@
 from django import template
 from django.conf import settings
 from task.models import Task, TaskStatus, CheckPointType
+from task.utils import get_last_parent
 
 
 register = template.Library()
@@ -118,3 +119,9 @@ def show_button_done(task):
         return False
     return True
 
+
+@register.filter
+def has_survey_correspondent(task):
+    # Se nao tiver parent retornar o proprio objeto
+    last_parent = get_last_parent(task) 
+    return last_parent.type_task.survey
