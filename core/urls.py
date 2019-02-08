@@ -200,6 +200,7 @@ urlpatterns = [
     url(r'^validate_email/$',
         views.ValidateEmail.as_view(),
         name='validate_email'),
+    url(r'^validate_cpf_cnpj/$', views.ValidateCpfCnpj.as_view()),
 
     # Contact mechanism views
     url(r'^pessoas/(?P<person_pk>[0-9]+)/contato/criar/$',

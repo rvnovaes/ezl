@@ -5,6 +5,7 @@ import logging
 from openpyxl import load_workbook
 import os
 from functools import wraps
+from localflavor.br.forms import BRCPFField, BRCNPJField
 
 EZL_LOGGER = logging.getLogger('ezl')
 
@@ -198,3 +199,18 @@ def validate_xlsx_header(xls_file, headers):
                 [list(sheet.rows)[0] for sheet in wb.worksheets][0]))
         header_is_valid = set(headers).issubset(set(headers_in_file))
     return header_is_valid
+
+
+def cpf_is_valid(cpf):
+    try:
+        BRCPFField().clean(cpf)
+        return True
+    except:
+        return False
+
+def cnpj_is_valid(cnpj):
+    try:
+        BRCNPJField().clean(cnpj)
+        return True
+    except:
+        return False

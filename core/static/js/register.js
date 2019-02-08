@@ -161,6 +161,9 @@ class Register {
             this.elName.siblings().css('display', 'none');
         }
     }
+    validateCpfCnpj() {
+        
+    }
     validateAcceptTerms() {
         if (this.elAcceptTerms.is(':checked')) {
             delete this.errors['acceptTerms'];

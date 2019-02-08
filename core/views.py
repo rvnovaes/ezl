@@ -65,7 +65,7 @@ from allauth.socialaccount.providers.oauth2.views import *
 from allauth.socialaccount.providers.google.views import *
 from billing.tables import BillingDetailsTable
 from billing.forms import BillingDetailsForm, BillingAddressCombinedForm
-
+from core.utils import cpf_is_valid, cnpj_is_valid
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -2069,6 +2069,11 @@ class ValidateEmail(View):
             data['valid'] = False
         return JsonResponse(data, safe=False)
 
+class ValidateCpfCnpj(View):
+    def post(self, request, *args, **kwargs):
+        cpf_cnpj = request.POST.get('cpf_cnpj')
+        data = {'valid': True}
+        return JsonResponse(data, safe=False)
 
 class ContactMechanismCreateView(ViewRelatedMixin, CreateView):
     model = ContactMechanism
