@@ -47,7 +47,7 @@ from task.workflow import CorrespondentsTable
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
 from core.utils import get_office_session, get_domain
-from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task
+from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, has_task_parent
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -899,8 +899,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             survey.survey_result = survey_result
             survey.save()
             survey.tasks.add(form.instance)
-            if form.instance.parent:
-                survey.tasks.add(form.instance.parent)
+            task_to_check_parent = form.instance
+            while has_task_parent(task_to_check_parent):
+                survey.tasks.add(task_to_check_parent.parent)
+                task_to_check_parent = task_to_check_parent.parent
         send_notes_execution_date.send(
             sender=self.__class__,
             notes=notes,
@@ -934,7 +936,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 form.instance.person_executed_by = None
                 delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
-                
+
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
         feedback_comment = form.cleaned_data.get('feedback_comment')
@@ -966,13 +968,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             pending_list.append('Correspondente')
         context['pending_surveys'] = {'status': True if pending_list else False,
                                       'pending_list': pending_list}
-        context['survey_data'] = (self.object.type_task.survey.data
-                                  if self.object.type_task.survey else None)
-        if self.object.parent:
-            context['survey_data'] = (self.object.parent.type_task.survey.data
-                                      if self.object.parent.type_task.survey
-                                      else None)
-
+        # Pega o ultimo parent, se nao tiver parent retorna o proprio objeto
+        last_parent = get_last_parent(self.object)
+        context['survey_data'] = (last_parent.type_task.survey.data
+                                  if last_parent.type_task.survey else None)
         office_session = get_office_session(self.request)
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
@@ -983,11 +982,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         checker = ObjectPermissionChecker(self.request.user)
         if checker.has_perm('can_see_tasks_company_representative', office_session):
             if not TaskSurveyAnswer.objects.filter(tasks=self.object, create_user=self.request.user):
-                if self.object.type_task.survey_company_representative:
+                if (last_parent.type_task.survey_company_representative):
                     context['not_answer_questionnarie'] = True
-                    if self.object.type_task.survey_company_representative:
-                        context[
-                            'survey_company_representative'] = self.object.type_task.survey_company_representative.data
+                    if last_parent.type_task.survey_company_representative:
+                        context['survey_company_representative'] = last_parent.type_task.survey_company_representative.data
                     else:
                         context['survey_company_representative'] = ''
         context['show_company_representative_in_tab'] = self.show_company_representative_in_tab(checker, office_session)
@@ -1121,7 +1119,6 @@ def delete_internal_ecm(request, pk):
 
 def delete_external_ecm(request, task_hash, pk):
     # Para usuario que apenas acessam a task por hash, sem autenticar
-    Task.objects.get(task_hash=task_hash)
     ecm = Ecm.objects.get(pk=pk)
     if ecm.task.task_hash.hex == task_hash:
         return delete_ecm(request, pk)
@@ -1210,11 +1207,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     ]
                     task_dynamic_query.add(Q(task_status__in=status), Q.AND)
                 if data['type_task']:
-                    list_of_type_task_main = [list(type_task.type_task_main.all()) for type_task in data['type_task']]
-                    list_of_type_task_main = reduce(operator.concat, list_of_type_task_main)
-                    task_dynamic_query.add(
-                        Q(Q(type_task__in=data['type_task']) |
-                          Q(type_task__type_task_main__in=list_of_type_task_main)), Q.AND)
+                    task_dynamic_query.add(Q(type_task__in=data['type_task']), Q.AND)
+                if data['type_task_main']:
+                    task_dynamic_query.add(Q(type_task__type_task_main__in=data['type_task_main']), Q.AND)
                 if data['court']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__organ=data['court']), Q.AND)
@@ -2261,6 +2256,16 @@ class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
+
+class TypeTaskMainAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return TypeTaskMain.objects.none()
+        qs = TypeTaskMain.objects.all()
+        if self.q:
+            qs = qs.filter(name__unaccent__icontains=self.q)
+        return qs
+
 
 
 class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
