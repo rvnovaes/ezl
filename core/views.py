@@ -985,8 +985,10 @@ class UserUpdateView(AuditFormMixin, UpdateView):
     model = User
 
     form_class = UserUpdateForm
-    success_url = reverse_lazy('user_list')
     success_message = UPDATE_SUCCESS_MESSAGE
+
+    def get_success_url(self):
+        return self.request.META.get('HTTP_REFERER', reverse_lazy('user_list'))
 
     def get_initial(self):
         self.form_class.declared_fields['password'].disabled = True
@@ -998,7 +1000,7 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         checker = ObjectPermissionChecker(self.request.user)
         if form.is_valid:
             for office in form.instance.person.offices.active_offices():
-                if checker.has_perm('can_access_general_data', office):
+                if checker.has_perm('group_admin', office):
                     groups = self.request.POST.getlist(
                         'office_' + str(office.id), '')
                     if not groups:
@@ -1681,20 +1683,20 @@ class TypeaHeadInviteUserSearch(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,
                  *args, **kwargs):
-        data = []
-        for user in User.objects.filter(
-                Q(person__legal_name__unaccent__icontains=q)
-                | Q(username__unaccent__icontains=q)
-                | Q(email__unaccent__icontains=q)):
-            data.append({
-                'id':
-                user.person.id,
-                'value':
-                user.person.legal_name + ' ({})'.format(user.username),
-                'data-value-txt':
-                user.person.legal_name + ' ({} - {})'.format(
-                    user.username, user.email)
-            })
+        data = []        
+        users = User.objects.filter(
+            Q(person__legal_name__unaccent__icontains=q) 
+            | Q(username__unaccent__icontains=q) | Q(email__unaccent__icontains=q))
+        for user in users:            
+            if hasattr(user, 'person'):
+                data.append(
+                    {
+                        'id': user.person.id,
+                        'value': user.person.legal_name + ' ({})'.format(user.username),
+                        'data-value-txt': user.person.legal_name + ' ({} - {})'.format(
+                            user.username, user.email)
+                    }
+                )
         return list(data)
 
 

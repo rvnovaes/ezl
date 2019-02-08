@@ -2,7 +2,6 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
   vm = this;
   vm.chat_id = false;
   vm.in_office_list = true;
-  vm.can_send = true;
   vm.offices = [];
   vm.messages = [];
   vm.messageToSend = "";
@@ -26,11 +25,10 @@ angular.module('app').controller('chatInternalCtrl', function($scope, chatApiSer
     })
   }
 
-  vm.getMessages = function(chat, can_send){
+  vm.getMessages = function(chat){
     chatApiService.getMessages(chat).then(function(data){
       vm.messages = data;
       vm.in_office_list = false;
-      vm.can_send = can_send;
       vm.chat = data.chat;
       console.debug(vm.chat);
       var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
