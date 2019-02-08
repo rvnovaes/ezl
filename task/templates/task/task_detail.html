@@ -168,7 +168,8 @@
     $(document).ready(function(){
         var checkout = new Checkout('{{csrf_token}}', '{{object.charge.charge_id}}');
         let billing = new Billing(checkout);
-        taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, '{{survey_company_representative|safe}}', '{{csrf_token}}', billing, '{{object.charge.charge_id}}');
+        debugger;
+        taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, `{{survey_company_representative|safe}}`, '{{csrf_token}}', billing, '{{object.charge.charge_id}}');
     })
     </script>
 {% endblock %}
@@ -250,7 +251,7 @@
         });
         /* Ao fechar o modal, limpar a tabela */
         $('#confirmAction').on('hide.bs.modal', function (event) {
-            if (window.table_rows) {
+            if (window.table) {
                 window.table.destroy();
             }
         });

@@ -1210,11 +1210,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     ]
                     task_dynamic_query.add(Q(task_status__in=status), Q.AND)
                 if data['type_task']:
-                    list_of_type_task_main = [list(type_task.type_task_main.all()) for type_task in data['type_task']]
-                    list_of_type_task_main = reduce(operator.concat, list_of_type_task_main)
-                    task_dynamic_query.add(
-                        Q(Q(type_task__in=data['type_task']) |
-                          Q(type_task__type_task_main__in=list_of_type_task_main)), Q.AND)
+                    task_dynamic_query.add(Q(type_task__in=data['type_task']), Q.AND)
+                if data['type_task_main']:
+                    task_dynamic_query.add(Q(type_task__type_task_main__in=data['type_task_main']), Q.AND)
                 if data['court']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__organ=data['court']), Q.AND)
@@ -2261,6 +2259,16 @@ class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
+
+class TypeTaskMainAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return TypeTaskMain.objects.none()
+        qs = TypeTaskMain.objects.all()
+        if self.q:
+            qs = qs.filter(name__unaccent__icontains=self.q)
+        return qs
+    
 
 
 class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
