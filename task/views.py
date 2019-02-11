@@ -1289,7 +1289,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                                 'client']), Q.AND)
                 if data['law_suit_number']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__law_suit_number=data[
+                        Q(movement__law_suit__law_suit_number__unaccent__icontains=data[
                             'law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(
