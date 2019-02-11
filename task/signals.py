@@ -444,7 +444,7 @@ def post_create_historical_record_callback(sender, **kwargs):
         """.format(instance.get_child.task_number, msg)
     if field_has_changed(history_instance, 'amount'):
         change = get_history_changes(history_instance).get('amount')
-        if change.old != change.new:
+        if change.old != change.new and float(change.old) > 0.0:
             msg += "Valor alterado de {} para {}".format(
                 format_currency(change.old, 'R$', locale='pt_BR'),
                 format_currency(change.new, 'R$', locale='pt_BR'))

@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         historys = []
-        history_qs = TaskHistory.objects.all()
+        history_qs = TaskHistory.objects.all().order_by('task')
         for start, end, total, qs in batch_qs(history_qs, batch_size=1000):
             LOGGER.info("Now processing %s - %s of %s" % (start + 1, end, total))            
             for task_history in qs:        
