@@ -4,9 +4,10 @@ class Register {
         this.elEmail = $('input[name=email]');
         this.elPassword = $('input[name=password]');        
         this.elName = $('input[name=name]');
-        this.elOfficeCpfCnpj = $('input[name=office_cpf_cnpj]')
+        this.elOfficeCpfCnpj = $('input[name=cpf_cnpj]')
         this.elAcceptTerms = $('input[name=accept-terms]'); 
         this.elBtnEye = $('#btn-eye'); 
+        this.cpfCnpjExist = false;
         this.onSubmit();
         this.onBlurEmail();
         this.onBlurPassword();
@@ -56,6 +57,7 @@ class Register {
         this.elOfficeCpfCnpj.on('blur', (evt)=>{
             delete this.errors['email'];
             this.validateCpfCnpj();
+            this.checkCpfCnpjExist();
             if (this.elOfficeCpfCnpj.val().length <= 11) {
                 this.elOfficeCpfCnpj.mask('000.000.000-00', {reverse: true})
             } else {
@@ -121,12 +123,20 @@ class Register {
             data: this.query, 
             success: (response) => {
                 if (!response.valid) {
-                    this.errors['office_cpf_cnpj'] = false;
+                    this.errors['cpf_cnpj'] = false;
                     this.addClassError(this.elOfficeCpfCnpj);                    
                 } else {
                     this.removeClassError(this.elOfficeCpfCnpj)
                 }
             }
+        })
+    }
+    checkCpfCnpjExist() {
+        $.ajax({
+            method: 'POST', 
+            url: '/check_cpf_cnpj_exist', 
+            data: this.query, 
+            success: (response) => this.cpfCnpjExist = response.exist
         })
     }
     validateEmail() {

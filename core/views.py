@@ -2069,13 +2069,22 @@ class ValidateEmail(View):
             data['valid'] = False
         return JsonResponse(data, safe=False)
 
+
 class ValidateCpfCnpj(View):
     def post(self, request, *args, **kwargs):
-        cpf_cnpj = request.POST.get('office_cpf_cnpj')
+        cpf_cnpj = request.POST.get('cpf_cnpj')
         data = {'valid': False}
         if cpf_is_valid(cpf_cnpj) or cnpj_is_valid(cpf_cnpj):
             data = {'valid': True}
         return JsonResponse(data, safe=False)
+
+
+class CheckCpfCnpjExist(View):
+    def post(self, request, *args, **kwargs):
+        cpf_cnpj = request.POST.get('cpf_cnpj')
+        data = {'exist': Office.objects.filter(cpf_cnpj=cpf_cnpj).exists()}
+        return JsonResponse(data, safe=False)
+
 
 class ContactMechanismCreateView(ViewRelatedMixin, CreateView):
     model = ContactMechanism
@@ -2363,10 +2372,11 @@ class NewRegister(TemplateView):
             first_name = request.POST.get('name').split(' ')[0]
             last_name = ' '.join(request.POST.get('name').split(' ')[1:])
             office_name = request.POST.get('office')
+            office_cpf_cnpj = request.POST.get('cpf_cnpj')
             user = User.objects.create(username=username, last_name=last_name, first_name=first_name, email=email)
             user.set_password(password)
             user.save()
-            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
+            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user, cpf_cnpj=office_cpf_cnpj)            
             office.customsettings.email_to_notification = email
             office.customsettings.save()
             DefaultOffice.objects.create(
