@@ -7,7 +7,7 @@ class Register {
         this.elOfficeCpfCnpj = $('input[name=cpf_cnpj]')
         this.elAcceptTerms = $('input[name=accept-terms]'); 
         this.elBtnEye = $('#btn-eye'); 
-        this.cpfCnpjExist = false;
+        this.officeExist;
         this.onSubmit();
         this.onBlurEmail();
         this.onBlurPassword();
@@ -43,21 +43,47 @@ class Register {
 
     }
 
+    requestInvitation() {
+        swal({
+            title: 'Atenção!',
+            type: 'warning',
+            text: `
+                O escritório/empresa ${this.officeExist.legal_name} com esse CPF/CNPJ já existe. 
+                Deseja enviar uma solicitação de ingresso para este escritório/empresa?
+            `, 
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            cancelButtonText: 'Não', 
+            confirmButtonText: 'Sim', 
+            reverseButtons: true             
+        }).then((result => {
+            if (result.value) {
+                alert('ok vou enviar o convite...')
+            }
+        }))
+    }
+
+
     onSubmit() {
         this.elRegisterForm.on('submit', (el)=>{
-            el.preventDefault();            
-            if (!Object.keys(this.errors).length) {
-                this.save()
+            el.preventDefault();
+            if (this.officeExist.exist) {
+                this.requestInvitation();
             } else {
-                this.validateAcceptTerms();
-            }            
+                if (!Object.keys(this.errors).length) {
+                    this.save()
+                } else {
+                    this.validateAcceptTerms();
+                }
+            }                     
         })
     }
     onBlurCpfCnpj() {
         this.elOfficeCpfCnpj.on('blur', (evt)=>{
             delete this.errors['email'];
             this.validateCpfCnpj();
-            this.checkCpfCnpjExist();
+            this.checkOfficeExist();
             if (this.elOfficeCpfCnpj.val().length <= 11) {
                 this.elOfficeCpfCnpj.mask('000.000.000-00', {reverse: true})
             } else {
@@ -131,12 +157,14 @@ class Register {
             }
         })
     }
-    checkCpfCnpjExist() {
+    checkOfficeExist() {
+        let query = this.query;
+        query['model'] = 'office'
         $.ajax({
             method: 'POST', 
             url: '/check_cpf_cnpj_exist', 
-            data: this.query, 
-            success: (response) => this.cpfCnpjExist = response.exist
+            data: query, 
+            success: (response) => this.officeExist = response
         })
     }
     validateEmail() {

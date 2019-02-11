@@ -45,7 +45,7 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
-from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form
+from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, check_cpf_cnpj_exist
 from core.view_validators import create_person_office_relation, person_exists
 from core.mail import send_mail_sign_up
 from financial.models import ServicePriceTable
@@ -2081,8 +2081,9 @@ class ValidateCpfCnpj(View):
 
 class CheckCpfCnpjExist(View):
     def post(self, request, *args, **kwargs):
+        model_name = request.POST.get('model')
         cpf_cnpj = request.POST.get('cpf_cnpj')
-        data = {'exist': Office.objects.filter(cpf_cnpj=cpf_cnpj).exists()}
+        data = check_cpf_cnpj_exist(model_name, cpf_cnpj)
         return JsonResponse(data, safe=False)
 
 

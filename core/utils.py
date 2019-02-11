@@ -1,11 +1,14 @@
 from enum import Enum
 from config.config import get_parser
 from django.db.models import Q
+from django.apps import apps
+from django.forms.models import model_to_dict
 import logging
 from openpyxl import load_workbook
 import os
 from functools import wraps
 from localflavor.br.forms import BRCPFField, BRCNPJField
+import re
 
 EZL_LOGGER = logging.getLogger('ezl')
 
@@ -214,3 +217,16 @@ def cnpj_is_valid(cnpj):
         return True
     except:
         return False
+
+def clear_cpf_cnpj(cpf_cnpj):
+    return re.sub(r'[^0-9]', '', cpf_cnpj)
+
+def check_cpf_cnpj_exist(model, cpf_cnpj):
+    model = apps.get_model('core', model)
+    instances = model.objects.filter(cpf_cnpj=cpf_cnpj)
+    data = {'exist': False}
+    if instances.exists():
+        instance = instances.latest('pk')
+        data.update(model_to_dict(instance, fields=['legal_name', 'name', 'cpf_cnpj', 'id']))
+        data['exist'] = True
+    return data

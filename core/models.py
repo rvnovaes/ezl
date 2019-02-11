@@ -9,9 +9,10 @@ from django.contrib.auth.models import User, Group
 from django.contrib.postgres.fields import JSONField
 
 from core.managers import PersonManager
-from core.utils import LegacySystem
+from core.utils import LegacySystem, clear_cpf_cnpj
 from guardian.shortcuts import get_perms
 from oauth2_provider.models import Application, AbstractApplication
+
 
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'),
                  ('E', 'EXTERNAL'))
@@ -464,6 +465,8 @@ class Office(AbstractPerson):
 
     def save(self, *args, **kwargs):
         self._i_work_alone = kwargs.pop('i_work_alone', False)
+        if self.cpf_cnpj:
+            self.cpf_cnpj = clear_cpf_cnpj(self.cpf_cnpj)
         return super().save(*args, **kwargs)
 
 
