@@ -31,16 +31,6 @@ class Register {
         return data;
     }
 
-    onBlurCpfCnpj() {
-        this.elOfficeCpfCnpj.on('blur', (evt)=>{
-            if (this.elOfficeCpfCnpj.val().length <= 11) {
-                this.elOfficeCpfCnpj.mask('000.000.000-00', {reverse: true})
-            } else {
-                this.elOfficeCpfCnpj.mask('00.000.000/0000-00', {reverse: true})
-            }
-        })
-    }
-
     onFocusCpfCnpj() {
         try {
             this.elOfficeCpfCnpj.on('focus', (evt) => {
@@ -62,10 +52,21 @@ class Register {
             }            
         })
     }
+    onBlurCpfCnpj() {
+        this.elOfficeCpfCnpj.on('blur', (evt)=>{
+            delete this.errors['email'];
+            this.validateCpfCnpj();
+            if (this.elOfficeCpfCnpj.val().length <= 11) {
+                this.elOfficeCpfCnpj.mask('000.000.000-00', {reverse: true})
+            } else {
+                this.elOfficeCpfCnpj.mask('00.000.000/0000-00', {reverse: true})
+            }; 
+        })
+    }    
     onBlurEmail(){
         this.elEmail.on('blur', ()=>{
             delete this.errors['email'];
-            this.validateEmail()
+            this.validateEmail();
         })
     }
     onBlurPassword() {
@@ -96,6 +97,38 @@ class Register {
             }
         })
     }
+    addClassError(el, siblingsParam) {
+        el.closest('.form-group').addClass('has-error')
+        if (siblingsParam) {
+            el.siblings(siblingsParam).css('display', 'block');
+        } else {
+            el.siblings().css('display', 'block');
+        }        
+    }
+    removeClassError(el, siblingsParam) {
+        el.closest('.form-group').removeClass('has-error');
+        if (siblingsParam) {
+            el.siblings(siblingsParam).css('display', 'none');
+        } else {
+            el.siblings().css('display', 'none');
+        }                
+    }
+
+    validateCpfCnpj() {
+        $.ajax({
+            method: 'POST', 
+            url: '/validate_cpf_cnpj/', 
+            data: this.query, 
+            success: (response) => {
+                if (!response.valid) {
+                    this.errors['office_cpf_cnpj'] = false;
+                    this.addClassError(this.elOfficeCpfCnpj);                    
+                } else {
+                    this.removeClassError(this.elOfficeCpfCnpj)
+                }
+            }
+        })
+    }
     validateEmail() {
         $.ajax({
             method: 'POST', 
@@ -104,12 +137,9 @@ class Register {
             success: (response) => {                
                 if (!response.valid) {
                     this.errors['email'] = false;
-                    this.elEmail.closest('.form-group').addClass('has-error');
-                    this.elEmail.siblings().css('display', 'block');
-
+                    this.addClassError(this.elEmail);                  
                 } else {
-                    this.elEmail.closest('.form-group').removeClass('has-error');
-                    this.elEmail.siblings().css('display', 'none');
+                    this.removeClassError(this.elEmail);
                 }
             }, 
             error: (error) => {
@@ -154,25 +184,18 @@ class Register {
     validateName() {
         if (this.elName.val().trim().split(' ').length <= 1) {
             this.errors['name'] = false;
-            this.elName.closest('.form-group').addClass('has-error')
-            this.elName.siblings().css('display', 'block');
+            this.addClassError(this.elName)
         } else {
-            this.elName.closest('.form-group').removeClass('has-error')            
-            this.elName.siblings().css('display', 'none');
+            this.removeClassError(this.elName)
         }
-    }
-    validateCpfCnpj() {
-        
     }
     validateAcceptTerms() {
         if (this.elAcceptTerms.is(':checked')) {
             delete this.errors['acceptTerms'];
-            this.elAcceptTerms.closest('.form-group').removeClass('has-error')            
-            this.elAcceptTerms.siblings('span').css('display', 'none');            
+            this.removeClassError(this.elAcceptTerms, 'span');            
         } else {
             this.errors['acceptTerms'] = false;
-            this.elAcceptTerms.closest('.form-group').addClass('has-error')
-            this.elAcceptTerms.siblings('span').css('display', 'block');            
+            this.addClassError(this.elAcceptTerms, 'span');            
         }                        
     }    
     save() {

@@ -2071,8 +2071,10 @@ class ValidateEmail(View):
 
 class ValidateCpfCnpj(View):
     def post(self, request, *args, **kwargs):
-        cpf_cnpj = request.POST.get('cpf_cnpj')
-        data = {'valid': True}
+        cpf_cnpj = request.POST.get('office_cpf_cnpj')
+        data = {'valid': False}
+        if cpf_is_valid(cpf_cnpj) or cnpj_is_valid(cpf_cnpj):
+            data = {'valid': True}
         return JsonResponse(data, safe=False)
 
 class ContactMechanismCreateView(ViewRelatedMixin, CreateView):
