@@ -1,24 +1,19 @@
 from core.models import Person
 from collections import OrderedDict
-from decimal import Decimal
 from django.db import transaction
-from django.db.models.signals import pre_save
-from django.utils import timezone
+from django.db.models import Q
 from financial.models import CostCenter
 from import_export import resources
-from import_export.widgets import DecimalWidget, CharWidget, IntegerWidget
+from import_export.widgets import CharWidget, IntegerWidget
 from import_export.results import RowResult, Result
 from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance, \
-    TypeLawsuit, CourtDistrictComplement, City
+    TypeLawsuit, CourtDistrictComplement, City, State
 from task.fields import CustomFieldImportExport
 from task.instance_loaders import TaskModelInstanceLoader
 from task.messages import *
 from task.models import Task, TypeTask, TaskStatus
-from task.signals import change_status
-from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative
 from task.utils import self_or_none
-from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin
-from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, TypeTaskByWidget
+from task.widgets import PersonAskedByWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, TypeTaskByWidget
 import logging
 
 
@@ -86,6 +81,12 @@ COLUMN_NAME_DICT = {
         'attribute': 'movement__law_suit__person_lawyer',
         'required': False,
         'verbose_name': LawSuit._meta.get_field('person_lawyer').verbose_name,
+    },
+    'lawsuit_state': {
+        'column_name': 'processo.uf',
+        'attribute': 'movement__law_suit__state',
+        'required': False,
+        'verbose_name': CourtDistrict._meta.get_field('state').verbose_name,
     },
     'lawsuit_court_district': {
         'column_name': 'processo.comarca',
@@ -379,23 +380,46 @@ class TaskResource(resources.ModelResource):
                                                       offices=self.office).first()
                 if not person_lawyer:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_person_lawyer')])
+            state = row.get('lawsuit_state', '')
+            if state:
+                state = State.objects.filter(Q(name__unaccent__iexact=state) |
+                                             Q(initials__unaccent__iexact=state)).first()
             court_district = row.get('lawsuit_court_district', '')
             if court_district:
-                court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district).first()
-                if not court_district:
-                    row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_district')])
+                if not state:
+                    row_errors.append(REQUIRED_COLUMN_RELATED.format(
+                        COLUMN_NAME_DICT['lawsuit_state']['column_name'],
+                        COLUMN_NAME_DICT['lawsuit_court_district']['column_name']))
+                else:
+                    court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district).first()
+                    if not court_district:
+                        row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_district')])
+
             court_district_complement = row.get('lawsuit_court_district_complement', '')
             if court_district_complement:
-                court_district_complement = CourtDistrictComplement.objects.filter(
-                    name__unaccent__iexact=court_district_complement).first()
-                if not court_district_complement:
-                    row['warnings'].append([insert_incorrect_natural_key_message(row,
-                                                                                 'lawsuit_court_district_complement')])
+                if not court_district:
+                    row_errors.append(REQUIRED_COLUMN_RELATED.format(
+                        COLUMN_NAME_DICT['lawsuit_court_district']['column_name'],
+                        COLUMN_NAME_DICT['lawsuit_court_district_complement']['column_name']))
+                else:
+                    court_district_complement = CourtDistrictComplement.objects.filter(
+                        court_district=court_district,
+                        name__unaccent__iexact=court_district_complement,
+                        office=self.office).first()
+                    if not court_district_complement:
+                        row['warnings'].append([insert_incorrect_natural_key_message(
+                            row, 'lawsuit_court_district_complement')])
             city = row.get('lawsuit_city', '')
             if city:
-                city = City.objects.filter(name__unaccent__iexact=city).first()
-                if not city:
-                    row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_city')])
+                if not state:
+                    row_errors.append(REQUIRED_COLUMN_RELATED.format(
+                        COLUMN_NAME_DICT['lawsuit_state']['column_name'],
+                        COLUMN_NAME_DICT['lawsuit_city']['column_name']))
+                else:
+                    city = City.objects.filter(name__unaccent__iexact=city,
+                                               state=state).first()
+                    if not city:
+                        row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_city')])
             court_division = row.get('lawsuit_court_division', '')
             if court_division:
                 court_division = CourtDivision.objects.filter(name__unaccent__iexact=court_division,
@@ -464,7 +488,8 @@ class TaskResource(resources.ModelResource):
                 defaults={'create_user': self.create_user,
                           'system_prefix': row['system_prefix']})
         else:
-            type_movement = TypeMovement.objects.filter(name__unaccent__iexact=type_movement_name).first()
+            type_movement = TypeMovement.objects.filter(name__unaccent__iexact=type_movement_name,
+                                                        office_id=self.office_id).first()
             movement = None
             if movement_legacy_code:
                 movement = Movement.objects.filter(legacy_code=movement_legacy_code,
@@ -479,8 +504,7 @@ class TaskResource(resources.ModelResource):
                     office=self.office,
                     type_movement=type_movement,
                     legacy_code=movement_legacy_code,
-                    defaults={'legacy_code': movement_legacy_code,
-                              'system_prefix': row['system_prefix'],
+                    defaults={'system_prefix': row['system_prefix'],
                               'create_user': self.create_user})
             elif not movement and not type_movement:
                 row_errors.append(insert_incorrect_natural_key_message(row, 'type_movement'))
