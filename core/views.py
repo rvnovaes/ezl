@@ -45,7 +45,7 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
-from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form
+from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, check_cpf_cnpj_exist
 from core.view_validators import create_person_office_relation, person_exists
 from core.mail import send_mail_sign_up
 from financial.models import ServicePriceTable
@@ -65,7 +65,7 @@ from allauth.socialaccount.providers.oauth2.views import *
 from allauth.socialaccount.providers.google.views import *
 from billing.tables import BillingDetailsTable
 from billing.forms import BillingDetailsForm, BillingAddressCombinedForm
-
+from core.utils import cpf_is_valid, cnpj_is_valid
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -2070,6 +2070,23 @@ class ValidateEmail(View):
         return JsonResponse(data, safe=False)
 
 
+class ValidateCpfCnpj(View):
+    def post(self, request, *args, **kwargs):
+        cpf_cnpj = request.POST.get('cpf_cnpj')
+        data = {'valid': False}
+        if cpf_is_valid(cpf_cnpj) or cnpj_is_valid(cpf_cnpj):
+            data = {'valid': True}
+        return JsonResponse(data, safe=False)
+
+
+class CheckCpfCnpjExist(View):
+    def post(self, request, *args, **kwargs):
+        model_name = request.POST.get('model')
+        cpf_cnpj = request.POST.get('cpf_cnpj')
+        data = check_cpf_cnpj_exist(model_name, cpf_cnpj)
+        return JsonResponse(data, safe=False)
+
+
 class ContactMechanismCreateView(ViewRelatedMixin, CreateView):
     model = ContactMechanism
     form_class = ContactMechanismForm
@@ -2356,20 +2373,32 @@ class NewRegister(TemplateView):
             first_name = request.POST.get('name').split(' ')[0]
             last_name = ' '.join(request.POST.get('name').split(' ')[1:])
             office_name = request.POST.get('office')
+            office_cpf_cnpj = request.POST.get('cpf_cnpj')
             user = User.objects.create(username=username, last_name=last_name, first_name=first_name, email=email)
             user.set_password(password)
             user.save()
-            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
-            office.customsettings.email_to_notification = email
-            office.customsettings.save()
-            DefaultOffice.objects.create(
-                auth_user=user,
-                office=office,
-                create_user=user)
             authenticate(username=username, password=password)
             auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
-            send_mail_sign_up(first_name, email)
-            return JsonResponse({'redirect': reverse_lazy('dashboard')})
+            send_mail_sign_up(first_name, email)            
+            if not request.POST.get('request_invite'):
+                office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user, cpf_cnpj=office_cpf_cnpj)            
+                office.customsettings.email_to_notification = email
+                office.customsettings.save()
+                DefaultOffice.objects.create(
+                    auth_user=user,
+                    office=office,
+                    create_user=user)
+                return JsonResponse({'redirect': reverse_lazy('dashboard')})
+            else:
+                office = Office.objects.get(pk=request.POST.get('office_pk'))
+                Invite.objects.create(
+                    office=office,
+                    person=user.person,
+                    status='N',
+                    create_user=user,
+                    invite_from='P',
+                    is_active=True)                
+                return JsonResponse({'redirect': reverse_lazy('office_instance')})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
@@ -2380,16 +2409,28 @@ class SocialRegister(TemplateView):
     def post(self, request, *args, **kwargs):
         try:
             office_name = request.POST.get('office')
-            user = request.user            
-            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
-            office.customsettings.email_to_notification = user.email
-            office.customsettings.save()
-            DefaultOffice.objects.create(
-                auth_user=user,
-                office=office,
-                create_user=user)
-            send_mail_sign_up(user.first_name, user.email)
-            return JsonResponse({'redirect': reverse_lazy('dashboard')})
+            office_cpf_cnpj = request.POST.get('cpf_cnpj')
+            user = request.user    
+            if not request.POST.get('request_invite'):
+                office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
+                office.customsettings.email_to_notification = user.email
+                office.customsettings.save()
+                DefaultOffice.objects.create(
+                    auth_user=user,
+                    office=office,
+                    create_user=user)
+                send_mail_sign_up(user.first_name, user.email)
+                return JsonResponse({'redirect': reverse_lazy('dashboard')})
+            else:
+                office = Office.objects.get(pk=request.POST.get('office_pk'))
+                Invite.objects.create(
+                    office=office,
+                    person=user.person,
+                    status='N',
+                    create_user=user,
+                    invite_from='P',
+                    is_active=True)                
+                return JsonResponse({'redirect': reverse_lazy('office_instance')})                    
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
