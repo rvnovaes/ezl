@@ -4,6 +4,7 @@ class Register {
         this.elEmail = $('input[name=email]');
         this.elPassword = $('input[name=password]');        
         this.elName = $('input[name=name]');
+        this.elOfficeName = $('input[name=office]');
         this.elOfficeCpfCnpj = $('input[name=cpf_cnpj]')
         this.elAcceptTerms = $('input[name=accept-terms]'); 
         this.elBtnEye = $('#btn-eye'); 
@@ -60,8 +61,13 @@ class Register {
         }).then((result => {
             if (result.value) {
                 this.save(true);
+            } else {
+                swal.close();
+                setTimeout(()=>{
+                    this.elOfficeName.focus();
+                }, 500)
             }
-        }))
+        }));        
     }
 
 
@@ -250,9 +256,23 @@ class Register {
                 $.ajax({
                     method: 'POST', 
                     data: query, 
-                    success: (response) => {                
-                        window.location.href = response.redirect                                
-                        swal.close();
+                    success: (response) => {            
+                        if (requestInvite) {
+                            swal({
+                                type: 'info', 
+                                title: 'Atenção', 
+                                text: `
+                                    Foi enviado o convite para ${this.officeExist.legal_name}.
+                                    Assim que ele aceitar você fará parte desse escritório/empresa.
+                                `
+                            }).then((result)=> {
+                                window.location.href = response.redirect                                
+                                swal.close();
+                            })
+                        } else {
+                            window.location.href = response.redirect                                
+                            swal.close();
+                        }    
                     }, 
                     error: (error) => {
                         console.log(error)
