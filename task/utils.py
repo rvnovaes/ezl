@@ -189,3 +189,14 @@ def get_offices_to_pay(tasks):
 
 def get_clients_to_pay():
     pass
+
+def get_last_parent(task):
+    if task.parent:
+        return get_last_parent(task.parent)
+    return task
+
+def has_task_parent(task):
+    if task.parent:
+        return True
+    return False
+

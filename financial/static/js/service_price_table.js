@@ -9,6 +9,8 @@ class ServicePriceTable {
         this.elOffice = $('#id_office');
         this.elPolicyPrice = $('select[name=policy_price]');
         this.elTaskValue = $('#id_value');
+        this.elTaskValueToPay = $('#id_value_to_pay');
+        this.elTaskValueToReceive = $('#id_value_to_receive');
         this.onChangeOfficeNetwork();
         this.onChangeOfficeCorrespondent();
         this.onSaveSubmit();
@@ -149,6 +151,22 @@ class ServicePriceTable {
         return this.elTaskValue.val();
     }
 
+    get taskValueToPay(){
+        return this.elTaskValueToPay.val();
+    }
+
+    set taskValueToPay(value){
+        return this.elTaskValueToPay.val(value);
+    }
+
+    get taskValueToReceive(){
+        return this.elTaskValueToReceive.val();
+    }
+
+    set taskValueToReceive(value){
+        return this.elTaskValueToReceive.val(value);
+    }
+
     get pricePolicyCategory(){
         return (this.policyPrice) ? this.policyPrices[this.policyPrice].category : null;
     }
@@ -198,6 +216,12 @@ class ServicePriceTable {
             }
             ServicePriceTable.enableElement(this.elOfficeNetwork);
             ServicePriceTable.enableElement(this.elOfficeCorrespondent);
+            if (this.taskValueToPay === ''){
+                this.taskValueToPay = this.taskValue;
+            }
+            if (this.taskValueToReceive === ''){
+                this.taskValueToReceive = this.taskValue;
+            }
         });
     }
 

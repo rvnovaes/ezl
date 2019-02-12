@@ -10,6 +10,7 @@ from django.views.generic import View
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
+from django_tables2 import RequestConfig
 from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
                            DELETE_SUCCESS_MESSAGE)
 from core.models import Office, ContactMechanismType, EMAIL
@@ -101,6 +102,20 @@ class ServicePriceTableListView(CustomLoginRequiredView, SingleTableViewMixin):
     table_class = ServicePriceTableTable
     ordering = ('office', )
     paginate_by = 30
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.request.user.is_superuser:
+            qs = context['table'].data.data.exclude(policy_price__category='NETWORK')
+            table = self.table_class(qs)
+            total_colums = len(table.columns.items())
+            RequestConfig(
+                self.request, paginate={
+                    'per_page': self.paginate_by
+                }).configure(table)
+            context['table'] = table
+            context['total_columns'] = total_colums
+        return context
 
 
 class ServicePriceTableCreateView(AuditFormMixin, CreateView):
