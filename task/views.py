@@ -1196,9 +1196,6 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
         if task_form.is_valid():
             data = task_form.cleaned_data
-            import logging
-            logger = logging.getLogger('teste')
-            logger.info(data)
 
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
@@ -1289,7 +1286,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                                 'client']), Q.AND)
                 if data['law_suit_number']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__law_suit_number=data[
+                        Q(movement__law_suit__law_suit_number__unaccent__icontains=data[
                             'law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(
@@ -1495,6 +1492,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return super().get(request)
 
     def _export_result(self, request):
+        self.object_list = self.get_queryset()
         data = self.get_queryset().annotate(
             origin_code=Coalesce(Cast('parent__task_number', TextField()), Cast('legacy_code', TextField()))).values(
             'task_status', 'task_number', 'final_deadline_date', 'type_task__name',

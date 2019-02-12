@@ -30,8 +30,10 @@ def get_refused_action(user, task, office_session_perms):
         if task.person_executed_by == user.person:
             if task.status.name == 'OPEN':
                 refused_action = 'REFUSED'
+        elif task.parent:
+            refused_action = 'REFUSED'
         elif not task.get_child:
-            refused_action = 'REQUESTED'
+            refused_action = 'REFUSED'
         elif task.get_child:
             refused_action = 'REQUESTED' if valid_status(task.get_child.task_status) else 'INVALID_CHILD_STATUS'
     if 'can_distribute_tasks' in office_session_perms and task.status.name == 'ERROR':

@@ -13,13 +13,18 @@ class TaskFilter {
 	get query() {
 		let formData = this.formData;
 		let data = {};
-		$(formData ).each(function(index, obj){
+		data['task_status'] = [];
+		$(formData).each(function(index, obj){
 		    let element = $('form [name=' + obj.name);
 			let value = obj.value;
 		    if (element.hasClass('twitter-typeahead')){
-			    value = element.attr('data-value')
+			    value = element.attr('data-value');
 		    }
-			data[obj.name] = value;
+		    if (obj.name === 'task_status'){
+				data[obj.name].push(value);
+			} else {
+				data[obj.name] = value;
+			}
 		});
 		return data;
 	}
@@ -27,7 +32,7 @@ class TaskFilter {
     getXlsx(fileName='task-filter', typeXls='export_result') {
 		let request = new XMLHttpRequest();
 		fileName += '.xlsx';
-		let params = $.param(this.query);
+		let params = $.param(this.query, true);
 		params += `&${typeXls}=true`;
 		let url = `/dashboard/filtrar/?${params}`;
 		request.open('GET', url, true);

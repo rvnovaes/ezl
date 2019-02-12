@@ -114,12 +114,12 @@ class TaskDetail {
 
     setExecutionDateRequire(status) {
         if (this._elExecutionDate.length > 0) {
-            if (status === "REQUESTED"){
-                this._elExecutionDate.attr('required', false);
+            if (status === 'DONE'){
+                this._elExecutionDate.attr('required', 'required');
                 this._elExecutionDate.val('');
 
             }else{
-                this._elExecutionDate.attr('required', true);
+                this._elExecutionDate.removeAttr('required');
             }
             let input = this._elExecutionDate.get(0);
             if (! input.checkValidity()) {
@@ -181,10 +181,10 @@ class TaskDetail {
         /*Apenas estes status devem possuir notes como required, alem de nao poder 
          espacos em branco */        
         this._elNotes.removeAttr('required');        
-        ['REQUESTED', 'REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (s) {
+        ['REQUESTED', 'REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach((s) => {
             if (status === s) {
-                this._elNotes.attr('required', true).change(function () {
-                    this._elNotes.val(this._elNotes.val().trim())
+                this._elNotes.attr('required', true).change(() => {
+                    this._elNotes.val(this._elNotes.val().trim());
                 });
             }
         });
@@ -196,12 +196,12 @@ class TaskDetail {
         actionButton.innerHTML = "<i class='"+this.nextState[status]['icon']+"'></i> "+
             this.nextState[status]['text'].replace(this.nextState[status]['text'][0],
                 this.nextState[status]['text'][0].toUpperCase());
-        this._elModalActionButton.attr("name", "action");
-        this._elModalActionButton.attr("value", status);
+        this._elModalActionButton.attr('name', 'action');
+        this._elModalActionButton.attr('value', status);
     }
 
     hideServicePriceTableAlert() {
-        $("#servicepricetable-alert").addClass("hidden");
+        $('#servicepricetable-alert').addClass('hidden');
     }
 
     initFeedbackRating() {
@@ -209,14 +209,14 @@ class TaskDetail {
     }
 
     makeTaskAction(value) {
-        var task_status = value.id;
+        var taskStatus = value.id;
         this.validSurvey();
-        this.makeRatingProccess(value.id);
-        this.setExecutionDateRequire(value.id);
+        this.makeRatingProccess(taskStatus);
+        this.setExecutionDateRequire(taskStatus);
         this.showModalAction();                
-        this.formatModalAction(value.id);
+        this.formatModalAction(taskStatus);
         this.hideServicePriceTableAlert();
-        this.configNotesField();
+        this.configNotesField(taskStatus);
         return true;
     }
 
