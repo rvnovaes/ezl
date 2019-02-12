@@ -554,7 +554,7 @@ class OfficeForm(BaseModelForm):
 
 class OfficeProfileForm(OfficeForm):
 
-    logo = UploadedFileField()
+    logo = UploadedFileField(required=False)
 
     class Meta:
         model = Office
