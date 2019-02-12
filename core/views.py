@@ -2409,16 +2409,28 @@ class SocialRegister(TemplateView):
     def post(self, request, *args, **kwargs):
         try:
             office_name = request.POST.get('office')
-            user = request.user            
-            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
-            office.customsettings.email_to_notification = user.email
-            office.customsettings.save()
-            DefaultOffice.objects.create(
-                auth_user=user,
-                office=office,
-                create_user=user)
-            send_mail_sign_up(user.first_name, user.email)
-            return JsonResponse({'redirect': reverse_lazy('dashboard')})
+            office_cpf_cnpj = request.POST.get('cpf_cnpj')
+            user = request.user    
+            if not request.POST.get('request_invite'):
+                office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
+                office.customsettings.email_to_notification = user.email
+                office.customsettings.save()
+                DefaultOffice.objects.create(
+                    auth_user=user,
+                    office=office,
+                    create_user=user)
+                send_mail_sign_up(user.first_name, user.email)
+                return JsonResponse({'redirect': reverse_lazy('dashboard')})
+            else:
+                office = Office.objects.get(pk=request.POST.get('office_pk'))
+                Invite.objects.create(
+                    office=office,
+                    person=user.person,
+                    status='N',
+                    create_user=user,
+                    invite_from='P',
+                    is_active=True)                
+                return JsonResponse({'redirect': reverse_lazy('office_instance')})                    
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
