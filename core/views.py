@@ -2377,13 +2377,18 @@ class NewRegister(TemplateView):
             user = User.objects.create(username=username, last_name=last_name, first_name=first_name, email=email)
             user.set_password(password)
             user.save()
-            office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user, cpf_cnpj=office_cpf_cnpj)            
-            office.customsettings.email_to_notification = email
-            office.customsettings.save()
-            DefaultOffice.objects.create(
-                auth_user=user,
-                office=office,
-                create_user=user)
+            import pdb; pdb.set_trace()
+            if request.POST.get('request_invite'):
+                office = Office.objects.get(pk=request.POST.get('office_pk'))
+                pass
+            else: 
+                office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user, cpf_cnpj=office_cpf_cnpj)            
+                office.customsettings.email_to_notification = email
+                office.customsettings.save()
+                DefaultOffice.objects.create(
+                    auth_user=user,
+                    office=office,
+                    create_user=user)
             authenticate(username=username, password=password)
             auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
             send_mail_sign_up(first_name, email)

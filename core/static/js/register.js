@@ -59,7 +59,7 @@ class Register {
             reverseButtons: true             
         }).then((result => {
             if (result.value) {
-                alert('ok vou enviar o convite...')
+                this.save(true);
             }
         }))
     }
@@ -236,15 +236,20 @@ class Register {
             this.addClassError(this.elAcceptTerms, 'span');            
         }                        
     }    
-    save() {
+    save(requestInvite) {
         swal({
             title: 'Criando seu escritório', 
             text: 'Aguarde um momento',
             onOpen: ()=>{
                 swal.showLoading()
+                let query = this.query;
+                query['request_invite'] = requestInvite
+                if (requestInvite) {
+                    query['office_pk'] = this.officeExist.id
+                }
                 $.ajax({
                     method: 'POST', 
-                    data: this.query, 
+                    data: query, 
                     success: (response) => {                
                         window.location.href = response.redirect                                
                         swal.close();
