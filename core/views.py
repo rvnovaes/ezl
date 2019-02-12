@@ -2377,11 +2377,10 @@ class NewRegister(TemplateView):
             user = User.objects.create(username=username, last_name=last_name, first_name=first_name, email=email)
             user.set_password(password)
             user.save()
-            import pdb; pdb.set_trace()
-            if request.POST.get('request_invite'):
-                office = Office.objects.get(pk=request.POST.get('office_pk'))
-                pass
-            else: 
+            authenticate(username=username, password=password)
+            auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
+            send_mail_sign_up(first_name, email)            
+            if not request.POST.get('request_invite'):
                 office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user, cpf_cnpj=office_cpf_cnpj)            
                 office.customsettings.email_to_notification = email
                 office.customsettings.save()
@@ -2389,10 +2388,17 @@ class NewRegister(TemplateView):
                     auth_user=user,
                     office=office,
                     create_user=user)
-            authenticate(username=username, password=password)
-            auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
-            send_mail_sign_up(first_name, email)
-            return JsonResponse({'redirect': reverse_lazy('dashboard')})
+                return JsonResponse({'redirect': reverse_lazy('dashboard')})
+            else:
+                office = Office.objects.get(pk=request.POST.get('office_pk'))
+                Invite.objects.create(
+                    office=office,
+                    person=user.person,
+                    status='N',
+                    create_user=user,
+                    invite_from='P',
+                    is_active=True)                
+                return JsonResponse({'redirect': reverse_lazy('office_instance')})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
