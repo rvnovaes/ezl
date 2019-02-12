@@ -135,6 +135,8 @@ class GenericETL(object):
 
     field_check = 'legacy_code'
 
+    default_office = get_default_office()
+
     class Meta:
         abstract = True
 
@@ -146,17 +148,17 @@ class GenericETL(object):
         for record in records:
             record.deactivate()
 
-    def deactivate_all(self, default_office):
+    def deactivate_all(self):
         if self.model._meta.object_name == 'Person':
             self.model.objects.filter(
-                offices=default_office,
+                offices=self.default_office,
                 system_prefix=LegacySystem.ADVWIN.value).update(
                     is_active=False)
         else:
             try:
                 office_field = self.model._meta.get_field('office')
                 self.model.objects.filter(
-                    office=default_office,
+                    office=self.default_office,
                     system_prefix=LegacySystem.ADVWIN.value).update(
                         is_active=False)
             except:
@@ -171,7 +173,7 @@ class GenericETL(object):
         from django.contrib.auth import get_user_model
         User = get_user_model()
         user = User.objects.get(pk=create_alter_user)
-        default_office = get_default_office()
+        default_office = self.default_office
         dashboard_log = DashboardETL.objects.create(
             name=self.model._meta.verbose_name.upper(),
             status=False,
@@ -181,7 +183,7 @@ class GenericETL(object):
             db_host_source=db_host_source,
             office=default_office)
         if self.has_status:
-            self.deactivate_all(default_office)
+            self.deactivate_all()
 
         for attempt in range(5):
             try:
