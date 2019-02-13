@@ -1950,7 +1950,6 @@ class OfficeOfficesInactiveView(UpdateView):
                          | Q(
                              Q(parent__task_status=TaskStatus.OPEN)
                              | Q(parent__task_status=TaskStatus.ACCEPTED)
-                             | Q(parent__task_status=TaskStatus.REQUESTED)
                              | Q(parent__task_status=TaskStatus.DONE))),
                             parent__office=self.kwargs['office_pk'],
                             office=record.pk):
@@ -1986,8 +1985,8 @@ class OfficeOfficesInactiveView(UpdateView):
             return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse(
-            'office_update', kwargs={'pk': self.kwargs['office_pk']})
+        return self.request.META.get('HTTP_REFERER', reverse(
+            'office_update', kwargs={'pk': self.kwargs['office_pk']}))
 
 
 class TagsInputPermissionsView(View):
