@@ -219,16 +219,6 @@
             if (! window.type_task_id){
                 window.type_task_id = {{ form.instance.type_task.id }}
             }
-            var $id_type_task_field = $("#id_type_task_field");
-            if ($id_type_task_field.length > 0 && $id_type_task_field.val()) {
-                if ($id_type_task_field[0].options.length == 1){
-                    $("#type_task").html($id_type_task_field.find(":selected").text())
-                    $("#type_task_name").html("<label>Tipo de Serviço: </label> " + $id_type_task_field.find(":selected").text())
-                }
-                window.type_task_id = $id_type_task_field.val();
-                taskDetail.ajax_get_correspondents(window.type_task_id);
-            }
-            taskDetail.onChangeTypeTaskField();
             (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
         });
         $('#confirmAction').on('shown.bs.modal', function (event) {

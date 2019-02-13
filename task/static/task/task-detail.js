@@ -24,7 +24,6 @@ class TaskDetail {
         this._elBtnCompanyRepresentative = $('#btn-company_representative');
         this._elModalSurveyCompanyRepresentative = $("#survey-company-representative");
         this._elExecutionDate.attr({'required': true, 'placeholder': 'Data de Cumprimento'});
-        this._elTypeTaskField = $('#id_type_task_field');        
         this.initFeedbackRating();
         this.initCpfCnpjField();
         this.onClickRowServicePriceTable();  
@@ -209,7 +208,7 @@ class TaskDetail {
     }
 
     makeTaskAction(value) {
-        var taskStatus = value.id;
+        let taskStatus = value.id;
         this.validSurvey();
         this.makeRatingProccess(taskStatus);
         this.setExecutionDateRequire(taskStatus);
@@ -319,19 +318,6 @@ class TaskDetail {
         }
     }
 
-    onChangeTypeTaskField(){
-        this._elTypeTaskField.on('change', (event) => {
-            swal({
-                title: 'Buscando tabelas de preço',
-                html: '<h4>Aguarde...</h4>',
-                onOpen: () => {
-                    swal.showLoading();
-                }
-            });
-            this.ajax_get_correspondents(this.typeTask).then( (data) => {swal.close();} )
-        })
-    }
-
     getLocation() {
         if (navigator.geolocation) {
             $('#locating').modal('show');
@@ -412,58 +398,6 @@ class TaskDetail {
             }
             self.setBillingItem();
         });
-    };    
-
-    async ajax_get_correspondents(type_task) {
-        let tmplRowCorrespondent = '<tr id="office-${pk}" data-id="${pk}" ' +
-                            'data-value="${value}" data-formated-value="${formated_value}" ' +
-                            'data-price-category="${price_category}" ' +
-                            'data-office-public="${office_public}" class="tr_select" role="row">\n' +
-                '<td class="office_correspondent">${office_correspondent}</td>\n' +
-                '<td class="type_task">${type_task}</td>\n' +
-                '<td class="office_networl">${office_network}</td>\n' +
-                '<td class="state">${state}</td>\n' +
-                '<td class="court_district">${court_district}</td>\n' +
-                '<td class="court_district_complement">${court_district_complement}</td>\n' +
-                '<td class="state">${city}</td>\n' +
-                '<td class="client">${client}</td>\n' +
-                '<td class="value">${value}</td>\n' +
-                '<td class="office_rating">${office_rating}</td>\n' +
-                '<td class="office_return_rating">${office_return_rating}</td>\n' +
-            '</tr>';
-        let self = this;
-        if (!window.table){
-            this.setWindowTable();
-        }
-        const result = await $.ajax({
-            type: 'GET',
-            url: `/providencias/ajax_get_correspondent_table/?task=${this.taskId}&type_task=${type_task}`,
-            success: function (data) {
-                window.total = data.total;
-                window.table_rows = data.total;
-                window.type_task_id = data.type_task_id;
-                $("#type_task").html(data.type_task);
-                var tbody = $('#correspondents-table tbody');
-                if(window.table) {
-                    window.table.clear().draw();
-                    if (data.total > 0) {
-                        $.each(data.correspondents_table, function (index, value) {
-                            window.table.row.add($($.tmpl(tmplRowCorrespondent, value))).draw();
-                        });
-                    }
-                } else {
-                    tbody.html('');
-                    if (data.total > 0) {
-                        $.each(data.correspondents_table, function (index, value) {
-                            $.tmpl(tmplRowCorrespondent, value).appendTo(tbody)
-                        });
-                    }
-                }
-                self.correspondents_data_table();
-            },
-            dataType: 'json'
-        });
-        return result;
     };
 
     setWindowTable() {
@@ -478,17 +412,6 @@ class TaskDetail {
             },
         });
     }
-
-    correspondents_data_table() {
-        if (!window.table){
-            this.setWindowTable()
-        }
-        this._elModalActionButton.removeAttr('disabled');
-        $("#correspondents-table_filter input").focus();
-        this.onClickRowServicePriceTable();
-        swal.close();
-        return;
-    };   
 
     onKeypressAmountField() {
         $('input[id=id_amount]').keypress(function(e) {

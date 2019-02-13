@@ -57,28 +57,32 @@ class ServicePriceTableTypeTaskFilter(ServicePriceTableFilter):
         networks = self.data.get('networks')
         dynamic_query.add(
             Q(
-                # seleciona os precos que tenham tipo de servico igual o tipo de servico da OS e que sejam
-                # do mesmo escritorio da OS
+                # seleciona os precos da categoria PADRAO, que tenham tipo de servico igual o tipo de servico da OS
+                # e que sejam do mesmo escritorio da OS
+                Q(policy_price__category=CategoryPrice.DEFAULT),
                 Q(
                     Q(type_task=type_task) | Q(type_task=None)
                 ),
                 Q(office=task.office)
             ) |
             Q(
-                # selecina os precos que estejam no mesmo tipo de servico principal do tipo de servico da OS
-                # e que sejam do mesmo escritorio da OS
+                # selecina os precos da categoria PADRAO que estejam no mesmo tipo de servico principal
+                # do tipo de servico da OS e que sejam do mesmo escritorio da OS
+                Q(policy_price__category=CategoryPrice.DEFAULT),
                 Q(type_task__type_task_main__in=type_task_main),
                 Q(office=task.office)
             ) |
             Q(
-                # seleciona os precos que estejam no mesmo tipo de servico principal do tipo de servico da OS
-                # e que sejam de categoria Publica
+                # seleciona os precos da categoria PUBLIC que estejam no mesmo tipo de servico principal
+                # do tipo de servico da OS e que nao sejam do escritorio da OS
+                Q(policy_price__category=CategoryPrice.PUBLIC),
                 Q(type_task__type_task_main__in=type_task_main),
-                Q(policy_price__category=CategoryPrice.PUBLIC)) |
+                ~Q(office=task.office)) |
             Q(
-                # seleciona os precos que estejam no mesmo tipo de servico principal do tipo de servico da OS
-                # e que pertencam a mesma rede do escritorio da OS,
+                # seleciona os precos da categoria NETWORK que estejam no mesmo tipo de servico principal
+                # do tipo de servico da OS e que pertencam a mesma rede do escritorio da OS,
                 # desde que nao sejam precos do escritorio da OS
+                Q(policy_price__category=CategoryPrice.NETWORK),
                 Q(type_task__type_task_main__in=type_task_main),
                 Q(office_network__in=networks),
                 ~Q(office=task.office)
