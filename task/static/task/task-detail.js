@@ -420,6 +420,7 @@ class TaskDetail {
                             'data-price-category="${price_category}" ' +
                             'data-office-public="${office_public}" class="tr_select" role="row">\n' +
                 '<td class="office_correspondent">${office_correspondent}</td>\n' +
+                '<td class="type_task">${type_task}</td>\n' +
                 '<td class="office_networl">${office_network}</td>\n' +
                 '<td class="state">${state}</td>\n' +
                 '<td class="court_district">${court_district}</td>\n' +
@@ -468,7 +469,7 @@ class TaskDetail {
     setWindowTable() {
         window.table = $('#correspondents-table').DataTable({
             paging: false,
-            order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
+            order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
             dom: 'frti',
             buttons: [],
             destroy: true,

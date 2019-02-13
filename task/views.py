@@ -1024,9 +1024,6 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
         context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
-        type_task_field = get_correspondents_table.get_type_task_field()
-        if type_task_field:
-            context['form'].fields['type_task_field'] = type_task_field
         checker = ObjectPermissionChecker(self.request.user)
         if checker.has_perm('can_see_tasks_company_representative', office_session):
             if not TaskSurveyAnswer.objects.filter(tasks=self.object, create_user=self.request.user):
@@ -1677,19 +1674,17 @@ def ajax_get_correspondents_table(request):
     type_task_name = None
     if type_task_id and task_id:
         type_task = TypeTask.objects.filter(pk=type_task_id).first()
+        type_task_name = type_task.name
         task = Task.objects.filter(pk=task_id).first()
         office = get_office_session(request)
         get_correspondents_table = CorrespondentsTable(
             task, office, type_task=type_task)
-        type_task = get_correspondents_table.update_type_task(type_task)
-        type_task_name = type_task.name
-        type_task_id = type_task.id
-        correspondents_table = get_correspondents_table.get_correspondents_table(
-        )
+        correspondents_table = get_correspondents_table.get_correspondents_table()
         correspondents_table_list = list(map(lambda x: {
             'pk': x.pk,
             'office': x.office.legal_name,
             'office_correspondent': x.office_correspondent.legal_name,
+            'type_task': x.type_task.__str__(),
             'court_district': x.court_district.name if x.court_district else '—',
             'state': x.state.name if x.state else '—',
             'client': x.client.legal_name if x.client else '—',
