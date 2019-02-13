@@ -3,7 +3,6 @@ import django_tables2 as tables
 
 from core.tables import CheckBoxMaterial
 from .models import CostCenter, ServicePriceTable, PolicyPrice
-from djmoney.money import Money
 
 
 class CostCenterTable(tables.Table):
@@ -64,7 +63,8 @@ class ServicePriceTableTaskTable(tables.Table):
             'id': lambda record: 'office-{}'.format(record.pk),
             'data-id': lambda record: record.pk,
             'data-value': lambda record: record.value,
-            'data-formated-value': lambda record: Money(record.value, 'BRL').__str__(),
+            'data-price-category': lambda record: record.policy_price.category,
+            'data-formated-value': lambda record: record.value.__str__(),
             'data-office-public': lambda record: record.office_correspondent.public_office if record.office_correspondent else False,
             'data-office-txt': lambda record: record.office.__str__(),
             'class': 'tr_select'
@@ -73,6 +73,7 @@ class ServicePriceTableTaskTable(tables.Table):
 
 class PolicyPriceTable(tables.Table):
     selection = CheckBoxMaterial(accessor="pk", orderable=False)
+
     class Meta: 
         model = PolicyPrice
         fields = ('selection', 'name', 'category', 'billing_moment', 'is_active')

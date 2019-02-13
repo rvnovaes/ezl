@@ -6,28 +6,28 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $scope.hideEmptyChats = true;
   $scope.realContacts = [];
   $scope.contacts = [];
-  $scope.chat = {}
+  $scope.chat = {};
   $scope.chatPageSize = 20;
   $scope.chats = [];
   $scope.allChats = [];
   $scope.currentChatPage = 0;
   $scope.chatsLoading = false;
   $scope.sockets = {};
-  $scope.messages = []
+  $scope.messages = [];
   $scope.listOffices = true;
   $scope.search = "";
   $scope.chatSelected = {};
   $scope.office_id = false;
   $scope.office_id_since = false;
-  $scope.listScrollChat = false
+  $scope.listScrollChat = false;
   $scope.existsUnread = false;
-  $scope.search = ''
+  $scope.search = '';
 
   $('#list-chat-scroll').ready(function(){
     resizeChat();
     $scope.listScrollChat = new PerfectScrollbar('#list-chat-scroll', {
       wheelSpeed: 2
-    })
+    });
   });
 
   $scope.$watch('search', function(newValue, oldValue) {
@@ -58,21 +58,21 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $scope.unreadMessage = function(chat){
     data = {
       chat: chat.id
-    }
+    };
     chatApiService.unreadMessage(data).then(function(data){
       chat.unread_message_quanty = 0;
       $scope.existsUnread = true;
-    })
-  }
+    });
+  };
 
   var readMessage = function(chat){
     data = {
       chat_id: chat.id
-    }
-    chatApiService.readMessage(data)
+    };
+    chatApiService.readMessage(data);
     chat.unread_message_quanty = 0;
     $scope.existsUnread = false;
-  }
+  };
 
   var getContacts = function () {
     if ($scope.listOffices) {
@@ -83,9 +83,9 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
         }
       });
     }
-  }
+  };
 
-  getContacts()
+  getContacts();
 
   var getChats = function(){
     if ($scope.office_id && !$scope.listOffices) {
@@ -170,20 +170,20 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     $scope.office_id = office_id;
     $scope.listOffices = false;
     $scope.search = "";
-    getChats()
-  }
+    getChats();
+  };
 
-  update_list_office = $interval(getContacts, 5000)
-  update_list_chats = $interval(updateListChats, 5000)
+  update_list_office = $interval(getContacts, 5000);
+  update_list_chats = $interval(updateListChats, 5000);
 
   $scope.getMessages = function(chat){
     $scope.inMessage = true;
-    $location.hash('bottom')
-    $anchorScroll()
-    $scope.chat = chat    
+    $location.hash('bottom');
+    $anchorScroll();
+    $scope.chat = chat;
     chatApiService.getMessages(chat.id).then(function(data){
-      $scope.messages = data
-      $scope.task = data.task
+      $scope.messages = data;
+      $scope.task = data.task;
       var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
       if (!$scope.sockets[chat.id] ||
         ($scope.sockets[chat.id] && $scope.sockets[chat.id].readyState !=WebSocket.OPEN)){
@@ -193,9 +193,9 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
           };
           $scope.sockets[chat.id].onmessage = function(e){
             if (JSON.parse(e.data).chat === $scope.chat.id){
-              $scope.messages.messages.push(JSON.parse(e.data))
-              $scope.$apply()
-              updateScroll()
+              $scope.messages.messages.push(JSON.parse(e.data));
+              $scope.$apply();
+              updateScroll();
             }
           }
       }
@@ -208,7 +208,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     setTimeout(function(){
       scrollID.scrollTop(scrollID[0].scrollHeight)
     }, 500);
-  }
+  };
 
   $scope.sendMessage = function(){
     if ($scope.message) {
@@ -218,28 +218,28 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
         'label': $scope.chat.label
       });
       $scope.sockets[$scope.chat.id].onopen(data);
-      updateScroll()
+      updateScroll();
       $scope.message = ""
     }
-  }
+  };
 
   $scope.getClass = function(message_user_id, request_user_id){
     if (message_user_id === request_user_id) {
       return 'odd bounceInRight animated'
     }
     return 'bounceInLeft animated'
-  }
+  };
 
   $scope.goToOfficeList = function(){
-    $scope.listOffices = true
+    $scope.listOffices = true;
     $scope.search = '';
     $scope.inMessage = false;
-    getContacts()
+    getContacts();
   };
 
   $scope.onEnterKey = function(event){
     if (event.key === 'Enter') {
-      $scope.sendMessage()
+      $scope.sendMessage();
     }
   };
-})
+});

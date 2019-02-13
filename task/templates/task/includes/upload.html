@@ -36,9 +36,18 @@
                     $('#no-providence').removeClass('show')
                     $('.js-batch-download-files').hide()
                 };
-                $.each(data.ecms, function( index, value ) {
-                    $.tmpl(tmplRowUpload, value).appendTo('#containnerUploads');
-                })
+                try {
+                    $.each(data.ecms, function( index, value ) {
+                        $.tmpl(tmplRowUpload, value).appendTo('#containnerUploads');
+                    })   
+                } catch (error) {
+                    setTimeout(() => {
+                        console.log('tentando novamente')
+                        $.each(data.ecms, function( index, value ) {
+                            $.tmpl(tmplRowUpload, value).appendTo('#containnerUploads');
+                        })                        
+                    }, 1000)
+                }
             }
         });
     };

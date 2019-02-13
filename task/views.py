@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.db import IntegrityError, OperationalError
-from django.db.models import Q, Case, When, CharField, Count, TextField, Max, Subquery, OuterRef, Prefetch
+from django.db.models import Q, Case, When, CharField, Count, TextField, Max, Subquery, OuterRef, Prefetch, F
 from django.db.models.functions import Cast, Coalesce
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse_lazy, reverse
@@ -50,8 +50,9 @@ from task.rules import RuleViewTask
 from task.workflow import CorrespondentsTable
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
+from financial.utils import recalculate_values
 from core.utils import get_office_session, get_domain
-from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task
+from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, has_task_parent
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -316,11 +317,17 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
         try:
             task = Task.objects.get(pk=kwargs.get('pk'))
             amount = request.POST.get('amount').replace('R$', '') if request.POST.get('amount') else '0.00'
+            amount_to_pay = request.POST.get('amount_to_pay').replace('R$', '') \
+                if request.POST.get('amount_to_pay') else '0.00'
+            amount_to_receive = request.POST.get('amount_to_receive').replace('R$', '') \
+                if request.POST.get('amount_to_receive') else '0.00'
             note = request.POST.get('note', '')
             form = TaskDetailForm(request.POST, instance=task)
             if form.is_valid():
                 form.instance.task_status = TaskStatus.OPEN
                 form.instance.amount = Decimal(amount)
+                form.instance.amount_to_pay = Decimal(amount_to_pay)
+                form.instance.amount_to_receive = Decimal(amount_to_receive)
                 get_task_attachment(self, form)
                 form.instance.delegation_date = timezone.now()
                 if not form.instance.person_distributed_by:
@@ -436,11 +443,11 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         context['filter'] = self.task_filter
         try:
             if self.request.GET['group_by_tasks'] == OFFICE:
-                office_list, total = self.get_os_grouped_by_office()
+                office_list, total, total_to_pay = self.get_os_grouped_by_office()
             else:
-                office_list, total = self.get_os_grouped_by_client()
+                office_list, total, total_to_pay = self.get_os_grouped_by_client()
         except:
-            office_list, total = self.get_os_grouped_by_office()
+            office_list, total, total_to_pay = self.get_os_grouped_by_office()
         context['offices_report'] = office_list
         context['total'] = total
         return context
@@ -472,6 +479,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map = {}
         tasks = self.get_queryset()
         total = 0
+        total_to_pay = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
@@ -484,30 +492,36 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map_total = {}
         for office, clients in offices_map.items():
             office_total = 0
+            office_total_to_pay = 0
             for client, tasks in clients.items():
                 client_total = sum(map(lambda x: x.amount, tasks))
+                client_total_to_pay = sum(map(lambda x: x.amount_to_pay, tasks))
                 office_total = office_total + client_total
+                office_total_to_pay += client_total_to_pay
                 offices.append({
                     'office_name': office.name,
                     'client_name': client.name,
                     'client_refunds': client.refunds_correspondent_service,
                     'tasks': tasks,
                     "client_total": client_total,
+                    "client_total_to_pay": client_total_to_pay,
                     "office_total": 0,
                 })
-            offices_map_total[office.name] = office_total
+            offices_map_total[office.name] = {'total': office_total, 'total_to_pay': office_total_to_pay}
             total = total + office_total
+            total_to_pay += office_total_to_pay
 
         for item in offices:
             item['office_total'] = offices_map_total[item['office_name']]
 
-        return offices, total
+        return offices, total, total_to_pay
 
     def get_os_grouped_by_client(self):
         clients = []
         clients_map = {}
         tasks = self.get_queryset()
         total = 0
+        total_to_pay = 0
         for task in tasks:
             client = self._get_related_client(task)
             if client not in clients_map:
@@ -520,24 +534,29 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         clients_map_total = {}
         for client, offices in clients_map.items():
             client_total = 0
+            client_total_to_pay = 0
             for office, tasks in offices.items():
                 office_total = sum(map(lambda x: x.amount, tasks))
+                office_total_to_pay = sum(map(lambda x: x.amount_to_pay, tasks))
                 client_total = client_total + office_total
+                client_total_to_pay += office_total_to_pay
                 # necessário manter a mesma estrutura do get_os_grouped_by_office para não mexer no template.
                 clients.append({
                     'office_name': client.name,
                     'client_name': office.name,
                     'tasks': tasks,
                     "client_total": office_total,
+                    "client_total": office_total_to_pay,
                     "office_total": 0,
                 })
-            clients_map_total[client.name] = client_total
+            clients_map_total[client.name] = {'total': client_total, 'total_to_pay': client_total_to_pay}
             total = total + client_total
+            total_to_pay += client_total_to_pay
 
         for item in clients:
             item['office_total'] = clients_map_total[item['office_name']]
 
-        return clients, total
+        return clients, total, total_to_pay
 
     def _get_related_client(self, task):
         return task.client
@@ -625,7 +644,7 @@ class ToReceiveTaskReportView(TaskReportBase):
 
             if query or finished_query or parent_finished_query:
                 query.add(Q(finished_query), Q.AND).add(Q(parent_finished_query), Q.AND)
-                queryset = queryset.filter(query)
+                queryset = queryset.filter(query).annotate(fee=F('amount') - F('amount_to_pay'))
             else:
                 queryset = Task.objects.none()
         else:
@@ -732,17 +751,17 @@ class ToPayTaskReportView(View):
     def get_queryset(self):
         office = get_office_session(self.request)
         queryset = Task.objects \
-        .select_related('office') \
-        .select_related('type_task') \
-        .select_related('movement__type_movement') \
-        .select_related('movement__folder') \
-        .select_related('movement__folder__person_customer') \
-        .select_related('movement__law_suit__court_district') \
-        .select_related('parent__type_task') \
-        .filter(
-            parent__office=office,
-            parent__task_status=TaskStatus.FINISHED,
-            parent__isnull=False)
+            .select_related('office') \
+            .select_related('type_task') \
+            .select_related('movement__type_movement') \
+            .select_related('movement__folder') \
+            .select_related('movement__folder__person_customer') \
+            .select_related('movement__law_suit__court_district') \
+            .select_related('parent__type_task') \
+            .filter(
+                parent__office=office,
+                parent__task_status=TaskStatus.FINISHED,
+                parent__isnull=False)
         queryset = self.filter_queryset(queryset)
         return queryset
 
@@ -917,8 +936,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             survey.survey_result = survey_result
             survey.save()
             survey.tasks.add(form.instance)
-            if form.instance.parent:
-                survey.tasks.add(form.instance.parent)
+            task_to_check_parent = form.instance
+            while has_task_parent(task_to_check_parent):
+                survey.tasks.add(task_to_check_parent.parent)
+                task_to_check_parent = task_to_check_parent.parent
         send_notes_execution_date.send(
             sender=self.__class__,
             notes=notes,
@@ -937,18 +958,30 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             form.instance.delegation_date = timezone.now()
             if not form.instance.person_distributed_by:
                 form.instance.person_distributed_by = self.request.user.person
-            default_amount = Decimal(
-                '0.00') if not form.instance.amount else form.instance.amount
-            form.instance.amount = (form.cleaned_data['amount']
-                                    if form.cleaned_data['amount'] else
-                                    default_amount)
+            default_amount = Decimal('0.00') if not form.instance.amount else form.instance.amount
+            form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else default_amount)
             servicepricetable_id = (
                 self.request.POST['servicepricetable_id']
                 if self.request.POST['servicepricetable_id'] else None)
             servicepricetable = ServicePriceTable.objects.filter(
-                id=servicepricetable_id).first()
+                id=servicepricetable_id).select_related('policy_price').first()
             get_task_attachment(self, form)
             if servicepricetable:
+                form.instance.price_category = servicepricetable.policy_price.category
+                form.instance.amount_to_receive = Decimal(servicepricetable.value_to_receive.amount)
+                form.instance.amount_to_pay = Decimal(servicepricetable.value_to_pay.amount)
+                form.instance.rate_type_receive = servicepricetable.rate_type_receive
+                form.instance.rate_type_pay = servicepricetable.rate_type_pay
+                if form.instance.amount != servicepricetable.value:
+                    form.instance.amount_to_pay, form.instance.amount_to_receive = recalculate_values(
+                        servicepricetable.value,
+                        form.instance.amount_to_pay,
+                        form.instance.amount_to_receive,
+                        form.instance.amount,
+                        form.instance.rate_type_pay,
+                        form.instance.rate_type_receive
+                    )
+
                 delegate_child_task(
                     form.instance, servicepricetable.office_correspondent)
                 form.instance.person_executed_by = None
@@ -983,13 +1016,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             pending_list.append('Correspondente')
         context['pending_surveys'] = {'status': True if pending_list else False,
                                       'pending_list': pending_list}
-        context['survey_data'] = (self.object.type_task.survey.data
-                                  if self.object.type_task.survey else None)
-        if self.object.parent:
-            context['survey_data'] = (self.object.parent.type_task.survey.data
-                                      if self.object.parent.type_task.survey
-                                      else None)
-
+        # Pega o ultimo parent, se nao tiver parent retorna o proprio objeto
+        last_parent = get_last_parent(self.object) 
+        context['survey_data'] = (last_parent.type_task.survey.data
+                                  if last_parent.type_task.survey else None)
         office_session = get_office_session(self.request)
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
@@ -1000,10 +1030,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         checker = ObjectPermissionChecker(self.request.user)
         if checker.has_perm('can_see_tasks_company_representative', office_session):
             if not TaskSurveyAnswer.objects.filter(tasks=self.object, create_user=self.request.user):
-                if (self.object.type_task.survey_company_representative):
+                if (last_parent.type_task.survey_company_representative):
                     context['not_answer_questionnarie'] = True
-                    if self.object.type_task.survey_company_representative:
-                        context['survey_company_representative'] = self.object.type_task.survey_company_representative.data
+                    if last_parent.type_task.survey_company_representative:
+                        context['survey_company_representative'] = last_parent.type_task.survey_company_representative.data
                     else:
                         context['survey_company_representative'] = ''
         context['show_company_representative_in_tab'] = self.show_company_representative_in_tab(checker, office_session)
@@ -1166,9 +1196,6 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
         if task_form.is_valid():
             data = task_form.cleaned_data
-            import logging
-            logger = logging.getLogger('teste')
-            logger.info(data)
 
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
@@ -1230,11 +1257,9 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                     ]
                     task_dynamic_query.add(Q(task_status__in=status), Q.AND)
                 if data['type_task']:
-                    list_of_type_task_main = [list(type_task.type_task_main.all()) for type_task in data['type_task']]
-                    list_of_type_task_main = reduce(operator.concat, list_of_type_task_main)
-                    task_dynamic_query.add(
-                        Q(Q(type_task__in=data['type_task']) |
-                          Q(type_task__type_task_main__in=list_of_type_task_main)), Q.AND)
+                    task_dynamic_query.add(Q(type_task__in=data['type_task']), Q.AND)
+                if data['type_task_main']:
+                    task_dynamic_query.add(Q(type_task__type_task_main__in=data['type_task_main']), Q.AND)
                 if data['court']:
                     task_dynamic_query.add(
                         Q(movement__law_suit__organ=data['court']), Q.AND)
@@ -1261,7 +1286,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                                 'client']), Q.AND)
                 if data['law_suit_number']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__law_suit_number=data[
+                        Q(movement__law_suit__law_suit_number__unaccent__icontains=data[
                             'law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(
@@ -1467,6 +1492,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return super().get(request)
 
     def _export_result(self, request):
+        self.object_list = self.get_queryset()
         data = self.get_queryset().annotate(
             origin_code=Coalesce(Cast('parent__task_number', TextField()), Cast('legacy_code', TextField()))).values(
             'task_status', 'task_number', 'final_deadline_date', 'type_task__name',
@@ -1667,11 +1693,12 @@ def ajax_get_correspondents_table(request):
             'court_district': x.court_district.name if x.court_district else '—',
             'state': x.state.name if x.state else '—',
             'client': x.client.legal_name if x.client else '—',
-            'value': x.value,
+            'value': x.value_to_receive.amount,
             'formated_value': Money(x.value, 'BRL').__str__(),
             'office_rating': x.office_rating if x.office_rating else '0.00',
             'office_return_rating': x.office_return_rating if x.office_return_rating else '0.00',
-            'office_public': x.office_correspondent.public_office
+            'office_public': x.office_correspondent.public_office,
+            'price_category': x.policy_price.category
         }, correspondents_table.data.data))
     data = {
         "correspondents_table": correspondents_table_list,
@@ -2126,7 +2153,7 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
         for task in tasks:
             price_table = CorrespondentsTable(task, task.office)
             cheapest_correspondent = price_table.get_cheapest_correspondent()
-            prices = [ {
+            prices = [{
                 'id': price.id,
                 'court_district': {
                     'id': price.court_district.pk if price.court_district else '-',
@@ -2158,7 +2185,8 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 },
                 'office_rating': price.office_rating,
                 'office_return_rating': price.office_return_rating,
-                'value': price.value
+                'value': price.value_to_receive.amount,
+                'price_category': price.policy_price.category
 
             } for price in price_table.correspondents_qs]
 
@@ -2232,10 +2260,18 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
 
 
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
-    def post(self, request, *args, **kwargs):        
+    def post(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.POST.get('task_id'))
-        current_amount = task.amount        
+        current_amount = task.amount
         task.amount = request.POST.get('amount')
+        task.amount_to_pay, task.amount_to_receive = recalculate_values(
+            current_amount,
+            task.amount_to_pay,
+            task.amount_to_receive,
+            task.amount,
+            task.rate_type_pay,
+            task.rate_type_receive
+        )
         pre_save.disconnect(signals.change_status, sender=Task)
         pre_save.disconnect(signals.pre_save_task, sender=Task)        
         post_save.disconnect(signals.post_save_task, sender=Task)
@@ -2243,6 +2279,8 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         child_task = task.get_child
         if child_task:
             child_task.amount = task.amount
+            child_task.amount_to_pay = task.amount_to_pay
+            child_task.amount_to_receive = task.amount_to_receive
             child_task.save()
         msg = "Valor alterado de {} para {} pelo escritório {}".format(
             format_currency(current_amount, 'R$', locale='pt_BR'),
@@ -2287,6 +2325,16 @@ class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
+
+class TypeTaskMainAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return TypeTaskMain.objects.none()
+        qs = TypeTaskMain.objects.all()
+        if self.q:
+            qs = qs.filter(name__unaccent__icontains=self.q)
+        return qs
+    
 
 
 class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):

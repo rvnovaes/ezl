@@ -52,9 +52,9 @@ def save_error_log(log, create_user, message_error):
         log.errors.create(create_user=create_user, error=message_error)
 
 
-def get_clients_to_import():
+def get_clients_to_import(office):
     """Retorna os ids dos correspondentes que devemos importar"""
-    return Person.objects.filter(import_from_legacy=True).values_list(
+    return office.persons.filter(import_from_legacy=True, legacy_code__isnull=False).values_list(
         'legacy_code', flat=True)
 
 

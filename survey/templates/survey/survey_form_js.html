@@ -62,9 +62,9 @@
                                         <div class="form-group ezl-required">
                                             <label :for="'id_'+i+'_question_type'" class="control-label">Tipo de campo</label>
                                             <select :id="'id_'+i+'_question_type'" name="question_type" v-model="question.type" class="form-control">
-                                                <option value="text" se>Texto</option>
-                                                <option value="comment">Comentário</option>
-                                                <option value="radiogroup">Seleção</option>
+                                                <option value="text" se>Texto simples</option>
+                                                <option value="comment">Texto longo</option>
+                                                <option value="radiogroup">Seleção única</option>
                                                 <option value="checkbox">Seleção múltipla</option>
                                                 <option value="file">Upload de arquivo</option>
                                             </select>

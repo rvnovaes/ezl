@@ -114,12 +114,12 @@ class TaskDetail {
 
     setExecutionDateRequire(status) {
         if (this._elExecutionDate.length > 0) {
-            if (status === "REQUESTED"){
-                this._elExecutionDate.attr('required', false);
+            if (status === 'DONE'){
+                this._elExecutionDate.attr('required', 'required');
                 this._elExecutionDate.val('');
 
             }else{
-                this._elExecutionDate.attr('required', true);
+                this._elExecutionDate.removeAttr('required');
             }
             let input = this._elExecutionDate.get(0);
             if (! input.checkValidity()) {
@@ -181,10 +181,10 @@ class TaskDetail {
         /*Apenas estes status devem possuir notes como required, alem de nao poder 
          espacos em branco */        
         this._elNotes.removeAttr('required');        
-        ['REQUESTED', 'REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach(function (s) {
+        ['REQUESTED', 'REFUSED', 'BLOCKEDPAYMENT', 'RETURN', 'REFUSED_SERVICE'].forEach((s) => {
             if (status === s) {
-                this._elNotes.attr('required', true).change(function () {
-                    this._elNotes.val(this._elNotes.val().trim())
+                this._elNotes.attr('required', true).change(() => {
+                    this._elNotes.val(this._elNotes.val().trim());
                 });
             }
         });
@@ -196,12 +196,12 @@ class TaskDetail {
         actionButton.innerHTML = "<i class='"+this.nextState[status]['icon']+"'></i> "+
             this.nextState[status]['text'].replace(this.nextState[status]['text'][0],
                 this.nextState[status]['text'][0].toUpperCase());
-        this._elModalActionButton.attr("name", "action");
-        this._elModalActionButton.attr("value", status);
+        this._elModalActionButton.attr('name', 'action');
+        this._elModalActionButton.attr('value', status);
     }
 
     hideServicePriceTableAlert() {
-        $("#servicepricetable-alert").addClass("hidden");
+        $('#servicepricetable-alert').addClass('hidden');
     }
 
     initFeedbackRating() {
@@ -209,14 +209,14 @@ class TaskDetail {
     }
 
     makeTaskAction(value) {
-        var task_status = value.id;
+        var taskStatus = value.id;
         this.validSurvey();
-        this.makeRatingProccess(value.id);
-        this.setExecutionDateRequire(value.id);
+        this.makeRatingProccess(taskStatus);
+        this.setExecutionDateRequire(taskStatus);
         this.showModalAction();                
-        this.formatModalAction(value.id);
+        this.formatModalAction(taskStatus);
         this.hideServicePriceTableAlert();
-        this.configNotesField();
+        this.configNotesField(taskStatus);
         return true;
     }
 
@@ -252,7 +252,7 @@ class TaskDetail {
         $('#task_detail').submit(function (e) {
             e.preventDefault();
         });
-        $('#actionButton').removeAttr('disabled')
+        $('#actionButton').removeAttr('disabled');
     }        
 
     checkDelegationOffice() {        
@@ -277,6 +277,8 @@ class TaskDetail {
 			            html: '<h4>Aguarde...</h4>',
                         onOpen: () => {
                             swal.showLoading();
+                            debugger;
+                            $('input[name=amount]').removeAttr('disabled');
                             $('#task_detail').unbind('submit').submit();            
                         }
                     })
@@ -396,34 +398,42 @@ class TaskDetail {
             $("#servicepricetable-alert").addClass("hidden");            
             let rowId = $(this).data('id');
             let amount = $(this).data('value').toString();
+            let priceCategory = $(this).data('price-category');
+            let elAmount =$('input[name=amount]');
             $('input[name=servicepricetable_id]').val(rowId);
-            $('input[name=amount]').val(amount.replace(".", ","));
+            elAmount.val(amount.replace(".", ","));
             $(this).addClass("ezl-bg-open");
             $(this).siblings().removeClass("ezl-bg-open");
-            $('input[name=amount]').focus();
+            if (priceCategory === 'NETWORK'){
+                elAmount.attr("disabled", "disabled");
+            } else {
+                elAmount.removeAttr("disabled");
+                elAmount.focus();
+            }
             self.setBillingItem();
-        });        
+        });
     };    
 
     async ajax_get_correspondents(type_task) {
         let tmplRowCorrespondent = '<tr id="office-${pk}" data-id="${pk}" ' +
                             'data-value="${value}" data-formated-value="${formated_value}" ' +
+                            'data-price-category="${price_category}" ' +
                             'data-office-public="${office_public}" class="tr_select" role="row">\n' +
                 '<td class="office_correspondent">${office_correspondent}</td>\n' +
-                '<td class="office_correspondent">${office_network}</td>\n' +
+                '<td class="office_networl">${office_network}</td>\n' +
+                '<td class="state">${state}</td>\n' +
                 '<td class="court_district">${court_district}</td>\n' +
                 '<td class="court_district_complement">${court_district_complement}</td>\n' +
                 '<td class="state">${city}</td>\n' +
-                '<td class="state">${state}</td>\n' +
                 '<td class="client">${client}</td>\n' +
                 '<td class="value">${value}</td>\n' +
                 '<td class="office_rating">${office_rating}</td>\n' +
                 '<td class="office_return_rating">${office_return_rating}</td>\n' +
             '</tr>';
         let self = this;
-        // if (!window.table){
-        //     this.setWindowTable();
-        // }
+        if (!window.table){
+            this.setWindowTable();
+        }
         const result = await $.ajax({
             type: 'GET',
             url: `/providencias/ajax_get_correspondent_table/?task=${this.taskId}&type_task=${type_task}`,
@@ -499,6 +509,7 @@ class TaskDetail {
                 if (action === 'assign') {
                     $('#ASSIGN').click();
                 }
+                this.onKeypressAmountField()
             }
         });
     }
@@ -519,7 +530,9 @@ class TaskDetail {
                         data: {
                                 task_id: this.taskId,
                                 servicepricetable_id: response.id,   
-                                amount: response.value, 
+                                amount: response.value,
+                                amount_to_pay: response.value_to_pay,
+                                amount_to_receive: response.value_to_receive,
                                 note: '',                               
                             },
                         success: function(response) {                
