@@ -133,7 +133,6 @@
     <!--Style Switcher -->
     <script src="{% static 'skeleton/js/cbpFWTabs.js' %}?rev={{request.REVIEW}}"></script>
     <script src="{% static 'skeleton/plugins/bower_components/styleswitcher/jQuery.style.switcher.js' %}?rev={{request.REVIEW}}"></script>
-    <script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}?rev={{request.REVIEW}}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 
     <script src="{% static 'libs/jQuery-File-Upload/js/vendor/jquery.ui.widget.js' %}?rev={{request.REVIEW}}"></script>
@@ -169,12 +168,12 @@
         var checkout = new Checkout('{{csrf_token}}', '{{object.charge.charge_id}}');
         let billing = new Billing(checkout);
         taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, '{{survey_company_representative|safe}}', '{{csrf_token}}', billing, '{{object.charge.charge_id}}');
+        get_internal_ecms({{form.instance.pk}});
     })
     </script>
 {% endblock %}
 {% block script_window_load %}
     {{ block.super }}
-    get_internal_ecms({{form.instance.pk}});
 {% endblock %}
 
 {% block extra_modal %}

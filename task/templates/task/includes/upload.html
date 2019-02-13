@@ -1,8 +1,4 @@
-{% load static %}
-
-<script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}?rev={{request.REVIEW}}"></script>
-<script> 
-    var get_ecms;           
+<script>            
     var tmplRowUpload = '<tr class="zoomInDown animated">\n' +
                         '    <td style="width: 50px;">\n' +
                         '       <div class="circle circle-sm bg-info di"> <i class="fa fa-user"></i></div>\n' +
@@ -40,9 +36,18 @@
                     $('#no-providence').removeClass('show')
                     $('.js-batch-download-files').hide()
                 };
-                $.each(data.ecms, function( index, value ) {
-                    $.tmpl(tmplRowUpload, value).appendTo('#containnerUploads');
-                })
+                try {
+                    $.each(data.ecms, function( index, value ) {
+                        $.tmpl(tmplRowUpload, value).appendTo('#containnerUploads');
+                    })   
+                } catch (error) {
+                    setTimeout(() => {
+                        console.log('tentando novamente')
+                        $.each(data.ecms, function( index, value ) {
+                            $.tmpl(tmplRowUpload, value).appendTo('#containnerUploads');
+                        })                        
+                    }, 1000)
+                }
             }
         });
     };
