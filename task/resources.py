@@ -420,7 +420,8 @@ class TaskResource(resources.ModelResource):
                         COLUMN_NAME_DICT['lawsuit_state']['column_name'],
                         COLUMN_NAME_DICT['lawsuit_court_district']['column_name']))
                 else:
-                    court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district).first()
+                    court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district,
+                                                                  state=state).first()
                     if not court_district:
                         row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_district')])
 
