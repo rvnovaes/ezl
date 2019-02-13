@@ -1,4 +1,8 @@
-<script>            
+{% load static %}
+
+<script src="{% static 'skeleton/plugins/bower_components/jquery.tmpl/jquery.tmpl.js' %}?rev={{request.REVIEW}}"></script>
+<script> 
+    var get_ecms;           
     var tmplRowUpload = '<tr class="zoomInDown animated">\n' +
                         '    <td style="width: 50px;">\n' +
                         '       <div class="circle circle-sm bg-info di"> <i class="fa fa-user"></i></div>\n' +
@@ -20,6 +24,7 @@
                         '</tr>';
 
     var get_ecms = function(url, task_key, task_value){
+        console.log(url, task_key, task_value)
         var data = {}
         data[task_key] = task_value
         $.ajax({
