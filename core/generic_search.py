@@ -2,6 +2,7 @@ from functools import wraps
 from itertools import groupby
 from datetime import datetime
 from django.contrib.auth.models import User
+from core.models import Office
 from financial.utils import remove_special_char
 from core.utils import get_office_session
 from decimal import Decimal
@@ -98,7 +99,7 @@ class GenericSearchFormat(object):
 
         try:
             office_field = self.model._meta.get_field('office')
-            if self.model == User:
+            if self.model in [User, Office]:
                 search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
             else:
                 if not office:

@@ -97,7 +97,7 @@ class TaskETL(GenericETL):
     @property
     def import_query(self):
         return self._import_query.format(
-            cliente="','".join(get_clients_to_import()))
+            cliente="','".join(get_clients_to_import(self.default_office)))
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
