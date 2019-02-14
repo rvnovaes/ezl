@@ -114,6 +114,7 @@
         $(document).ready(function(){          
             $('#modal-service-price-table').on('show.bs.modal', function(e) {
                 var taskId = $(this).attr('task-id');
+                var typeTask = $(this).attr('type-task');
                 var servicePriceTable = servicePrices[taskId];
                 if (!correspondentTable) {
                     correspondentTable = $('#table-service-price')
@@ -125,6 +126,12 @@
                             language: {"url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"},
                             columnDefs: [
                                 {'targets': [11], 'visible': false, 'searchable': false, 'orderable': false  }],
+                            "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                                if(aData[1] === '-' || aData[1] === '—'){
+                                    $("td:eq(1)", nRow).text(typeTask);
+                                }
+                                return nRow;
+                            },
                         });
                 }
                 servicePriceTable.prices.forEach(function(price) {
@@ -195,7 +202,6 @@
                     servicePrices[taskId]['chosenPrice'] = chosenPrice;
                     correspondentTable.clear().draw(false);
                     correspondentTable.search('').draw(false);
-                    $('#type-task').empty();
                     setChosenPrice(chosenPrice);
                 }
             });

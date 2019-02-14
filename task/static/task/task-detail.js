@@ -1,5 +1,5 @@
 class TaskDetail {
-    constructor(taskId, taskStatus, officeWorkAlone, pendingSurveys, pendingList, surveyCompanyRepresentative, csrfToken, billing, chargeId) {
+    constructor(taskId, taskStatus, officeWorkAlone, pendingSurveys, pendingList, surveyCompanyRepresentative, csrfToken, billing, chargeId, typeTask) {
         this.csrfToken = csrfToken;
         this.taskId = taskId;
         this.taskStatus = taskStatus;
@@ -9,6 +9,7 @@ class TaskDetail {
         this.pendingList = pendingList;
         this.surveyCompanyRepresentative=surveyCompanyRepresentative;
         this.billing = billing;
+        this.typeTask = typeTask;
         this.expanded = false;            
         this.servicePriceTable = {};
         this._elTaskTitle = $('#task-title');
@@ -59,10 +60,6 @@ class TaskDetail {
 
     get officeToDelegateValue() {
         return this.officeToDelegate.data('value');
-    }
-
-    get typeTask() {
-        return this._elTypeTaskField.val();
     }
 
     get nextState() {
@@ -401,14 +398,23 @@ class TaskDetail {
     };
 
     setWindowTable() {
+        let columnDefs = [{ 'targets': [ 1 ], 'defaultContent': 'TESTE'  }];
+        let typeTask = this.typeTask;
         window.table = $('#correspondents-table').DataTable({
             paging: false,
             order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
             dom: 'frti',
             buttons: [],
             destroy: true,
+            columnDefs: columnDefs,
             language: {
                 "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+            },
+            "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                if(aData[1] === '-' || aData[1] === '—'){
+                    $("td:eq(1)", nRow).text(typeTask);
+                }
+                return nRow;
             },
         });
     }
