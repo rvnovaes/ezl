@@ -245,8 +245,8 @@ class Register {
     }    
     save(requestInvite) {
         swal({
-            title: 'Criando seu escritório', 
-            text: 'Aguarde um momento',
+            title: 'Aguarde...',
+            html: `<h4>Criando seu escritório</h4>`,
             onOpen: ()=>{
                 swal.showLoading()
                 let query = this.query;
@@ -262,10 +262,10 @@ class Register {
                             swal({
                                 type: 'info', 
                                 title: 'Atenção', 
-                                text: `
-                                    Foi enviado o convite para ${this.officeExist.legal_name}.
+                                html: `<h4>
+                                    Foi enviado o convite para ${this.officeExist.legal_name}.<br />
                                     Assim que ele aceitar você fará parte desse escritório/empresa.
-                                `
+                                    </h4>`,
                             }).then((result)=> {
                                 window.location.href = response.redirect                                
                                 swal.close();
