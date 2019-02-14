@@ -54,6 +54,10 @@
                     <div class="modal-body p-30">
                         {% if form.instance.status.name == 'ACCEPTED_SERVICE' or  form.instance.status.name == 'REQUESTED' and not form.instance.office.use_service%}
                             {{ form.servicepricetable_id }}
+                            <div class="form-group" style="margin: auto">
+                                <label>Tipo de serviço: </label>
+                                {{ object.type_task }}
+                            </div>
                             <div id="servicepricetable" class="table-responsive" style="margin: auto">
                                 {% render_table correspondents_table %}
                                 <div id="servicepricetable-alert" class="alert alert-danger alert hidden">
