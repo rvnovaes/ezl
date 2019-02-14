@@ -19,9 +19,9 @@ class ServicePriceTableOfficeFilter(ServicePriceTableFilter):
         qs = super().get_delegation_queryset()
         dynamic_query = Q()
         task = self.data.get('task')
-        network_office_id_list = self.data.get('network_office_id_list')
-        offices_related = self.data.get('offices_related')
-        if task and network_office_id_list and offices_related:
+        network_office_id_list = self.data.get('network_office_id_list', [])
+        offices_related = self.data.get('offices_related', [])
+        if task:
             dynamic_query.add(
                 Q(
                     Q(office=task.office) |
