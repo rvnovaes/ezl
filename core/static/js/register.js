@@ -48,10 +48,10 @@ class Register {
         swal({
             title: 'Atenção!',
             type: 'warning',
-            text: `
-                O escritório/empresa ${this.officeExist.legal_name} com esse CPF/CNPJ já existe. 
+            html: `<h4>
+                O escritório/empresa ${this.officeExist.legal_name} com esse CPF/CNPJ já existe.<br /><br />
                 Deseja enviar uma solicitação de ingresso para este escritório/empresa?
-            `, 
+                </h4>`,
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
