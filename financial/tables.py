@@ -40,6 +40,7 @@ class ServicePriceTableTable(tables.Table):
 
 class ServicePriceTableTaskTable(tables.Table):
     office_correspondent = tables.Column(orderable=False, verbose_name='Escritório correspondente')
+    type_task = tables.Column(orderable=False, verbose_name='Tipo de serviço')
     office_network = tables.Column(orderable=False, verbose_name='Rede')
     court_district = tables.Column(orderable=False, verbose_name='Comarca')
     court_district_complement = tables.Column(orderable=False, verbose_name='Complemento da comarca')
@@ -51,10 +52,10 @@ class ServicePriceTableTaskTable(tables.Table):
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')
 
     class Meta:
-        sequence = ('office_correspondent', 'office_network', 'state', 'court_district', 'court_district_complement',
+        sequence = ('office_correspondent', 'type_task', 'office_network', 'state', 'court_district', 'court_district_complement',
                     'city', 'client', 'value', 'office_rating', 'office_return_rating')
         model = ServicePriceTable
-        fields = ('office_correspondent', 'office_network', 'court_district', 'state', 'client', 'value',
+        fields = ('office_correspondent', 'type_task', 'office_network', 'court_district', 'state', 'client', 'value',
                   'court_district_complement', 'office_rating', 'office_return_rating', 'city')
         attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
         empty_text = "Não existe tabela de preços cadastrada para o tipo de serviço selecionado."

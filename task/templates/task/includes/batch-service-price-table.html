@@ -49,12 +49,11 @@
         <div class="form-group" style="margin: auto">
           <div class="row">
             <div class="col" id="modal-content">
-              <strong>Tipo de serviço:</strong> <span id="type-task"></span>
-              <hr/>
               <table id='table-service-price' style="width:100%">
                 <thead>
                   <tr>
                     <th>Escritório correspondente</th>
+                    <th>Tipo de serviço</th>
                     <th>Rede</th>
                     <th>UF</th>
                     <th>Comarca</th>
@@ -116,21 +115,21 @@
             $('#modal-service-price-table').on('show.bs.modal', function(e) {
                 var taskId = $(this).attr('task-id');
                 var servicePriceTable = servicePrices[taskId];
-                $('#type-task').append(servicePriceTable.task.type_task.name);
                 if (!correspondentTable) {
                     correspondentTable = $('#table-service-price')
                         .DataTable({
                             destroy: true,
                             paging: false,
-                            order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
+                            order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
                             dom: 'frti',
                             language: {"url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"},
                             columnDefs: [
-                                {'targets': [10], 'visible': false, 'searchable': false, 'orderable': false  }],
+                                {'targets': [11], 'visible': false, 'searchable': false, 'orderable': false  }],
                         });
                 }
                 servicePriceTable.prices.forEach(function(price) {
                     let office_correspondent_name = price.office_correspondent.legal_name;
+                    let type_task = price.type_task.name;
                     let office_networ_name = price.office_network.name;
                     let state = price.state;
                     let court_district_name = price.court_district.name;
@@ -145,6 +144,7 @@
                     let row = correspondentTable.row.add(
                         [
                             office_correspondent_name,
+                            type_task,
                             office_networ_name,
                             state,
                             court_district_name,
@@ -163,8 +163,8 @@
                 $('#table-service-price tbody tr').on('click', function() {
                     $(this).addClass("ezl-bg-open");
                     $(this).siblings().removeClass("ezl-bg-open");
-                    let amount = correspondentTable.row(this).data()[7];
-                    let priceCategory = correspondentTable.row(this).data()[10];
+                    let amount = correspondentTable.row(this).data()[8];
+                    let priceCategory = correspondentTable.row(this).data()[11];
                     let elValue = $('#value');
                     elValue.val(amount.replace(".", ","));
                     if (priceCategory === 'NETWORK'){
