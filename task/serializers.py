@@ -34,11 +34,17 @@ class TypeTaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
 
 class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
 
-    person_asked_by = serializers.HiddenField(default=PersonAskedByDefault())
+    person_asked_by = serializers.HiddenField(default=PersonAskedByDefault())   
+    office_name = serializers.SerializerMethodField()
+    executed_by_name = serializers.SerializerMethodField()
+    type_task_name = serializers.SerializerMethodField()
+    lawsuit_number = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+    court_district_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        exclude = ('create_date', 'alter_date', 'system_prefix', 'survey_result', 'chat', 'company_chat', 'task_hash')
+        exclude = ('alter_date', 'system_prefix', 'survey_result', 'chat', 'company_chat', 'task_hash')
 
     def validate_person_asked_by(self, value):
         if not value:
@@ -51,6 +57,26 @@ class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, Off
         if Task.objects.filter(office=office, legacy_code=value):
             raise serializers.ValidationError("O legacy_code informado já está sendo utilizado neste escritório")
         return value
+
+    def get_office_name(self, obj):
+        return obj.office.legal_name
+
+    def get_executed_by_name(self, obj):
+        if obj.person_executed_by:
+            return obj.person_executed_by.legal_name
+        return obj.get_child.office.legal_name if obj.get_child else ''
+
+    def get_type_task_name(self, obj):
+        return obj.type_task.name
+
+    def get_lawsuit_number(self, obj): 
+        return obj.lawsuit_number
+
+    def get_state(self, obj):
+        return obj.court_district.state.initials if obj.court_district else ''
+
+    def get_court_district_name(self, obj):
+        return obj.court_district.name if obj.court_district else ''
 
 
 class TaskCreateSerializer(TaskSerializer):
