@@ -90,6 +90,7 @@ class Register {
             delete this.errors['email'];
             this.validateCpfCnpj();
             this.checkOfficeExist();
+            this.elOfficeCpfCnpj.val(this.elOfficeCpfCnpj.val().replace(/[^0-9]+/g, ''))
             if (this.elOfficeCpfCnpj.val().length <= 11) {
                 this.elOfficeCpfCnpj.mask('000.000.000-00', {reverse: true})
             } else {
