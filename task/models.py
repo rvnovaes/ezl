@@ -24,6 +24,7 @@ from .mail import TaskCompanyRepresentativeChangeMail
 from simple_history.models import HistoricalRecords
 from core.models import BaseHistoricalModel
 import inspect
+from financial.enums import CategoryPrice, RateType
 
 
 class ChoiceArrayField(ArrayField):
@@ -385,6 +386,27 @@ class Task(Audit, LegacyCode, OfficeMixin):
         max_digits=9,
         decimal_places=2,
         default=Decimal('0.00'))
+    amount_to_receive = models.DecimalField(
+        null=False,
+        blank=False,
+        verbose_name='Valor a receber',
+        max_digits=9,
+        decimal_places=2,
+        default=Decimal('0.00'))
+    amount_to_pay = models.DecimalField(
+        null=False,
+        blank=False,
+        verbose_name='Valor a pagar',
+        max_digits=9,
+        decimal_places=2,
+        default=Decimal('0.00'))
+    rate_type_receive = models.CharField(verbose_name='Tipo de taxa a receber', max_length=10,
+                                         choices=RateType.choices(), default=RateType.PERCENT)
+    rate_type_pay = models.CharField(verbose_name='Tipo de taxa a pagar', max_length=10,
+                                     choices=RateType.choices(), default=RateType.PERCENT)
+    # Responsável por armanezar a categoria do preço. Recebe o valor do campo PolicyPrice.category, ao ser delegado
+    price_category = models.CharField(verbose_name='Categoria do preço', max_length=255,
+                                      choices=CategoryPrice.choices(), null=True, blank=True)
     chat = models.ForeignKey(
         Chat,
         verbose_name='Chat',

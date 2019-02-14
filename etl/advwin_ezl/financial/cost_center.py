@@ -2,7 +2,7 @@
 from core.utils import LegacySystem
 from etl.advwin_ezl.advwin_ezl import GenericETL, validate_import
 from financial.models import CostCenter
-from etl.utils import get_message_log_default, save_error_log, get_clients_to_import
+from etl.utils import get_message_log_default, save_error_log
 
 
 class CostCenterETL(GenericETL):
