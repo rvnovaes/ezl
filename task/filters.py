@@ -29,9 +29,10 @@ GROUP_BY_TASK_TO_RECEIVE_TYPE = (
 
 
 class TaskApiFilter(FilterSet):
+    is_hearing = filters.BooleanFilter(name='type_task__type_task_main__is_hearing')
     class Meta:
         model = Task
-        fields = ['legacy_code', 'task_number']
+        fields = ['legacy_code', 'task_number', 'is_hearing']
 
 
 class TaskFilter(FilterSet):
