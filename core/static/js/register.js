@@ -74,20 +74,19 @@ class Register {
     onSubmit() {
         this.elRegisterForm.on('submit', (el)=>{
             el.preventDefault();
-            if (this.officeExist.exist) {
-                this.requestInvitation();
-            } else {
-                if (!Object.keys(this.errors).length) {
-                    this.save()
+            this.validateAcceptTerms();
+            if (!Object.keys(this.errors).length) {
+                if (this.officeExist.exist) {
+                    this.requestInvitation();
                 } else {
-                    this.validateAcceptTerms();
-                }
-            }                     
+                    this.save()
+                }                 
+            }                   
         })
     }
     onBlurCpfCnpj() {
         this.elOfficeCpfCnpj.on('blur', (evt)=>{
-            delete this.errors['email'];
+            delete this.errors['cpf_cnpj'];
             this.validateCpfCnpj();
             this.checkOfficeExist();
             this.elOfficeCpfCnpj.val(this.elOfficeCpfCnpj.val().replace(/[^0-9]+/g, ''))
@@ -244,9 +243,13 @@ class Register {
         }                        
     }    
     save(requestInvite) {
+        let msg = `<h4>Criando seu escritório</h4>`;
+        if (requestInvite) {
+            msg = ""
+        }
         swal({
             title: 'Aguarde...',
-            html: `<h4>Criando seu escritório</h4>`,
+            html: msg,
             onOpen: ()=>{
                 swal.showLoading()
                 let query = this.query;
@@ -256,6 +259,7 @@ class Register {
                 }
                 $.ajax({
                     method: 'POST', 
+                    url: '/registrar/',
                     data: query, 
                     success: (response) => {            
                         if (requestInvite) {

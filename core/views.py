@@ -2373,7 +2373,7 @@ class NewRegister(TemplateView):
             last_name = ' '.join(request.POST.get('name').split(' ')[1:])
             office_name = request.POST.get('office')
             office_cpf_cnpj = request.POST.get('cpf_cnpj')
-            user = User.objects.create(username=username, last_name=last_name, first_name=first_name, email=email)
+            user = User.objects.create(username=username, last_name=last_name[0:30], first_name=first_name, email=email)
             user.set_password(password)
             user.save()
             authenticate(username=username, password=password)
