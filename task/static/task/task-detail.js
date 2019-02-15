@@ -466,7 +466,7 @@ class TaskDetail {
     };
 
     setWindowTable() {
-        if(window.table_rows > 0) {
+        if(window.table_rows > 0){
             window.table = $('#correspondents-table').DataTable({
                 paging: false,
                 order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
