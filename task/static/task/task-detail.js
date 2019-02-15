@@ -466,16 +466,18 @@ class TaskDetail {
     };
 
     setWindowTable() {
-        window.table = $('#correspondents-table').DataTable({
-            paging: false,
-            order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
-            dom: 'frti',
-            buttons: [],
-            destroy: true,
-            language: {
-                "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-            },
-        });
+        if(window.table_rows > 0){
+            window.table = $('#correspondents-table').DataTable({
+                paging: false,
+                order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
+                dom: 'frti',
+                buttons: [],
+                destroy: true,
+                language: {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+                },
+            });
+        }
     }
 
     correspondents_data_table() {
