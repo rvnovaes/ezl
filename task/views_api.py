@@ -49,7 +49,7 @@ class EcmTaskViewSet(mixins.CreateModelMixin,
 
 @permission_classes((TokenHasReadWriteScope, ))
 class TaskViewSet(OfficeMixinViewSet, ApplicationView):
-    queryset = Task.objects.all()
+    queryset = Task.objects.all().order_by('-final_deadline_date')
     filter_backends = (DjangoFilterBackend, )
     filter_class = TaskApiFilter
 
