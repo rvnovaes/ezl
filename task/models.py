@@ -459,7 +459,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                                  'billing_date', 'receipt_date', 'performance_place',
                                                  'person_company_representative', 'executed_by_checkin',
                                                  'company_representative_checkin', 'create_date', 'alter_date',
-                                                 'legacy_code', 'system_prefix', 'is_active', 'charge'])
+                                                 'legacy_code', 'system_prefix', 'is_active', 'charge',
+                                                 'amount_to_pay', 'amount_to_receive'])
 
     __previous_status = None  # atributo transient
     __notes = None  # atributo transient
