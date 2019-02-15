@@ -243,9 +243,11 @@
             (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
         });
         $('#confirmAction').on('shown.bs.modal', function (event) {
-            taskDetail.setWindowTable();
-            if($('#correspondents-table_filter input').length > 0){
-                $('#correspondents-table_filter input').focus()
+            if(window.table_rows > 0){
+                taskDetail.setWindowTable();
+                if($('#correspondents-table_filter input').length > 0){
+                    $('#correspondents-table_filter input').focus()
+                }
             }
         });
         /* Ao fechar o modal, limpar a tabela */
