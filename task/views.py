@@ -950,7 +950,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             instance=form.instance,
             execution_date=execution_date,
             survey_result=survey_result,
-            **{'external_task': True})
+            **{'external_task': False})
         form.instance.__server = get_domain(self.request)
         if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
             form.instance.person_distributed_by = self.request.user.person
@@ -996,14 +996,18 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(TaskDetailView, self).get_context_data(**kwargs)
+        # pega o office da sessao
         office_session = get_office_session(self.request)
-        custom_settings = CustomSettings.objects.filter(
-            office=office_session).first()
-        context['custom_settings'] = custom_settings
+
+        # pega as configuracoes personalizadas do escritorio
+        context['custom_settings'] = office_session.customsettings
+
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(
                 task_id=self.object.id).order_by('-create_date')
+
+        # monta lista de surveys a serem respondidos pela OS
         pending_surveys = self.object.have_pending_surveys
         pending_list = []
         if pending_surveys.get('survey_company_representative'):
@@ -1016,10 +1020,13 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         last_parent = get_last_parent(self.object) 
         context['survey_data'] = (last_parent.type_task.survey.data
                                   if last_parent.type_task.survey else None)
-        office_session = get_office_session(self.request)
+
+        # Pega tabela de correspondentes
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
         context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
+
+        # Verifica se todos os Surveys foram preenchidos
         checker = ObjectPermissionChecker(self.request.user)
         if checker.has_perm('can_see_tasks_company_representative', office_session):
             if not TaskSurveyAnswer.objects.filter(tasks=self.object, create_user=self.request.user):
@@ -1036,8 +1043,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
     def show_company_representative_in_tab(self, checker, office_session):
         """
-            Caso a pessoa logada seja o correspondente da ordem de servico
-            Nao mostra os dados do preposto na aba Participantes
+        Caso a pessoa logada seja o correspondente da ordem de servico
+        Nao mostra os dados do preposto na aba Participantes
         """
         show_in_tab = True         
         is_person_executed_by = checker.has_perm('view_delegated_tasks', office_session)
@@ -1048,8 +1055,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
     def show_person_executed_by_in_tab(self, checker, office_session):
         """
-            Caso a pessoa logada seja o preposto da ordem de servico
-            Nao mostra os dados do correspondente na aba Participantes
+        Caso a pessoa logada seja o preposto da ordem de servico
+        Nao mostra os dados do correspondente na aba Participantes
         """        
         show_in_tab = True 
         is_company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)        
