@@ -1,9 +1,6 @@
 import json
-import uuid
-import csv
 import pickle
 import io
-import pandas as pd
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from zipfile import ZipFile
@@ -24,15 +21,14 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
 from django.core.exceptions import ValidationError
-from django_tables2 import SingleTableView, RequestConfig, MultiTableMixin
+from django_tables2 import SingleTableView, RequestConfig
 from djmoney.money import Money
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE_SUCCESS_MESSAGE, \
     operational_error_create, ioerror_create, exception_create, integrity_error_delete, DELETE_EXCEPTION_MESSAGE, \
-    success_sent, success_delete, NO_PERMISSIONS_DEFINED, record_from_wrong_office
-from core.models import Person, CorePermissions, CustomSettings, Office
+    success_sent, success_delete, NO_PERMISSIONS_DEFINED
+from core.models import Person, CorePermissions, CustomSettings
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from core.xlsx import XLSXWriter
-from lawsuit.models import Movement
 from lawsuit.forms import LawSuitForm
 from lawsuit.models import Movement, LawSuit, Folder, TypeMovement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter, \
@@ -53,23 +49,22 @@ from financial.models import ServicePriceTable
 from financial.utils import recalculate_values
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
-    has_task_parent, set_instance_values
+    has_task_parent, set_instance_values, clone_task_ecms
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
-import operator
 from django.shortcuts import render
 import os
 from django.conf import settings
 from urllib.parse import urljoin
-from survey.models import SurveyPermissions
 from babel.numbers import format_currency
 from task import signals
-from django.db.models.signals import post_init, pre_save, post_save, post_delete, pre_delete
+from django.db.models.signals import pre_save, post_save
 from dal import autocomplete
 from billing.gerencianet_api import api as gn_api
 import logging
 import operator
+
 logger = logging.getLogger(__name__)
 
 mapOrder = {'asc': '', 'desc': '-'}
@@ -118,8 +113,9 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
             law_suit, created = LawSuit.objects.get_or_create(folder=self.folder,
                                                               law_suit_number='Processo avulso',
                                                               office=validation_data.get('office'),
-                                                              defaults={'create_user': validation_data.get('create_user'),
-                                                                        'is_active': True})
+                                                              defaults={
+                                                                  'create_user': validation_data.get('create_user'),
+                                                                  'is_active': True})
         self.law_suit = law_suit
 
     def get_movement(self, validation_data):
@@ -140,8 +136,8 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
                                                                type_movement=default_type_movement,
                                                                office=validation_data.get('office'),
                                                                defaults={'create_user': validation_data.get(
-                                                                            'create_user'),
-                                                                         'is_active': True})
+                                                                   'create_user'),
+                                                                   'is_active': True})
         self.movement = movement
 
     def get_context_data(self, **kwargs):
@@ -271,23 +267,18 @@ class TaskCreateView(AuditFormMixin, CreateView):
             })
 
 
-class TaskToAssignView(AuditFormMixin, UpdateView):
+class TaskToAssignView(CustomLoginRequiredView, UpdateView):
     model = Task
     form_class = TaskToAssignForm
     success_url = reverse_lazy('dashboard')
     template_name_suffix = '_to_assign'
 
-    def save_form(self, form):
-        if form.is_valid():
-            form.instance.person_distributed_by = self.request.user.person
-            form.instance.task_status = TaskStatus.OPEN
-            # TODO: rever processo de anexo, quando for trocar para o ECM Generico
-            get_task_attachment(self, form)
-            form.save()
-
     def form_valid(self, form):
+        form.instance.person_distributed_by = self.request.user.person
+        form.instance.task_status = TaskStatus.OPEN
+        # TODO: rever processo de anexo, quando for trocar para o ECM Generico
+        get_task_attachment(self, form)
         super().form_valid(form)
-        self.save_form(form)
         return HttpResponseRedirect(self.success_url + str(form.instance.id))
 
     def form_invalid(self, form):
@@ -341,12 +332,6 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
                     delegate_child_task(form.instance,
                                         servicepricetable.office_correspondent, servicepricetable.type_task)
                     form.instance.person_executed_by = None
-                send_notes_execution_date.send(
-                    sender=self.__class__,
-                    notes=note,
-                    instance=form.instance,
-                    execution_date=form.instance.execution_date,
-                    survey_result=form.instance.survey_result)
                 form.save()
                 return JsonResponse({'status': 'ok'})
             return JsonResponse({'status': 'error', 'errors': form})
@@ -435,13 +420,13 @@ class TaskDeleteView(SuccessMessageMixin, CustomLoginRequiredView,
 
 class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
                      TemplateView):
-    permission_required = ('core.view_financial_report', )
+    permission_required = ('core.view_financial_report',)
     template_name = None
     filter_class = None
     datetime_field = None
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         self.task_filter = self.filter_class(
             data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
@@ -665,17 +650,17 @@ class ToReceiveTaskReportView(TaskReportBase):
         for task_id in json.loads(tasks_payload):
             try:
                 pre_save.disconnect(signals.change_status, sender=Task)
-                pre_save.disconnect(signals.pre_save_task, sender=Task)        
-                post_save.disconnect(signals.post_save_task, sender=Task)                
+                pre_save.disconnect(signals.pre_save_task, sender=Task)
+                post_save.disconnect(signals.post_save_task, sender=Task)
                 task = Task.objects.get(id=task_id, office=office)
                 setattr(task, self.datetime_field, timezone.now())
                 task.save()
-            except: 
+            except:
                 pass
             finally:
-                pre_save.connect(signals.change_status, sender=Task)           
+                pre_save.connect(signals.change_status, sender=Task)
                 pre_save.connect(signals.pre_save_task, sender=Task)
-                post_save.connect(signals.post_save_task, sender=Task)             
+                post_save.connect(signals.post_save_task, sender=Task)
 
         messages.add_message(self.request, messages.SUCCESS,
                              "OS's marcadas como recebidas com sucesso.")
@@ -726,7 +711,7 @@ class ToPayTaskReportView(View):
                 else:
                     query.add(
                         Q(office__legal_name__unaccent__icontains=data['office']),
-                        Q.AND)            
+                        Q.AND)
 
             if data['finished_in']:
                 if data['finished_in'].start:
@@ -762,10 +747,7 @@ class ToPayTaskReportView(View):
             .select_related('movement__folder__person_customer') \
             .select_related('movement__law_suit__court_district') \
             .select_related('parent__type_task') \
-            .filter(
-                parent__office=office,
-                parent__task_status=TaskStatus.FINISHED,
-                parent__isnull=False)
+            .filter(parent__office=office, parent__task_status=TaskStatus.FINISHED, parent__isnull=False)
         queryset = self.filter_queryset(queryset)
         return queryset
 
@@ -779,17 +761,17 @@ class ToPayTaskReportView(View):
             # Todo: Ajustar signals e dar um unico update
             try:
                 pre_save.disconnect(signals.change_status, sender=Task)
-                pre_save.disconnect(signals.pre_save_task, sender=Task)        
-                post_save.disconnect(signals.post_save_task, sender=Task)                
+                pre_save.disconnect(signals.pre_save_task, sender=Task)
+                post_save.disconnect(signals.post_save_task, sender=Task)
                 task = Task.objects.get(id=task_id, office=office)
                 setattr(task, self.datetime_field, timezone.now())
                 task.save()
             except:
                 pass
             finally:
-                pre_save.connect(signals.change_status, sender=Task)           
+                pre_save.connect(signals.change_status, sender=Task)
                 pre_save.connect(signals.pre_save_task, sender=Task)
-                post_save.connect(signals.post_save_task, sender=Task)                
+                post_save.connect(signals.post_save_task, sender=Task)
 
         messages.add_message(self.request, messages.SUCCESS,
                              "OS's faturadas com sucesso.")
@@ -823,8 +805,8 @@ class ToPayTaskReportTemplateView(TemplateView):
     template_name = 'task/reports/to_pay.html'
     filter_class = TaskToPayFilter
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         self.task_filter = self.filter_class(
             data=self.request.GET, request=self.request)
         context['filter'] = self.task_filter
@@ -845,9 +827,9 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
             return HttpResponseRedirect(reverse_lazy('task_to_company_representative'))
         return super().get(request, *args, **kwargs)
 
-    def get_context_data(self, *args, **kwargs):
+    def get_context_data(self, **kwargs):
         office_session = get_office_session(self.request)
-        context = super().get_context_data(*args, **kwargs)
+        context = super().get_context_data(**kwargs)
         custom_settings = CustomSettings.objects.filter(
             office=office_session).first()
         context['cards_to_show'] = []
@@ -920,7 +902,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             messages.error(self.request, "Favor Selecionar um correspondente")
             return self.form_invalid(form)
         form.instance.task_status = TaskStatus[
-            self.request.POST['action']] or TaskStatus.INVALID
+                                        self.request.POST['action']] or TaskStatus.INVALID
         form.instance.alter_user = User.objects.get(id=self.request.user.id)
         notes = form.cleaned_data['notes'] if form.cleaned_data[
             'notes'] else None
@@ -1013,7 +995,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         context['pending_surveys'] = {'status': True if pending_list else False,
                                       'pending_list': pending_list}
         # Pega o ultimo parent, se nao tiver parent retorna o proprio objeto
-        last_parent = get_last_parent(self.object) 
+        last_parent = get_last_parent(self.object)
         context['survey_data'] = (last_parent.type_task.survey.data
                                   if last_parent.type_task.survey else None)
         office_session = get_office_session(self.request)
@@ -1039,10 +1021,10 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             Caso a pessoa logada seja o correspondente da ordem de servico
             Nao mostra os dados do preposto na aba Participantes
         """
-        show_in_tab = True         
+        show_in_tab = True
         is_person_executed_by = checker.has_perm('view_delegated_tasks', office_session)
         if is_person_executed_by:
-            if self.object.person_executed_by == self.request.user.person:            
+            if self.object.person_executed_by == self.request.user.person:
                 show_in_tab = False
         return show_in_tab
 
@@ -1050,9 +1032,9 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         """
             Caso a pessoa logada seja o preposto da ordem de servico
             Nao mostra os dados do correspondente na aba Participantes
-        """        
-        show_in_tab = True 
-        is_company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)        
+        """
+        show_in_tab = True
+        is_company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)
         if is_company_representative:
             if self.object.person_company_representative == self.request.user.person:
                 show_in_tab = False
@@ -1160,7 +1142,6 @@ def delete_internal_ecm(request, pk):
 
 def delete_external_ecm(request, task_hash, pk):
     # Para usuario que apenas acessam a task por hash, sem autenticar
-    task = Task.objects.get(task_hash=task_hash)
     ecm = Ecm.objects.get(pk=pk)
     if ecm.task.task_hash.hex == task_hash:
         return delete_ecm(request, pk)
@@ -1322,23 +1303,23 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         accepted_service_dynamic_query.add(
                             Q(acceptance_service_date__gte=data[
                                 'accepted_service_in'].start.replace(
-                                    hour=0, minute=0)), Q.AND)
+                                hour=0, minute=0)), Q.AND)
                     if data['accepted_service_in'].stop:
                         accepted_service_dynamic_query.add(
                             Q(acceptance_service_date__lte=data[
                                 'accepted_service_in'].stop.replace(
-                                    hour=23, minute=59)), Q.AND)
+                                hour=23, minute=59)), Q.AND)
                 if data['refused_service_in']:
                     if data['refused_service_in'].start:
                         refused_service_query.add(
                             Q(refused_service_date__gte=data[
                                 'refused_service_in'].start.replace(
-                                    hour=0, minute=0)), Q.AND)
+                                hour=0, minute=0)), Q.AND)
                     if data['refused_service_in'].stop:
                         refused_service_query.add(
                             Q(refused_service_date__lte=data[
                                 'refused_service_in'].stop.replace(
-                                    hour=23, minute=59)), Q.AND)
+                                hour=23, minute=59)), Q.AND)
                 if data['open_in']:
                     if data['open_in'].start:
                         open_dynamic_query.add(
@@ -1389,12 +1370,12 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         blocked_payment_dynamic_query.add(
                             Q(blocked_payment_date__gte=data[
                                 'blocked_payment_in'].start.replace(
-                                    hour=0, minute=0)), Q.AND)
+                                hour=0, minute=0)), Q.AND)
                     if data['blocked_payment_in'].stop:
                         blocked_payment_dynamic_query.add(
                             Q(blocked_payment_date__lte=data[
                                 'blocked_payment_in'].stop.replace(
-                                    hour=23, minute=59)), Q.AND)
+                                hour=23, minute=59)), Q.AND)
                 if data['finished_in']:
                     if data['finished_in'].start:
                         finished_dynamic_query.add(
@@ -1409,12 +1390,12 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         finished_dynamic_query.add(
                             Q(final_deadline_date__gte=data[
                                 'final_deadline_date_in'].start.replace(
-                                    hour=0, minute=0)), Q.AND)
+                                hour=0, minute=0)), Q.AND)
                     if data['final_deadline_date_in'].stop:
                         finished_dynamic_query.add(
                             Q(final_deadline_date__lte=data[
                                 'final_deadline_date_in'].stop.replace(
-                                    hour=23, minute=59)), Q.AND)
+                                hour=23, minute=59)), Q.AND)
 
                 person_dynamic_query.add(Q(client_query), Q.AND) \
                     .add(Q(task_dynamic_query), Q.AND) \
@@ -1511,11 +1492,11 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
         columns = self._get_answers_columns(answers)
         all_columns = [
-            'N° da OS',
-            'N° da OS no sistema de origem',
-            'Tipo de Serviço',
-            'Usuário',
-        ] + columns
+                          'N° da OS',
+                          'N° da OS no sistema de origem',
+                          'Tipo de Serviço',
+                          'Usuário',
+                      ] + columns
         xlsx = XLSXWriter("respostas_dos_formularios.xlsx", all_columns)
 
         for answer in answers:
@@ -1613,18 +1594,19 @@ def ajax_get_task_data_table(request):
     query = Task.objects.filter(dynamic_query).filter(
         is_active=True, task_status=status,
         office=get_office_session(request)).select_related(
-            'type_task', 'movement__law_suit',
-            'movement__law_suit__court_district',
-            'movement__law_suit__court_district__state',
-            'movement__law_suit__folder__person_customer', 'movement__law_suit__court_district_complement__name', 'parent').annotate(
-                task_original=Case(
-                    When(
-                        parent_id__isnull=False,
-                        then=Cast('parent__task_number',
-                                  CharField(max_length=255))),
-                    default=Cast('legacy_code', CharField(max_length=255)),
-                    output_field=CharField(max_length=255),
-                ), ).values(*values_list)
+        'type_task', 'movement__law_suit',
+        'movement__law_suit__court_district',
+        'movement__law_suit__court_district__state',
+        'movement__law_suit__folder__person_customer', 'movement__law_suit__court_district_complement__name',
+        'parent').annotate(
+        task_original=Case(
+            When(
+                parent_id__isnull=False,
+                then=Cast('parent__task_number',
+                          CharField(max_length=255))),
+            default=Cast('legacy_code', CharField(max_length=255)),
+            output_field=CharField(max_length=255),
+        ), ).values(*values_list)
 
     # criando o filtro de busca a partir do valor enviado no campo de pesquisa
     search_value = search_dict.get('value', None)
@@ -1663,7 +1645,7 @@ def ajax_get_task_data_table(request):
 
 
 def get_ecm_url(ecm, external=False):
-    if external: 
+    if external:
         return '{path}/{task_hash}/'.format(path=ecm.path.name, task_hash=ecm.task.task_hash.hex)
     return ecm.path.name
 
@@ -1699,14 +1681,14 @@ def get_external_ecms(request):
 
 class ExternalMediaFileView(View):
     def get(self, request, path, task_hash):
-        if Ecm.objects.filter(task__task_hash=task_hash, path=path).exists():            
+        if Ecm.objects.filter(task__task_hash=task_hash, path=path).exists():
             if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
                 return static_serve_view(
                     self.request, path, document_root=settings.MEDIA_ROOT)
             return HttpResponseRedirect(
                 urljoin(settings.AWS_STORAGE_BUCKET_URL, path))
         raise Http404('Arquivo não existe')
-        
+
 
 class FilterListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = Filter
@@ -1801,13 +1783,13 @@ class GeolocationTaskCreate(CustomLoginRequiredView, View):
                     task=task)
             return JsonResponse({
                 "ok":
-                True,
+                    True,
                 "latitude":
-                latitude,
+                    latitude,
                 "longitude":
-                longitude,
+                    longitude,
                 "check_date":
-                date_format(timezone.localtime(check_date), 'DATETIME_FORMAT')
+                    date_format(timezone.localtime(check_date), 'DATETIME_FORMAT')
             })
         return JsonResponse({"ok": False})
 
@@ -1825,10 +1807,10 @@ class GeolocationTaskFinish(CustomLoginRequiredView, View):
                 taskgeolocation.save()
             return JsonResponse({
                 "ok":
-                True,
+                    True,
                 "finished_date":
-                date_format(
-                    timezone.localtime(finished_date), 'DATETIME_FORMAT')
+                    date_format(
+                        timezone.localtime(finished_date), 'DATETIME_FORMAT')
             })
         return JsonResponse({"ok": False})
 
@@ -1860,7 +1842,7 @@ def ecm_batch_download(request, pk):
 class TypeTaskListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = TypeTask
     table_class = TypeTaskTable
-    ordering = ('id', )
+    ordering = ('id',)
 
 
 class TypeTaskCreateView(AuditFormMixin, CreateView):
@@ -1869,7 +1851,7 @@ class TypeTaskCreateView(AuditFormMixin, CreateView):
     success_url = reverse_lazy('typetask_list')
     success_message = CREATE_SUCCESS_MESSAGE
     object_list_url = 'typetask_list'
-    permission_required = (CorePermissions.group_admin, )
+    permission_required = (CorePermissions.group_admin,)
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
@@ -1948,7 +1930,7 @@ class ExternalTaskView(UpdateView):
         if custom_settings.exists():
             form.instance.alter_user = custom_settings.first().default_user
         form.instance.task_status = TaskStatus[
-            self.request.POST['action']] or TaskStatus.INVALID
+                                        self.request.POST['action']] or TaskStatus.INVALID
         if form.is_valid():
             notes = form.cleaned_data['notes'] if form.cleaned_data[
                 'notes'] else None
@@ -1995,24 +1977,24 @@ class EcmExternalCreateView(CreateView):
                 ecm.save()
                 data = {
                     'success':
-                    True,
+                        True,
                     'id':
-                    ecm.id,
+                        ecm.id,
                     'task_hash':
-                    ecm.task.task_hash.hex,
+                        ecm.task.task_hash.hex,
                     'name':
-                    str(file),
+                        str(file),
                     'user':
-                    str(self.request.user),
+                        str(self.request.user),
                     'username':
-                    str(self.request.user.first_name + ' ' +
-                        self.request.user.last_name),
+                        str(self.request.user.first_name + ' ' +
+                            self.request.user.last_name),
                     'filename':
-                    str(ecm.exhibition_name),
+                        str(ecm.exhibition_name),
                     'task_id':
-                    str(task.pk),
+                        str(task.pk),
                     'message':
-                    success_sent()
+                        success_sent()
                 }
 
             except OperationalError:
@@ -2033,7 +2015,7 @@ class EcmExternalCreateView(CreateView):
 
 class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
                      TemplateView):
-    permission_required = ('core.group_admin', )
+    permission_required = ('core.group_admin',)
     template_name = 'task/import_task_list.html'
     form_class = ImportTaskListForm
 
@@ -2044,7 +2026,7 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
         return context
 
     def post(self, request, *args, **kwargs):
-        context = self.get_context_data(*args, **kwargs)
+        context = self.get_context_data(**kwargs)
         form = self.form_class(request.POST, request.FILES)
         status = 200
         if form.is_valid():
@@ -2084,7 +2066,7 @@ class BatchChangeTasksView(DashboardSearchView):
             status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED]
             return task_list.filter(task_status__in=status_to_filter)
         status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN,
-            TaskStatus.DONE, TaskStatus.ERROR]
+                            TaskStatus.DONE, TaskStatus.ERROR]
         office_session = get_office_session(self.request)
         return task_list.filter(office=office_session, task_status__in=status_to_filter)
 
@@ -2115,7 +2097,7 @@ class BatchServicePriceTable(CustomLoginRequiredView, View):
                 'court_district_complement': {
                     'id': price.court_district_complement.pk if price.court_district_complement else '-',
                     'name': price.court_district_complement.name if price.court_district_complement else '-',
-                    },
+                },
                 'create_user': price.create_user.pk,
                 'client': price.client if price.client else '-',
                 'city': price.city.name if price.city else '-',
@@ -2170,11 +2152,11 @@ class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
         cheapest_correspondent = price_table.get_cheapest_correspondent()
         if cheapest_correspondent:
             return JsonResponse({
-                    'count': len(cheapest_correspondent),
-                    'id': cheapest_correspondent[0].pk,
-                    'office_correspondent': cheapest_correspondent[0].office_correspondent.legal_name,
-                    'value': cheapest_correspondent[0].value
-                })
+                'count': len(cheapest_correspondent),
+                'id': cheapest_correspondent[0].pk,
+                'office_correspondent': cheapest_correspondent[0].office_correspondent.legal_name,
+                'value': cheapest_correspondent[0].value
+            })
         return JsonResponse({})
 
 
@@ -2226,7 +2208,7 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
             task.rate_type_receive
         )
         pre_save.disconnect(signals.change_status, sender=Task)
-        pre_save.disconnect(signals.pre_save_task, sender=Task)        
+        pre_save.disconnect(signals.pre_save_task, sender=Task)
         post_save.disconnect(signals.post_save_task, sender=Task)
         task.save()
         child_task = task.get_child
@@ -2235,16 +2217,9 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
             child_task.amount_to_pay = task.amount_to_pay
             child_task.amount_to_receive = task.amount_to_receive
             child_task.save()
-        msg = "Valor alterado de {} para {} pelo escritório {}".format(
-            format_currency(current_amount, 'R$', locale='pt_BR'),
-            format_currency(task.amount, 'R$', locale='pt_BR'),
-            get_office_session(request).legal_name)
-        TaskHistory.objects.create(create_user=request.user, task=task, notes=msg, status=task.status.value)
-        if child_task:
-            TaskHistory.objects.create(create_user=request.user, task=child_task, notes=msg, status=task.status.value)
-        pre_save.connect(signals.change_status, sender=Task)           
+        pre_save.connect(signals.change_status, sender=Task)
         pre_save.connect(signals.pre_save_task, sender=Task)
-        post_save.connect(signals.post_save_task, sender=Task) 
+        post_save.connect(signals.post_save_task, sender=Task)
         return JsonResponse({'message': 'Registro atualizado com sucesso'})
 
 
@@ -2287,7 +2262,7 @@ class TypeTaskMainAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
-    
+
 
 
 class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
