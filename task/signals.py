@@ -27,6 +27,7 @@ send_notes_execution_date = Signal(
 
 def new_task(sender, instance, created, **kwargs):
     try:
+        logger.info('Created {}'.format(created))
         notes = 'Nova providência' if created else getattr(
             instance, '__notes', '')
         user = instance.alter_user if instance.alter_user else instance.create_user
@@ -80,6 +81,7 @@ def create_or_update_user_by_chat(task, task_to_fields, fields):
                 user = UserByChat.objects.filter(
                     user_by_chat=user, chat=task.chat).first()
             user = user.user_by_chat
+
 
 def create_company_chat(sender, instance, created, **kwargs):
     if not instance.parent and instance.client.company:
@@ -360,7 +362,7 @@ def update_status_parent_task(sender, instance, **kwargs):
     :param kwargs:
     :return:
     """
-    if instance.parent and not instance.task_status == TaskStatus.REQUESTED and instance.task_status != instance.__previous_status:    
+    if instance.parent and instance.task_status != instance.__previous_status:
         if not get_parent_status(instance.status) == TaskStatus(instance.parent.__previous_status) \
                 and not getattr(instance, '_from_parent'):
             instance.parent.task_status = get_parent_status(instance.status)
@@ -393,11 +395,10 @@ def update_status_child_task(sender, instance, **kwargs):
     :return:
     """
     status = get_child_status(instance.status)
-    if TaskStatus(instance.task_status) == TaskStatus(
-            instance.__previous_status):
+    if TaskStatus(instance.task_status) == TaskStatus(instance.__previous_status):
         setattr(instance, '_skip_signal', True)
-    if instance.get_child and status:
-        child = instance.get_child
+    child = instance.get_child
+    while child and status:
         if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
             if not getattr(instance, '__external_task', False):
                 setattr(
@@ -415,6 +416,8 @@ def update_status_child_task(sender, instance, **kwargs):
                 'skip_mail': False,
                 'from_parent': True
             })
+        status = get_child_status(child.status)
+        child = child.get_child
 
 
 @receiver(pre_save, sender=Task)
