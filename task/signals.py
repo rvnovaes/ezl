@@ -335,7 +335,7 @@ def update_status_parent_task(sender, instance, **kwargs):
     :param kwargs:
     :return:
     """
-    if instance.parent and not instance.task_status == TaskStatus.REQUESTED and instance.task_status != instance.__previous_status:
+    if instance.parent and instance.task_status != instance.__previous_status:
         if not get_parent_status(instance.status) == TaskStatus(instance.parent.__previous_status) \
                 and not getattr(instance, '_from_parent'):
             instance.parent.task_status = get_parent_status(instance.status)
@@ -368,11 +368,10 @@ def update_status_child_task(sender, instance, **kwargs):
     :return:
     """
     status = get_child_status(instance.status)
-    if TaskStatus(instance.task_status) == TaskStatus(
-            instance.__previous_status):
+    if TaskStatus(instance.task_status) == TaskStatus(instance.__previous_status):
         setattr(instance, '_skip_signal', True)
-    if instance.get_child and status:
-        child = instance.get_child
+    child = instance.get_child
+    while child and status:
         child.task_status = status
         child._mail_attrs = get_child_recipients(instance.task_status)
         setattr(child, '_TaskDetailView__server',
@@ -383,6 +382,8 @@ def update_status_child_task(sender, instance, **kwargs):
                 'skip_mail': False,
                 'from_parent': True
             })
+        status = get_child_status(child.status)
+        child = child.get_child
 
 
 @receiver(pre_save, sender=Task)
