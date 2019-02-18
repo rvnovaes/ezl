@@ -114,15 +114,20 @@ class TaskDetail {
 
     setExecutionDateRequire(status) {
         if (this._elExecutionDate.length > 0) {
-            if (status === 'DONE'){
+            if (status === 'ACCEPTED'){
                 this._elExecutionDate.attr('required', 'required');
                 this._elExecutionDate.val('');
 
             }else{
                 this._elExecutionDate.removeAttr('required');
             }
+        }
+    }
+
+    checkExecutionDate(){
+        if (this._elExecutionDate.length > 0) {
             let input = this._elExecutionDate.get(0);
-            if (! input.checkValidity()) {
+            if (!input.checkValidity()) {
                 input.reportValidity();
                 return false;
             }
@@ -212,8 +217,8 @@ class TaskDetail {
         var taskStatus = value.id;
         this.validSurvey();
         this.makeRatingProccess(taskStatus);
-        this.setExecutionDateRequire(taskStatus);
-        this.showModalAction();                
+        this.checkExecutionDate(taskStatus);
+        this.showModalAction();
         this.formatModalAction(taskStatus);
         this.hideServicePriceTableAlert();
         this.configNotesField(taskStatus);
@@ -513,6 +518,7 @@ class TaskDetail {
                 }
                 this.onKeypressAmountField()
             }
+	        this.setExecutionDateRequire(this.taskStatus);
         });
     }
 
