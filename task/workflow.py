@@ -3,24 +3,25 @@ from django.db.models import Q
 from financial.models import ServicePriceTable, CategoryPrice
 from financial.tables import ServicePriceTableTaskTable
 from task.models import TaskStatus, TypeTask
-from decimal import Decimal
 
 PARENT_STATUS = {
-    TaskStatus.REQUESTED: TaskStatus.OPEN,
-    TaskStatus.ACCEPTED_SERVICE: TaskStatus.ACCEPTED,
-    TaskStatus.REFUSED_SERVICE: TaskStatus.REQUESTED,
-    TaskStatus.OPEN: TaskStatus.ACCEPTED,
     TaskStatus.ACCEPTED: TaskStatus.ACCEPTED,
-    TaskStatus.REFUSED: TaskStatus.REQUESTED,
-    TaskStatus.DONE: TaskStatus.ACCEPTED,
-    TaskStatus.RETURN: TaskStatus.ACCEPTED,
+    TaskStatus.ACCEPTED_SERVICE: TaskStatus.ACCEPTED,
     TaskStatus.BLOCKEDPAYMENT: TaskStatus.DONE,
+    TaskStatus.DONE: TaskStatus.ACCEPTED,
     TaskStatus.FINISHED: TaskStatus.DONE,
+    TaskStatus.OPEN: TaskStatus.ACCEPTED,
+    TaskStatus.REFUSED: TaskStatus.REQUESTED,
+    TaskStatus.REFUSED_SERVICE: TaskStatus.REQUESTED,
+    TaskStatus.REQUESTED: TaskStatus.OPEN,
+    TaskStatus.RETURN: TaskStatus.ACCEPTED,
 }
 
 CHILD_STATUS = {
-    TaskStatus.REQUESTED: TaskStatus.REFUSED,
     TaskStatus.OPEN: TaskStatus.REQUESTED,
+    TaskStatus.REFUSED: TaskStatus.REFUSED,
+    TaskStatus.REFUSED_SERVICE: TaskStatus.REFUSED,
+    TaskStatus.REQUESTED: TaskStatus.REFUSED,
     TaskStatus.RETURN: TaskStatus.RETURN,
 }
 
@@ -60,12 +61,7 @@ CHILD_RECIPIENTS = {
 def get_parent_status(child_status):
     """
     Retorna o status da OS pai de acordo com o status da OS filha informado no parametro
-    :param child_status:vou liberar o código agora
-￼￼￼￼￼
-11:03 AM
-que já da pra delegar pro ezlog
-11:03 AM
-porém ainda tem que criar a tabela de preços na mão
+    :param child_status:
     :return:
     """
     return PARENT_STATUS.get(child_status)
