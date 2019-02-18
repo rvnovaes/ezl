@@ -30,7 +30,9 @@ class Command(BaseCommand):
                 history = HistoricalTask(
                     id=task_history.task.pk, history_date=task_history.create_date,
                     history_office=task_history.task.office, task_status=task_history.status,
-                    history_user=task_history.create_user, history_notes=task_history.notes)
+                    history_user=task_history.create_user, history_notes=task_history.notes,
+                    amount=task_history.task.amount, amount_to_pay=task_history.task.amount_to_pay,
+                    amount_to_receive=task_history.task.amount_to_receive)
                 historys.append(history)            
             HistoricalTask.objects.bulk_create(historys)
             historys.clear()
