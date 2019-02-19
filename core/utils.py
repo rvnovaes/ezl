@@ -226,7 +226,7 @@ def clear_cpf_cnpj(cpf_cnpj):
 
 def check_cpf_cnpj_exist(model, cpf_cnpj):
     model = apps.get_model('core', model)
-    instances = model.objects.filter(cpf_cnpj=cpf_cnpj)
+    instances = model.objects.filter(cpf_cnpj=clear_cpf_cnpj(cpf_cnpj))
     data = {'exist': False}
     if instances.exists():
         instance = instances.latest('pk')
