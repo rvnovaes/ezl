@@ -127,8 +127,9 @@ def login(request):
 
 @login_required
 def inicial(request):
-    if request.user.is_authenticated:
-        if request.user.person.offices.active_offices().exists():
+    if request.user.is_authenticated and getattr(request.user, 'person'):
+        person = request.user.person
+        if person.offices.active_offices().exists() or person.invites.filter(status='N').first():
             set_office_session(request)
             if not get_office_session(request):
                 return HttpResponseRedirect(reverse_lazy('office_instance'))
@@ -283,7 +284,7 @@ class LoginCustomView(LoginView):
 
 def set_first_login_user(request):
     created = False
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.person.offices.active_offices().exists():
         obj, created = ControlFirstAccessUser.objects.get_or_create(
             auth_user=request.user)
     request.session['first_login_user'] = created
@@ -1485,6 +1486,11 @@ class InviteUpdateView(UpdateView):
                     'create_user': self.request.user,
                     'is_active': True
                 })
+            if not DefaultOffice.objects.filter(auth_user=invite.person.auth_user, is_active=True).first():
+                DefaultOffice.objects.create(auth_user=invite.person.auth_user,
+                                             office=invite.office,
+                                             is_active=True,
+                                             create_user=self.request.user)
             groups_list = {
                 group
                 for group, perms in get_groups_with_perms(

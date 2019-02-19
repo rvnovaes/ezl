@@ -28,8 +28,8 @@ class Register {
         let formData = this.formData;
         let data = {};
         $(formData ).each(function(index, obj){
-                data[obj.name] = obj.value;
-            });
+            data[obj.name] = obj.value;
+        });
         return data;
     }
 

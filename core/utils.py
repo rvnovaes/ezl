@@ -211,6 +211,7 @@ def cpf_is_valid(cpf):
     except:
         return False
 
+
 def cnpj_is_valid(cnpj):
     try:
         BRCNPJField().clean(cnpj)
@@ -218,8 +219,10 @@ def cnpj_is_valid(cnpj):
     except:
         return False
 
+
 def clear_cpf_cnpj(cpf_cnpj):
     return re.sub(r'[^0-9]', '', cpf_cnpj)
+
 
 def check_cpf_cnpj_exist(model, cpf_cnpj):
     model = apps.get_model('core', model)
