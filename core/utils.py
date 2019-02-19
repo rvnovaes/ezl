@@ -219,7 +219,7 @@ def cnpj_is_valid(cnpj):
     except:
         return False
 
-
+Aplicacoes/ATSPO/pgmei.app/emissao
 def clear_cpf_cnpj(cpf_cnpj):
     return re.sub(r'[^0-9]', '', cpf_cnpj)
 
