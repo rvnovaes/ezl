@@ -1,18 +1,20 @@
 from .models import TypeTask, Task, Ecm, TypeTaskMain
 from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
-    TypeTaskMainSerializer
+    TypeTaskMainSerializer, CustomResultsSetPagination
 from .filters import TaskApiFilter, TypeTaskMainFilter
 from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
 from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
 from lawsuit.models import Folder, Movement
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, F, Max, Subquery, OuterRef
+from django.db.models.functions import Coalesce
 from core.views_api import OfficeMixinViewSet
 
 
@@ -49,9 +51,26 @@ class EcmTaskViewSet(mixins.CreateModelMixin,
 
 @permission_classes((TokenHasReadWriteScope, ))
 class TaskViewSet(OfficeMixinViewSet, ApplicationView):
-    queryset = Task.objects.all().order_by('-final_deadline_date')
-    filter_backends = (DjangoFilterBackend, )
+    office_corresp = Task.objects.filter(id=OuterRef('child')).order_by('-id')
+    queryset = Task.objects.annotate(
+        filho=Max('child'),
+        office_name=F('office__legal_name'),
+        type_task_name=F('type_task__name'),
+        law_suit_number=F('movement__law_suit__law_suit_number'),
+        state=F('movement__law_suit__court_district__state__initials'),
+        court_district_name=F('movement__law_suit__court_district__name')
+    ).annotate(
+        office_exec=Subquery(office_corresp.values('office__legal_name')[:1])
+    ).annotate(
+        executed_by_name=Coalesce('person_executed_by__legal_name', 'office_exec')
+    )
+
+    filter_backends = (DjangoFilterBackend, OrderingFilter, )
     filter_class = TaskApiFilter
+    pagination_class = CustomResultsSetPagination
+    ordering_fields = ('id', 'create_date', 'final_deadline_date', 'office_name', 'task_number', 'type_task_name',
+                       'amount', 'lawsuit_number', 'state', 'court_district_name', 'task_status')
+    default_ordering = ('-final_deadline_date', )
 
     def get_serializer_class(self):
         if self.request.method == "POST":
