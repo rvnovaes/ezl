@@ -68,7 +68,7 @@ def get_default_office():
     admin = User.objects.filter(username='admin').first()
     default_office, created = Office.objects.get_or_create(
         create_user=admin,
-        cpf_cnpj='03.482.042/0001-02',
+        cpf_cnpj='03482042000102',
         name='Marcelo Tostes Advogados Associados',
         legal_name='Marcelo Tostes Advogados Associados')
     return default_office

@@ -4,73 +4,175 @@ class Register {
         this.elEmail = $('input[name=email]');
         this.elPassword = $('input[name=password]');        
         this.elName = $('input[name=name]');
+        this.elOfficeName = $('input[name=office]');
+        this.elOfficeCpfCnpj = $('input[name=cpf_cnpj]');
         this.elAcceptTerms = $('input[name=accept-terms]'); 
         this.elBtnEye = $('#btn-eye'); 
+        this.officeExist;
         this.onSubmit();
         this.onBlurEmail();
         this.onBlurPassword();
         this.onBlurName();
         this.onChangeAcceptTerms();
         this.onClickBtnEye();
+        this.onBlurCpfCnpj();
+        this.onFocusCpfCnpj();
         this.errors = {'acceptTerms': false};
     }
 
     get formData() {
-        return $("form").serializeArray();
+        return $('form').serializeArray();
     }    
 
     get query() {
         let formData = this.formData;
         let data = {};
         $(formData ).each(function(index, obj){
-                data[obj.name] = obj.value;
-            });     
+            data[obj.name] = obj.value;
+        });
         return data;
     }
 
+    onFocusCpfCnpj() {
+        try {
+            this.elOfficeCpfCnpj.on('focus', (evt) => {
+                this.elOfficeCpfCnpj.unmask();
+                this.elOfficeCpfCnpj.removeAttr('maxlength');
+            });
+        } catch (error) {
+            console.log('Ainda não foi atribuido mascara');
+        }
+
+    }
+
+    requestInvitation() {
+        swal({
+            title: 'Atenção!',
+            type: 'warning',
+            html: `<h4>
+                O escritório/empresa ${this.officeExist.legal_name} com esse CPF/CNPJ já existe.<br /><br />
+                Deseja enviar uma solicitação de ingresso para este escritório/empresa?
+                </h4>`,
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            cancelButtonText: 'Não',
+            confirmButtonText: 'Sim',
+            reverseButtons: true
+        }).then((result => {
+            if (result.value) {
+                this.save(true);
+            } else {
+                swal.close();
+                setTimeout(()=>{
+                    this.elOfficeName.focus();
+                }, 500);
+            }
+        }));
+    }
+
+
     onSubmit() {
         this.elRegisterForm.on('submit', (el)=>{
-            el.preventDefault();            
+            el.preventDefault();
+            this.validateAcceptTerms();
             if (!Object.keys(this.errors).length) {
-                this.save()
-            } else {
-                this.validateAcceptTerms();
-            }            
-        })
+                if (this.officeExist.exist) {
+                    this.requestInvitation();
+                } else {
+                    this.save();
+                }                 
+            }                   
+        });
     }
+    onBlurCpfCnpj() {
+        this.elOfficeCpfCnpj.on('blur', (evt)=>{
+            delete this.errors['cpf_cnpj'];
+            this.validateCpfCnpj();
+            this.checkOfficeExist();
+            this.elOfficeCpfCnpj.val(this.elOfficeCpfCnpj.val().replace(/[^0-9]+/g, ''));
+            if (this.elOfficeCpfCnpj.val().length <= 11) {
+                this.elOfficeCpfCnpj.mask('000.000.000-00', {reverse: true});
+            } else {
+                this.elOfficeCpfCnpj.mask('00.000.000/0000-00', {reverse: true});
+            }
+        });
+    }    
     onBlurEmail(){
         this.elEmail.on('blur', ()=>{
             delete this.errors['email'];
-            this.validateEmail()
-        })
+            this.validateEmail();
+        });
     }
     onBlurPassword() {
         this.elPassword.on('blur', ()=>{
             delete this.errors['password'];
-            this.validatePassword()
-        })        
+            this.validatePassword();
+        });
     }
     onBlurName() {
         this.elName.on('blur', ()=>{
             delete this.errors['name'];
-            this.validateName()
-        })        
+            this.validateName();
+        });
     }        
     onChangeAcceptTerms() {
         this.elAcceptTerms.on('change', ()=>{
             this.validateAcceptTerms();
-        })
+        });
     }
     onClickBtnEye() {
         this.elBtnEye.on('click', ()=>{
-            if (this.elPassword.attr('type') == 'password') {
-                this.elPassword.attr('type', 'text')                
-                this.elBtnEye.children('i').attr('class', 'fa fa-eye-slash')
+            if (this.elPassword.attr('type') === 'password') {
+                this.elPassword.attr('type', 'text');
+                this.elBtnEye.children('i').attr('class', 'fa fa-eye-slash');
             } else {
-                this.elPassword.attr('type', 'password')
-                this.elBtnEye.children('i').attr('class', 'fa fa-eye')
+                this.elPassword.attr('type', 'password');
+                this.elBtnEye.children('i').attr('class', 'fa fa-eye');
             }
-        })
+        });
+    }
+    addClassError(el, siblingsParam) {
+        el.closest('.form-group').addClass('has-error');
+        if (siblingsParam) {
+            el.siblings(siblingsParam).css('display', 'block');
+        } else {
+            el.siblings().css('display', 'block');
+        }        
+    }
+    removeClassError(el, siblingsParam) {
+        el.closest('.form-group').removeClass('has-error');
+        if (siblingsParam) {
+            el.siblings(siblingsParam).css('display', 'none');
+        } else {
+            el.siblings().css('display', 'none');
+        }                
+    }
+
+    validateCpfCnpj() {
+        $.ajax({
+            method: 'POST', 
+            url: '/validate_cpf_cnpj/', 
+            data: this.query, 
+            success: (response) => {
+                if (!response.valid) {
+                    this.errors['cpf_cnpj'] = false;
+                    this.addClassError(this.elOfficeCpfCnpj);                    
+                } else {
+                    this.removeClassError(this.elOfficeCpfCnpj);
+                }
+            }
+        });
+    }
+    checkOfficeExist() {
+        let query = this.query;
+        query['model'] = 'office';
+        $.ajax({
+            method: 'POST', 
+            url: '/check_cpf_cnpj_exist', 
+            data: query, 
+            success: (response) => this.officeExist = response
+        });
     }
     validateEmail() {
         $.ajax({
@@ -80,22 +182,19 @@ class Register {
             success: (response) => {                
                 if (!response.valid) {
                     this.errors['email'] = false;
-                    this.elEmail.closest('.form-group').addClass('has-error');
-                    this.elEmail.siblings().css('display', 'block');
-
+                    this.addClassError(this.elEmail);                  
                 } else {
-                    this.elEmail.closest('.form-group').removeClass('has-error');
-                    this.elEmail.siblings().css('display', 'none');
+                    this.removeClassError(this.elEmail);
                 }
             }, 
             error: (error) => {
-                console.log(error)
+                console.log(error);
             },
             beforeSend: function (xhr, settings) {
-                xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
+                xhr.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
             },
             dataType: 'json'            
-        })       
+        });
 
     }
     validatePassword() {
@@ -104,14 +203,14 @@ class Register {
             url: '/validate_password/',
             data: this.query, 
             success: (response) => {                
-                console.log(response)
-                $('#password-error').empty()
+                console.log(response);
+                $('#password-error').empty();
                 if (!response.valid) {                    
                     this.elPassword.closest('.form-group').addClass('has-error');
                     $('#password-error').css('display', 'block');
                     response.message.forEach((message)=>{
                         $('#password-error').append('* ' + message);
-                    })                    
+                    });
 
                 } else {
                     this.elPassword.closest('.form-group').removeClass('has-error');
@@ -119,58 +218,78 @@ class Register {
                 }
             }, 
             error: (error) => {
-                console.log(error)
+                console.log(error);
             },
             beforeSend: function (xhr, settings) {
-                xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
+                xhr.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
             },
             dataType: 'json'            
-        })               
+        });
     }
     validateName() {
         if (this.elName.val().trim().split(' ').length <= 1) {
             this.errors['name'] = false;
-            this.elName.closest('.form-group').addClass('has-error')
-            this.elName.siblings().css('display', 'block');
+            this.addClassError(this.elName);
         } else {
-            this.elName.closest('.form-group').removeClass('has-error')            
-            this.elName.siblings().css('display', 'none');
+            this.removeClassError(this.elName);
         }
     }
     validateAcceptTerms() {
         if (this.elAcceptTerms.is(':checked')) {
             delete this.errors['acceptTerms'];
-            this.elAcceptTerms.closest('.form-group').removeClass('has-error')            
-            this.elAcceptTerms.siblings('span').css('display', 'none');            
+            this.removeClassError(this.elAcceptTerms, 'span');            
         } else {
             this.errors['acceptTerms'] = false;
-            this.elAcceptTerms.closest('.form-group').addClass('has-error')
-            this.elAcceptTerms.siblings('span').css('display', 'block');            
+            this.addClassError(this.elAcceptTerms, 'span');            
         }                        
     }    
-    save() {
+    save(requestInvite) {
+        let msg = `<h4>Criando seu escritório</h4>`;
+        if (requestInvite) {
+            msg = '';
+        }
         swal({
-            title: 'Criando seu escritório', 
-            text: 'Aguarde um momento',
+            title: 'Aguarde...',
+            html: msg,
             onOpen: ()=>{
-                swal.showLoading()
+                swal.showLoading();
+                let query = this.query;
+                query['request_invite'] = requestInvite;
+                if (requestInvite) {
+                    query['office_pk'] = this.officeExist.id;
+                }
                 $.ajax({
                     method: 'POST', 
-                    data: this.query, 
-                    success: (response) => {                
-                        window.location.href = response.redirect                                
-                        swal.close();
+                    url: '/registrar/',
+                    data: query, 
+                    success: (response) => {            
+                        if (requestInvite) {
+                            swal({
+                                type: 'info', 
+                                title: 'Atenção', 
+                                html: `<h4>
+                                    Foi enviado o convite para ${this.officeExist.legal_name}.<br />
+                                    Assim que ele aceitar você fará parte desse escritório/empresa.
+                                    </h4>`,
+                            }).then((result)=> {
+                                window.location.href = response.redirect;
+                                swal.close();
+                            });
+                        } else {
+                            window.location.href = response.redirect;
+                            swal.close();
+                        }    
                     }, 
                     error: (error) => {
-                        console.log(error)
+                        console.log(error);
                     },
                     beforeSend: function (xhr, settings) {
-                        xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
+                        xhr.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
                     },
                     dataType: 'json'            
-                })                
+                });
             }
-        })       
+        });
     }
 
 }
