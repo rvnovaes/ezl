@@ -1,6 +1,7 @@
+from datetime import datetime, time
 from django.forms import Select, Textarea, RadioSelect
 from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter, ModelMultipleChoiceFilter
+    BooleanFilter, ModelMultipleChoiceFilter, RangeFilter, Filter
 from dal import autocomplete
 from django.db.models import Q
 from core.models import Person, State, Office, Team
@@ -9,9 +10,9 @@ from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ, CourtDistrictComplement
 from task.models import TypeTask, Task, Filter, TaskStatus
+from task.widgets import ApiDatetimeRangeField
 from .models import DashboardViewModel, TypeTaskMain
 from core.utils import get_office_session
-from django import forms
 
 from django_filters import rest_framework as filters
 
@@ -28,10 +29,29 @@ GROUP_BY_TASK_TO_RECEIVE_TYPE = (
 )
 
 
+class DatetimeFromToRangeFilter(RangeFilter):
+    field_class = ApiDatetimeRangeField
+
+
+class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
+    def filter(self, qs, value):
+        # value is either a list or an 'empty' value
+        values = value or []
+        qs = super(MultiValueCharFilter, self).filter(qs, values)
+
+        return qs
+
+
 class TaskApiFilter(FilterSet):
+    is_hearing = filters.BooleanFilter(name='type_task__type_task_main__is_hearing')
+    office_name = filters.CharFilter(name='office__legal_name', lookup_expr='unaccent__icontains')
+    final_deadline_date = DatetimeFromToRangeFilter()
+    task_status = MultiValueCharFilter(name='task_status', lookup_expr='in')
+    executed_by_name = filters.CharFilter(name='executed_by_name', lookup_expr='unaccent__icontains')
+
     class Meta:
         model = Task
-        fields = ['legacy_code', 'task_number']
+        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_name', 'final_deadline_date', 'task_status']
 
 
 class TaskFilter(FilterSet):
