@@ -61,7 +61,7 @@ COLUMN_NAME_DICT = {
     'type_lawsuit': {
         'column_name': 'processo.tipo',
         'attribute': 'movement__law_suit__type_lawsuit',
-        'required': True,
+        'required': False,
         'verbose_name': LawSuit._meta.get_field('type_lawsuit').verbose_name,
     },
     'instance': {
@@ -365,11 +365,10 @@ class TaskResource(resources.ModelResource):
         court_district = row.get('lawsuit_court_district', '')
         city = row.get('lawsuit_city', '')
         lawsuit = None
-        type_lawsuit = row['type_lawsuit']
-        if not lawsuit_legacy_code and not (lawsuit_number and type_lawsuit):
+        type_lawsuit = row.get('type_lawsuit', 'Judicial')
+        if not lawsuit_legacy_code and not lawsuit_number:
             row_errors.append(REQUIRED_ONE_IN_GROUP.format('identificação do processo',
                                                            [COLUMN_NAME_DICT['law_suit_number']['column_name'],
-                                                            COLUMN_NAME_DICT['type_lawsuit']['column_name'],
                                                             COLUMN_NAME_DICT['lawsuit_legacy_code']['column_name']]))
         if not state:
             row_errors.append(REQUIRED_COLUMN.format(COLUMN_NAME_DICT['lawsuit_state']['column_name']))
