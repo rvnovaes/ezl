@@ -74,9 +74,16 @@ class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
 
 
 class CompanySerializer(serializers.ModelSerializer):
+    show_administrative_menus = serializers.SerializerMethodField()
     class Meta:
         model = Company
-        fields = ('id', 'name', 'logo')
+        fields = ('id', 'name', 'logo', 'show_administrative_menus')
+
+    def get_show_administrative_menus(self, obj):
+        user_company = obj.users.filter(user=self.context['request'].user).first()
+        if user_company:
+            return user_company.show_administrative_menus
+        return False
    
 
 class OfficeSerializer(serializers.ModelSerializer):
