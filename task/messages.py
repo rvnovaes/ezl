@@ -16,3 +16,9 @@ WRONG_TASK_STATUS = "{} não é um valor de status válido: {}."
 
 MISSING_ACCEPTANCE_SERVICE_DATE = "A data de de Aceite pelo Service é obrigatória caso o status da OS seja " \
                                   "Aceite pelo Service"
+
+
+def insert_incorrect_natural_key_message(verbose_name, column_name, value):
+    return INCORRECT_NATURAL_KEY.format(verbose_name,
+                                        column_name,
+                                        value)

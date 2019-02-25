@@ -17,6 +17,7 @@ from django.conf import settings
 from retrying import retry
 import traceback
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -218,3 +219,20 @@ def set_instance_values(instance, service_price_table):
                                   instance.rate_type_receive)
 
     return Decimal(service_price_table.value_to_pay.amount), Decimal(service_price_table.value_to_receive.amount)
+
+
+def set_performance_place(movement):
+    if movement.law_suit.court_district_complement:
+        performance_place = movement.law_suit.court_district_complement.name
+    elif movement.law_suit.city:
+        performance_place = movement.law_suit.city.name
+    else:
+        performance_place = movement.law_suit.court_district.name
+
+    return performance_place
+
+
+def get_default_customer(office):
+    if hasattr(office, 'customsettings'):
+        return office.customsettings.default_customer or None
+    return None
