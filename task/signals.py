@@ -436,16 +436,21 @@ def pre_create_historical_record_callback(sender, **kwargs):
 def post_create_historical_record_callback(sender, **kwargs):
     history_instance = kwargs.get('history_instance')
     instance = kwargs.get('instance')
-    status = get_child_status(instance.status) if instance.get_child else False
+    status = get_child_status(instance.status) if instance.get_child else None
     request = HistoricalRecords.thread.request
     msg = request.POST.get('notes', '')
+    task_number = None
     if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
+        task_number = instance.get_child.task_number
+    if instance.task_status == TaskStatus.REFUSED and instance.parent:
+        task_number = instance.task_number
+    if task_number:
         msg = """
         A OS {} foi recusada pelo escritório pelo motivo: {}
-        """.format(instance.get_child.task_number, msg)
+        """.format(task_number, msg)
     if field_has_changed(history_instance, 'amount'):
         change = get_history_changes(history_instance).get('amount')
-        if change.old != change.new and float(change.old) > 0.0:
+        if float(change.old) != float(change.new):
             msg += "Valor alterado de {} para {}".format(
                 format_currency(change.old, 'R$', locale='pt_BR'),
                 format_currency(change.new, 'R$', locale='pt_BR'))
