@@ -97,11 +97,17 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         if folder_number:
             folder = Folder.objects.filter(id=folder_number).first()
         else:
-            folder, created = Folder.objects.get_or_create(person_customer_id=validation_data.get('person_customer_id'),
-                                                           is_default=True,
-                                                           office=validation_data.get('office'),
-                                                           defaults={'create_user': validation_data.get('create_user'),
-                                                                     'is_active': True})
+            folder = Folder.objects.filter(person_customer_id=validation_data.get('person_customer_id'),
+                                           is_default=True,
+                                           office=validation_data.get('office'),
+                                           is_active=True).first()
+            if not folder:
+                folder, created = Folder.objects.get_or_create(
+                    person_customer_id=validation_data.get('person_customer_id'),
+                    is_default=True,
+                    office=validation_data.get('office'),
+                    is_active=True,
+                    defaults={'create_user': validation_data.get('create_user')})
         self.folder = folder
 
     def get_law_suit(self, validation_data):
