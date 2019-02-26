@@ -71,4 +71,4 @@ class CustomFieldImportExport(Field):
                     getattr(obj, attrs[-1]).set(cleaned)
             if self.column_name_dict.get(attrs[-1], False) and \
                     self.column_name_dict[attrs[-1]]['required'] and not getattr(obj, attrs[-1]):
-                raise ValueError(required_column(self.column_name))
+                raise ValueError(required_column(self.column_name_dict.get(self.column_name, {}).get('column_name')))
