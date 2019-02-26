@@ -3,7 +3,7 @@ from core.models import Person, Office
 from django.utils.timezone import make_aware
 from import_export.widgets import ForeignKeyWidget, Widget, DateTimeWidget
 from task.models import TaskStatus
-from task.messages import *
+from task.messages import wrong_task_status
 from codemirror import CodeMirrorTextarea
 
 code_mirror_schema = CodeMirrorTextarea(
@@ -108,10 +108,11 @@ class TaskStatusWidget(Widget):
         ret = TaskStatus.REQUESTED
         if value:
             if not row['id']:
-                values = {item.value.title(): item.value for item in [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE]}
+                values = {item.value.title(): item.value for item in [TaskStatus.REQUESTED,
+                                                                      TaskStatus.ACCEPTED_SERVICE]}
                 ret = values.get(value.title(), None)
                 if not ret:
-                    raise ValueError(WRONG_TASK_STATUS.format(value.title(), values.values()))
+                    raise ValueError(wrong_task_status(value.title(), values.values()))
             else:
                 ret = value
         return ret

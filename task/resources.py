@@ -1,29 +1,18 @@
 from core.models import Person
 from collections import OrderedDict
 from django.db import transaction
-from django.db.models import Q
-from financial.models import CostCenter
 from import_export import resources
 from import_export.widgets import CharWidget, IntegerWidget
 from import_export.results import RowResult, Result
-from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance, \
-    TypeLawsuit, CourtDistrictComplement, City, State
 from task.fields import CustomFieldImportExport
 from task.instance_loaders import TaskModelInstanceLoader
-from task.messages import *
 from task.models import Task, TypeTask, TaskStatus
 from task.utils import self_or_none, set_performance_place
-from task.task_import import TRUE_FALSE_DICT, COLUMN_NAME_DICT, ImportFolder
+from task.task_import import TRUE_FALSE_DICT, COLUMN_NAME_DICT, ImportFolder, ImportLawSuit, ImportMovement
 from task.widgets import PersonAskedByWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, TypeTaskByWidget
 import logging
 
 logger = logging.getLogger('resources')
-
-
-def insert_incorrect_natural_key_message(row, key):
-    return INCORRECT_NATURAL_KEY.format(COLUMN_NAME_DICT[key]['verbose_name'],
-                                        COLUMN_NAME_DICT[key]['column_name'],
-                                        row[key])
 
 
 class TaskRowResult(RowResult):
@@ -88,13 +77,13 @@ class TaskResource(resources.ModelResource):
         self.create_user = None
         self.office_id = None
         self.default_type_movement = None
-        self._meta.instance_loader_class = TaskModelInstanceLoader
         self.folder = None
         self.lawsuit = None
         self.movement = None
         self.current_line = 0
 
     class Meta:
+        instance_loader_class = TaskModelInstanceLoader
         model = Task
         import_id_fields = ('task_number', 'legacy_code')
 
@@ -112,51 +101,6 @@ class TaskResource(resources.ModelResource):
         """
         return TaskResult
 
-    def validate_movement(self, row, row_errors):
-        """
-        Faz a validacao do grupo de colunas referente ao movement
-        :param row: dict com os dados da linha que está sendo processada no momento
-        :param row_errors: lista de erros do processo de importação. Lista cumulativa dos processos de validação de
-        folder, lawsuit e movement
-        :return: Movement instance or None
-        """
-        type_movement_name = row.get('type_movement', '')
-        movement_legacy_code = row.get('movement_legacy_code', '')
-        if type(movement_legacy_code) == float and movement_legacy_code.is_integer():
-            movement_legacy_code = str(int(movement_legacy_code))
-        if not (type_movement_name or movement_legacy_code):
-            movement, created = Movement.objects.get_or_create(
-                folder=self.folder,
-                law_suit=self.lawsuit,
-                type_movement=self.default_type_movement,
-                office=self.office,
-                defaults={'create_user': self.create_user,
-                          'system_prefix': row['system_prefix']})
-        else:
-            type_movement = TypeMovement.objects.filter(name__unaccent__iexact=type_movement_name,
-                                                        office_id=self.office_id).first()
-            movement = None
-            if movement_legacy_code:
-                movement = Movement.objects.filter(legacy_code=movement_legacy_code,
-                                                   system_prefix=row['system_prefix'],
-                                                   folder=self.folder,
-                                                   law_suit=self.lawsuit,
-                                                   office_id=self.office_id).first()
-            if not movement and type_movement:
-                movement, created = Movement.objects.get_or_create(
-                    folder=self.folder,
-                    law_suit=self.lawsuit,
-                    office=self.office,
-                    type_movement=type_movement,
-                    legacy_code=movement_legacy_code,
-                    defaults={'system_prefix': row['system_prefix'],
-                              'create_user': self.create_user})
-            elif not movement and not type_movement:
-                row_errors.append(insert_incorrect_natural_key_message(row, 'type_movement'))
-        if not movement:
-            row_errors.append(RECORD_NOT_FOUND.format(Movement._meta.verbose_name))
-        return movement
-
     def before_import(self, dataset, using_transactions, dry_run, **kwargs):
         self.office = kwargs['office']
         self.create_user = kwargs['create_user']
@@ -166,13 +110,6 @@ class TaskResource(resources.ModelResource):
                 headers_index = dataset.headers.index(v['column_name'])
                 dataset.headers[headers_index] = k
 
-        self.default_type_movement, created = TypeMovement.objects.get_or_create(
-            is_default=True,
-            office=self.office,
-            defaults={
-                'name': 'OS Avulsa',
-                'create_user': self.create_user
-            })
         dataset.insert_col(0, col=["", ] * dataset.height, header="id")
         dataset.insert_col(1, col=[int("{}".format(self.office.id)), ] * dataset.height, header="office")
         dataset.insert_col(2, col=[int("{}".format(self.create_user.id)), ] * dataset.height, header="create_user")
@@ -191,10 +128,17 @@ class TaskResource(resources.ModelResource):
             instance = self.get_instance(instance_loader, row)
         if not instance:
             with transaction.atomic():
-                self.folder = ImportFolder(row, row_errors, self.office, self.create_user).get_folder()
-                self.lawsuit = self.validate_lawsuit(row, row_errors) if self.folder else None
-                self.movement = self.validate_movement(row, row_errors) if self.lawsuit else None
+                self.folder, folder_errors = ImportFolder(row, row_errors, self.office, self.create_user).get_folder()
+                row_errors.extend(folder_errors)
+                if self.folder:
+                    self.lawsuit, lawsuit_errors = ImportLawSuit(row, row_errors, self.office, self.create_user,
+                                                                 self.folder).get_lawsuit()
+                    row_errors.extend(lawsuit_errors)
+                if self.lawsuit:
+                    self.movement, movement_errors = ImportMovement(row, row_errors, self.office, self.create_user,
+                                                                    self.lawsuit).get_movement()
 
+                    row_errors.extend(movement_errors)
                 if self.movement:
                     row['movement'] = self.movement.id
                 if not row.get('performance_place', None) and self.movement:

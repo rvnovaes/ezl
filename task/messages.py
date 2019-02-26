@@ -18,7 +18,35 @@ MISSING_ACCEPTANCE_SERVICE_DATE = "A data de de Aceite pelo Service é obrigató
                                   "Aceite pelo Service"
 
 
-def insert_incorrect_natural_key_message(verbose_name, column_name, value):
+def columns_not_available(column, columns_list):
+    return COLUMNS_NOT_AVAILABLE.format(column, columns_list)
+
+
+def column_error(column, error):
+    return COLUMN_ERROR.format(column, error)
+
+
+def incorrect_natural_key(verbose_name, column_name, value):
     return INCORRECT_NATURAL_KEY.format(verbose_name,
                                         column_name,
                                         value)
+
+
+def required_one_in_group(group_name, fields):
+    return REQUIRED_ONE_IN_GROUP.format(group_name, fields)
+
+
+def record_not_found(record_model):
+    return RECORD_NOT_FOUND.format(record_model)
+
+
+def required_column(column):
+    return REQUIRED_COLUMN.format(column)
+
+
+def required_column_related(column, column_related):
+    return REQUIRED_COLUMN_RELATED.format(column, column_related)
+
+
+def wrong_task_status(status, valid_status):
+    return WRONG_TASK_STATUS.format(status, valid_status)
