@@ -105,7 +105,7 @@ class TaskStatusWidget(Widget):
     """
 
     def clean(self, value, row=None, *args, **kwargs):
-        ret = TaskStatus.REQUESTED
+        ret = TaskStatus.REQUESTED.value
         if value:
             if not row['id']:
                 values = {item.value.title(): item.value for item in [TaskStatus.REQUESTED,

@@ -120,8 +120,8 @@ class TaskResource(resources.ModelResource):
         row_errors = []
         row['warnings'] = []
         instance = None
-        row['task_number'] = self_or_none(row['task_number'])
-        row['legacy_code'] = self_or_none(row['legacy_code'])
+        row['task_number'] = self_or_none(row.get('task_number'))
+        row['legacy_code'] = self_or_none(row.get('legacy_code'))
         row['is_active'] = TRUE_FALSE_DICT.get('is_active', True)
         if row['task_number'] or row['legacy_code']:
             instance_loader = self._meta.instance_loader_class(self, row)
