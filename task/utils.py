@@ -222,12 +222,13 @@ def set_instance_values(instance, service_price_table):
 
 
 def set_performance_place(movement):
+    list_places = [movement.law_suit.court_district.state.initials,
+                   movement.law_suit.court_district.name]
     if movement.law_suit.court_district_complement:
-        performance_place = movement.law_suit.court_district_complement.name
+        list_places.append(movement.law_suit.court_district_complement.name)
     elif movement.law_suit.city:
-        performance_place = movement.law_suit.city.name
-    else:
-        performance_place = movement.law_suit.court_district.name
+        list_places.append(movement.law_suit.city.name)
+    performance_place = ' - '.join(list_places)
 
     return performance_place
 
