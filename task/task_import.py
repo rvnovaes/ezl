@@ -273,7 +273,7 @@ class ImportFolder(TaskImport):
         folder_args = {}
         person_customer = self._get_person_customer(row)
 
-        if not (folder_legacy_code or folder_number) and person_customer:
+        if not (folder_legacy_code and folder_number) and person_customer:
             folder_args = {'person_customer': person_customer,
                            'is_default': True,
                            'office': self.office}
@@ -285,7 +285,6 @@ class ImportFolder(TaskImport):
             if not folder and folder_number:
                 filter_args = {'folder_number': folder_number}
                 folder = self._filter_folder(**filter_args)
-
             if not folder and person_customer:
                 folder_args = {'person_customer': person_customer,
                                'office': self.office,
@@ -295,6 +294,8 @@ class ImportFolder(TaskImport):
         if row.get('folder_person_customer') and not person_customer:
             row_errors.append(record_not_found(
                 COLUMN_NAME_DICT['folder_person_customer']['verbose_name']))
+        elif not row.get('folder_person_customer') and not person_customer:
+            row_errors.append(default_customer_missing(self.office.legal_name))
 
         if not folder and folder_args:
             self._set_create_args(folder_args)
@@ -309,11 +310,15 @@ class ImportFolder(TaskImport):
                     data = {'create_user': self.create_user}
                     if self._cost_center_update and self._cost_center:
                         data['cost_center'] = self._cost_center
-                    folder = self._get_create_folder(defaults=data, **self._create_args)
+                    if self._create_args:
+                        folder = self._get_create_folder(defaults=data, **self._create_args)
                 elif self._cost_center_update and self._cost_center:
                     self._update_cost_center(self.folder, self._cost_center, self._cost_center_update)
             except Exception:
                 self.row_errors.append(record_not_found(Folder._meta.verbose_name))
+
+        if not self.folder:
+            self.row_errors.append(record_not_found(Folder._meta.verbose_name))
 
         return self.folder, self.row_errors
 

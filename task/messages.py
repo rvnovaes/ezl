@@ -14,6 +14,8 @@ RECORD_NOT_FOUND = "Não foi encontrado registro de {} correspondente aos valore
 
 WRONG_TASK_STATUS = "{} não é um valor de status válido: {}."
 
+DEFAULT_CUSTOMER_MISSING = "O escritório {} não possui Cliente padrão configurado"
+
 MISSING_ACCEPTANCE_SERVICE_DATE = "A data de de Aceite pelo Service é obrigatória caso o status da OS seja " \
                                   "Aceite pelo Service"
 
@@ -50,3 +52,6 @@ def required_column_related(column, column_related):
 
 def wrong_task_status(status, valid_status):
     return WRONG_TASK_STATUS.format(status, valid_status)
+
+def default_customer_missing(office):
+    return DEFAULT_CUSTOMER_MISSING.format(office)
