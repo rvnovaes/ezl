@@ -388,7 +388,8 @@ class ImportLawSuit(TaskImport):
         """
         row = self.row
         row_errors = self.row_errors
-        lawsuit_number = str(row.get('law_suit_number', ''))
+        lawsuit_number = row.get('law_suit_number', '')
+        lawsuit_number = str(int(lawsuit_number)) if isinstance(lawsuit_number, float) else str(lawsuit_number)
         lawsuit_legacy_code = row.get('lawsuit_legacy_code', '')
         state = row.get('lawsuit_state', '')
         court_district = row.get('lawsuit_court_district', '')
