@@ -53,5 +53,6 @@ def required_column_related(column, column_related):
 def wrong_task_status(status, valid_status):
     return WRONG_TASK_STATUS.format(status, valid_status)
 
+
 def default_customer_missing(office):
     return DEFAULT_CUSTOMER_MISSING.format(office)

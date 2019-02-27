@@ -4,8 +4,9 @@ from financial.models import CostCenter
 from lawsuit.models import Folder, LawSuit, CourtDistrict, Instance, CourtDistrictComplement, CourtDivision, Organ, \
     TypeLawsuit, TypeMovement
 from task.utils import get_default_customer, self_or_none
-from task.messages import *
-from task.models import Task, Movement
+from task.messages import column_error, incorrect_natural_key, required_one_in_group, record_not_found, \
+    required_column, required_column_related, default_customer_missing
+from task.models import Task, Movement, TypeTask
 
 TRUE_FALSE_DICT = {'V': True, 'F': False}
 
@@ -187,7 +188,7 @@ COLUMN_NAME_DICT = {
 }
 
 
-class TaskImport(object):
+class ImportTask(object):
 
     def __init__(self, row, row_errors, office, create_user):
         self.row = row
@@ -204,8 +205,61 @@ class TaskImport(object):
     def _set_create_args(self, create_args):
         self._create_args = create_args or {}
 
+    def validate_person_asked_by(self, value):
+        if not value:
+            return True
+        else:
+            qs = Person.objects.all()
+            filter_args = {'legal_name__unaccent__iexact': str(value),
+                           'officemembership__office': self.office}
+            return True if self._filter_queryset(qs, **filter_args).first() else False
 
-class ImportFolder(TaskImport):
+    def validate_person_company_representative(self, value):
+        if not value:
+            return True
+        else:
+            qs = Person.objects.all()
+            filter_args = {'legal_name__unaccent__iexact': str(value),
+                           'officemembership__office': self.office}
+            return True if self._filter_queryset(qs, **filter_args).first() else False
+
+    def validate_type_task(self, value):
+        if not value:
+            return True
+        else:
+            qs = TypeTask.objects.get_queryset(office=[self._office_id])
+            return True if self._filter_queryset(qs, **{'name__unaccent__iexact': str(value)}).first() else False
+
+    def get_errors(self):
+        return self.row_errors
+
+    def validate_task(self):
+        """
+        Checa se os campos de preenchimento obrigatórios foram preenchidos e se os dados preenchidos são validos
+        :return (boolean): True or False
+        """
+
+        row = self.row
+        row_errors = self.row_errors
+        required_fields = ['person_asked_by', 'type_task', 'final_deadline_date']
+        check_fields = ['person_asked_by', 'person_company_representative', 'type_task']
+
+        for field in required_fields:
+            if not row.get(field):
+                row_errors.append(required_column(COLUMN_NAME_DICT[field]['column_name']))
+
+        for field in check_fields:
+            validation_method = getattr(self, 'validate_{}'.format(field))
+            value = row.get(field)
+            if validation_method and not validation_method(value):
+                row_errors.append(column_error(COLUMN_NAME_DICT[field]['column_name'],
+                                               incorrect_natural_key(COLUMN_NAME_DICT[field]['verbose_name'],
+                                                                     COLUMN_NAME_DICT[field]['column_name'],
+                                                                     value)))
+        return row_errors == []
+
+
+class ImportFolder(ImportTask):
 
     def __init__(self, row, row_errors, office, create_user):
         super().__init__(row, row_errors, office, create_user)
@@ -323,7 +377,7 @@ class ImportFolder(TaskImport):
         return self.folder, self.row_errors
 
 
-class ImportLawSuit(TaskImport):
+class ImportLawSuit(ImportTask):
 
     def __init__(self, row, row_errors, office, create_user, folder):
         super().__init__(row, row_errors, office, create_user)
@@ -587,7 +641,7 @@ class ImportLawSuit(TaskImport):
         return self.lawsuit, self.row_errors
 
 
-class ImportMovement(TaskImport):
+class ImportMovement(ImportTask):
 
     def __init__(self, row, row_errors, office, create_user, lawsuit):
         super().__init__(row, row_errors, office, create_user)

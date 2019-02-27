@@ -8,8 +8,9 @@ from task.fields import CustomFieldImportExport
 from task.instance_loaders import TaskModelInstanceLoader
 from task.models import Task, TypeTask, TaskStatus
 from task.utils import self_or_none, set_performance_place
-from task.task_import import TRUE_FALSE_DICT, COLUMN_NAME_DICT, ImportFolder, ImportLawSuit, ImportMovement
-from task.widgets import PersonAskedByWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, TypeTaskByWidget
+from task.task_import import TRUE_FALSE_DICT, COLUMN_NAME_DICT, ImportFolder, ImportLawSuit, ImportMovement, ImportTask
+from task.widgets import PersonAskedByWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, \
+    TypeTaskByWidget
 import logging
 
 logger = logging.getLogger('resources')
@@ -143,6 +144,9 @@ class TaskResource(resources.ModelResource):
                     row['movement'] = self.movement.id
                 if not row.get('performance_place', None) and self.movement:
                     row['performance_place'] = set_performance_place(self.movement)
+                import_task = ImportTask(row, row_errors, self.office, self.create_user)
+                if not import_task.validate_task():
+                    row_errors.extend(import_task.get_errors())
                 if row_errors:
                     transaction.set_rollback(True)
                     raise Exception(row_errors)
@@ -154,7 +158,7 @@ class TaskResource(resources.ModelResource):
                 row['performance_place'] = instance.performance_place
 
     def after_import_row(self, row, row_result, **kwargs):
-        line_warnings = row['warnings']
+        line_warnings = row.get('warnings', [])
         if line_warnings:
             for warning in line_warnings:
                 row_result.warnings.append(warning)
