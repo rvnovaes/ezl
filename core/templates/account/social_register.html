@@ -74,7 +74,13 @@
                         <div class="col-xs-12">
                             <input class="form-control" type="text" required="" placeholder="Nome do escritório/empresa" name="office"> 
                         </div>
-                    </div>                    
+                    </div>    
+                    <div class="form-group ">
+                        <div class="col-xs-12">
+                            <input class="form-control" type="text" required="" placeholder="CPF/CNPJ" name="cpf_cnpj">
+                            <span class="text-danger" id="office_cpf_cnpj-error" style="display: none">* Informe um CPF/CNPJ válido</span>
+                        </div>
+                    </div>                                      
                     <div class="form-group">
                         <div class="col-md-12">
                             <div class="checkbox checkbox-primary p-t-0">
@@ -110,6 +116,7 @@
     <!-- Swal  -->
     <script src="{% static 'skeleton/plugins/bower_components/sweetalert2/dist/sweetalert2.all.min.js' %}?rev={{request.REVIEW}}"></script>    
     <script type="text/javascript" src="{% static 'js/register.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'skeleton/js/jquery.mask.min.js' %}?rev={{request.REVIEW}}"></script>
     <script type="text/javascript">
         var register;
         $(document).ready(function(){

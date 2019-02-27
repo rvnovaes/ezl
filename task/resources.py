@@ -1,24 +1,19 @@
 from core.models import Person
 from collections import OrderedDict
-from decimal import Decimal
 from django.db import transaction
-from django.db.models.signals import pre_save
-from django.utils import timezone
+from django.db.models import Q
 from financial.models import CostCenter
 from import_export import resources
-from import_export.widgets import DecimalWidget, CharWidget, IntegerWidget
+from import_export.widgets import CharWidget, IntegerWidget
 from import_export.results import RowResult, Result
 from lawsuit.models import Folder, LawSuit, Movement, TypeMovement, CourtDistrict, CourtDivision, Organ, Instance, \
-    TypeLawsuit, CourtDistrictComplement, City
+    TypeLawsuit, CourtDistrictComplement, City, State
 from task.fields import CustomFieldImportExport
 from task.instance_loaders import TaskModelInstanceLoader
 from task.messages import *
 from task.models import Task, TypeTask, TaskStatus
-from task.signals import change_status
-from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative
 from task.utils import self_or_none
-from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin
-from task.widgets import PersonAskedByWidget, UnaccentForeignKeyWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, TypeTaskByWidget
+from task.widgets import PersonAskedByWidget, TaskStatusWidget, DateTimeWidgetMixin, PersonCompanyRepresentative, TypeTaskByWidget
 import logging
 
 
@@ -86,6 +81,12 @@ COLUMN_NAME_DICT = {
         'attribute': 'movement__law_suit__person_lawyer',
         'required': False,
         'verbose_name': LawSuit._meta.get_field('person_lawyer').verbose_name,
+    },
+    'lawsuit_state': {
+        'column_name': 'processo.uf',
+        'attribute': 'movement__law_suit__state',
+        'required': True,
+        'verbose_name': CourtDistrict._meta.get_field('state').verbose_name,
     },
     'lawsuit_court_district': {
         'column_name': 'processo.comarca',
@@ -290,7 +291,14 @@ class TaskResource(resources.ModelResource):
         """
         return TaskResult
 
-    def validate_folder(self, row, row_errors):            
+    def validate_folder(self, row, row_errors):
+        """
+        Faz a validacao do grupo de colunas referente ao folder
+        :param row: dict com os dados da linha que está sendo processada no momento
+        :param row_errors: lista de erros do processo de importação. Lista cumulativa dos processos de validação de
+        folder, lawsuit e movement
+        :return: Folder instance or None
+        """
         folder_number = int(row['folder_number']) if self_or_none(row['folder_number']) else None
         folder_legacy_code = row['folder_legacy_code']
         cost_center = row['folder_cost_center']
@@ -344,8 +352,18 @@ class TaskResource(resources.ModelResource):
         return folder
 
     def validate_lawsuit(self, row, row_errors):
-        lawsuit_number = str(row['law_suit_number'])
-        lawsuit_legacy_code = row['lawsuit_legacy_code']
+        """
+        Faz a validacao do grupo de colunas referente ao lawsuit
+        :param row: dict com os dados da linha que está sendo processada no momento
+        :param row_errors: lista de erros do processo de importação. Lista cumulativa dos processos de validação de
+        folder, lawsuit e movement
+        :return: Lawsuit instance or None
+        """
+        lawsuit_number = str(row.get('law_suit_number', ''))
+        lawsuit_legacy_code = row.get('lawsuit_legacy_code', '')
+        state = row.get('lawsuit_state', '')
+        court_district = row.get('lawsuit_court_district', '')
+        city = row.get('lawsuit_city', '')
         lawsuit = None
         type_lawsuit = row['type_lawsuit']
         if not lawsuit_legacy_code and not (lawsuit_number and type_lawsuit):
@@ -353,7 +371,13 @@ class TaskResource(resources.ModelResource):
                                                            [COLUMN_NAME_DICT['law_suit_number']['column_name'],
                                                             COLUMN_NAME_DICT['type_lawsuit']['column_name'],
                                                             COLUMN_NAME_DICT['lawsuit_legacy_code']['column_name']]))
-        else:
+        if not state:
+            row_errors.append(REQUIRED_COLUMN.format(COLUMN_NAME_DICT['lawsuit_state']['column_name']))
+        if not (court_district or city):
+            row_errors.append(REQUIRED_ONE_IN_GROUP.format('local de execução',
+                                                           [COLUMN_NAME_DICT['lawsuit_court_district']['column_name'],
+                                                            COLUMN_NAME_DICT['lawsuit_city']['column_name']]))
+        if not row_errors:
             if lawsuit_legacy_code:
                 lawsuit = LawSuit.objects.filter(
                     legacy_code=lawsuit_legacy_code,
@@ -373,42 +397,84 @@ class TaskResource(resources.ModelResource):
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'instance')])
             is_current_instance = TRUE_FALSE_DICT.get(row['lawsuit_is_current_instance'], False)
             person_lawyer = row.get('lawsuit_person_lawyer', '')
+
+            # Validacao de person_lawyer
             if person_lawyer:
                 person_lawyer = Person.objects.filter(legal_name__unaccent__iexact=person_lawyer,
                                                       is_lawyer=True,
                                                       offices=self.office).first()
                 if not person_lawyer:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_person_lawyer')])
-            court_district = row.get('lawsuit_court_district', '')
+
+            # Validacao de state
+            if state:
+                state = State.objects.filter(Q(name__unaccent__iexact=state) |
+                                             Q(initials__unaccent__iexact=state)).first()
+                if not state:
+                    row_errors.append([insert_incorrect_natural_key_message(row, 'lawsuit_person_lawyer')])
+
+            # Validacao de court_district
             if court_district:
-                court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district).first()
-                if not court_district:
-                    row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_district')])
+                if not state:
+                    row_errors.append(REQUIRED_COLUMN_RELATED.format(
+                        COLUMN_NAME_DICT['lawsuit_state']['column_name'],
+                        COLUMN_NAME_DICT['lawsuit_court_district']['column_name']))
+                else:
+                    court_district = CourtDistrict.objects.filter(name__unaccent__iexact=court_district,
+                                                                  state=state).first()
+                    if not court_district:
+                        row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_district')])
+
+            # Validacao de court_district_complement
             court_district_complement = row.get('lawsuit_court_district_complement', '')
             if court_district_complement:
-                court_district_complement = CourtDistrictComplement.objects.filter(
-                    name__unaccent__iexact=court_district_complement).first()
-                if not court_district_complement:
-                    row['warnings'].append([insert_incorrect_natural_key_message(row,
-                                                                                 'lawsuit_court_district_complement')])
-            city = row.get('lawsuit_city', '')
+                if not court_district:
+                    row_errors.append(REQUIRED_COLUMN_RELATED.format(
+                        COLUMN_NAME_DICT['lawsuit_court_district']['column_name'],
+                        COLUMN_NAME_DICT['lawsuit_court_district_complement']['column_name']))
+                else:
+                    court_district_complement = CourtDistrictComplement.objects.filter(
+                        court_district=court_district,
+                        name__unaccent__iexact=court_district_complement,
+                        office=self.office).first()
+                    if not court_district_complement:
+                        row['warnings'].append([insert_incorrect_natural_key_message(
+                            row, 'lawsuit_court_district_complement')])
+
+            # Validacao de city
             if city:
-                city = City.objects.filter(name__unaccent__iexact=city).first()
-                if not city:
-                    row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_city')])
+                if not state:
+                    row_errors.append(REQUIRED_COLUMN_RELATED.format(
+                        COLUMN_NAME_DICT['lawsuit_state']['column_name'],
+                        COLUMN_NAME_DICT['lawsuit_city']['column_name']))
+                else:
+                    city = City.objects.filter(name__unaccent__iexact=city,
+                                               state=state).first()
+                    if not city:
+                        row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_city')])
+
+            # Validacao de court_division
             court_division = row.get('lawsuit_court_division', '')
             if court_division:
                 court_division = CourtDivision.objects.filter(name__unaccent__iexact=court_division,
                                                               office=self.office).first()
                 if not court_division:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_court_division')])
+
+            # Validacao de organ
             organ = row.get('lawsuit_organ', '')
             if organ:
                 organ = Organ.objects.get_queryset(office=[self.office_id]).filter(
                     legal_name__unaccent__iexact=organ).first()
                 if not organ:
                     row['warnings'].append([insert_incorrect_natural_key_message(row, 'lawsuit_organ')])
-            opposing_party = row.get('lawsuit_opposing_party', '')            
+
+            opposing_party = row.get('lawsuit_opposing_party', '')
+
+            if not (city or court_district):
+                REQUIRED_ONE_IN_GROUP.format('local de execução',
+                                             [COLUMN_NAME_DICT['lawsuit_court_district']['column_name'],
+                                              COLUMN_NAME_DICT['lawsuit_city']['column_name']])
             if not row_errors:
                 if not lawsuit:
                     lawsuit = LawSuit.objects.create(type_lawsuit=TypeLawsuit(type_lawsuit).name,
@@ -451,8 +517,15 @@ class TaskResource(resources.ModelResource):
         return lawsuit
 
     def validate_movement(self, row, row_errors):
-        type_movement_name = row['type_movement']
-        movement_legacy_code = row['movement_legacy_code']
+        """
+        Faz a validacao do grupo de colunas referente ao movement
+        :param row: dict com os dados da linha que está sendo processada no momento
+        :param row_errors: lista de erros do processo de importação. Lista cumulativa dos processos de validação de
+        folder, lawsuit e movement
+        :return: Movement instance or None
+        """
+        type_movement_name = row.get('type_movement', '')
+        movement_legacy_code = row.get('movement_legacy_code', '')
         if type(movement_legacy_code) == float and movement_legacy_code.is_integer():
             movement_legacy_code = str(int(movement_legacy_code))
         if not (type_movement_name or movement_legacy_code):
@@ -464,7 +537,8 @@ class TaskResource(resources.ModelResource):
                 defaults={'create_user': self.create_user,
                           'system_prefix': row['system_prefix']})
         else:
-            type_movement = TypeMovement.objects.filter(name__unaccent__iexact=type_movement_name).first()
+            type_movement = TypeMovement.objects.filter(name__unaccent__iexact=type_movement_name,
+                                                        office_id=self.office_id).first()
             movement = None
             if movement_legacy_code:
                 movement = Movement.objects.filter(legacy_code=movement_legacy_code,
@@ -479,8 +553,7 @@ class TaskResource(resources.ModelResource):
                     office=self.office,
                     type_movement=type_movement,
                     legacy_code=movement_legacy_code,
-                    defaults={'legacy_code': movement_legacy_code,
-                              'system_prefix': row['system_prefix'],
+                    defaults={'system_prefix': row['system_prefix'],
                               'create_user': self.create_user})
             elif not movement and not type_movement:
                 row_errors.append(insert_incorrect_natural_key_message(row, 'type_movement'))

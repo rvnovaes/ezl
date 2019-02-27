@@ -175,31 +175,37 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
         office_network_q = Q(office_network=self.office_network) \
             if getattr(self, 'office_network', None) else Q(office_network__isnull=True)
         state_q = Q(state=self.state) if self.state else Q(state__isnull=True)
+        city_q = Q(city=self.city) if self.city else Q(city__isnull=True)
         court_district_q = Q(court_district=self.court_district) if self.court_district \
             else Q(court_district__isnull=True)
         court_district_complement_q = Q(court_district_complement=self.court_district_complement) if \
             self.court_district_complement else Q(court_district_complement__isnull=True)
         type_task_q = Q(type_task=self.type_task) if self.type_task else Q(type_task__isnull=True)
         client_q = Q(client=self.client) if self.client else Q(client__isnull=True)
+        policy_price_q = Q(policy_price=self.policy_price) if self.policy_price else Q(policy_price__isnull=True)
         try:
             if ServicePriceTable.objects.filter(~Q(pk=self.pk),
                                                 office_q,
                                                 office_correspondent_q,
                                                 office_network_q,
                                                 state_q,
+                                                city_q,
                                                 court_district_q,
                                                 court_district_complement_q,
                                                 type_task_q,
-                                                client_q):
+                                                client_q,
+                                                policy_price_q):
                 raise ValidationError({
                     NON_FIELD_ERRORS: [
                         "Os campos office, office_correspondent, office_network, type_task, client, court_district, "
-                        "state e court_district_complement devem criar um set único."
+                        "state, city, policy_price e court_district_complement devem criar um set único."
                     ],
                     'office_correspondent': ['Favor verificar o escritório correspondente'],
                     'office_network': ['Favor verificar a rede de escritórios'],
+                    'policy_price': ['Favor verificar tipo de preço'],
                     'type_task': ['Favor verificar o tipo de serviço'],
                     'state': ['Favor verificar o estado'],
+                    'city': ['Favor verificar a cidade'],
                     'court_district': ['Favor verificar a comarca'],
                     'court_district_complement': ['Favor verificar o complemento de comarcar'],
                     'client': ['Favor verificar o cliente']

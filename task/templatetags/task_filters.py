@@ -19,28 +19,27 @@ def valid_status(status):
 def show_company_representative_buttons(status):
     if status:
         return str(TaskStatus(status)) in [str(TaskStatus.RETURN), str(TaskStatus.OPEN), str(TaskStatus.ACCEPTED),
-                                      str(TaskStatus.DONE)]
+                                           str(TaskStatus.DONE)]
     return False
 
 
 @register.simple_tag
 def get_refused_action(user, task, office_session_perms):
     refused_action = None
+    default_action = 'REQUESTED' if task.office.use_service else 'REFUSED'
     if task.status.name == 'OPEN' or task.status.name == 'ACCEPTED':
         if task.person_executed_by == user.person:
             if task.status.name == 'OPEN':
-                refused_action = 'REFUSED'
-        elif task.parent:
-            refused_action = 'REFUSED'
-        elif not task.get_child:
-            refused_action = 'REFUSED'
+                refused_action = default_action
         elif task.get_child:
-            refused_action = 'REQUESTED' if valid_status(task.get_child.task_status) else 'INVALID_CHILD_STATUS'
-    if 'can_distribute_tasks' in office_session_perms and task.status.name == 'ERROR':
+            refused_action = default_action if valid_status(task.get_child.task_status) else 'INVALID_CHILD_STATUS'
+        elif 'can_distribute_tasks' in office_session_perms:
+            refused_action = default_action
+    elif task.status.name == 'ERROR' and 'can_distribute_tasks' in office_session_perms:
         if task.office.use_service:
             refused_action = 'REFUSED_SERVICE'
         else:
-            refused_action = 'REFUSED'
+            refused_action = default_action
     return refused_action
 
 

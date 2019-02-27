@@ -52,7 +52,8 @@ from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
 from financial.utils import recalculate_values
 from core.utils import get_office_session, get_domain
-from task.utils import get_task_attachment, clone_task_ecms, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, has_task_parent
+from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
+    has_task_parent, set_instance_values
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -335,7 +336,10 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
                 servicepricetable = ServicePriceTable.objects.get(
                     pk=request.POST.get('servicepricetable_id'))
                 if servicepricetable:
-                    delegate_child_task(form.instance, servicepricetable.office_correspondent)
+                    form.instance.amount_to_pay, form.instance.amount_to_receive = set_instance_values(
+                        form.instance, servicepricetable)
+                    delegate_child_task(form.instance,
+                                        servicepricetable.office_correspondent, servicepricetable.type_task)
                     form.instance.person_executed_by = None
                 send_notes_execution_date.send(
                     sender=self.__class__,
@@ -946,7 +950,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             instance=form.instance,
             execution_date=execution_date,
             survey_result=survey_result,
-            **{'external_task': True})
+            **{'external_task': False})
         form.instance.__server = get_domain(self.request)
         if form.instance.task_status == TaskStatus.ACCEPTED_SERVICE:
             form.instance.person_distributed_by = self.request.user.person
@@ -968,22 +972,14 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             get_task_attachment(self, form)
             if servicepricetable:
                 form.instance.price_category = servicepricetable.policy_price.category
-                form.instance.amount_to_receive = Decimal(servicepricetable.value_to_receive.amount)
-                form.instance.amount_to_pay = Decimal(servicepricetable.value_to_pay.amount)
                 form.instance.rate_type_receive = servicepricetable.rate_type_receive
                 form.instance.rate_type_pay = servicepricetable.rate_type_pay
-                if form.instance.amount != servicepricetable.value:
-                    form.instance.amount_to_pay, form.instance.amount_to_receive = recalculate_values(
-                        servicepricetable.value,
-                        form.instance.amount_to_pay,
-                        form.instance.amount_to_receive,
-                        form.instance.amount,
-                        form.instance.rate_type_pay,
-                        form.instance.rate_type_receive
-                    )
+                form.instance.amount_to_pay, form.instance.amount_to_receive = set_instance_values(form.instance,
+                                                                                                   servicepricetable)
 
-                delegate_child_task(
-                    form.instance, servicepricetable.office_correspondent)
+                delegate_child_task(form.instance,
+                                    servicepricetable.office_correspondent,
+                                    servicepricetable.type_task)
                 form.instance.person_executed_by = None
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
@@ -1000,14 +996,18 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(TaskDetailView, self).get_context_data(**kwargs)
+        # pega o office da sessao
         office_session = get_office_session(self.request)
-        custom_settings = CustomSettings.objects.filter(
-            office=office_session).first()
-        context['custom_settings'] = custom_settings
+
+        # pega as configuracoes personalizadas do escritorio
+        context['custom_settings'] = office_session.customsettings
+
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
             TaskHistory.objects.filter(
                 task_id=self.object.id).order_by('-create_date')
+
+        # monta lista de surveys a serem respondidos pela OS
         pending_surveys = self.object.have_pending_surveys
         pending_list = []
         if pending_surveys.get('survey_company_representative'):
@@ -1020,13 +1020,13 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         last_parent = get_last_parent(self.object) 
         context['survey_data'] = (last_parent.type_task.survey.data
                                   if last_parent.type_task.survey else None)
-        office_session = get_office_session(self.request)
+
+        # Pega tabela de correspondentes
         get_correspondents_table = CorrespondentsTable(self.object,
                                                        office_session)
         context['correspondents_table'] = get_correspondents_table.get_correspondents_table()
-        type_task_field = get_correspondents_table.get_type_task_field()
-        if type_task_field:
-            context['form'].fields['type_task_field'] = type_task_field
+
+        # Verifica se todos os Surveys foram preenchidos
         checker = ObjectPermissionChecker(self.request.user)
         if checker.has_perm('can_see_tasks_company_representative', office_session):
             if not TaskSurveyAnswer.objects.filter(tasks=self.object, create_user=self.request.user):
@@ -1043,8 +1043,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
     def show_company_representative_in_tab(self, checker, office_session):
         """
-            Caso a pessoa logada seja o correspondente da ordem de servico
-            Nao mostra os dados do preposto na aba Participantes
+        Caso a pessoa logada seja o correspondente da ordem de servico
+        Nao mostra os dados do preposto na aba Participantes
         """
         show_in_tab = True         
         is_person_executed_by = checker.has_perm('view_delegated_tasks', office_session)
@@ -1055,8 +1055,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
     def show_person_executed_by_in_tab(self, checker, office_session):
         """
-            Caso a pessoa logada seja o preposto da ordem de servico
-            Nao mostra os dados do correspondente na aba Participantes
+        Caso a pessoa logada seja o preposto da ordem de servico
+        Nao mostra os dados do correspondente na aba Participantes
         """        
         show_in_tab = True 
         is_company_representative = checker.has_perm('can_see_tasks_company_representative', office_session)        
@@ -1665,46 +1665,6 @@ def ajax_get_task_data_table(request):
         "recordsTotal": records_total,
         "recordsFiltered": records_filtered,
         "data": xdata
-    }
-    return JsonResponse(data)
-
-
-@login_required
-def ajax_get_correspondents_table(request):
-    type_task_id = request.GET.get('type_task', 0)
-    task_id = request.GET.get('task', 0)
-    correspondents_table_list = []
-    type_task_name = None
-    if type_task_id and task_id:
-        type_task = TypeTask.objects.filter(pk=type_task_id).first()
-        task = Task.objects.filter(pk=task_id).first()
-        office = get_office_session(request)
-        get_correspondents_table = CorrespondentsTable(
-            task, office, type_task=type_task)
-        type_task = get_correspondents_table.update_type_task(type_task)
-        type_task_name = type_task.name
-        type_task_id = type_task.id
-        correspondents_table = get_correspondents_table.get_correspondents_table(
-        )
-        correspondents_table_list = list(map(lambda x: {
-            'pk': x.pk,
-            'office': x.office.legal_name,
-            'office_correspondent': x.office_correspondent.legal_name,
-            'court_district': x.court_district.name if x.court_district else '—',
-            'state': x.state.name if x.state else '—',
-            'client': x.client.legal_name if x.client else '—',
-            'value': x.value_to_receive.amount,
-            'formated_value': Money(x.value, 'BRL').__str__(),
-            'office_rating': x.office_rating if x.office_rating else '0.00',
-            'office_return_rating': x.office_return_rating if x.office_return_rating else '0.00',
-            'office_public': x.office_correspondent.public_office,
-            'price_category': x.policy_price.category
-        }, correspondents_table.data.data))
-    data = {
-        "correspondents_table": correspondents_table_list,
-        "type_task": type_task_name,
-        "type_task_id": type_task_id,
-        "total": correspondents_table_list.__len__()
     }
     return JsonResponse(data)
 
