@@ -14,16 +14,18 @@
         $(document).ready(function() {
 
             async function showOptions (){
+                let inputOptions = {
+                      'CA': 'Alterar Solicitante',
+                      'A': 'Atribuir OS',
+                      'D': 'Delegar OS',
+                      'R': 'Recusar OS'
+                };
                 const {value: changeOption} = await swal({
                   title: 'Selecione o tipo de alteração',
                   input: 'select',
                   width: '30%', 
                   inputClass: 'form-control',
-                  inputOptions: {
-                    'A': 'Atribuir OS',
-                    'D': 'Delegar OS',
-                    'R': 'Recusar OS'
-                  },
+                  inputOptions: inputOptions,
                   inputPlaceholder: 'Selecione a ação desejada',
                   showCancelButton: true,
                   inputValidator: (value) => {
@@ -36,18 +38,12 @@
 
                     })
                   }
-                })
+                });
 
-                if (changeOption) {
-                  if (changeOption==='A') {
-                    window.location.href = "{% url 'batch_change_tasks' 'A' %}"
-                  } else if (changeOption==='D') {
-                    window.location.href = "{% url 'batch_change_tasks' 'D' %}"
-                  } else {
-                    window.location.href = "{% url 'batch_change_tasks' 'R' %}"
-                  }
+                if (changeOption && changeOption in inputOptions) {
+                    window.location.href = `{% url 'batch_change_tasks' %}/${changeOption}`;
                 }
-            };
+            }
 
             $('#menu-batch-change-tasks').on('click', function(){
                 showOptions();

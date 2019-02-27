@@ -20,6 +20,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.formats import date_format
 from django.views.generic import CreateView, UpdateView, TemplateView, View
+from django.views.static import serve as static_serve_view
 from django.core.exceptions import ValidationError
 from django_tables2 import SingleTableView, RequestConfig
 from djmoney.money import Money
@@ -34,7 +35,7 @@ from lawsuit.models import Movement, LawSuit, Folder, TypeMovement
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter, \
     TaskCheckinReportFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
-    ImportTaskListForm, TaskBulkCreateForm
+    ImportTaskListForm, TaskBulkCreateForm, TaskChangeAskedBy
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain, TaskSurveyAnswer
 from .report import TaskToPayXlsx, ExportFilterTask
@@ -49,7 +50,7 @@ from financial.models import ServicePriceTable
 from financial.utils import recalculate_values
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
-    has_task_parent, set_instance_values, clone_task_ecms
+    has_task_parent, set_instance_values, get_status_to_filter
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -304,6 +305,20 @@ class BatchTaskToAssignView(AuditFormMixin, UpdateView):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
 
+class BatchTaskChangeAskedByView(AuditFormMixin, UpdateView):
+    def post(self, request, *args, **kwargs):
+        try:
+            task_id = kwargs.get('pk')
+            task = Task.objects.get(pk=task_id)
+            form = TaskChangeAskedBy(request.POST, instance=task)
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'ok'})
+            return JsonResponse({'status': 'error', 'errors': form})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+
 class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         try:
@@ -535,7 +550,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
                     'client_name': office.name,
                     'tasks': tasks,
                     "client_total": office_total,
-                    "client_total": office_total_to_pay,
+                    "client_total_to_pay": office_total_to_pay,
                     "office_total": 0,
                 })
             clients_map_total[client.name] = {'total': client_total, 'total_to_pay': client_total_to_pay}
@@ -2069,13 +2084,13 @@ class BatchChangeTasksView(DashboardSearchView):
     def get_queryset(self):
         task_list, task_filter = self.query_builder()
         self.filter = task_filter
-        if self.option in ['A', 'D']:
-            status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED]
-            return task_list.filter(task_status__in=status_to_filter)
-        status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN,
-                            TaskStatus.DONE, TaskStatus.ERROR]
-        office_session = get_office_session(self.request)
-        return task_list.filter(office=office_session, task_status__in=status_to_filter)
+        status_to_filter = get_status_to_filter(self.option)
+        filter_args = {'task_status__in': status_to_filter}
+        if self.option not in ['A', 'D']:
+            office_session = get_office_session(self.request)
+            filter_args['office'] = office_session
+
+        return task_list.filter(**filter_args)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -2261,6 +2276,7 @@ class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
 
+
 class TypeTaskMainAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         if not self.request.user.is_authenticated():
@@ -2269,7 +2285,6 @@ class TypeTaskMainAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
-
 
 
 class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
