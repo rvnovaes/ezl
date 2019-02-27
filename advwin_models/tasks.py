@@ -11,7 +11,7 @@ from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCo
     JuridGedMain, JuridCorrespondenteHist, JuridGEDLig
 from connections.db_connection import get_advwin_engine
 from etl.utils import ecm_path_ezl2advwin, get_ecm_file_name
-from task.models import Task, TaskStatus, TaskHistory, Ecm
+from task.models import Task, TaskStatus, Ecm, HistoricalTask
 from sqlalchemy import and_
 from django.utils import timezone
 from guardian.shortcuts import get_users_with_perms
@@ -261,18 +261,18 @@ def insert_advwin_history(task_history, values, execute=True):
     stmt = JuridCorrespondenteHist.__table__.insert().values(**values)
 
     if execute:
-        LOGGER.debug('Exportando Histórico de OS %d-%d ', task_history.task.id, task_history.id)
+        LOGGER.debug('Exportando Histórico de OS %d-%d ', task_history.history_object.id, task_history.id)
         try:
             result = get_advwin_engine().execute(stmt)
             LOGGER.info('Histórico de OS %d-%d: exportado com sucesso.',
-                        task_history.task.id,
+                        task_history.history_object.id,
                         task_history.id)
             total_afected = result.rowcount
             result.close()
             return '{} Registros afetados'.format(total_afected)
         except Exception as exc:
             LOGGER.warning('Não foi possível exportar Histórico de OS: %d-%d\n%s',
-                           task_history.task.id,
+                           task_history.history_object.id,
                            task_history.id,
                            exc,
                            exc_info=(type(exc), exc, exc.__traceback__))
@@ -284,13 +284,12 @@ def insert_advwin_history(task_history, values, execute=True):
 @shared_task(bind=True, max_retries=10)
 def export_task_history(self, task_history_id, task_history=None, execute=True, **kwargs):
     if task_history is None:
-        task_history = TaskHistory.objects.get(pk=task_history_id)
+        task_history = HistoricalTask.objects.get(pk=task_history_id)
 
     username = ''
-    if task_history.create_user:
-        username = task_history.create_user.username[:20]
-
-    task = task_history.task
+    if task_history.history_user:
+        username = task_history.history_user.username[:20]
+    task = Task.objects.get(pk=task_history.history_object.pk)
     person_asked_by_legacy_code = None
     if task.person_asked_by and task.person_asked_by.id != 1:
         person_asked_by_legacy_code = task.person_asked_by.legacy_code
@@ -299,7 +298,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
         person_distributed_by_legacy_code = task.person_distributed_by.legacy_code
     person_executed_by_legacy_code = None
     person_executed_by_legal_name = None
-    justification = task_history.notes[:1000]
+    justification = task_history.history_notes[:1000]
     values = {}
     if task.get_child:
         person_executed_by_legacy_code = None
@@ -307,103 +306,103 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
     elif task.person_executed_by:
         person_executed_by_legacy_code = task.person_executed_by.legacy_code
         person_executed_by_legal_name = task.person_executed_by.legal_name
-    if task_history.status == TaskStatus.ACCEPTED.value:
+    if task_history.task_status == TaskStatus.ACCEPTED.value:
         values = {
             'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 50,
-            'data_operacao': timezone.localtime(task_history.create_date),
+            'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
             'descricao': 'Aceita por correspondente: {}'.format(
                 person_executed_by_legal_name),
         }
-    elif task_history.status == TaskStatus.DONE.value:
+    elif task_history.task_status == TaskStatus.DONE.value:
         values = {
             'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 70,
-            'data_operacao': timezone.localtime(task_history.create_date),
+            'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
             'descricao': 'Cumprida por correspondente: {}'.format(
                 person_executed_by_legal_name),
         }
-    elif task_history.status == TaskStatus.REFUSED.value:
+    elif task_history.task_status == TaskStatus.REFUSED.value:
         values = {
             'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 20,
-            'data_operacao': timezone.localtime(task_history.create_date),
+            'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
             'descricao': 'Recusada por correspondente: {}'.format(
                 person_executed_by_legal_name),
         }
-    elif task_history.status == TaskStatus.FINISHED.value:
+    elif task_history.task_status == TaskStatus.FINISHED.value:
         values = {
             'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 100,
-            'data_operacao': timezone.localtime(task_history.create_date),
+            'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
             'descricao': 'Diligência devidamente cumprida por: {}'.format(
                 person_executed_by_legal_name),
         }
-    elif task_history.status == TaskStatus.RETURN.value:
+    elif task_history.task_status == TaskStatus.RETURN.value:
         values = {
             'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 80,
-            'data_operacao': timezone.localtime(task_history.create_date),
+            'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
             'descricao': 'Diligência delegada ao correspondente para complementação:'
         }
-    elif task_history.status == TaskStatus.BLOCKEDPAYMENT.value:
+    elif task_history.task_status == TaskStatus.BLOCKEDPAYMENT.value:
         values = {
             'codigo_adv_correspondente': person_executed_by_legacy_code,
             'ident_agenda': task.legacy_code,
             'status': 0,
             'SubStatus': 90,
-            'data_operacao': timezone.localtime(task_history.create_date),
+            'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
             'descricao': 'Diligência não cumprida - pagamento glosado'
         }
-    elif task_history.status == TaskStatus.ACCEPTED_SERVICE.value:
+    elif task_history.task_status == TaskStatus.ACCEPTED_SERVICE.value:
         values = {
             'ident_agenda': task.legacy_code,
             'codigo_adv_solicitante': person_asked_by_legacy_code,
             'codigo_adv_origem': person_distributed_by_legacy_code,
             'SubStatus': 11,
             'status': 0,
-            'data_operacao': timezone.localtime(task_history.create_date),
+            'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
             'descricao': 'Aceita por Back Office: {}'.format(
                 task.person_distributed_by.legal_name),
         }
-    elif task_history.status == TaskStatus.REFUSED_SERVICE.value:
+    elif task_history.task_status == TaskStatus.REFUSED_SERVICE.value:
         values = {
             'ident_agenda': task.legacy_code,
             'codigo_adv_solicitante': person_asked_by_legacy_code,
             'codigo_adv_origem': person_distributed_by_legacy_code,
             'SubStatus': 20,
             'status': 1,
-            'data_operacao': timezone.localtime(task_history.create_date),
+            'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
             'descricao': 'Recusada por Back Office: {}'.format(
                 task.person_distributed_by.legal_name),
         }
-    elif task_history.status == TaskStatus.OPEN.value:
+    elif task_history.task_status == TaskStatus.OPEN.value:
         values = {
             'ident_agenda': task.legacy_code,
             'codigo_adv_solicitante': person_asked_by_legacy_code,
@@ -411,7 +410,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'codigo_adv_correspondente': person_executed_by_legacy_code,
             'SubStatus': 30,
             'status': 0,
-            'data_operacao': timezone.localtime(task_history.create_date),
+            'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
             'descricao': 'Solicitada ao correspondente ('+person_executed_by_legal_name +
