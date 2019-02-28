@@ -864,5 +864,3 @@ class BaseHistoricalModel(models.Model):
 
     class Meta:
         abstract = True
-
-
