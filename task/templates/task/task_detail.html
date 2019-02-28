@@ -55,16 +55,8 @@
                         {% if form.instance.status.name == 'ACCEPTED_SERVICE' or  form.instance.status.name == 'REQUESTED' and not form.instance.office.use_service%}
                             {{ form.servicepricetable_id }}
                             <div class="form-group" style="margin: auto">
-                                <span id="type_task_name">
-                                {% if form.type_task_field %}
-                                    <label>{{ form.type_task_field.label }}</label>
-                                    {{ form.type_task_field }}
-                                    <div class="divider">&nbsp</div>
-                                {% else %}
-                                    <label>Tipo de Serviço: </label>
-                                    {{ form.instance.type_task }}
-                                {% endif %}
-                                </span>
+                                <label>Tipo de serviço: </label>
+                                {{ object.type_task }}
                             </div>
                             <div id="servicepricetable" class="table-responsive" style="margin: auto">
                                 {% render_table correspondents_table %}
@@ -167,7 +159,7 @@
     $(document).ready(function(){
         var checkout = new Checkout('{{csrf_token}}', '{{object.charge.charge_id}}');
         let billing = new Billing(checkout);
-        taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, `{{survey_company_representative|safe}}`, '{{csrf_token}}', billing, '{{object.charge.charge_id}}');
+        taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, `{{survey_company_representative|safe}}`, '{{csrf_token}}', billing, '{{object.charge.charge_id}}', '{{object.type_task}}');
         get_internal_ecms({{form.instance.pk}});
     })
     </script>
@@ -230,16 +222,6 @@
             if (! window.type_task_id){
                 window.type_task_id = {{ form.instance.type_task.id }}
             }
-            var $id_type_task_field = $("#id_type_task_field");
-            if ($id_type_task_field.length > 0 && $id_type_task_field.val()) {
-                if ($id_type_task_field[0].options.length == 1){
-                    $("#type_task").html($id_type_task_field.find(":selected").text())
-                    $("#type_task_name").html("<label>Tipo de Serviço: </label> " + $id_type_task_field.find(":selected").text())
-                }
-                window.type_task_id = $id_type_task_field.val();
-                taskDetail.ajax_get_correspondents(window.type_task_id);
-            }
-            taskDetail.onChangeTypeTaskField();
             (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
         });
         $('#confirmAction').on('shown.bs.modal', function (event) {
