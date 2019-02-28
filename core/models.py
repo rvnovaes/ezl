@@ -850,7 +850,8 @@ class AreaOfExpertise(models.Model):
     offices = models.ManyToManyField(Office, blank=True)
 
     class Meta:
-        verbose_name='Áreas de atuação'
+        verbose_name = 'Área de atuação'
+        verbose_name_plural = 'Áreas de atuação'
         ordering = ['area']
 
     def __str__(self):
