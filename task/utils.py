@@ -227,6 +227,6 @@ def get_status_to_filter(option):
         'A': [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED],
         'D': [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED],
         'CA': [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE, TaskStatus.OPEN, TaskStatus.ACCEPTED,
-               TaskStatus.DONE, TaskStatus.RETURN, TaskStatus.REFUSED_SERVICE, TaskStatus.INVALID, TaskStatus.ERROR]
+               TaskStatus.DONE, TaskStatus.RETURN, TaskStatus.REFUSED_SERVICE, TaskStatus.ERROR]
     }
-    return status_dict.get(option, default_status)
+    return sorted(list(status.value for status in status_dict.get(option.upper(), default_status)))

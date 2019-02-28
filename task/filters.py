@@ -183,22 +183,24 @@ class TaskFilter(FilterSet):
         if custom_settings and custom_settings.task_status_show:
             task_status_choices = list(
                 custom_settings.task_status_show.values_list(
-                    'status_to_show', flat=True))
-            self.filters['task_status'].extra['choices'] = list(
-                map(lambda x: (TaskStatus(x).name, x), task_status_choices))
+                    'status_to_show', flat=True).order_by('status_to_show'))
+            self.filters['task_status'].extra['choices'] = self.set_task_status_choices(task_status_choices)
 
     class Meta:
         model = DashboardViewModel
         fields = []
         order_by = ['final_deadline_date']
 
+    @staticmethod
+    def set_task_status_choices(status_choices):
+        return list(map(lambda x: (TaskStatus(x).name, x), status_choices))
+
 
 class BatchChangTaskFilter(TaskFilter):
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
         super().__init__(data, queryset, prefix, strict, request)
         status_to_filter = get_status_to_filter(request.option)
-        self.filters['task_status'].extra['choices'] = list(
-            map(lambda x: (TaskStatus(x).name, x), status_to_filter))
+        self.filters['task_status'].extra['choices'] = self.set_task_status_choices(status_to_filter)
 
 
 class TaskReportFilterBase(FilterSet):
