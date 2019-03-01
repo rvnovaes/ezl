@@ -1,6 +1,7 @@
 class AreasOfExpertise{
     constructor(csrfToken){
-        this.csrfToken = csrfToken
+        this.csrfToken = csrfToken;
+		this._elDivAreasOfExpertise = $('#office-areas-of-expertise');
         AreasOfExpertise.onClickTdArea();
         this.onClickUpdateButton();
     }
@@ -30,6 +31,20 @@ class AreasOfExpertise{
         });
     }
 
+    static getHTMLAreasList(areas){
+    	let i;
+    	let htmlList = '';
+		for (i = 0; i < areas.length; i++) {
+		  htmlList += `<div class="col col-md-12" style="margin: 3px"><li>${areas[i]}</li></div>`;
+		}
+		return htmlList;
+	}
+
+	updateDivAreasOfExpertise(htmlList){
+    	this._elDivAreasOfExpertise.html('');
+    	this._elDivAreasOfExpertise.html(htmlList);
+	}
+
     onClickUpdateButton(){
         $('#btn-add-areas').on('click', () => {
             let data = this.query;
@@ -43,6 +58,8 @@ class AreasOfExpertise{
 						url: '/office_profile_areas_of_expertise/',
 						data: data,
 						success: (response)=> {
+                        	let areasHTMLList = AreasOfExpertise.getHTMLAreasList(response.areas);
+                        	this.updateDivAreasOfExpertise(areasHTMLList);
 							swal.close();
 						},
 						error: (request, status, error)=> {

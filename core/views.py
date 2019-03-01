@@ -2526,12 +2526,15 @@ class OfficeAreasOfExpertiseUpdateView(View):
     def post(self, request, *args, **kwargs):
         office = get_office_session(request)
         areas_of_expoertise = AreaOfExpertise.objects.all()
+        list_areas = []
         for area in areas_of_expoertise:
             if int(request.POST.get('area_{}'.format(area.id), 0)) == 0:
                 area.offices.remove(office)
             else:
+                list_areas.append(area.area)
                 area.offices.add(office)
-        return JsonResponse({'status': 'ok'}, status=200)
+        return JsonResponse({'status': 'ok',
+                             'areas': list_areas}, status=200)
 
 
 class OfficeProfileUpdateView(UpdateView):
