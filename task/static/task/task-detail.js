@@ -278,7 +278,6 @@ class TaskDetail {
 			            html: '<h4>Aguarde...</h4>',
                         onOpen: () => {
                             swal.showLoading();
-                            debugger;
                             $('input[name=amount]').removeAttr('disabled');
                             $('#task_detail').unbind('submit').submit();            
                         }
