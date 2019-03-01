@@ -6,12 +6,12 @@ class Office {
 		this._elLegalName = document.querySelector('#el-office-legal-name');		
 		this._elCpfCnpj = document.querySelector('#el-office-cpf-cnpj');
 		this._elBtnSaveOffice = $('#btn-save-office');
-		this._elImgLogo = $("#logo");
+		this._elImgLogo = $('#logo');
 		this.data;
 		this.onClickBtnEditOffice();		
 		this.setOffice();
 		this.onSubmitForm();
-	};	
+	}
 
 	get form() {
 		return $("#form-office");
@@ -44,7 +44,17 @@ class Office {
 
 	set cpfCnpj(value) {
 		this.data.cpf_cnpj = this._elCpfCnpj.textContent = value;
-	}	
+	}
+
+	static formatCpfCnpj(cpfCnpj){
+		cpfCnpj.replace(/[^0-9]+/g, '');
+		if (cpfCnpj.length <= 11) {
+			return `${cpfCnpj.substr(0,3)}.${cpfCnpj.substr(3,3)}.${cpfCnpj.substr(6,3)}-${cpfCnpj.substr(9)}`;
+		} else {
+			return `${cpfCnpj.substr(0,2)}.${cpfCnpj.substr(2,3)}.${cpfCnpj.substr(5,3)}/`+
+				`${cpfCnpj.substr(8,4)}-${cpfCnpj.substr(12)}`;
+		}
+	}
 
 
 	formatAttr(stringVariable) {
@@ -54,6 +64,9 @@ class Office {
 	}
 
 	updateInstance(name, value) {
+		if (this.data.cpf_cnpj !== ''){
+			this.data.cpf_cnpj = Office.formatCpfCnpj(this.data.cpf_cnpj);
+		}
 		Object.keys(this.data).forEach((key)=>{
 		    if (key !== 'logo') {
                 this.updateAttr(key, this.data[key]);

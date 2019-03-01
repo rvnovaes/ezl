@@ -113,7 +113,7 @@
                             <div class="col-md-12">
 								<div class="p-20 row">
 	                                <div class="col-sm-6">
-	                                    <h3 class="m-t-0">Informe um ou mais endereços</h3>
+	                                    <h3 class="m-t-0">Endereços do escritório</h3>
 	                                </div>
                                 </div>                                
                                 <div class="row">
@@ -154,7 +154,7 @@
                                                         {% endblock table.tfoot %}
                                                     </table>
                                                 </div>
-                                                {% if 'group_admin' in office_session_perms or request.user.is_superuser %}
+                                                {% if 'group_admin' in office_session_perms and is_session_office %}
                                                     <div class="text-right btn-table-actions">
                                                         <div class="text-right" style="">
                                                             <div class="fixed-btn">
@@ -177,9 +177,9 @@
                             <div class="col-md-12">
 								<div class="p-20 row">
 	                                <div class="col-sm-6">
-	                                    <h3 class="m-t-0">Informe as formas de contato</h3>
+	                                    <h3 class="m-t-0">Formas de contato do escritorio</h3>
 	                                </div>
-                                </div>                                
+                                </div>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="contact-mechanism">
@@ -231,7 +231,7 @@
 						                            {% endblock table_contact_mechanism.tfoot %}
 						                        </table>
 						                    </div>
-                                            {% if 'group_admin' in office_session_perms or request.user.is_superuser %}
+                                            {% if 'group_admin' in office_session_perms and is_session_office %}
                                                 <div class="text-right btn-table-actions">
                                                     <div class="text-right" style="">
                                                         <div class="fixed-btn">
@@ -249,10 +249,9 @@
                             </div>
                             <div class="clearfix"></div>
                         </div>
-                        {% if 'group_admin' in office_session_perms or request.user.is_superuser %}
+                        {% if 'group_admin' in office_session_perms and is_session_office %}
                             <div role="tabpanel" class="tab-pane fade" id="tab-invite-users">
                                 <div class="col-md-12">
-                                    <h3>Relacionamentos com usuários</h3>
                                     <div class="invite-user">
                                         <div class="white-box">
                                             <ul class="nav nav-tabs">

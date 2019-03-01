@@ -41,7 +41,7 @@ class ServicePriceTableTable(tables.Table):
 
 
 class ServicePriceTableTaskTable(tables.Table):
-    office_correspondent = tables.LinkColumn('office_update', args=[A('office_correspondent_id')], orderable=False,
+    office_correspondent = tables.LinkColumn('office_profile', args=[A('office_correspondent_id')], orderable=False,
                                              verbose_name='Escritório correspondente',
                                              attrs={
                                                  'a': {'target': '_blank'}
