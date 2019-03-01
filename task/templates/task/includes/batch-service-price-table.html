@@ -115,7 +115,14 @@
     <script type="text/javascript">  
         var correspondentTable;  
         var chosenPrice = {};
-        $(document).ready(function(){          
+        $(document).ready(function(){
+            function getOfficeCorrespondentLink(officeCorrespondent){
+                if (officeCorrespondent.id !== '' && officeCorrespondent.legal_name !== ''){
+                    return `<a href="/office_profile/${officeCorrespondent.id}/" target="_blank">`+
+                        `${officeCorrespondent.legal_name}</a>`
+                }
+                return ''
+            }
             $('#modal-service-price-table').on('show.bs.modal', function(e) {
                 var taskId = $(this).attr('task-id');
                 var typeTask = $(this).attr('type-task');
@@ -130,7 +137,13 @@
                             dom: 'frti',
                             language: {"url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"},
                             columnDefs: [
-                                {'targets': [11], 'visible': false, 'searchable': false, 'orderable': false  }],
+                                {'targets': [11], 'visible': false, 'searchable': false, 'orderable': false  },
+                                {
+                                    'targets': [0],
+                                    'createdCell':  function (td, cellData, rowData, row, col) {
+                                       $(td).attr('class', 'office_correspondent');
+                                    }
+                                }],
                             "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
                                 if(aData[1] === '-' || aData[1] === '—'){
                                     $("td:eq(1)", nRow).text(typeTask);
@@ -140,7 +153,7 @@
                         });
                 }
                 servicePriceTable.prices.forEach(function(price) {
-                    let office_correspondent_name = price.office_correspondent.legal_name;
+                    let office_correspondent_name = getOfficeCorrespondentLink(price.office_correspondent);
                     let type_task = price.type_task.name;
                     let office_networ_name = price.office_network.name;
                     let state = price.state;
@@ -169,8 +182,13 @@
                             priceCategory
                         ]
                     ).node();
+                    debugger
                     row.id = servicePriceTableId;
                     correspondentTable.draw(false);
+                });
+
+                $('.office_correspondent').click(function (e) {
+                    e.stopPropagation();
                 });
                 $('#table-service-price tbody tr').on('click', function() {
                     $(this).addClass("ezl-bg-open");

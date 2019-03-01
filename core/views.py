@@ -2452,11 +2452,15 @@ class OfficeProfileDataView(View):
         return JsonResponse(OfficeSerializer(office).data)
 
     def post(self, request, *args, **kwargs):
+        office_session = get_office_session(request)
+        office_id = kwargs.get('pk', None)
+        if office_id and office_session != get_office_by_id(office_id):
+            return JsonResponse({'error': 'Só é possível alterar o escritório da sessão'})
         office_serializer = OfficeSerializer(data=request.POST, instance=get_office_session(request))
         if office_serializer.is_valid():
             office_serializer.save()
             return JsonResponse(office_serializer.data)
-        return JsonResponse({'error': office_serializer.errors})            
+        return JsonResponse({'error': office_serializer.errors})
 
 
 class OfficeProfileView(TemplateView):
