@@ -76,7 +76,7 @@ class TaskViewSet(OfficeMixinViewSet, ApplicationView):
         if self.request.method == "POST":
             return TaskCreateSerializer
         return TaskSerializer
-
+    
 
 @api_view(['GET'])
 @permission_classes((TokenHasReadWriteScope, ))

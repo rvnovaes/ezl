@@ -6,5 +6,6 @@ from . import views_api as views
 router = routers.SimpleRouter()
 router.register(r'person', views.PersonViewSet, base_name='person')
 router.register(r'company', views.CompanyViewSet, base_name='company')
+router.register(r'office', views.OfficeViewSet, base_name='office')
 
 urlpatterns = [url(r'^user_session/$', views.user_session_view)]
