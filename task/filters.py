@@ -44,13 +44,14 @@ class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
 class TaskApiFilter(FilterSet):
     is_hearing = filters.BooleanFilter(name='type_task__type_task_main__is_hearing')
     office_id = MultiValueCharFilter(name='office_id', lookup_expr='in')
+    person_executed_by_id = MultiValueCharFilter(name='person_executed_by_id', lookup_expr='in')
     final_deadline_date = DatetimeFromToRangeFilter()
     task_status = MultiValueCharFilter(name='task_status', lookup_expr='in')
-    executed_by_name = filters.CharFilter(name='executed_by_name', lookup_expr='unaccent__icontains')
 
     class Meta:
         model = Task
-        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date', 'task_status']
+        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date', 
+        'task_status', 'person_executed_by_id']
 
 
 class TaskFilter(FilterSet):

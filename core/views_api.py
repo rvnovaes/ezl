@@ -5,6 +5,8 @@ from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHa
 from rest_framework.response import Response
 from rest_framework.decorators import permission_classes, api_view
 from core.views import remove_invalid_registry
+from django.contrib.auth.models import Group
+
 
 
 class OfficeMixinViewSet(viewsets.ModelViewSet):
@@ -43,6 +45,17 @@ class PersonViewSet(viewsets.ModelViewSet):
         if invalid_registry:
             self.queryset = self.queryset.exclude(id=invalid_registry)
         return self.queryset.filter(offices=self.request.auth.application.office)
+
+
+class CorrespondentViewSet(PersonViewSet):
+    def get_queryset(self, *args, **kwargs):
+        correspondents = Person.objects.filter(
+            auth_user__groups__in=Group.objects.filter(
+                name__icontains='correspondent')).order_by().distinct()
+        q = self.request.query_params.get('q', None)
+        if q:
+            correspondents = correspondents.filter(legal_name__unaccent__icontains=q)
+        return correspondents
 
 
 class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
