@@ -181,6 +181,13 @@ def get_office_session(request):
     return office
 
 
+def get_office_by_id(office_id):
+    from core.models import Office
+    if office_id:
+        return Office.objects.filter(pk=office_id).first()
+    return None
+
+
 def get_domain(request):
     try:
         if request.META.get('HTTP_X_FORWARDED_HOST') or request.META.get(

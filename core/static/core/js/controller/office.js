@@ -70,7 +70,7 @@ class Office {
 
 	setOffice(){
 		$.ajax({
-			url: '/office_profile_data/', 
+			url: `/office_profile_data/${this.office_id}`,
 			method: 'GET', 
 			success: (response) => {
 				this.data = response;
@@ -89,7 +89,6 @@ class Office {
 
 	onClickBtnEditOffice() {
 		this._elBtnEditOffice.on('click', ()=>{
-			console.log('aqui');
 			this.showOfficeForm();
 		});
 	}

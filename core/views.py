@@ -45,7 +45,8 @@ from core.models import Person, Address, City, State, Country, AddressType, Offi
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
-from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, check_cpf_cnpj_exist
+from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, \
+    check_cpf_cnpj_exist, get_office_by_id
 from core.view_validators import create_person_office_relation, person_exists
 from core.mail import send_mail_sign_up
 from financial.models import ServicePriceTable
@@ -2446,7 +2447,8 @@ class TermsView(TemplateView):
 
 class OfficeProfileDataView(View):
     def get(self, request, *args, **kwargs):
-        office = get_office_session(request)
+        office_id = kwargs.get('pk', None)
+        office = get_office_by_id(office_id) if office_id else get_office_session(request)
         return JsonResponse(OfficeSerializer(office).data)
 
     def post(self, request, *args, **kwargs):
@@ -2465,42 +2467,47 @@ class OfficeProfileView(TemplateView):
     success_message = UPDATE_SUCCESS_MESSAGE
     object_list_url = 'office_list'
 
-    def get_context_data(self, **kwargs):        
-        self.object = get_office_session(self.request)
+    def get_context_data(self, **kwargs):
+        office_id = kwargs.get('pk', None)
+        office_session = get_office_session(self.request)
+        office_profile = get_office_by_id(office_id)
+        self.object = office_profile or office_session
+
         kwargs.update({
             'table':
-            AddressOfficeTable(self.object.get_address()),
+                AddressOfficeTable(self.object.get_address()),
             'table_members':
-            OfficeMembershipTable(
-                self.object.officemembership_set.filter(
-                    is_active=True,
-                    person__auth_user__isnull=False,
-                    person__auth_user__is_superuser=False).exclude(
+                OfficeMembershipTable(
+                    self.object.officemembership_set.filter(
+                        is_active=True,
+                        person__auth_user__isnull=False,
+                        person__auth_user__is_superuser=False
+                    ).exclude(
                         person__auth_user=self.request.user)),
             'table_offices':
-            OfficeTable(
-                Office.objects.get(pk=self.object.pk).offices.all().
-                order_by('legal_name')),
+                OfficeTable(self.object.offices.all().order_by('legal_name')),
             'table_contact_mechanism':
-            ContactMechanismOfficeTable(
-                self.object.contactmechanism_set.all()),
-            'table_billing_details': BillingDetailsTable(
-                self.object.billingdetails_office.all()),
+                ContactMechanismOfficeTable(self.object.contactmechanism_set.all()),
+            'table_billing_details':
+                BillingDetailsTable(self.object.billingdetails_office.all()),
         })
         data = super().get_context_data(**kwargs)
-        data['inviteofficeform'] = InviteForm(self.request.POST) \
-            if InviteForm(self.request.POST).is_valid() else InviteForm()
-        RequestConfig(
-            self.request, paginate=False).configure(
-                kwargs.get('table_members'))
-        RequestConfig(
-            self.request, paginate=False).configure(
-                kwargs.get('table_offices'))
-        data['office'] = get_office_session(self.request)
-        data['form_office'] = self.form_class(instance=data['office']) 
-        data['form_address'] = AddressForm()      
-        data['form_contact_mechanism'] = ContactMechanismForm()
-        data['form_billing_details'] = BillingAddressCombinedForm
+        data['office'] = self.object
+        data['is_session_office'] = False
+        if self.object == office_session:
+            data['is_session_office'] = True
+            data['inviteofficeform'] = InviteForm(self.request.POST) \
+                if InviteForm(self.request.POST).is_valid() else InviteForm()
+            RequestConfig(
+                self.request, paginate=False).configure(
+                    kwargs.get('table_members'))
+            RequestConfig(
+                self.request, paginate=False).configure(
+                    kwargs.get('table_offices'))
+            data['form_office'] = self.form_class(instance=data['office'])
+            data['form_address'] = AddressForm()
+            data['form_contact_mechanism'] = ContactMechanismForm()
+            data['form_billing_details'] = BillingAddressCombinedForm
         return data
 
 

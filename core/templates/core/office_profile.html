@@ -15,7 +15,7 @@
         <div class="profile-about">
         	<div class="white-box custom-white-box">
                 <div class="pull-right">
-                    {% if 'group_admin' in office_session_perms or request.user.is_superuser %}
+                    {% if 'group_admin' in office_session_perms and is_session_office %}
                         <button class="btn btn-sm btn-success" id="btn-edit-office"> <i class="fa fa-pencil"></i> Editar</button>       
                     {% endif %}
                 </div>                
@@ -60,7 +60,7 @@
                         <li role="presentation" class="active"><a href="#tab-about" aria-controls="home" role="tab" data-toggle="tab" aria-expanded="true"><span class="visible-xs"><i class="ti-email"></i></span><span class="hidden-xs"> Sobre</span></a></li>
                         <li role="presentation" class=""><a href="#tab-address" aria-controls="profile" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-export"></i></span> <span class="hidden-xs">Endereço</span></a></li>
                         <li role="presentation" class=""><a href="#tab-mechanism-contact" aria-controls="settings" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-trash"></i></span> <span class="hidden-xs">Contato</span></a></li>
-                        {% if 'group_admin' in office_session_perms or request.user.is_superuser %}
+                        {% if 'group_admin' in office_session_perms and is_session_office %}
                             <li role="presentation" class=""><a href="#tab-invite-users" aria-controls="settings" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-trash"></i></span> <span class="hidden-xs">Relacionamento com usuário</span></a></li>
                             <li role="presentation" class=""><a href="#tab-invite-office" aria-controls="settings" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-trash"></i></span> <span class="hidden-xs">Relacionamento com escritórios</span></a></li>
                             <li role="presentation" class=""><a href="#tab-billign-details" aria-controls="settings" role="tab" data-toggle="tab" aria-expanded="false"><span class="visible-xs"><i class="ti-trash"></i></span> <span class="hidden-xs">Detalhes de cobrança</span></a></li>
@@ -559,10 +559,12 @@
         </div>
     </div>
 </div>
+{% if is_session_office %}
 {% include 'core/modal/office_profile_basic.html' %}
 {% include 'core/modal/office_profile_address.html' %}
 {% include 'core/modal/office_profile_contact_mechanism.html' with form=form_contact_mechanism %}
 {% include 'core/modal/office_profile_billing_details.html' with form=form_billing_details %}
+{% endif %}
 {%endblock%}
 
 {% block extra_scripts %}
