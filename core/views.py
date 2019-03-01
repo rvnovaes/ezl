@@ -18,7 +18,7 @@ from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from core.serializers import OfficeSerializer, AddressSerializer, ContactMechanismSerializer
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import ProtectedError, Q, F
+from django.db.models import ProtectedError, Q, F, Sum, Case, When, IntegerField
 from django.db import transaction, IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -41,7 +41,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     USER_CREATE_SUCCESS_MESSAGE, person_cpf_cnpj_already_exists
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
     OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser, CustomSettings, \
-    OfficeOffices
+    OfficeOffices, AreaOfExpertise
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
@@ -2512,7 +2512,26 @@ class OfficeProfileView(TemplateView):
             data['form_address'] = AddressForm()
             data['form_contact_mechanism'] = ContactMechanismForm()
             data['form_billing_details'] = BillingAddressCombinedForm
+            data['areas_expertise'] = AreaOfExpertise.objects.annotate(
+                total_office=Sum(
+                    Case(
+                        When(offices=self.object, then=1),
+                        default=0, output_field=IntegerField()
+                    ))).values('id', 'area', 'total_office')
         return data
+
+
+class OfficeAreasOfExpertiseUpdateView(View):
+
+    def post(self, request, *args, **kwargs):
+        office = get_office_session(request)
+        areas_of_expoertise = AreaOfExpertise.objects.all()
+        for area in areas_of_expoertise:
+            if int(request.POST.get('area_{}'.format(area.id), 0)) == 0:
+                area.offices.remove(office)
+            else:
+                area.offices.add(office)
+        return JsonResponse({'status': 'ok'}, status=200)
 
 
 class OfficeProfileUpdateView(UpdateView):
@@ -2522,8 +2541,17 @@ class OfficeProfileUpdateView(UpdateView):
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST, request.FILES, instance=get_office_session(request))
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('office_profile'))
+            try:
+                form.save()
+                return HttpResponseRedirect(reverse('office_profile'))
+            except IntegrityError as e:
+                if 'cpf_cnpj' in e.args[0]:
+                    error = {'errors': {'cpf_cnpj': ['Já existe um escritório com o CPF ou CNPJ informado']}}
+                else:
+                    error = {'errors': {'__all__': [e.__str__()]}}
+                return JsonResponse(error, status=500)
+            except Exception as e:
+                return JsonResponse({'errors': {'__all__': [e.__str__()]}}, status=500)
         else:
             return JsonResponse({'errors': form.errors}, status=400)
 

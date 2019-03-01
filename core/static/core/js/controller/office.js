@@ -14,10 +14,10 @@ class Office {
 	}
 
 	get form() {
-		return $("#form-office");
+		return $('#form-office');
 	}
 
-	get formData(){		
+	get formData(){
 		return this.form.serializeArray();
 	}
 
@@ -26,7 +26,7 @@ class Office {
 		let data = {};
 		$(formData ).each((index, obj) =>{
 		        data[obj.name] = obj.value;
-		    });		
+		    });
 		return data;
 	}	
 
@@ -46,7 +46,18 @@ class Office {
 		this.data.cpf_cnpj = this._elCpfCnpj.textContent = value;
 	}
 
+	static createListItens(listItems) {
+		let htmlListItens = '';
+		for (var i = 0; i < listItems.length; i++) {
+			htmlListItens += `<li>${listItems[i]}</li>`;
+		}
+		return htmlListItens;
+	}
+
 	static formatCpfCnpj(cpfCnpj){
+		if (cpfCnpj === '' || cpfCnpj === null){
+			return '';
+		}
 		cpfCnpj.replace(/[^0-9]+/g, '');
 		if (cpfCnpj.length <= 11) {
 			return `${cpfCnpj.substr(0,3)}.${cpfCnpj.substr(3,3)}.${cpfCnpj.substr(6,3)}-${cpfCnpj.substr(9)}`;
@@ -57,7 +68,7 @@ class Office {
 	}
 
 
-	formatAttr(stringVariable) {
+	static formatAttr(stringVariable) {
 		return stringVariable.replace(/_([a-z])/g, function (m, w) {
 		    return w.toUpperCase();
 		});		
@@ -77,7 +88,7 @@ class Office {
 	}
 
 	updateAttr(name, value) {
-		this[this.formatAttr(name)] = value;
+		this[Office.formatAttr(name)] = value;
 	}
 
 
@@ -146,16 +157,24 @@ class Office {
 						data: formdata ? formdata : this.form.serialize(),
 						success: (response)=> {
 							swal.close();
-							showToast('success', 'Perfil atualizado com sucesso', '', 3000, true);
 							this.setOffice();
 							this.hideOfficeForm();
 						}, 
 						error: (request, status, error)=> {
+                        	let errorList = []
 							Object.keys(request.responseJSON.errors).forEach((key)=>{
 								request.responseJSON.errors[key].forEach((e)=>{
-									swal.close();
-									showToast('error', this.form.find(`[name=${key}]`).siblings('label').text(), e, 0, false);
+									errorList.push(`error: ${e}`);
 								});
+							});
+                        	let htmlList = `<ul class='font-15 text-left'>${Office.createListItens(errorList)}</ul>`;
+							let html = `<h4>Ocorreram os seguintes erros ao atualizar o registro do escritório:</h4>
+										<br />${htmlList}`;
+                        	swal.close();
+                        	swal({
+								type: 'error',
+								title: 'Escritório',
+								html: html,
 							});
 						}
 					});
