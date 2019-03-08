@@ -8,7 +8,7 @@ from django.core.validators import ValidationError
 from django.views.generic import View
 # project imports
 from django.db.models import ProtectedError
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.http.response import JsonResponse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django_tables2 import RequestConfig
@@ -29,7 +29,7 @@ from django.core.cache import cache
 from dal import autocomplete
 from django.db.models import Q
 from core.views import CustomLoginRequiredView, TypeaHeadGenericSearch
-from core.utils import get_office_session, filter_valid_choice_form
+from core.utils import get_office_session, filter_valid_choice_form, get_invalid_data
 
 
 class InstanceListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -189,7 +189,6 @@ class FolderCreateView(AuditFormMixin, CreateView):
         kw['request'] = self.request
         return kw
 
-
 class FolderUpdateView(AuditFormMixin, UpdateView):
     model = Folder
     form_class = FolderForm
@@ -199,7 +198,7 @@ class FolderUpdateView(AuditFormMixin, UpdateView):
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
-        return kw
+        return kw       
 
 
 class FolderDeleteView(AuditFormMixin, MultiDeleteViewMixin):
@@ -414,6 +413,12 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany,
         kw['request'] = self.request
         return kw
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        invalid_registry = get_invalid_data(self.model)
+        if invalid_registry.pk == obj.pk:
+            raise Http404("Registro não foi encontrado")
+        return obj
 
 class LawSuitListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = LawSuit

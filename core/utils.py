@@ -256,3 +256,16 @@ def check_cpf_cnpj_exist(model, cpf_cnpj):
         data.update(model_to_dict(instance, fields=['legal_name', 'name', 'cpf_cnpj', 'id']))
         data['exist'] = True
     return data
+
+def get_invalid_data(model):
+    class_verbose_name_invalid = model._meta.verbose_name.upper(
+    ) + '-INVÁLIDO'
+    try:
+        invalid_registry = model.objects.filter(
+            name=class_verbose_name_invalid).first()
+    except:
+        invalid_registry = model.objects.filter(
+                legacy_code='REGISTRO-INVÁLIDO').earliest('pk')
+    if invalid_registry:
+        return invalid_registry                
+    return None
