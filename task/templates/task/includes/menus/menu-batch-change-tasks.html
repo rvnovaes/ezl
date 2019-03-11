@@ -1,4 +1,4 @@
-{% if 'can_distribute_tasks' in office_session_perms or 'group_admin' in office_session_perms or request.user.is_superuser %}
+{% if 'can_distribute_tasks' in office_session_perms or 'group_admin' in office_session_perms %}
 <li>
     <a href="javascript:void(0)" class="waves-effect" id="menu-batch-change-tasks">
         <i class="fa fa-exchange" data-icon="v"></i>
@@ -14,16 +14,20 @@
         $(document).ready(function() {
 
             async function showOptions (){
+                let inputOptions = {};
+                {% if 'can_see_tasks_from_team_members' in office_session_perms or 'group_admin' in office_session_perms %}
+                inputOptions['CA'] = 'Alterar solicitante';
+                {% endif %}
+                inputOptions['A'] = 'Atribuir OS';
+                inputOptions['D'] = 'Delegar OS';
+                inputOptions['R'] = 'Recusar OS';
+
                 const {value: changeOption} = await swal({
                   title: 'Selecione o tipo de alteração',
                   input: 'select',
                   width: '30%', 
                   inputClass: 'form-control',
-                  inputOptions: {
-                    'A': 'Atribuir OS',
-                    'D': 'Delegar OS',
-                    'R': 'Recusar OS'
-                  },
+                  inputOptions: inputOptions,
                   inputPlaceholder: 'Selecione a ação desejada',
                   showCancelButton: true,
                   inputValidator: (value) => {
@@ -36,18 +40,12 @@
 
                     })
                   }
-                })
+                });
 
-                if (changeOption) {
-                  if (changeOption==='A') {
-                    window.location.href = "{% url 'batch_change_tasks' 'A' %}"
-                  } else if (changeOption==='D') {
-                    window.location.href = "{% url 'batch_change_tasks' 'D' %}"
-                  } else {
-                    window.location.href = "{% url 'batch_change_tasks' 'R' %}"
-                  }
+                if (changeOption && changeOption in inputOptions) {
+                    window.location.href = `{% url 'batch_change_tasks' %}/${changeOption}`;
                 }
-            };
+            }
 
             $('#menu-batch-change-tasks').on('click', function(){
                 showOptions();

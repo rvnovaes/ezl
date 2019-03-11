@@ -234,6 +234,16 @@ class TaskToAssignForm(BaseForm):
         self.fields['person_executed_by'].required = True
 
 
+class TaskChangeAskedBy(BaseForm):
+    class Meta:
+        model = Task
+        fields = ['person_asked_by']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['person_asked_by'].required = True
+
+
 class TypeTaskMainForm(forms.ModelForm):
     characteristics = JSONFieldMixin(
         label="Caractersíticas",

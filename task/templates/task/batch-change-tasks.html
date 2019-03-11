@@ -4,15 +4,37 @@
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
 {% load core_filters %}
-{% block content %} 
-	{% include 'task/includes/task-form-filters.html'%}    
+{% block content %}
+    {% if option %}
+    {% include 'task/includes/task-form-filters.html'%}
+    {% endif %}
     {% block extra_content %}
         {% if option == 'D' %}
             {% include 'task/includes/batch-delegate-task-table.html'%}
         {% elif option == 'A' %}
             {% include 'task/includes/batch-assign-task-table.html'%}
-        {% else %}
+        {% elif option == 'CA' %}
+            {% include 'task/includes/batch-change-requested-task-table.html'%}
+        {% elif option == 'R' %}
             {% include 'task/includes/batch-refuse-task-table.html'%}
+        {% else %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title form-row">
+                        <span>Escolha uma ação para realizar em lote</span>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <ul>
+                        {% if 'can_see_tasks_from_team_members' in office_session_perms or 'group_admin' in office_session_perms %}
+                        <li><a href="{% url 'batch_change_tasks' 'CA' %}" >Alterar solicitante</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'batch_change_tasks' 'A' %}" >Atribuir OS</a></li>
+                        <li><a href="{% url 'batch_change_tasks' 'D' %}" >Delegar OS</a></li>
+                        <li><a href="{% url 'batch_change_tasks' 'R' %}" >Recusar OS</a></li>
+                    </ul>
+                </div>
+            </div>
         {% endif %}
     {% endblock extra_content %}	
 {% endblock %}
