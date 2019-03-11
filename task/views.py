@@ -28,6 +28,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, DELETE
     operational_error_create, ioerror_create, exception_create, integrity_error_delete, DELETE_EXCEPTION_MESSAGE, \
     success_sent, success_delete, NO_PERMISSIONS_DEFINED
 from core.models import Person, CorePermissions, CustomSettings
+from core.permissions import CustomPermissionRequiredMixin
 from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixin
 from core.xlsx import XLSXWriter
 from lawsuit.forms import LawSuitForm
@@ -2070,11 +2071,17 @@ class ImportTaskList(PermissionRequiredMixin, CustomLoginRequiredView,
         return JsonResponse(json.loads(json.dumps(ret)), status=status)
 
 
-class BatchChangeTasksView(DashboardSearchView):
+class BatchChangeTasksView(CustomPermissionRequiredMixin, DashboardSearchView):
     filter_class = BatchChangTaskFilter
     template_name = 'task/batch-change-tasks.html'
     option = ''
     table_class = DashboardStatusTable
+    permission_required = ('can_distribute_tasks', 'group_admin', )
+
+    def get_permission_required(self):
+        if self.request.resolver_match.kwargs.get('option') == 'CA':
+            self.permission_required = ('can_see_tasks_from_team_members', 'group_admin', )
+        return super().get_permission_required()
 
     def get(self, request, option, *args, **kwargs):
         self.option = option

@@ -26,7 +26,9 @@
                 </div>
                 <div class="panel-body">
                     <ul>
+                        {% if 'can_see_tasks_from_team_members' in office_session_perms or 'group_admin' in office_session_perms %}
                         <li><a href="{% url 'batch_change_tasks' 'CA' %}" >Alterar Solicitante</a></li>
+                        {% endif %}
                         <li><a href="{% url 'batch_change_tasks' 'A' %}" >Atribuir OS</a></li>
                         <li><a href="{% url 'batch_change_tasks' 'D' %}" >Delegar OS</a></li>
                         <li><a href="{% url 'batch_change_tasks' 'R' %}" >Recusar OS</a></li>

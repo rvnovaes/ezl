@@ -1,4 +1,4 @@
-{% if 'can_distribute_tasks' in office_session_perms or 'group_admin' in office_session_perms or request.user.is_superuser %}
+{% if 'can_distribute_tasks' in office_session_perms or 'group_admin' in office_session_perms %}
 <li>
     <a href="javascript:void(0)" class="waves-effect" id="menu-batch-change-tasks">
         <i class="fa fa-exchange" data-icon="v"></i>
@@ -14,12 +14,14 @@
         $(document).ready(function() {
 
             async function showOptions (){
-                let inputOptions = {
-                      'CA': 'Alterar Solicitante',
-                      'A': 'Atribuir OS',
-                      'D': 'Delegar OS',
-                      'R': 'Recusar OS'
-                };
+                let inputOptions = {};
+                {% if 'can_see_tasks_from_team_members' in office_session_perms or 'group_admin' in office_session_perms %}
+                inputOptions['CA'] = 'Alterar Solicitante';
+                {% endif %}
+                inputOptions['A'] = 'Atribuir OS';
+                inputOptions['D'] = 'Delegar OS';
+                inputOptions['R'] = 'Recusar OS';
+
                 const {value: changeOption} = await swal({
                   title: 'Selecione o tipo de alteração',
                   input: 'select',
