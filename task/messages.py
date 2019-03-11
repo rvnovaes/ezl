@@ -14,10 +14,10 @@ RECORD_NOT_FOUND = "Não foi encontrado registro de {} correspondente aos valore
 
 WRONG_TASK_STATUS = "{} não é um valor de status válido: {}."
 
-DEFAULT_CUSTOMER_MISSING = "O escritório {} não possui Cliente padrão configurado"
+DEFAULT_CUSTOMER_MISSING = "O escritório {} não possui cliente padrão configurado"
 
-MISSING_ACCEPTANCE_SERVICE_DATE = "A data de de Aceite pelo Service é obrigatória caso o status da OS seja " \
-                                  "Aceite pelo Service"
+MISSING_ACCEPTANCE_SERVICE_DATE = "A data de aceite pelo service é obrigatória caso o status da OS seja " \
+                                  "Aceita pelo Service"
 
 
 def columns_not_available(column, columns_list):
