@@ -2,13 +2,7 @@
 
 {% block content %}
     {% load bootstrap3 %}
-    <script id="inline-script">
-        {% if survey_data %}
-            window.survey = new Survey.Model({{ survey_data|safe }});
-            window.survey2 = new Survey.Model({{ survey_data|safe }});
-        {% endif %}
-    </script>
-        <div id="survey" class="modal" data-status="">
+    <div id="survey" class="modal" data-status="">
         <div class="modal-dialog">
             <div class="modal-content ">
                 <div id=" modal modalHeader">
@@ -29,123 +23,130 @@
         </div>
     </div>
     {% if survey_data %}
+    <script id="inline-script">
+        $(document).ready(function() {
+            window.survey = new Survey.Model({{ survey_data|safe }});
+            window.survey2 = new Survey.Model({{ survey_data|safe }});
+        });
+    </script>
     <script>
-        setInterval(function(){
-            $('#survey input[type=file]').each(function(){
-                var $el = $(this),
-                    id = $el.attr('id').replace('i', ''),
-                    $button = $('<button type="button" class="btn btn-sm btn-primary btn-raised" style="color: #fff !important;"><i class="icon-cloud-upload"></i> &nbsp; Enviar arquivo(s)<div class="ripple-container"></div></button>'),
-                    $parent = $el.parent();
+        $(document).ready(function() {
+            setInterval(function () {
+                $('#survey input[type=file]').each(function () {
+                    var $el = $(this),
+                        id = $el.attr('id').replace('i', ''),
+                        $button = $('<button type="button" class="btn btn-sm btn-primary btn-raised" style="color: #fff !important;"><i class="icon-cloud-upload"></i> &nbsp; Enviar arquivo(s)<div class="ripple-container"></div></button>'),
+                        $parent = $el.parent();
 
-                if ($parent.find('button').length == 0){
-                    $parent.append($button);
-                    $el.hide();
-                    $button.click(function(){
-                        SurveyUploadDatabase.currentField = id;
-                        SurveyUploadDatabase.inProgress = true;
-                        $('.js-upload-files').click();
-                        return false;
-                    });
-                }
-            });
-        }, 1000);
-
-
-        //Função para retornar o método submit default
-        function submitSurvey() {
-            $('#task_detail').unbind('submit').submit();
-
-        }
-
-        // Retorna as respostas da pesquisa formatadas corretamente
-        function getSurveyResult(result){
-            var data = {};
-            $.each(result.getAllQuestions(), function(i, question){
-                if (question.visible && question.getType() != "file") {
-                    data[question.title] = question.value || "";
-                }
-            });
-            return data;
-        }
-
-        Survey.Survey.cssType = "bootstrapmaterial";
-        Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-sm btn-raised btn-primary";
-
-        survey.onComplete.add(function (result) {
-            var surveyResponse = JSON.stringify(result.data);
-            var surveyResult = document.getElementsByName('survey_result').item(0);
-            surveyResult.value = surveyResponse;
-            document.getElementById('id_survey_result').innerHTML = surveyResponse;
-            let status = $('#survey').attr('data-status')
-            $(`<input name="action" value="${status}">`).appendTo($('#task_detail'));
-            submitSurvey();
-        });
-        survey.locale = "pt";
-        Survey.JsonObject.metaData.addProperty("dropdown", {
-            name: "dateFormat",
-            default: "mm/dd/yy",
-            choices: ["mm/dd/yy", "yy-mm-dd", "d M, y", "d MM, y", "DD, d MM, yy", "'day' d 'of' MM 'in the year' yy"]
-        });
-
-
-        var widget = {
-            name: "datepicker",
-            htmlTemplate: "<input class='widget-datepicker form-control' type='text' style='width: 100%;'>",
-            isFit: function (question) {
-                return question.getType() === 'text' && question.inputType === 'date';
-            },
-            afterRender: function (question, el) {
-                var $el;
-
-                var $el = $(el).find(".widget-datepicker");
-
-                var widget = $el.datepicker({
-                    dateFormat: 'dd/mm/yy',
-                    onSelect: function (dateText) {
-                        question.value = dateText;
-                    },
-                    dayNames: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
-                    dayNamesMin: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S', 'D'],
-                    dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-                    monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
-                    monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-                    nextText: 'Próximo',
-                    prevText: 'Anterior'
+                    if ($parent.find('button').length == 0) {
+                        $parent.append($button);
+                        $el.hide();
+                        $button.click(function () {
+                            SurveyUploadDatabase.currentField = id;
+                            SurveyUploadDatabase.inProgress = true;
+                            $('.js-upload-files').click();
+                            return false;
+                        });
+                    }
                 });
-                question.valueChangedCallback = function () {
-                    widget.datepicker('setDate', new Date(question.value));
-                };
-                question.valueChangedCallback();
-                question.value = new Date();
-            },
-            willUnmount: function (question, el) {
+            }, 1000);
 
-                $(el).find('.widget-datepicker').datepicker("destroy");
+
+            //Função para retornar o método submit default
+            function submitSurvey() {
+                $('#task_detail').unbind('submit').submit();
 
             }
-        };
+
+            // Retorna as respostas da pesquisa formatadas corretamente
+            function getSurveyResult(result) {
+                var data = {};
+                $.each(result.getAllQuestions(), function (i, question) {
+                    if (question.visible && question.getType() != "file") {
+                        data[question.title] = question.value || "";
+                    }
+                });
+                return data;
+            }
+
+            Survey.Survey.cssType = "bootstrapmaterial";
+            Survey.defaultBootstrapMaterialCss.navigationButton = "btn btn-sm btn-raised btn-primary";
+
+            survey.onComplete.add(function (result) {
+                var surveyResponse = JSON.stringify(result.data);
+                var surveyResult = document.getElementsByName('survey_result').item(0);
+                surveyResult.value = surveyResponse;
+                document.getElementById('id_survey_result').innerHTML = surveyResponse;
+                let status = $('#survey').attr('data-status')
+                $(`<input name="action" value="${status}">`).appendTo($('#task_detail'));
+                submitSurvey();
+            });
+            survey.locale = "pt";
+            Survey.JsonObject.metaData.addProperty("dropdown", {
+                name: "dateFormat",
+                default: "mm/dd/yy",
+                choices: ["mm/dd/yy", "yy-mm-dd", "d M, y", "d MM, y", "DD, d MM, yy", "'day' d 'of' MM 'in the year' yy"]
+            });
 
 
-        Survey.CustomWidgetCollection.Instance.addCustomWidget(widget);
+            var widget = {
+                name: "datepicker",
+                htmlTemplate: "<input class='widget-datepicker form-control' type='text' style='width: 100%;'>",
+                isFit: function (question) {
+                    return question.getType() === 'text' && question.inputType === 'date';
+                },
+                afterRender: function (question, el) {
+                    var $el;
 
-        $("#surveyElement").Survey({model: survey});
+                    var $el = $(el).find(".widget-datepicker");
 
-        var footer = document.querySelector("#surveyElement").querySelector('.panel-footer')
-        var cancelBtn = document.createElement("button");
+                    var widget = $el.datepicker({
+                        dateFormat: 'dd/mm/yy',
+                        onSelect: function (dateText) {
+                            question.value = dateText;
+                        },
+                        dayNames: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+                        dayNamesMin: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S', 'D'],
+                        dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                        monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                        monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        nextText: 'Próximo',
+                        prevText: 'Anterior'
+                    });
+                    question.valueChangedCallback = function () {
+                        widget.datepicker('setDate', new Date(question.value));
+                    };
+                    question.valueChangedCallback();
+                    question.value = new Date();
+                },
+                willUnmount: function (question, el) {
 
-        footer.className = "row align-center";
-        footer.style = "text-align: center;";
+                    $(el).find('.widget-datepicker').datepicker("destroy");
 
-        cancelBtn.innerHTML = "Cancelar";
-        cancelBtn.className = "btn btn-sm btn-raised btn-error";
-        cancelBtn.type = "";
-        cancelBtn.name = "action";
-
-        cancelBtn.setAttribute("data-dismiss", "modal");
+                }
+            };
 
 
-        footer.appendChild(cancelBtn);
+            Survey.CustomWidgetCollection.Instance.addCustomWidget(widget);
 
+            $("#surveyElement").Survey({model: survey});
+
+            var footer = document.querySelector("#surveyElement").querySelector('.panel-footer')
+            var cancelBtn = document.createElement("button");
+
+            footer.className = "row align-center";
+            footer.style = "text-align: center;";
+
+            cancelBtn.innerHTML = "Cancelar";
+            cancelBtn.className = "btn btn-sm btn-raised btn-error";
+            cancelBtn.type = "";
+            cancelBtn.name = "action";
+
+            cancelBtn.setAttribute("data-dismiss", "modal");
+
+
+            footer.appendChild(cancelBtn);
+        });
     </script>
     {% endif %}
 

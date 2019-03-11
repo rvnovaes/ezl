@@ -47,14 +47,17 @@
       <!-- BODY MODAL -->
       <div class="modal-body p-30">
         <div class="form-group" style="margin: auto">
+            <label>Tipo de serviço: </label>
+            <span id="type-task-text"></span>
+        </div>
+        <div class="form-group" style="margin: auto">
           <div class="row">
             <div class="col" id="modal-content">
-              <strong>Tipo de serviço:</strong> <span id="type-task"></span>
-              <hr/>
               <table id='table-service-price' style="width:100%">
                 <thead>
                   <tr>
                     <th>Escritório correspondente</th>
+                    <th>Tipo de serviço</th>
                     <th>Rede</th>
                     <th>UF</th>
                     <th>Comarca</th>
@@ -112,25 +115,46 @@
     <script type="text/javascript">  
         var correspondentTable;  
         var chosenPrice = {};
-        $(document).ready(function(){          
+        $(document).ready(function(){
+            function getOfficeCorrespondentLink(officeCorrespondent){
+                if (officeCorrespondent.id !== '' && officeCorrespondent.legal_name !== ''){
+                    return `<a href="/office_profile/${officeCorrespondent.id}/" target="_blank">`+
+                        `${officeCorrespondent.legal_name}</a>`
+                }
+                return ''
+            }
             $('#modal-service-price-table').on('show.bs.modal', function(e) {
                 var taskId = $(this).attr('task-id');
+                var typeTask = $(this).attr('type-task');
                 var servicePriceTable = servicePrices[taskId];
-                $('#type-task').append(servicePriceTable.task.type_task.name);
+                $("#type-task-text").html(typeTask);
                 if (!correspondentTable) {
                     correspondentTable = $('#table-service-price')
                         .DataTable({
                             destroy: true,
                             paging: false,
-                            order: [[7, 'asc'], [8, 'desc'], [9, 'asc'], [0, 'asc']],
+                            order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
                             dom: 'frti',
                             language: {"url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"},
                             columnDefs: [
-                                {'targets': [10], 'visible': false, 'searchable': false, 'orderable': false  }],
+                                {'targets': [11], 'visible': false, 'searchable': false, 'orderable': false  },
+                                {
+                                    'targets': [0],
+                                    'createdCell':  function (td, cellData, rowData, row, col) {
+                                       $(td).attr('class', 'office_correspondent');
+                                    }
+                                }],
+                            "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+                                if(aData[1] === '-' || aData[1] === '—'){
+                                    $("td:eq(1)", nRow).text(typeTask);
+                                }
+                                return nRow;
+                            },
                         });
                 }
                 servicePriceTable.prices.forEach(function(price) {
-                    let office_correspondent_name = price.office_correspondent.legal_name;
+                    let office_correspondent_name = getOfficeCorrespondentLink(price.office_correspondent);
+                    let type_task = price.type_task.name;
                     let office_networ_name = price.office_network.name;
                     let state = price.state;
                     let court_district_name = price.court_district.name;
@@ -145,6 +169,7 @@
                     let row = correspondentTable.row.add(
                         [
                             office_correspondent_name,
+                            type_task,
                             office_networ_name,
                             state,
                             court_district_name,
@@ -160,11 +185,15 @@
                     row.id = servicePriceTableId;
                     correspondentTable.draw(false);
                 });
+
+                $('.office_correspondent').click(function (e) {
+                    e.stopPropagation();
+                });
                 $('#table-service-price tbody tr').on('click', function() {
                     $(this).addClass("ezl-bg-open");
                     $(this).siblings().removeClass("ezl-bg-open");
-                    let amount = correspondentTable.row(this).data()[7];
-                    let priceCategory = correspondentTable.row(this).data()[10];
+                    let amount = correspondentTable.row(this).data()[8];
+                    let priceCategory = correspondentTable.row(this).data()[11];
                     let elValue = $('#value');
                     elValue.val(amount.replace(".", ","));
                     if (priceCategory === 'NETWORK'){
@@ -189,13 +218,13 @@
             });
 
             $('#modal-service-price-table').on('hide.bs.modal', function(e) {
+                $("#type-task-text").html('');
                 if ($('#value').val()) {
                     var taskId = $(this).attr('task-id');
                     chosenPrice.note =  $('#note').val();
                     servicePrices[taskId]['chosenPrice'] = chosenPrice;
                     correspondentTable.clear().draw(false);
                     correspondentTable.search('').draw(false);
-                    $('#type-task').empty();
                     setChosenPrice(chosenPrice);
                 }
             });

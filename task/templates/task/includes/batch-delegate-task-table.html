@@ -49,7 +49,8 @@
                                     <span td-correspondent-value></span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-xs btn-info btn-outline btn-change-office-correspondent" btn-data-id="{{row.attrs.pk}}" disabled>
+                                    <button class="btn btn-xs btn-info btn-outline btn-change-office-correspondent"
+                                            btn-data-id="{{row.attrs.pk}}" btn-data-type-task="{{row.record.type_task}}" disabled>
                                         <i class="fa fa-edit"> Trocar</i>
                                     </button>
                                 </td>
@@ -115,7 +116,7 @@
         }).promise().done(function() { 
             var tasksToGetPrice = true;
             while(tasksToGetPrice) {                
-                setCorrespondents(taskIds.splice(0, 2))
+                setCorrespondents(taskIds.splice(0, 2));
                 // tasksToGetPrice = false;
                 if (taskIds.length === 0) {
                     tasksToGetPrice = false;
@@ -168,7 +169,8 @@
     };
     $('.btn-change-office-correspondent').on('click', function() {
         $('#modal-service-price-table').attr('task-id', $(this).attr('btn-data-id'));
-        $('#modal-service-price-table').modal('show');          
+        $('#modal-service-price-table').attr('type-task', $(this).attr('btn-data-type-task'));
+        $('#modal-service-price-table').modal('show');
     });
 
 
