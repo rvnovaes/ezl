@@ -118,6 +118,8 @@ class TaskResource(resources.ModelResource):
         dataset.insert_col(dataset.width, col=[[], ] * dataset.height, header="warnings")
 
     def before_import_row(self, row, **kwargs):
+        for column, value in row.items():
+            row[column] = value.strip() if isinstance(value, str) else value
         row_errors = []
         row['warnings'] = []
         instance = None
@@ -149,7 +151,7 @@ class TaskResource(resources.ModelResource):
                     row_errors.extend(import_task.get_errors())
                 if row_errors:
                     transaction.set_rollback(True)
-                    raise Exception(row_errors)
+                    raise Exception(list(set(row_errors)))
         else:
             row['id'] = instance.id
             row['task_status'] = instance.task_status

@@ -484,9 +484,9 @@ class ImportLawSuit(ImportTask):
                 instance = self._get_instance(**{'name__unaccent__iexact': row.get('instance')})
                 if not instance:
                     key = 'instance'
-                    row.get('warnings', []).append([incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
-                                                                          COLUMN_NAME_DICT[key]['column_name'],
-                                                                          row.get(key, ''))])
+                    row.get('warnings', []).append(incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
+                                                                         COLUMN_NAME_DICT[key]['column_name'],
+                                                                         row.get(key, '')))
             is_current_instance = TRUE_FALSE_DICT.get(row.get('lawsuit_is_current_instance'), False)
             person_lawyer = row.get('lawsuit_person_lawyer', '')
 
@@ -498,18 +498,18 @@ class ImportLawSuit(ImportTask):
                 person_lawyer = self._get_person(**filter_args)
                 if not person_lawyer:
                     key = 'lawsuit_person_lawyer'
-                    row.get('warnings', []).append([incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
-                                                                          COLUMN_NAME_DICT[key]['column_name'],
-                                                                          row.get(key, ''))])
+                    row.get('warnings', []).append(incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
+                                                                         COLUMN_NAME_DICT[key]['column_name'],
+                                                                         row.get(key, '')))
 
             # Validacao de state
             if state:
                 state = self._get_state(state)
                 if not state:
-                    key = 'lawsuit_person_lawyer'
-                    row_errors.append([incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
-                                                             COLUMN_NAME_DICT[key]['column_name'],
-                                                             row.get(key, ''))])
+                    key = 'lawsuit_state'
+                    row_errors.append(incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
+                                                            COLUMN_NAME_DICT[key]['column_name'],
+                                                            row.get(key, '')))
 
             # Validacao de court_district
             if court_district:
@@ -523,9 +523,9 @@ class ImportLawSuit(ImportTask):
                     court_district = self._get_court_district(**filter_args)
                     if not court_district:
                         key = 'lawsuit_court_district'
-                        row.get('warnings', []).append([incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
-                                                                              COLUMN_NAME_DICT[key]['column_name'],
-                                                                              row.get(key, ''))])
+                        row.get('warnings', []).append(incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
+                                                                             COLUMN_NAME_DICT[key]['column_name'],
+                                                                             row.get(key, '')))
 
             # Validacao de court_district_complement
             court_district_complement = row.get('lawsuit_court_district_complement', '')
@@ -540,9 +540,9 @@ class ImportLawSuit(ImportTask):
                     court_district_complement = self._get_court_district_complement(**filter_args)
                     if not court_district_complement:
                         key = 'lawsuit_court_district_complement'
-                        row.get('warnings', []).append([incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
-                                                                              COLUMN_NAME_DICT[key]['column_name'],
-                                                                              row.get(key, ''))])
+                        row.get('warnings', []).append(incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
+                                                                             COLUMN_NAME_DICT[key]['column_name'],
+                                                                             row.get(key, '')))
 
             # Validacao de city
             if city:
@@ -555,9 +555,9 @@ class ImportLawSuit(ImportTask):
                     city = self._get_city(**filter_args)
                     if not city:
                         key = 'lawsuit_city'
-                        row.get('warnings', []).append([incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
-                                                                              COLUMN_NAME_DICT[key]['column_name'],
-                                                                              row.get(key, ''))])
+                        row.get('warnings', []).append(incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
+                                                                             COLUMN_NAME_DICT[key]['column_name'],
+                                                                             row.get(key, '')))
 
             # Validacao de court_division
             court_division = row.get('lawsuit_court_division', '')
@@ -565,9 +565,9 @@ class ImportLawSuit(ImportTask):
                 court_division = self._get_court_division(**{'name__unaccent__iexact': court_division}).first()
                 if not court_division:
                     key = 'lawsuit_court_division'
-                    row.get('warnings', []).append([incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
-                                                                          COLUMN_NAME_DICT[key]['column_name'],
-                                                                          row.get(key, ''))])
+                    row.get('warnings', []).append(incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
+                                                                         COLUMN_NAME_DICT[key]['column_name'],
+                                                                         row.get(key, '')))
 
             # Validacao de organ
             organ = row.get('lawsuit_organ', '')
@@ -575,9 +575,9 @@ class ImportLawSuit(ImportTask):
                 organ = self._get_organ(**{'legal_name__unaccent__iexact': organ})
                 if not organ:
                     key = 'folder_cost_center'
-                    row.get('warnings', []).append([incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
-                                                                          COLUMN_NAME_DICT[key]['column_name'],
-                                                                          row.get(key, ''))])
+                    row.get('warnings', []).append(incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
+                                                                         COLUMN_NAME_DICT[key]['column_name'],
+                                                                         row.get(key, '')))
 
             opposing_party = row.get('lawsuit_opposing_party', '')
 
