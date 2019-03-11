@@ -9,9 +9,10 @@ from django.contrib.auth.models import User, Group
 from django.contrib.postgres.fields import JSONField
 
 from core.managers import PersonManager
-from core.utils import LegacySystem
+from core.utils import LegacySystem, clear_cpf_cnpj
 from guardian.shortcuts import get_perms
 from oauth2_provider.models import Application, AbstractApplication
+
 
 INVITE_STATUS = (('A', 'ACCEPTED'), ('R', 'REFUSED'), ('N', 'NOT REVIEWED'),
                  ('E', 'EXTERNAL'))
@@ -440,6 +441,7 @@ class Office(AbstractPerson):
         default=True,
         verbose_name='Possuo processo de importação de dados de outros sistemas'
     )
+    cpf_cnpj = models.CharField(max_length=255, blank=False, null=True, unique=True, verbose_name='CPF/CNPJ')    
 
     class Meta:
         verbose_name = 'Escritório'
@@ -463,6 +465,8 @@ class Office(AbstractPerson):
 
     def save(self, *args, **kwargs):
         self._i_work_alone = kwargs.pop('i_work_alone', False)
+        if self.cpf_cnpj:
+            self.cpf_cnpj = clear_cpf_cnpj(self.cpf_cnpj)
         return super().save(*args, **kwargs)
 
 
@@ -846,8 +850,17 @@ class AreaOfExpertise(models.Model):
     offices = models.ManyToManyField(Office, blank=True)
 
     class Meta:
-        verbose_name='Áreas de atuação'
+        verbose_name = 'Área de atuação'
+        verbose_name_plural = 'Áreas de atuação'
         ordering = ['area']
 
     def __str__(self):
         return self.area
+
+
+class BaseHistoricalModel(models.Model):
+    history_office = models.ForeignKey(Office, null=True, blank=True)
+    history_notes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True

@@ -1,7 +1,9 @@
 import copy
 import uuid
+from decimal import Decimal
 from django.template.loader import render_to_string
 from ecm.models import DefaultAttachmentRule, Attachment
+from financial.utils import recalculate_values
 from task.workflow import get_child_recipients
 from task.models import *
 from task.serializers import *
@@ -150,13 +152,14 @@ def self_or_none(obj):
     return obj if obj else None
 
 
-def delegate_child_task(object_parent, office_correspondent):
+def delegate_child_task(object_parent, office_correspondent, type_task=None):
     """
     Este metodo e chamado quando um escritorio delega uma OS para outro escritorio
     Ao realizar este processo a nova OS criada devera ficar com o status de Solicitada
     enquanto a OS pai devera ficar com o status de Delegada/Em Aberti
     :param object_parent: Task que sera copiada para gerar a nova task
     :param office_correspondent: Escritorio responsavel pela nova task
+    :param type_task: Tipo de servico a considerado para a criacao da OS filha
     :return:
     """
     if object_parent.get_child:
@@ -166,6 +169,7 @@ def delegate_child_task(object_parent, office_correspondent):
         ]:
             return False
     new_task = copy.copy(object_parent)
+    new_task.type_task = type_task or object_parent.type_task
     new_task.task_hash = uuid.uuid4()
     new_task.legacy_code = None
     new_task.system_prefix = None
@@ -187,16 +191,42 @@ def delegate_child_task(object_parent, office_correspondent):
 def get_offices_to_pay(tasks):
     return [OfficeToPaySerializer(task.office).data for task in tasks]    
 
+
 def get_clients_to_pay():
     pass
+
 
 def get_last_parent(task):
     if task.parent:
         return get_last_parent(task.parent)
     return task
 
+
 def has_task_parent(task):
     if task.parent:
         return True
     return False
 
+
+def set_instance_values(instance, service_price_table):
+    if instance.amount != service_price_table.value:
+        return recalculate_values(service_price_table.value,
+                                  instance.amount_to_pay,
+                                  instance.amount_to_receive,
+                                  instance.amount,
+                                  instance.rate_type_pay,
+                                  instance.rate_type_receive)
+
+    return Decimal(service_price_table.value_to_pay.amount), Decimal(service_price_table.value_to_receive.amount)
+
+
+def get_status_to_filter(option):
+    default_status = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN,
+                      TaskStatus.DONE, TaskStatus.ERROR]
+    status_dict = {
+        'A': [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED],
+        'D': [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED],
+        'CA': [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE, TaskStatus.OPEN, TaskStatus.ACCEPTED,
+               TaskStatus.DONE, TaskStatus.RETURN, TaskStatus.REFUSED_SERVICE, TaskStatus.ERROR]
+    }
+    return sorted(list(status.value for status in status_dict.get(option.upper(), default_status)))

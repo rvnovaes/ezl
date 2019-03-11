@@ -3,24 +3,27 @@ from django.db.models import Q
 from financial.models import ServicePriceTable, CategoryPrice
 from financial.tables import ServicePriceTableTaskTable
 from task.models import TaskStatus, TypeTask
-from decimal import Decimal
+from financial.filters import ServicePriceTableDefaultFilter, ServicePriceTableOfficeFilter, \
+    ServicePriceTableTypeTaskFilter
 
 PARENT_STATUS = {
-    TaskStatus.REQUESTED: TaskStatus.OPEN,
-    TaskStatus.ACCEPTED_SERVICE: TaskStatus.ACCEPTED,
-    TaskStatus.REFUSED_SERVICE: TaskStatus.REQUESTED,
-    TaskStatus.OPEN: TaskStatus.ACCEPTED,
     TaskStatus.ACCEPTED: TaskStatus.ACCEPTED,
-    TaskStatus.REFUSED: TaskStatus.REQUESTED,
-    TaskStatus.DONE: TaskStatus.ACCEPTED,
-    TaskStatus.RETURN: TaskStatus.ACCEPTED,
+    TaskStatus.ACCEPTED_SERVICE: TaskStatus.ACCEPTED,
     TaskStatus.BLOCKEDPAYMENT: TaskStatus.DONE,
+    TaskStatus.DONE: TaskStatus.ACCEPTED,
     TaskStatus.FINISHED: TaskStatus.DONE,
+    TaskStatus.OPEN: TaskStatus.ACCEPTED,
+    TaskStatus.REFUSED: TaskStatus.REQUESTED,
+    TaskStatus.REFUSED_SERVICE: TaskStatus.REQUESTED,
+    TaskStatus.REQUESTED: TaskStatus.OPEN,
+    TaskStatus.RETURN: TaskStatus.ACCEPTED,
 }
 
 CHILD_STATUS = {
-    TaskStatus.REQUESTED: TaskStatus.REFUSED,
     TaskStatus.OPEN: TaskStatus.REQUESTED,
+    TaskStatus.REFUSED: TaskStatus.REFUSED,
+    TaskStatus.REFUSED_SERVICE: TaskStatus.REFUSED,
+    TaskStatus.REQUESTED: TaskStatus.REFUSED,
     TaskStatus.RETURN: TaskStatus.RETURN,
 }
 
@@ -60,12 +63,7 @@ CHILD_RECIPIENTS = {
 def get_parent_status(child_status):
     """
     Retorna o status da OS pai de acordo com o status da OS filha informado no parametro
-    :param child_status:vou liberar o código agora
-￼￼￼￼￼
-11:03 AM
-que já da pra delegar pro ezlog
-11:03 AM
-porém ainda tem que criar a tabela de preços na mão
+    :param child_status:
     :return:
     """
     return PARENT_STATUS.get(child_status)
@@ -124,74 +122,43 @@ class CorrespondentsTable(object):
     def get_cheapest_correspondent(self):        
         correspondents = self.correspondents_qs
         if self.qs:
-            # Foi feito desta forma por conta de performance --Nao utilizar o sorted pois aumenta muito o tempo de execucao--
-            return max(self.qs.filter(value=self.qs.earliest('value').value), key=lambda k: k.office_rating if k.office_rating else '0.00')
+            # Feito desta forma por conta de performance (Nao utilizar o sorted pois aumenta muito o tempo de execucao)
+            return max(self.qs.filter(value=self.qs.earliest('value').value),
+                       key=lambda k: k.office_rating if k.office_rating else '0.00')
         return None
 
     def get_correspondents_qs(self):
         task = self.task
         type_task = self.type_task
         type_task_main = self.type_task_main
-        if type_task:
-            complement = task.movement.law_suit.court_district_complement
-            city = task.movement.law_suit.city
-            court_district = task.movement.law_suit.court_district
-            state = court_district.state if court_district else None
-            if not state:
-                state = city.state if city else None
-            client = task.movement.law_suit.folder.person_customer
-            offices_related = task.office.offices.all()
+        if type_task or type_task_main:
+            data = {
+                'task': task,
+                'type_task': type_task,
+                'type_task_main': type_task_main,
+                'complement': task.movement.law_suit.court_district_complement,
+                'city': task.movement.law_suit.city,
+                'court_district': task.movement.law_suit.court_district,
+                'state': getattr(task.movement.law_suit.court_district, 'state',
+                                 None) or getattr(task.movement.law_suit.city, 'state', None),
+                'client': task.movement.law_suit.folder.person_customer,
+                'offices_related': task.office.offices.all()
+            }
             networks = task.office.network_members.all()
             network_office_id_list = []
             for net in networks:
-                network_office_id_list.extend([x.id for x in net.members.all().order_by('id') if x.id != task.office.id])
+                network_office_id_list.extend([x.id for x in
+                                               net.members.all().order_by('id') if x.id != task.office.id])
             network_office_id_list = list(set(network_office_id_list))
-            qs = ServicePriceTable.objects.filter(
-                Q(
-                    Q(office=task.office) |
-                    Q(
-                        Q(policy_price__category=CategoryPrice.PUBLIC), ~Q(office=task.office)
-                    ) |
-                    Q(office_id__in=network_office_id_list)
-                ),
-                Q(
-                    Q(
-                        Q(  # para escritorios nao publicos seleciona os precos que
-                            # estao vinculados aos tipos de servico da tabaela do
-                            # proprio escritorio
-                            Q(type_task=type_task) | Q(type_task=None)),
-                        Q(office=task.office)
-                    ) |
-                    Q(  # para escritorios publicos seleciona os precos que estao
-                        # vinculados aos tipos de servico vinculados ao tipo de
-                        # servico padrao
-                        Q(type_task__type_task_main__in=type_task_main),
-                        Q(policy_price__category=CategoryPrice.PUBLIC)) |
-                    Q(
-                        # para escritórios que pertencem as mesmas redes do escritório da task
-                        # selecionar os preços que estão vinculados aos tipos de serviço vinculado
-                        # ao tipo de serviço padrão
-                        Q(Q(type_task__type_task_main__in=type_task_main) | Q(type_task__isnull=True)),
-                        Q(office_network__in=networks),
-                        ~Q(office=task.office)
-                    )
-                ),
-                Q(
-                    Q(office_correspondent__in=offices_related) |
-                    Q(
-                        Q(policy_price__category=CategoryPrice.PUBLIC), ~Q(office_correspondent=task.office)
-                    ) |
-                    Q(office_correspondent__in=network_office_id_list)
-                ),
-                Q(
-                    Q(office_correspondent__is_active=True) | Q(office_correspondent__isnull=True)
-                ),
-                Q(Q(court_district=court_district) | Q(court_district=None)),
-                Q(Q(state=state) | Q(state=None)),
-                Q(Q(court_district_complement=complement) | Q(court_district_complement=None)),
-                Q(Q(city=city) | Q(city=None)),
-                Q(Q(client=client) | Q(client=None)),
-                Q(is_active=True))
+            data['networks'] = networks
+            data['network_office_id_list'] = network_office_id_list
+
+            qs = None
+            for filter_class in [ServicePriceTableDefaultFilter, ServicePriceTableOfficeFilter,
+                                 ServicePriceTableTypeTaskFilter]:
+                qs = filter_class(data=data, queryset=qs).get_delegation_queryset()
+
+            qs = qs or ServicePriceTable.objects.none()
             qs_values = qs.values('pk', 'office_id', 'type_task__office_id',
                                   'type_task')
             # cria uma lista e ids que tenham tabelas de preço com preços vinculados à tipos de serviço de outros
@@ -218,11 +185,7 @@ class CorrespondentsTable(object):
         if task.parent:
             self.type_task_qs = TypeTask.objects.filter(office=self.office_session, type_task_main__in=type_task_main)
             if type_task.office != self.office_session:
-                if self.type_task_qs.count() == 1:
-                    type_task = self.type_task_qs.first()
-                    type_task_main = type_task.main_tasks
-                else:
-                    type_task = None
+                type_task = None
         return type_task, type_task_main
 
     def get_type_task_field(self):
@@ -243,10 +206,3 @@ class CorrespondentsTable(object):
             )
 
         return type_task_field
-
-    def update_type_task(self, type_task):
-        self.task.type_task = type_task
-        self.task.save(**{'skip_signal': True, 'skip_mail': True})
-        self.type_task = type_task
-
-        return type_task

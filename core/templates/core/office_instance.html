@@ -2,8 +2,18 @@
 {% load static %}
 {% block sidebar %}
 {% endblock %}
-{% block containner %}
-    {% include 'core/widgets/office_select.html' with offices=request.user.person.offices.active_offices %}
+{% block containner %}    
+    {% if request.user.person.offices.active_offices %}        
+        {% include 'core/widgets/office_select.html' with offices=request.user.person.offices.active_offices %}
+    {% else %}
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col col-md-12 alert alert-info">
+                    <span>Você ainda não foi aceito por um escritório!</span>
+                </div>            
+            </div>
+        </div>        
+    {% endif %}
 {% endblock %}
 {% block extra_stylesheets %}
     <style>
