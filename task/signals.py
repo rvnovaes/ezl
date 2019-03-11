@@ -140,7 +140,7 @@ def create_or_update_chat(sender, instance, created, **kwargs):
 def set_status_by_workflow(instance, custom_settings):
     workflow_status = custom_settings.task_workflows.filter(
         task_from=instance.task_status).first()
-    if workflow_task:
+    if workflow_status:
         instance.task_status = workflow_status.task_to
         instance.person_executed_by = workflow_status.responsible_user.person
         instance.person_distributed_by = workflow_status.responsible_user.person
