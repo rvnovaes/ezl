@@ -330,7 +330,8 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
                                       type_lawsuit=self.type_lawsuit,
                                       office=self.office,
                                       folder__folder_number=self.folder.folder_number,
-                                      folder__person_customer=self.folder.person_customer):
+                                      folder__person_customer=self.folder.person_customer,
+                                      is_active=True):
                 raise ValidationError({
                     NON_FIELD_ERRORS: [
                         'Já existe outro processo com o mesmo número, do mesmo tipo para a mesma instância cadastrado '

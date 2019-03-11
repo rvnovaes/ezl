@@ -6,6 +6,7 @@ from etl.advwin_ezl.factory import InvalidObjectFactory, INVALID_ORGAN
 from etl.utils import get_clients_to_import
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
 from etl.utils import get_message_log_default, save_error_log
+import json
 
 
 class LawsuitETL(GenericETL):
@@ -201,25 +202,25 @@ class LawsuitETL(GenericETL):
                         'opposing_party', 'office', 'city', 'court_district_complement', 'type_lawsuit'
                     ])
                 else:
-                    insert_records.append(self.model(
-                        folder=folder,
-                        person_lawyer=person_lawyer,
-                        instance=instance,
-                        court_district=court_district,
-                        court_division=court_division,
-                        organ=organ,
-                        law_suit_number=law_suit_number,
-                        alter_user=user,
-                        create_user=user,
-                        is_active=True,
-                        is_current_instance=is_current_instance,
-                        legacy_code=legacy_code,
-                        system_prefix=LegacySystem.ADVWIN.value,
-                        opposing_party=opposing_party,
-                        office=default_office,
-                        city=city,
-                        court_district_complement=court_district_complement,
-                        type_lawsuit=type_lawsuit))
+                    insert_records.append(json.dumps({
+                        'folder_id': folder.id if folder else None,
+                        'person_lawyer_id': person_lawyer.id if person_lawyer else None,
+                        'instance_id': instance.id if instance else None,
+                        'court_district_id': court_district.id if court_district else None,
+                        'court_division_id': court_division.id if court_division else None,
+                        'organ_id': organ.id if organ else None,
+                        'law_suit_number': law_suit_number,
+                        'alter_user_id': user.id,
+                        'create_user_id': user.id,
+                        'is_active': True,
+                        'is_current_instance': is_current_instance,
+                        'legacy_code': legacy_code,
+                        'system_prefix': LegacySystem.ADVWIN.value,
+                        'opposing_party': opposing_party,
+                        'office_id': default_office.id,
+                        'city_id': city.id if city else None,
+                        'court_district_complement': court_district_complement.id if court_district_complement else None,
+                        'type_lawsuit': type_lawsuit}, sort_keys=True))
                 self.debug_logger.debug(
                     "LawSuit,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s"
                     % (str(folder.id), str(person_lawyer.id), str(instance.id),
@@ -235,7 +236,10 @@ class LawsuitETL(GenericETL):
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)
         if insert_records:
-            self.model.objects.bulk_create(insert_records, batch_size=1000)
+
+            self.model.objects.bulk_create([
+                self.model(**json.loads(item)) for item in set(insert_records)
+            ], batch_size=1000)
 
 
 if __name__ == "__main__":
