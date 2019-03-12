@@ -36,22 +36,44 @@ class TypeTaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
 class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
 
     person_asked_by = serializers.HiddenField(default=PersonAskedByDefault())   
-    office_name = serializers.CharField(read_only=True)
-    executed_by_name = serializers.CharField(read_only=True)
-    type_task_name = serializers.CharField(read_only=True)
-    law_suit_number = serializers.CharField(read_only=True)
-    state = serializers.CharField(read_only=True)
-    court_district_name = serializers.CharField(read_only=True)
+    office_name = serializers.SerializerMethodField()
+    executed_by_name = serializers.SerializerMethodField()
+    type_task_name = serializers.SerializerMethodField()
+    law_suit_number = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+    court_district_name = serializers.SerializerMethodField()
+    external_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
         exclude = ('alter_date', 'system_prefix', 'survey_result', 'chat', 'company_chat', 'task_hash')
+    
+    def get_office_name(self, obj):
+        return obj.office.legal_name
+
+    def get_executed_by_name(self, obj): 
+        return obj.person_executed_by.legal_name if obj.person_executed_by else ''
+
+    def get_type_task_name(self, obj):
+        return obj.type_task.name
+
+    def get_law_suit_number(self, obj): 
+        return obj.lawsuit_number or ''
+
+    def get_state(self, obj):
+        return obj.court_district.state.initials if obj.court_district else ''
+    
+    def get_court_district_name(self, obj): 
+        return obj.court_district.name if obj.court_district else ''
 
     def validate_person_asked_by(self, value):
         if not value:
             raise serializers.ValidationError("O escritório da sessão não possui um usuário padrão. "
                                               "Entre em contato com o suporte")
         return value
+
+    def get_external_url(self, obj):
+        return 'providencias/external-task-detail/' + obj.task_hash.hex
 
     def validate_legacy_code(self, value):
         office = self.fields['office'].get_default()

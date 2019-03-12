@@ -1,4 +1,4 @@
-from .models import TypeTask, Task, Ecm, TypeTaskMain
+from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskStatus
 from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
     TypeTaskMainSerializer, CustomResultsSetPagination
 from .filters import TaskApiFilter, TypeTaskMainFilter
@@ -52,19 +52,6 @@ class EcmTaskViewSet(mixins.CreateModelMixin,
 @permission_classes((TokenHasReadWriteScope, ))
 class TaskViewSet(OfficeMixinViewSet, ApplicationView):
     office_corresp = Task.objects.filter(id=OuterRef('child')).order_by('-id')
-    queryset = Task.objects.annotate(
-        filho=Max('child'),
-        office_name=F('office__legal_name'),
-        type_task_name=F('type_task__name'),
-        law_suit_number=F('movement__law_suit__law_suit_number'),
-        state=F('movement__law_suit__court_district__state__initials'),
-        court_district_name=F('movement__law_suit__court_district__name')
-    ).annotate(
-        office_exec=Subquery(office_corresp.values('office__legal_name')[:1])
-    ).annotate(
-        executed_by_name=Coalesce('person_executed_by__legal_name', 'office_exec')
-    )
-
     filter_backends = (DjangoFilterBackend, OrderingFilter, )
     filter_class = TaskApiFilter
     pagination_class = CustomResultsSetPagination
@@ -77,6 +64,17 @@ class TaskViewSet(OfficeMixinViewSet, ApplicationView):
             return TaskCreateSerializer
         return TaskSerializer
 
+    def get_queryset(self):
+        queryset = Task.objects.all()
+        params = self.request.query_params
+        if params.getlist('office_id[]'):
+            queryset = queryset.filter(office_id__in=params.getlist('office_id[]'))
+        if params.getlist('person_executed_by_id[]'):
+            queryset = queryset.filter(person_executed_by_id__in=params.getlist('person_executed_by_id[]'))
+        if params.getlist('task_status[]'):
+            status_to_filter = params.getlist('task_status[]')
+            queryset = queryset.filter(task_status__in=[getattr(TaskStatus, status) for status in status_to_filter])            
+        return queryset
 
 @api_view(['GET'])
 @permission_classes((TokenHasReadWriteScope, ))
