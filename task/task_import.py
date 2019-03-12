@@ -284,8 +284,10 @@ class ImportFolder(ImportTask):
         self.folder = folder
 
     def _get_create_folder(self, defaults, **kwargs):
-        folder, created = Folder.objects.get_or_create(defaults=defaults,
-                                                       **kwargs)
+        folder = Folder.objects.filter(**kwargs).first()
+        if not folder:
+            folder, created = Folder.objects.get_or_create(defaults=defaults,
+                                                           **kwargs)
         self._set_folder(folder)
         return folder
 
