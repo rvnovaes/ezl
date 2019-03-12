@@ -68,11 +68,12 @@
 <script type="text/javascript">
     $(document).ready(function(){
         $('#fileupload').on('fileuploadstart', function(e, data){
-            $('#processing').modal('show');            
+            $('#processing').modal('show');
         });
 
         $('#fileupload').on('fileuploaddone', function(e, data){
-            $('#processing').modal('hide');            
-        });        
+            get_internal_ecms(data.result.task_id);
+            $('#processing').modal('hide');
+        });
     })
 </script>

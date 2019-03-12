@@ -281,7 +281,7 @@ class TaskDetail {
                             $('input[name=amount]').removeAttr('disabled');
                             $('#task_detail').unbind('submit').submit();            
                         }
-                    })
+                    });
                 }
         }        
     }
