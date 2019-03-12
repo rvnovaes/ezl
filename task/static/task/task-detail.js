@@ -110,15 +110,20 @@ class TaskDetail {
 
     setExecutionDateRequire(status) {
         if (this._elExecutionDate.length > 0) {
-            if (status === 'DONE'){
+            if (status === 'ACCEPTED'){
                 this._elExecutionDate.attr('required', 'required');
                 this._elExecutionDate.val('');
 
             }else{
                 this._elExecutionDate.removeAttr('required');
             }
+        }
+    }
+
+    checkExecutionDate(){
+        if (this._elExecutionDate.length > 0) {
             let input = this._elExecutionDate.get(0);
-            if (! input.checkValidity()) {
+            if (!input.checkValidity()) {
                 input.reportValidity();
                 return false;
             }
@@ -208,8 +213,8 @@ class TaskDetail {
         let taskStatus = value.id;
         this.validSurvey();
         this.makeRatingProccess(taskStatus);
-        this.setExecutionDateRequire(taskStatus);
-        this.showModalAction();                
+        this.checkExecutionDate(taskStatus);
+        this.showModalAction();
         this.formatModalAction(taskStatus);
         this.hideServicePriceTableAlert();
         this.configNotesField(taskStatus);
@@ -273,7 +278,6 @@ class TaskDetail {
 			            html: '<h4>Aguarde...</h4>',
                         onOpen: () => {
                             swal.showLoading();
-                            debugger;
                             $('input[name=amount]').removeAttr('disabled');
                             $('#task_detail').unbind('submit').submit();            
                         }
@@ -376,9 +380,12 @@ class TaskDetail {
     }    
 
     onClickRowServicePriceTable() {
+        $('.office_correspondent').click(function (e) {
+            e.stopPropagation();
+        });
         let self = this;
-        $("#correspondents-table tbody tr").on('click', function(){            
-            $("#servicepricetable-alert").addClass("hidden");            
+        $("#correspondents-table tbody tr").on('click', function(){
+            $("#servicepricetable-alert").addClass("hidden");
             let rowId = $(this).data('id');
             let amount = $(this).data('value').toString();
             let priceCategory = $(this).data('price-category');
@@ -441,6 +448,7 @@ class TaskDetail {
                 }
                 this.onKeypressAmountField()
             }
+	        this.setExecutionDateRequire(this.taskStatus);
         });
     }
 

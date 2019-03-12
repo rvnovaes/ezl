@@ -185,6 +185,7 @@ INSTALLED_APPS = [
     'import_export',
     'django_dbconn_retry',
     'rest_auth',
+    'simple_history',
 ]
 
 MIDDLEWARE = [
@@ -197,6 +198,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
     'core.middleware.ReviewRequestMiddleware',
 ]
 

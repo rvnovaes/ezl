@@ -18,7 +18,7 @@ from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from core.serializers import OfficeSerializer, AddressSerializer, ContactMechanismSerializer
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import ProtectedError, Q, F
+from django.db.models import ProtectedError, Q, F, Sum, Case, When, IntegerField
 from django.db import transaction, IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -41,11 +41,12 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     USER_CREATE_SUCCESS_MESSAGE, person_cpf_cnpj_already_exists
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
     OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser, CustomSettings, \
-    OfficeOffices
+    OfficeOffices, AreaOfExpertise
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
-from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, check_cpf_cnpj_exist
+from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, \
+    check_cpf_cnpj_exist, get_office_by_id
 from core.view_validators import create_person_office_relation, person_exists
 from core.mail import send_mail_sign_up
 from financial.models import ServicePriceTable
@@ -2446,15 +2447,20 @@ class TermsView(TemplateView):
 
 class OfficeProfileDataView(View):
     def get(self, request, *args, **kwargs):
-        office = get_office_session(request)
+        office_id = kwargs.get('pk', None)
+        office = get_office_by_id(office_id) if office_id else get_office_session(request)
         return JsonResponse(OfficeSerializer(office).data)
 
     def post(self, request, *args, **kwargs):
+        office_session = get_office_session(request)
+        office_id = kwargs.get('pk', None)
+        if office_id and office_session != get_office_by_id(office_id):
+            return JsonResponse({'error': 'Só é possível alterar o escritório da sessão'})
         office_serializer = OfficeSerializer(data=request.POST, instance=get_office_session(request))
         if office_serializer.is_valid():
             office_serializer.save()
             return JsonResponse(office_serializer.data)
-        return JsonResponse({'error': office_serializer.errors})            
+        return JsonResponse({'error': office_serializer.errors})
 
 
 class OfficeProfileView(TemplateView):
@@ -2465,43 +2471,70 @@ class OfficeProfileView(TemplateView):
     success_message = UPDATE_SUCCESS_MESSAGE
     object_list_url = 'office_list'
 
-    def get_context_data(self, **kwargs):        
-        self.object = get_office_session(self.request)
+    def get_context_data(self, **kwargs):
+        office_id = kwargs.get('pk', None)
+        office_session = get_office_session(self.request)
+        office_profile = get_office_by_id(office_id)
+        self.object = office_profile or office_session
+
         kwargs.update({
             'table':
-            AddressOfficeTable(self.object.get_address()),
+                AddressOfficeTable(self.object.get_address()),
             'table_members':
-            OfficeMembershipTable(
-                self.object.officemembership_set.filter(
-                    is_active=True,
-                    person__auth_user__isnull=False,
-                    person__auth_user__is_superuser=False).exclude(
+                OfficeMembershipTable(
+                    self.object.officemembership_set.filter(
+                        is_active=True,
+                        person__auth_user__isnull=False,
+                        person__auth_user__is_superuser=False
+                    ).exclude(
                         person__auth_user=self.request.user)),
             'table_offices':
-            OfficeTable(
-                Office.objects.get(pk=self.object.pk).offices.all().
-                order_by('legal_name')),
+                OfficeTable(self.object.offices.all().order_by('legal_name')),
             'table_contact_mechanism':
-            ContactMechanismOfficeTable(
-                self.object.contactmechanism_set.all()),
-            'table_billing_details': BillingDetailsTable(
-                self.object.billingdetails_office.all()),
+                ContactMechanismOfficeTable(self.object.contactmechanism_set.all()),
+            'table_billing_details':
+                BillingDetailsTable(self.object.billingdetails_office.all()),
         })
         data = super().get_context_data(**kwargs)
-        data['inviteofficeform'] = InviteForm(self.request.POST) \
-            if InviteForm(self.request.POST).is_valid() else InviteForm()
-        RequestConfig(
-            self.request, paginate=False).configure(
-                kwargs.get('table_members'))
-        RequestConfig(
-            self.request, paginate=False).configure(
-                kwargs.get('table_offices'))
-        data['office'] = get_office_session(self.request)
-        data['form_office'] = self.form_class(instance=data['office']) 
-        data['form_address'] = AddressForm()      
-        data['form_contact_mechanism'] = ContactMechanismForm()
-        data['form_billing_details'] = BillingAddressCombinedForm
+        data['office'] = self.object
+        data['is_session_office'] = False
+        if self.object == office_session:
+            data['is_session_office'] = True
+            data['inviteofficeform'] = InviteForm(self.request.POST) \
+                if InviteForm(self.request.POST).is_valid() else InviteForm()
+            RequestConfig(
+                self.request, paginate=False).configure(
+                    kwargs.get('table_members'))
+            RequestConfig(
+                self.request, paginate=False).configure(
+                    kwargs.get('table_offices'))
+            data['form_office'] = self.form_class(instance=data['office'])
+            data['form_address'] = AddressForm()
+            data['form_contact_mechanism'] = ContactMechanismForm()
+            data['form_billing_details'] = BillingAddressCombinedForm
+            data['areas_expertise'] = AreaOfExpertise.objects.annotate(
+                total_office=Sum(
+                    Case(
+                        When(offices=self.object, then=1),
+                        default=0, output_field=IntegerField()
+                    ))).values('id', 'area', 'total_office')
         return data
+
+
+class OfficeAreasOfExpertiseUpdateView(View):
+
+    def post(self, request, *args, **kwargs):
+        office = get_office_session(request)
+        areas_of_expoertise = AreaOfExpertise.objects.all()
+        list_areas = []
+        for area in areas_of_expoertise:
+            if int(request.POST.get('area_{}'.format(area.id), 0)) == 0:
+                area.offices.remove(office)
+            else:
+                list_areas.append(area.area)
+                area.offices.add(office)
+        return JsonResponse({'status': 'ok',
+                             'areas': list_areas}, status=200)
 
 
 class OfficeProfileUpdateView(UpdateView):
@@ -2511,8 +2544,17 @@ class OfficeProfileUpdateView(UpdateView):
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST, request.FILES, instance=get_office_session(request))
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('office_profile'))
+            try:
+                form.save()
+                return HttpResponseRedirect(reverse('office_profile'))
+            except IntegrityError as e:
+                if 'cpf_cnpj' in e.args[0]:
+                    error = {'errors': {'cpf_cnpj': ['Já existe um escritório com o CPF ou CNPJ informado']}}
+                else:
+                    error = {'errors': {'__all__': [e.__str__()]}}
+                return JsonResponse(error, status=500)
+            except Exception as e:
+                return JsonResponse({'errors': {'__all__': [e.__str__()]}}, status=500)
         else:
             return JsonResponse({'errors': form.errors}, status=400)
 

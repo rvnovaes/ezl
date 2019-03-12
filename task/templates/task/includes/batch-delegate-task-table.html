@@ -116,7 +116,7 @@
         }).promise().done(function() { 
             var tasksToGetPrice = true;
             while(tasksToGetPrice) {                
-                setCorrespondents(taskIds.splice(0, 2))
+                setCorrespondents(taskIds.splice(0, 2));
                 // tasksToGetPrice = false;
                 if (taskIds.length === 0) {
                     tasksToGetPrice = false;

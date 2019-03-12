@@ -9,6 +9,7 @@ import os
 from functools import wraps
 from localflavor.br.forms import BRCPFField, BRCNPJField
 import re
+from decimal import Decimal
 
 EZL_LOGGER = logging.getLogger('ezl')
 
@@ -120,7 +121,7 @@ def get_office_field(request, profile=None):
             initial = queryset.first().id
         else:
             queryset = request.user.person.offices.active_offices()
-            initial = none
+            initial = None
     except Exception as e:
         queryset = Office.objects.none()
         initial = None
@@ -180,6 +181,13 @@ def get_office_session(request):
     return office
 
 
+def get_office_by_id(office_id):
+    from core.models import Office
+    if office_id:
+        return Office.objects.filter(pk=office_id).first()
+    return None
+
+
 def get_domain(request):
     try:
         if request.META.get('HTTP_X_FORWARDED_HOST') or request.META.get(
@@ -202,6 +210,28 @@ def validate_xlsx_header(xls_file, headers):
                 [list(sheet.rows)[0] for sheet in wb.worksheets][0]))
         header_is_valid = set(headers).issubset(set(headers_in_file))
     return header_is_valid
+
+
+def field_has_changed(history, field_to_check):
+    if history.prev_record:
+        if getattr(history, 'amount'):
+            history.amount = Decimal("{:0.2f}".format(float(history.amount)))
+        delta = history.diff_against(history.prev_record)
+        for change in delta.changes:
+            if change.field == field_to_check:
+                return True
+    return False
+
+
+def get_history_changes(history):
+    changes = {}
+    if history.prev_record:
+        if getattr(history, 'amount'):
+            history.amount = Decimal("{:0.2f}".format(float(history.amount)))
+        delta = history.diff_against(history.prev_record)
+        for change in delta.changes:
+            changes[change.field] = change
+    return changes
 
 
 def cpf_is_valid(cpf):

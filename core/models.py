@@ -852,8 +852,17 @@ class AreaOfExpertise(models.Model):
     offices = models.ManyToManyField(Office, blank=True)
 
     class Meta:
-        verbose_name='Áreas de atuação'
+        verbose_name = 'Área de atuação'
+        verbose_name_plural = 'Áreas de atuação'
         ordering = ['area']
 
     def __str__(self):
         return self.area
+
+
+class BaseHistoricalModel(models.Model):
+    history_office = models.ForeignKey(Office, null=True, blank=True)
+    history_notes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
