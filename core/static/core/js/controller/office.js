@@ -6,18 +6,18 @@ class Office {
 		this._elLegalName = document.querySelector('#el-office-legal-name');		
 		this._elCpfCnpj = document.querySelector('#el-office-cpf-cnpj');
 		this._elBtnSaveOffice = $('#btn-save-office');
-		this._elImgLogo = $("#logo");
+		this._elImgLogo = $('#logo');
 		this.data;
 		this.onClickBtnEditOffice();		
 		this.setOffice();
 		this.onSubmitForm();
-	};	
-
-	get form() {
-		return $("#form-office");
 	}
 
-	get formData(){		
+	get form() {
+		return $('#form-office');
+	}
+
+	get formData(){
 		return this.form.serializeArray();
 	}
 
@@ -26,7 +26,7 @@ class Office {
 		let data = {};
 		$(formData ).each((index, obj) =>{
 		        data[obj.name] = obj.value;
-		    });		
+		    });
 		return data;
 	}	
 
@@ -44,16 +44,40 @@ class Office {
 
 	set cpfCnpj(value) {
 		this.data.cpf_cnpj = this._elCpfCnpj.textContent = value;
-	}	
+	}
+
+	static createListItens(listItems) {
+		let htmlListItens = '';
+		for (var i = 0; i < listItems.length; i++) {
+			htmlListItens += `<li>${listItems[i]}</li>`;
+		}
+		return htmlListItens;
+	}
+
+	static formatCpfCnpj(cpfCnpj){
+		if (cpfCnpj === '' || cpfCnpj === null){
+			return '';
+		}
+		cpfCnpj.replace(/[^0-9]+/g, '');
+		if (cpfCnpj.length <= 11) {
+			return `${cpfCnpj.substr(0,3)}.${cpfCnpj.substr(3,3)}.${cpfCnpj.substr(6,3)}-${cpfCnpj.substr(9)}`;
+		} else {
+			return `${cpfCnpj.substr(0,2)}.${cpfCnpj.substr(2,3)}.${cpfCnpj.substr(5,3)}/`+
+				`${cpfCnpj.substr(8,4)}-${cpfCnpj.substr(12)}`;
+		}
+	}
 
 
-	formatAttr(stringVariable) {
+	static formatAttr(stringVariable) {
 		return stringVariable.replace(/_([a-z])/g, function (m, w) {
 		    return w.toUpperCase();
 		});		
 	}
 
 	updateInstance(name, value) {
+		if (this.data.cpf_cnpj !== ''){
+			this.data.cpf_cnpj = Office.formatCpfCnpj(this.data.cpf_cnpj);
+		}
 		Object.keys(this.data).forEach((key)=>{
 		    if (key !== 'logo') {
                 this.updateAttr(key, this.data[key]);
@@ -64,13 +88,13 @@ class Office {
 	}
 
 	updateAttr(name, value) {
-		this[this.formatAttr(name)] = value;
+		this[Office.formatAttr(name)] = value;
 	}
 
 
 	setOffice(){
 		$.ajax({
-			url: '/office_profile_data/', 
+			url: `/office_profile_data/${this.office_id}`,
 			method: 'GET', 
 			success: (response) => {
 				this.data = response;
@@ -89,7 +113,6 @@ class Office {
 
 	onClickBtnEditOffice() {
 		this._elBtnEditOffice.on('click', ()=>{
-			console.log('aqui');
 			this.showOfficeForm();
 		});
 	}
@@ -134,16 +157,24 @@ class Office {
 						data: formdata ? formdata : this.form.serialize(),
 						success: (response)=> {
 							swal.close();
-							showToast('success', 'Perfil atualizado com sucesso', '', 3000, true);
 							this.setOffice();
 							this.hideOfficeForm();
 						}, 
 						error: (request, status, error)=> {
+                        	let errorList = []
 							Object.keys(request.responseJSON.errors).forEach((key)=>{
 								request.responseJSON.errors[key].forEach((e)=>{
-									swal.close();
-									showToast('error', this.form.find(`[name=${key}]`).siblings('label').text(), e, 0, false);
+									errorList.push(`error: ${e}`);
 								});
+							});
+                        	let htmlList = `<ul class='font-15 text-left'>${Office.createListItens(errorList)}</ul>`;
+							let html = `<h4>Ocorreram os seguintes erros ao atualizar o registro do escritório:</h4>
+										<br />${htmlList}`;
+                        	swal.close();
+                        	swal({
+								type: 'error',
+								title: 'Escritório',
+								html: html,
 							});
 						}
 					});
