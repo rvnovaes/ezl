@@ -231,7 +231,6 @@ class ServicePriceTable {
     }
 
     checkValue(){
-        debugger
         if (this.taskValue === ''){
             this.taskValue = '0,00';
         }
