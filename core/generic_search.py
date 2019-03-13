@@ -85,6 +85,12 @@ class GenericSearchFormat(object):
             'DecimalField': GenericSearchDecimal()
         }
 
+    def exclude_registry_invalid(self, search):
+        invalid_registry = get_invalid_data(self.model)
+        if invalid_registry:
+            search = search + '.filter(~Q(pk={}))'.format(invalid_registry.pk)
+        return search
+
     def despatch(self, office=False):
         params = []
         if not any([self.params, params]):
@@ -99,18 +105,20 @@ class GenericSearchFormat(object):
 
         try:
             office_field = self.model._meta.get_field('office')
+            table_string = "self.table_class({queryset})" 
             if self.model in [User, Office]:
-                search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
+                search = "self.model.objects.get_queryset().filter({params})"
             else:
                 if not office:
                     office = [get_office_session(self.request).id]
                 if not type(office) is list:
                     office = [office]
-                search = "self.table_class(self.model.objects.get_queryset(office={office}).filter({params}))".format(
+                search = "self.model.objects.get_queryset(office={office}).filter({params})".format(
                     office=office, params='{params}')
         except:
-            search = "self.table_class(self.model.objects.get_queryset().filter({params}))"
-
+            search = "self.model.objects.get_queryset().filter({params})"            
+        search = self.exclude_registry_invalid(search)
+        search = table_string.format(queryset=search)
         for field in self.model_type_fields:
             if field.get('type') in ['DateField', 'DateTimeField']:
                 value = self.params.get(field.get('name') +
@@ -132,11 +140,7 @@ class GenericSearchFormat(object):
                                                self.related_id))
 
         if not params:
-            return False
-
-        invalid_registry = get_invalid_data(self.model)
-        if invalid_registry:
-            params.append('~Q(pk={pk})'.format(pk=invalid_registry.pk))            
+            return False      
         return search.format(params=','.join(list(set(params))))        
 
     def format_params(self):

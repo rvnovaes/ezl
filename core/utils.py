@@ -269,10 +269,10 @@ def get_invalid_data(model):
     ) + '-INVÁLIDO'
     try:
         invalid_registry = model.objects.filter(
-            name=class_verbose_name_invalid).first()
+            name=class_verbose_name_invalid)
     except:
         invalid_registry = model.objects.filter(
-                legacy_code='REGISTRO-INVÁLIDO').earliest('pk')
+                legacy_code='REGISTRO-INVÁLIDO')
     if invalid_registry:
-        return invalid_registry                
+        return invalid_registry.earliest('pk')                
     return None
