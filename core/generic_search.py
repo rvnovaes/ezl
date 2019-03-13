@@ -4,7 +4,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from core.models import Office
 from financial.utils import remove_special_char
-from core.utils import get_office_session
+from core.utils import get_office_session, get_invalid_data
 from decimal import Decimal
 
 
@@ -134,7 +134,10 @@ class GenericSearchFormat(object):
         if not params:
             return False
 
-        return search.format(params=','.join(list(set(params))))
+        invalid_registry = get_invalid_data(self.model)
+        if invalid_registry:
+            params.append('~Q(pk={pk})'.format(pk=invalid_registry.pk))            
+        return search.format(params=','.join(list(set(params))))        
 
     def format_params(self):
         return dict(
