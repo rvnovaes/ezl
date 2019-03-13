@@ -1,10 +1,14 @@
+from django.contrib import messages
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from core.models import Person, OfficeRelGroup, CorePermissions
+from core.utils import get_office_session
 from task.models import Permissions
 from survey.models import SurveyPermissions
 from financial.models import FinancialPermissions
 from guardian.shortcuts import assign_perm, remove_perm
+from guardian.core import ObjectPermissionChecker
 
 GROUP_PERMISSIONS = {
     Person.ADMINISTRATOR_GROUP: (
@@ -112,3 +116,31 @@ def update_groups(group_name, name_to_search, office):
         else:
             group.name = '{}-{}'.format(group_name, office.id)
             group.save()
+
+
+class CustomPermissionRequiredMixin(PermissionRequiredMixin):
+    """
+    Customization of PermissionRequiredMixin class, using guardian methods
+
+    require_all_perms: if set true, all permissions passed on permission_required will be required
+    """
+    require_all_perms = False
+    login_url = '/'
+
+    def has_permission(self):
+        perms = self.get_permission_required()
+        checker = ObjectPermissionChecker(self.request.user)
+        user_has_perms = []
+        for permission in perms:
+            user_has_perms.append(checker.has_perm(permission, get_office_session(self.request)))
+
+        has_perms = self._check_perms(user_has_perms)
+        if not has_perms:
+            messages.add_message(self.request, messages.ERROR,
+                                 'Você não tem permissão para acessar o endereço solicitado.')
+        return has_perms
+
+    def _check_perms(self, user_has_perms):
+        if self.require_all_perms:
+            return False not in user_has_perms
+        return True in user_has_perms
