@@ -12,6 +12,7 @@ from etl.utils import get_message_log_default, save_error_log, get_clients_to_im
 from ezl import settings
 from lawsuit.models import Movement, Folder, CourtDistrict
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
+from task.utils import set_performance_place
 from etl.utils import get_message_log_default, save_error_log
 from etl.models import InconsistencyETL, Inconsistencies
 
@@ -236,12 +237,7 @@ class TaskETL(GenericETL):
                                     Inconsistencies.INVALIDCOURTDISTRICT)
                         })
                     else:
-                        if movement.law_suit.court_district_complement:
-                            performance_place = movement.law_suit.court_district_complement.name
-                        elif movement.law_suit.city:
-                            performance_place = movement.law_suit.city.name
-                        else:
-                            performance_place = movement.law_suit.court_district.name
+                        performance_place = set_performance_place(movement)
 
                 if task:
                     task.requested_date = requested_date

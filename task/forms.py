@@ -27,8 +27,8 @@ class TaskForm(BaseForm):
     class Meta:
         model = Task
         fields = [
-            'office', 'task_number', 'person_asked_by', 'person_company_representative', 'type_task', 'final_deadline_date', 'performance_place',
-            'description', 'is_active', 'legacy_code'
+            'office', 'task_number', 'person_asked_by', 'person_company_representative', 'type_task',
+            'final_deadline_date', 'performance_place', 'description', 'is_active', 'legacy_code'
         ]
 
     person_asked_by = forms.ModelChoiceField(

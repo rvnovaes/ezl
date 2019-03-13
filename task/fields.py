@@ -2,7 +2,7 @@ import json
 from django.contrib.postgres.forms import JSONField
 from django.db.models.fields import NOT_PROVIDED
 from import_export.fields import Field
-from task.messages import *
+from task.messages import columns_not_available, record_not_found, incorrect_natural_key, column_error, required_column
 from task.utils import self_or_none
 
 
@@ -27,7 +27,7 @@ class CustomFieldImportExport(Field):
         try:
             value = data[self.column_name]
         except KeyError:
-            raise KeyError(COLUMNS_NOT_AVAILABLE.format(self.column_name, list(data)))
+            raise KeyError(columns_not_available(self.column_name, list(data)))
 
         try:
             old_value = value
@@ -36,16 +36,16 @@ class CustomFieldImportExport(Field):
                 column_property = self.column_name_dict.get(self.column_name)
                 if column_property and column_property.get('required'):
                     if old_value and not value:
-                        raise ValueError(RECORD_NOT_FOUND.format(self.column_name))
+                        raise ValueError(record_not_found(self.column_name))
                 if old_value not in self.empty_values and column_property:
-                    data['warnings'].append([INCORRECT_NATURAL_KEY.format(column_property.get('verbose_name'),
-                                                                          self.column_name,
-                                                                          old_value)])
+                    data['warnings'].append([incorrect_natural_key(column_property.get('verbose_name'),
+                                                                   self.column_name,
+                                                                   old_value)])
         except ValueError as e:
             column_name = self.column_name_dict.get(self.column_name, self.column_name)
             if not column_name == self.column_name:
                 column_name = column_name.get('column_name')
-            raise ValueError(COLUMN_ERROR.format(column_name, e))
+            raise ValueError(column_error(column_name, e))
 
         if value in self.empty_values and self.default != NOT_PROVIDED:
             if callable(self.default):
@@ -71,4 +71,4 @@ class CustomFieldImportExport(Field):
                     getattr(obj, attrs[-1]).set(cleaned)
             if self.column_name_dict.get(attrs[-1], False) and \
                     self.column_name_dict[attrs[-1]]['required'] and not getattr(obj, attrs[-1]):
-                raise ValueError(REQUIRED_COLUMN.format(self.column_name))
+                raise ValueError(required_column(self.column_name_dict.get(self.column_name, {}).get('column_name')))
