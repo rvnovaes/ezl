@@ -293,7 +293,9 @@ class AbstractPerson(Audit, LegacyCode):
         return self.contact_mechanism_by_type('telefone')
 
     def get_emails(self):
-        emails = set(self.contact_mechanism_by_type('e-mail', formated=False))
+        emails = self.contact_mechanism_by_type('e-mail', formated=False)
+        emails = self.contact_mechanism_by_type('email', formated=False)
+        emails = set(emails)
         if (self.auth_user and self.auth_user.email
                 and self.auth_user.email.strip()):
             emails.add(self.auth_user.email.strip())
@@ -850,7 +852,8 @@ class AreaOfExpertise(models.Model):
     offices = models.ManyToManyField(Office, blank=True)
 
     class Meta:
-        verbose_name='Áreas de atuação'
+        verbose_name = 'Área de atuação'
+        verbose_name_plural = 'Áreas de atuação'
         ordering = ['area']
 
     def __str__(self):
@@ -863,5 +866,3 @@ class BaseHistoricalModel(models.Model):
 
     class Meta:
         abstract = True
-
-

@@ -7,7 +7,8 @@ from django.core.urlresolvers import reverse_lazy, reverse
 from django.core.validators import ValidationError
 from django.views.generic import View
 # project imports
-from django.db.models import ProtectedError
+from django.db.models import ProtectedError, CharField, Value as V, Q
+from django.db.models.functions import Concat
 from django.http import HttpResponseRedirect
 from django.http.response import JsonResponse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -27,7 +28,6 @@ from .tables import (MovementTable, FolderTable, LawSuitTable, CourtDistrictTabl
 from core.views import remove_invalid_registry, PopupMixin
 from django.core.cache import cache
 from dal import autocomplete
-from django.db.models import Q
 from core.views import CustomLoginRequiredView, TypeaHeadGenericSearch
 from core.utils import get_office_session, filter_valid_choice_form
 
@@ -795,12 +795,13 @@ class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
     def get_data(module, model, field, q, office, forward_params, extra_params,
                  *args, **kwargs):
         data = []
-        court_districts = CourtDistrict.objects.filter(
-            **
-            forward_params) if forward_params else CourtDistrict.objects.all()
+        qs = CourtDistrict.objects.annotate(
+            court_district_str=Concat(
+                'name', V(' ('), 'state__initials', V(')'),
+                output_field=CharField()))
+        court_districts = qs.filter(**forward_params) if forward_params else qs.all()
         court_districts = court_districts.filter(
-            Q(name__unaccent__icontains=q)
-            | Q(state__initials__unaccent__icontains=q))
+            Q(court_district_str__unaccent__icontains=q))
         for court_district in court_districts:
             data.append({
                 'id': court_district.id,
@@ -811,13 +812,15 @@ class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
 
 class CourtDistrictSelect2Autocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True))
+        qs = filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)).annotate(
+            court_district_str=Concat(
+                'name', V(' ('), 'state__initials', V(')'),
+                output_field=CharField()))
         states = self.forwarded.get('state', None)
         if states:
             qs = qs.filter(state__in=states)
         if self.q:
-            filters = Q(name__unaccent__icontains=self.q)
-            filters |= Q(state__initials__unaccent__icontains=self.q)
+            filters = Q(court_district_str__unaccent__icontains=self.q)
             qs = qs.filter(filters)
         return qs
 

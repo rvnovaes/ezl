@@ -176,7 +176,7 @@ def workflow_send_mail(sender, instance, created, **kwargs):
                                      instance,
                                      status_to_show.send_mail_template.template_id)
                 else:
-                    if not getattr(instance, '_skip_mail') and instance.__previous_status != instance.task_status:
+                    if instance.__previous_status != instance.task_status:
                         persons_to_receive = []
                         mail_list = []
                         person_recipient_list = status_to_show.mail_recipients
@@ -299,7 +299,7 @@ def change_status(sender, instance, **kwargs):
         instance.__previous_status) or TaskStatus.INVALID
 
     if new_status is not previous_status:
-        if new_status is TaskStatus.REQUESTED:
+        if new_status is TaskStatus.REQUESTED and not instance.requested_date:
             instance.requested_date = now_date
         if new_status is TaskStatus.ACCEPTED_SERVICE:
             instance.acceptance_service_date = now_date
