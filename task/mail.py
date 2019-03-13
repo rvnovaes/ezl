@@ -246,6 +246,7 @@ class TaskReturnMailTemplate(object):
 
 class TaskMail(object):
     def __init__(self, email, task, template_id, by_person=None):
+        logger.error('PASSEI AQUI PARA A OS {}-{}'.format(task.pk, task.office))
         self.sg = sendgrid.SendGridAPIClient(
             apikey=settings.EMAIL_HOST_PASSWORD
         )
@@ -254,6 +255,7 @@ class TaskMail(object):
         self.email = [{"email": email_address} for email_address in list(set(email))]
         self.template_id = template_id
         self.email_status = {
+            task_models.TaskStatus.REQUESTED: TaskOpenMailTemplate,
             task_models.TaskStatus.REFUSED_SERVICE: TaskRefusedServiceMailTemplate,
             task_models.TaskStatus.REFUSED: TaskRefusedMailTemplate,
             task_models.TaskStatus.RETURN: TaskReturnMailTemplate,
@@ -270,6 +272,7 @@ class TaskMail(object):
         if settings.DEFAULT_TO_EMAIL:
             to_email = [{"email": settings.DEFAULT_TO_EMAIL}]
             original_recipient = self.email
+
         self.data = {
             "personalizations": [{
                 "to": to_email,
