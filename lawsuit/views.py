@@ -1059,7 +1059,8 @@ class TypeaHeadCourtDistrictComplementSearch(TypeaHeadGenericSearch):
 class CourtDistrictComplementSelect2Autocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         court_district = self.forwarded.get('court_district', None)
-        qs = filter_valid_choice_form(CourtDistrictComplement.objects.filter(is_active=True))
+        qs = filter_valid_choice_form(CourtDistrictComplement.objects.filter(
+            is_active=True, office=get_office_session(self.request)))
         if court_district:
             qs = qs.filter(court_district_id=court_district)
         if self.q:
