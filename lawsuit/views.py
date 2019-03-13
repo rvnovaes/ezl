@@ -843,8 +843,9 @@ class FolderAutocomplete(TypeaHeadGenericSearch):
 
 
 class FolderSelect2Autocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
+    def get_queryset(self):        
         law_suit_id = self.forwarded.get('task_law_suit_number', None)
+        person_customer_id = self.forwarded.get('person_customer', None)
         law_suit = None
         if law_suit_id:
             law_suit = LawSuit.objects.filter(id=law_suit_id).first()
@@ -856,6 +857,8 @@ class FolderSelect2Autocomplete(autocomplete.Select2QuerySetView):
                 filters = Q(person_customer__legal_name__unaccent__istartswith=self.q)
                 filters |= Q(folder_number__startswith=self.q)
                 qs = qs.filter(is_active=True).filter(filters)
+        if person_customer_id:
+            qs = qs.filter(person_customer_id=person_customer_id)
         return qs
 
     def get_result_label(self, result):

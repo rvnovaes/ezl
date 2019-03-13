@@ -126,7 +126,7 @@ class TaskBulkCreateForm(TaskCreateForm):
     folder_number = forms.ModelChoiceField(label='Nº da Pasta',
                                            required=False,
                                            widget=MDSelect(url='/processos/folder_autocomplete_2',
-                                                           forward=['task_law_suit_number']),
+                                                           forward=['task_law_suit_number', 'person_customer']),
                                            queryset=Folder.objects.all())
     movement = forms.ModelChoiceField(label='Movimentação',
                                       required=False,
