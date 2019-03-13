@@ -151,6 +151,10 @@ class ServicePriceTable {
         return this.elTaskValue.val();
     }
 
+    set taskValue(value){
+        return this.elTaskValue.val(value);
+    }
+
     get taskValueToPay(){
         return this.elTaskValueToPay.val();
     }
@@ -208,6 +212,7 @@ class ServicePriceTable {
 
     onSaveSubmit() {
         $('[type=submit]').on('click', (el)=> {
+            this.checkValue();
             this.validatePolicyPrice(false);
             if (this.formErrors.length > 0){
                 el.preventDefault();
@@ -223,6 +228,12 @@ class ServicePriceTable {
                 this.taskValueToReceive = this.taskValue;
             }
         });
+    }
+
+    checkValue(){
+        if (this.taskValue === ''){
+            this.taskValue = '0,00';
+        }
     }
 
     validatePolicyPrice(showAlert) {
