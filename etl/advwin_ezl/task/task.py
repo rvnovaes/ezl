@@ -255,7 +255,6 @@ class TaskETL(GenericETL):
                     task.execution_date = execution_date
                     task.blocked_payment_date = blocked_payment_date
                     task.finished_date = finished_date
-                    task.requested_date = requested_date
                     task.movement = movement
                     task.performance_place = performance_place
                     if task.task_status == TaskStatus.ERROR.value and status_code_advwin != TaskStatus.ERROR:
@@ -266,7 +265,7 @@ class TaskETL(GenericETL):
                     update_fields = [
                         'requested_date', 'final_deadline_date', 'description', 'task_status', 'alter_user',
                         'person_asked_by', 'type_task', 'refused_date', 'execution_date', 'blocked_payment_date',
-                        'finished_date', 'requested_date', 'movement', 'performance_place'
+                        'finished_date', 'movement', 'performance_place'
                     ]
 
                     task.save(update_fields=update_fields, skip_signal=True)

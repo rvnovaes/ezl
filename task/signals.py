@@ -299,7 +299,7 @@ def change_status(sender, instance, **kwargs):
         instance.__previous_status) or TaskStatus.INVALID
 
     if new_status is not previous_status:
-        if new_status is TaskStatus.REQUESTED:
+        if new_status is TaskStatus.REQUESTED and not instance.requested_date:
             instance.requested_date = now_date
         if new_status is TaskStatus.ACCEPTED_SERVICE:
             instance.acceptance_service_date = now_date
