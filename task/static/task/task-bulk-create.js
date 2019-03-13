@@ -454,6 +454,10 @@ class TaskBulkCreate {
                         this.city = city;
                     }
                     this.enableOnChange = true
+                } else {
+                    this.courtDistrict = this.nullData;
+                    this.city = this.nullData;
+                    this.courtDistrictComplement = this.nullData
                 }
             }
         });
@@ -481,9 +485,9 @@ class TaskBulkCreate {
     }
 
 	onChangePersonCustomer(){
-	    this.elInputPersonCustomer.on('change',()=> {
+	    this.elInputPersonCustomer.on('change',()=> {            
 	        if(this.enableOnChange){
-	            let personCustomer = this.elFolderNumber.select2('data')[0].person_customer;
+	            let personCustomer = this.elFolderNumber.select2('data')[0].id;
                 if (personCustomer && personCustomer.id !== parseInt(this.personCustomer)){
                     this.folderNumber = this.nullData;
                 }
