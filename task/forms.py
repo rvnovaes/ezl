@@ -6,7 +6,7 @@ from django_file_form.forms import MultipleUploadedFileField
 
 from core.models import Person, ImportXlsFile
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
-from core.widgets import MDDateTimepicker, MDDatePicker, TypeaHeadForeignKeyWidget, MDSelect
+from core.widgets import MDDateTimepicker, MDSelect
 from core.forms import BaseForm, XlsxFileField
 from lawsuit.models import CourtDistrict, CourtDistrictComplement, City, Movement, LawSuit, Folder
 from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer
@@ -232,6 +232,16 @@ class TaskToAssignForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['person_executed_by'].required = True
+
+
+class TaskChangeAskedBy(BaseForm):
+    class Meta:
+        model = Task
+        fields = ['person_asked_by']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['person_asked_by'].required = True
 
 
 class TypeTaskMainForm(forms.ModelForm):

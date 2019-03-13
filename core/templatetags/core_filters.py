@@ -119,7 +119,12 @@ def order_groups_by_office_name(request):
 
 @register.filter
 def get_correspondent(persons, office):
-    return persons.filter(auth_user__groups__name__startswith='Correspondente-{}'.format(office.pk))
+    return persons.correspondents(office_id=office.pk)
+
+
+@register.filter
+def get_requesters(persons, office):
+    return persons.requesters(office_id=office.pk)
 
 
 @register.filter

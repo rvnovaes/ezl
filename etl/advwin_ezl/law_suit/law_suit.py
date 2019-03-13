@@ -6,6 +6,7 @@ from etl.advwin_ezl.factory import InvalidObjectFactory, INVALID_ORGAN
 from etl.utils import get_clients_to_import
 from lawsuit.models import LawSuit, Folder, Instance, CourtDistrict, CourtDivision
 from etl.utils import get_message_log_default, save_error_log
+import json
 
 
 class LawsuitETL(GenericETL):
@@ -75,7 +76,6 @@ class LawsuitETL(GenericETL):
 
     @validate_import
     def config_import(self, rows, user, rows_count, default_office, log=False):
-        insert_records = []
         for row in rows:
             rows_count -= 1
 
@@ -201,7 +201,7 @@ class LawsuitETL(GenericETL):
                         'opposing_party', 'office', 'city', 'court_district_complement', 'type_lawsuit'
                     ])
                 else:
-                    insert_records.append(self.model(
+                    obj = self.model(
                         folder=folder,
                         person_lawyer=person_lawyer,
                         instance=instance,
@@ -219,7 +219,9 @@ class LawsuitETL(GenericETL):
                         office=default_office,
                         city=city,
                         court_district_complement=court_district_complement,
-                        type_lawsuit=type_lawsuit))
+                        type_lawsuit=type_lawsuit
+                    )
+                    obj.save()
                 self.debug_logger.debug(
                     "LawSuit,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s"
                     % (str(folder.id), str(person_lawyer.id), str(instance.id),
@@ -234,9 +236,6 @@ class LawsuitETL(GenericETL):
                                               rows_count, e, self.timestr)
                 self.error_logger.error(msg)
                 save_error_log(log, user, msg)
-        if insert_records:
-            self.model.objects.bulk_create(insert_records, batch_size=1000)
-
 
 if __name__ == "__main__":
     LawsuitETL().import_data()

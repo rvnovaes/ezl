@@ -26,6 +26,9 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/batch/atribuir$',
         login_required(views.BatchTaskToAssignView.as_view()),
         name='batch_task_to_assign'),
+    url(r'^(?P<pk>[0-9]+)/batch/mudar_solicitante$',
+        login_required(views.BatchTaskChangeAskedByView.as_view()),
+        name='batch_task_change_asked_by'),
     url(r'^(?P<pk>[0-9]+)/batch/delegar$',
         login_required(views.BatchTaskToDelegateView.as_view()),
         name='batch_task_to_delegate'),        
@@ -105,7 +108,7 @@ urlpatterns = [
         login_required(views.GetTypeTaskMainCharacteristics.as_view()),
         name='typetaskmain_get'),
 
-    url(r'^batch_change_tasks/(?P<option>[A-Z]+)/', login_required(views.BatchChangeTasksView.as_view()), 
+    url(r'^batch_change_tasks(?:/(?P<option>[A-Z]+))?(?:/)?$', login_required(views.BatchChangeTasksView.as_view()),
         name='batch_change_tasks'),
 
     url(r'^task_to_company_representative/$', login_required(views.ViewTaskToPersonCompanyRepresentative.as_view()), 
