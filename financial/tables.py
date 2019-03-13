@@ -1,5 +1,6 @@
 from django.core.urlresolvers import reverse_lazy
 import django_tables2 as tables
+from django_tables2.utils import A
 
 from core.tables import CheckBoxMaterial
 from .models import CostCenter, ServicePriceTable, PolicyPrice
@@ -25,11 +26,12 @@ class ServicePriceTableTable(tables.Table):
     value = tables.Column(attrs={"editable": True, "mask": "money"})
 
     class Meta:
-        sequence = ('selection', 'office', 'office_correspondent', 'office_network', 'type_task', 'state', 'court_district',
-                    'court_district_complement', 'city', 'client', 'policy_price', 'value', 'is_active')
+        sequence = ('selection', 'office', 'office_correspondent', 'office_network', 'type_task', 'state',
+                    'court_district', 'court_district_complement', 'city', 'client', 'policy_price', 'value',
+                    'is_active')
         model = ServicePriceTable
-        fields = ('selection', 'office', 'office_correspondent', 'office_network', 'type_task', 'court_district', 'state', 'client',
-                  'policy_price', 'value', 'is_active', 'court_district_complement', 'city')
+        fields = ('selection', 'office', 'office_correspondent', 'office_network', 'type_task', 'court_district',
+                  'state', 'client', 'policy_price', 'value', 'is_active', 'court_district_complement', 'city')
         attrs = {"class": "table stable-striped table-bordered"}
         empty_text = "Não existe tabela de preços cadastrada."
         row_attrs = {
@@ -39,7 +41,11 @@ class ServicePriceTableTable(tables.Table):
 
 
 class ServicePriceTableTaskTable(tables.Table):
-    office_correspondent = tables.Column(orderable=False, verbose_name='Escritório correspondente')
+    office_correspondent = tables.LinkColumn('office_profile', args=[A('office_correspondent_id')], orderable=False,
+                                             verbose_name='Escritório correspondente',
+                                             attrs={
+                                                 'a': {'target': '_blank'}
+                                             })
     type_task = tables.Column(orderable=False, verbose_name='Tipo de serviço')
     office_network = tables.Column(orderable=False, verbose_name='Rede')
     court_district = tables.Column(orderable=False, verbose_name='Comarca')
@@ -52,8 +58,8 @@ class ServicePriceTableTaskTable(tables.Table):
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')
 
     class Meta:
-        sequence = ('office_correspondent', 'type_task', 'office_network', 'state', 'court_district', 'court_district_complement',
-                    'city', 'client', 'value', 'office_rating', 'office_return_rating')
+        sequence = ('office_correspondent', 'type_task', 'office_network', 'state', 'court_district',
+                    'court_district_complement', 'city', 'client', 'value', 'office_rating', 'office_return_rating')
         model = ServicePriceTable
         fields = ('office_correspondent', 'type_task', 'office_network', 'court_district', 'state', 'client', 'value',
                   'court_district_complement', 'office_rating', 'office_return_rating', 'city')
