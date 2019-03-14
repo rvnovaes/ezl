@@ -133,7 +133,7 @@ def get_office_field(request, profile=None):
 
 
 def get_office_related_office_field(request):
-    from core.models import Office, DefaultOffice
+    from core.models import Office
     from django import forms
     queryset = Office.objects.none()
     initial = None
@@ -273,18 +273,42 @@ def get_person_field(request, user=None):
     from core.models import Person
     from django import forms
 
+    initial = None
+    empty_label = ''
+    user_query = Q(auth_user__isnull=True)
     try:
         office = get_office_session(request)
-        initial = user.person.id if user else None
-        user_query = Q(Q(auth_user__isnull=True) | Q(auth_user=user)) if user else Q(auth_user__isnull=True)
+        if user:
+            initial = user.person.id
+            empty_label = None
+            user_query = Q(Q(auth_user__isnull=True) | Q(auth_user=user))
         queryset = office.persons.filter(is_active=True).filter(user_query)
     except Exception:
         queryset = Person.objects.none()
         initial = None
+        empty_label = ''
 
     return forms.ModelChoiceField(
         queryset=queryset,
-        empty_label='',
+        empty_label=empty_label,
         required=False,
         label=u'Pessoa',
         initial=initial)
+
+
+def set_user_default_office(default_office, user, alter_user=None):
+    from core.models import DefaultOffice
+    if not alter_user:
+        alter_user = user
+    obj = DefaultOffice.objects.filter(auth_user=user).first()
+    if obj:
+        obj.office = default_office
+        obj.alter_user = alter_user
+        obj.save()
+    else:
+        obj = DefaultOffice.objects.create(
+            auth_user=user,
+            office=default_office,
+            create_user=alter_user
+        )
+    return obj

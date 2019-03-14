@@ -72,7 +72,7 @@ def post_create_office(office):
 
 
 def create_person(instance, sender, **kwargs):
-    if not Person.objects.filter(auth_user=instance).first():
+    if not getattr(instance, 'person', None):
         Person.objects.create(
             legal_name=instance.first_name + ' ' + instance.last_name,
             name=instance.first_name + ' ' + instance.last_name,
@@ -86,6 +86,10 @@ def create_person(instance, sender, **kwargs):
             is_supplier=False,
             import_from_legacy=False,
             legacy_code='')
+    else:
+        person = instance.person
+        person.auth_user = instance
+        person.save()
 
 
 @receiver(post_save, sender=Invite)

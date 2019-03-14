@@ -199,7 +199,7 @@ class TaskDetailForm(ModelForm):
 
     def clean_amount(self):
         amount = (self.cleaned_data['amount']
-                             if self.cleaned_data['amount'] else str(0))
+                  if self.cleaned_data['amount'] else str(0))
         amount = amount.replace('.', '')
         amount = amount.replace(',', '.')
         return float(amount)

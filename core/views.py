@@ -46,7 +46,7 @@ from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
 from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, \
-    check_cpf_cnpj_exist, get_office_by_id
+    check_cpf_cnpj_exist, get_office_by_id, set_user_default_office
 from core.view_validators import create_person_office_relation, person_exists
 from core.mail import send_mail_sign_up
 from financial.models import ServicePriceTable
@@ -915,79 +915,99 @@ class UserListView(CustomLoginRequiredView, SingleTableViewMixin):
         return context
 
 
-class UserCreateView(AuditFormMixin, CreateView):
+class UserView(FormView):
     model = User
     form_class = UserCreateForm
     success_url = reverse_lazy('user_list')
     template_name = 'auth/user_create.html'
     success_message = CREATE_SUCCESS_MESSAGE
 
-    def get_success_url(self):
-        create_person
-        return reverse_lazy('user_list')
-
-    def form_valid(self, form):
-        form.save(commit=False)
-        offices_user = []
-        if form.is_valid:
-            have_group = False
-            for office in self.request.user.person.offices.all():
-                groups = self.request.POST.getlist('office_' + str(office.id),
-                                                   '')
-                if groups and not form.instance.id:
-                    form.save()
-                    for group_office in office.office_groups.all():
-                        if str(group_office.group.id) in groups:
-                            if office not in offices_user:
-                                offices_user.append(office)
-                            offices_user.append(office)
-                            group_office.group.user_set.add(form.instance)
-                            have_group = True
-            if not have_group:
-                messages.error(
-                    self.request,
-                    "O usuário deve pertencer a pelo menos um grupo")
-                return self.form_invalid(form)
-
-            for office in offices_user:
-                member, created = OfficeMembership.objects.get_or_create(
-                    person=form.instance.person,
-                    office=office,
-                    defaults={
-                        'create_user': self.request.user,
-                        'is_active': True
-                    })
-                if not created:
-                    # Caso o relacionamento exista mas esta inativo
-                    member.is_active = True
-                    member.save()
-
-            default_office = form.cleaned_data['office']
-            obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
-            if obj:
-                obj.office = default_office
-                obj.alter_user = self.request.user
-                obj.save()
-            else:
-                DefaultOffice.objects.create(
-                    auth_user=form.instance,
-                    office=default_office,
-                    create_user=self.request.user)
-
-        super(UserCreateView, self).form_valid(form)
-        return HttpResponseRedirect(self.success_url)
-
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
 
+    def form_valid(self, form):
+        if not form.instance.id:
+            form.save()
+        default_office = set_user_default_office(
+            form.cleaned_data['office'],
+            form.instance,
+            self.request.user
+        )
+        super().form_valid(form)
+        return HttpResponseRedirect(self.success_url)
 
-class UserUpdateView(AuditFormMixin, UpdateView):
-    model = User
+    def clean_groups(self, office):
+        groups = self.request.POST.getlist('office_' + str(office.id), '')
+        if not groups:
+            messages.error(
+                self.request,
+                "O usuário deve pertencer a pelo menos um grupo. Verifique as permissões do escritório %s"
+                % office)
+            return self.form_invalid(self.get_form())
+        return groups
 
+    def get_create_office_membership(self, office, user):
+        member, created = OfficeMembership.objects.get_or_create(
+            person=user.person,
+            office=office,
+            defaults={
+                'create_user': self.request.user,
+                'is_active': True
+            })
+        if not created:
+            # Caso o relacionamento exista mas esta inativo
+            member.is_active = True
+            member.save()
+
+    def manage_user_groups(self, office, groups, user):
+        for group_office in office.office_groups.all():
+            if str(group_office.group.id) in groups:
+                self.get_create_office_membership(office, user)
+                group_office.group.user_set.add(user)
+            else:
+                group_office.group.user_set.remove(user)
+        if not user.groups.all():
+            messages.error(
+                self.request,
+                "O usuário deve pertencer a pelo menos um grupo")
+            return self.form_invalid(self.get_form())
+        return user.groups.all()
+
+    def update_user_person(self, form):
+        person = form.cleaned_data.get('person')
+        if person:
+            old_person = form.instance.person if form.instance.id else None
+            if old_person:
+                old_person.auth_user = None
+                old_person.save()
+            form.instance.person = person
+
+
+class UserCreateView(UserView, AuditFormMixin, CreateView):
+
+    def get_success_url(self):
+        return reverse_lazy('user_list')
+
+    def form_valid(self, form):
+        form.save(commit=False)
+        if form.is_valid:
+            self.update_user_person(form)
+            office = get_office_session(self.request)
+            groups = self.clean_groups(office)
+            if groups and not form.instance.id:
+                form.save()
+                user_groups = self.manage_user_groups(office, groups, form.instance)
+
+        super().form_valid(form)
+        return HttpResponseRedirect(self.success_url)
+
+
+class UserUpdateView(UserView, AuditFormMixin, UpdateView):
     form_class = UserUpdateForm
     success_message = UPDATE_SUCCESS_MESSAGE
+    template_name = 'auth/user_form.html'
 
     def get_success_url(self):
         return self.request.META.get('HTTP_REFERER', reverse_lazy('user_list'))
@@ -1001,37 +1021,15 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         form.save(commit=False)
         checker = ObjectPermissionChecker(self.request.user)
         if form.is_valid:
+            self.update_user_person(form)
             for office in form.instance.person.offices.active_offices():
                 if checker.has_perm('group_admin', office):
-                    groups = self.request.POST.getlist(
-                        'office_' + str(office.id), '')
-                    if not groups:
-                        messages.error(
-                            self.request,
-                            "O usuário deve pertencer a pelo menos um grupo. Verifique as permissões do escritório %s"
-                            % office)
-                        return self.form_invalid(form)
-
-                    for group_office in office.office_groups.all():
-                        if str(group_office.group.id) in groups:
-                            group_office.group.user_set.add(form.instance)
-                        else:
-                            group_office.group.user_set.remove(form.instance)
+                    groups = self.clean_groups(office)
+                    user_groups = self.manage_user_groups(office, groups, form.instance)
 
             form.save()
-            default_office = form.cleaned_data['office']
-            obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
-            if obj:
-                obj.office = default_office
-                obj.alter_user = self.request.user
-                obj.save()
-            else:
-                DefaultOffice.objects.create(
-                    auth_user=form.instance,
-                    office=default_office,
-                    create_user=self.request.user)
 
-        super(UserUpdateView, self).form_valid(form)
+        super(UserView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
     def get_context_data(self, **kwargs):
@@ -1059,11 +1057,6 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         if cache.get('user_page'):
             self.success_url = cache.get('user_page')
         return super(UserUpdateView, self).post(request, *args, **kwargs)
-
-    def get_form_kwargs(self):
-        kw = super().get_form_kwargs()
-        kw['request'] = self.request
-        return kw
 
 
 class UserDeleteView(CustomLoginRequiredView, MultiDeleteView):
