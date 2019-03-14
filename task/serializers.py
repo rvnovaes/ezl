@@ -51,7 +51,9 @@ class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, Off
     def get_office_name(self, obj):
         return obj.office.legal_name
 
-    def get_executed_by_name(self, obj): 
+    def get_executed_by_name(self, obj):
+        if obj.get_child: 
+            return obj.get_child.office.legal_name            
         return obj.person_executed_by.legal_name if obj.person_executed_by else ''
 
     def get_type_task_name(self, obj):
