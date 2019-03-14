@@ -17,6 +17,7 @@ from django.conf import settings
 from retrying import retry
 import traceback
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -218,3 +219,33 @@ def set_instance_values(instance, service_price_table):
                                   instance.rate_type_receive)
 
     return Decimal(service_price_table.value_to_pay.amount), Decimal(service_price_table.value_to_receive.amount)
+
+
+def get_status_to_filter(option):
+    default_status = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN,
+                      TaskStatus.DONE, TaskStatus.ERROR]
+    status_dict = {
+        'A': [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED],
+        'D': [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED],
+        'CA': [TaskStatus.REQUESTED, TaskStatus.ACCEPTED_SERVICE, TaskStatus.OPEN, TaskStatus.ACCEPTED,
+               TaskStatus.DONE, TaskStatus.RETURN, TaskStatus.REFUSED_SERVICE, TaskStatus.ERROR]
+    }
+    return sorted(list(status.value for status in status_dict.get(option.upper(), default_status)))
+
+
+def set_performance_place(movement):
+    list_places = [movement.law_suit.court_district.state.initials,
+                   movement.law_suit.court_district.name]
+    if movement.law_suit.court_district_complement:
+        list_places.append(movement.law_suit.court_district_complement.name)
+    elif movement.law_suit.city:
+        list_places.append(movement.law_suit.city.name)
+    performance_place = ' - '.join(list_places)
+
+    return performance_place
+
+
+def get_default_customer(office):
+    if hasattr(office, 'customsettings'):
+        return office.customsettings.default_customer or None
+    return None

@@ -6,7 +6,7 @@ from .models import (TypeMovement, Instance, Movement, Folder, CourtDistrict, La
                      CourtDistrictComplement)
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
 from localflavor.br.forms import BRCNPJField
-from core.widgets import TypeaHeadForeignKeyWidget
+from core.widgets import TypeaHeadForeignKeyWidget, MDSelect
 from core.forms import BaseForm
 
 
@@ -121,34 +121,19 @@ class LawSuitForm(BaseForm):
                 is_active=True,
                 is_lawyer=True)).only('legal_name').order_by('name'),
         required=False)
-    court_district = forms.CharField(
-        label='Comarca',
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=CourtDistrict,
-            field_related='name',
-            name='court_district',
-            url='/processos/courtdistrict_autocomplete'))
-    city = forms.CharField(
-        label='Cidade',
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=City,
-            field_related='name',
-            name='city',
-            url='/city/autocomplete/'
-        )
-    )
-    court_district_complement = forms.CharField(label="Complemento de Comarca",
-                                                required=False,
-                                                widget=TypeaHeadForeignKeyWidget(
-                                                    model=CourtDistrictComplement,
-                                                    field_related='name',
-                                                    forward='court_district',
-                                                    name='court_district_complement',
-                                                    url='/processos/typeahead/search/complemento',
-                                                ))
-
+    court_district = forms.ModelChoiceField(label='Comarca',
+                                            required=False,
+                                            widget=MDSelect(url='/processos/courtdistrict_select2', ),
+                                            queryset=CourtDistrict.objects.all())
+    city = forms.ModelChoiceField(label='Cidade',
+                                  required=False,
+                                  widget=MDSelect(url='/city/autocomplete_select2/', ),
+                                  queryset=City.objects.all())
+    court_district_complement = forms.ModelChoiceField(label='Complemento de Comarca',
+                                                       required=False,
+                                                       widget=MDSelect(url='/processos/complemento_select2',
+                                                                       forward=['court_district']),
+                                                       queryset=CourtDistrictComplement.objects.all())
     organ = forms.CharField(
         label='Órgão',
         required=False,

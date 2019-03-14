@@ -22,7 +22,7 @@ def get_tasks_to_pay(task_ids, order):
 			parent.finished_date,
 			type_task.name as type_task,
 			lawsuit.law_suit_number as lawsuit_number,
-			court_district.name as court_district,
+			COALESCE(court_district."name", '') as court_district,
 			lawsuit.opposing_party, 
 			parent.billing_date, 
 			parent.amount,
@@ -36,10 +36,10 @@ def get_tasks_to_pay(task_ids, order):
 		INNER JOIN core_office as office ON office.id = task.office_id
 		INNER JOIN movement ON movement.id = parent.movement_id
 		INNER JOIN law_suit as lawsuit ON lawsuit.id = movement.law_suit_id
-		INNER JOIN court_district ON lawsuit.court_district_id = court_district.id
 		INNER JOIN folder ON folder.id = lawsuit.folder_id
 		INNER JOIN person AS client ON client.id = folder.person_customer_id
 		INNER JOIN type_task ON type_task.id = parent.type_task_id
+		LEFT JOIN court_district ON lawsuit.court_district_id = court_district.id
 		LEFT JOIN billing_charge ON billing_charge.id = parent.charge_id
 		LEFT JOIN cost_center ON cost_center.id = folder.cost_center_id
 		WHERE parent.task_status = 'Finalizada' and task.task_status = 'Finalizada'
