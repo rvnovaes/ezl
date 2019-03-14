@@ -243,7 +243,10 @@ def remove_invalid_registry(f):
     def wrapper(*args, **kwargs):
         try:
             model = args[0].model
-            invalid_registry = get_invalid_data(model)
+            office = None
+            if getattr(model, 'office', None):
+                office = get_office_session(args[0].request)
+            invalid_registry = get_invalid_data(model, office)
             if invalid_registry:
                 kwargs['remove_invalid'] = invalid_registry.pk
         except:
@@ -491,6 +494,7 @@ class SingleTableViewMixin(SingleTableView):
             return queryset
 
     @set_search_model_attrs
+    @remove_invalid_registry
     def get_context_data(self, **kwargs):
         context = super(SingleTableViewMixin, self).get_context_data(**kwargs)
         context['module'] = self.model.__module__

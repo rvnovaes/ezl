@@ -86,7 +86,10 @@ class GenericSearchFormat(object):
         }
 
     def exclude_registry_invalid(self, search):
-        invalid_registry = get_invalid_data(self.model)
+        office = None
+        if getattr(self.model, 'office', None):
+            office = get_office_session(self.request)
+        invalid_registry = get_invalid_data(self.model, office)
         if invalid_registry:
             search = search + '.filter(~Q(pk={}))'.format(invalid_registry.pk)
         return search
@@ -105,7 +108,6 @@ class GenericSearchFormat(object):
 
         try:
             office_field = self.model._meta.get_field('office')
-            table_string = "self.table_class({queryset})" 
             if self.model in [User, Office]:
                 search = "self.model.objects.get_queryset().filter({params})"
             else:
@@ -116,7 +118,8 @@ class GenericSearchFormat(object):
                 search = "self.model.objects.get_queryset(office={office}).filter({params})".format(
                     office=office, params='{params}')
         except:
-            search = "self.model.objects.get_queryset().filter({params})"            
+            search = "self.model.objects.get_queryset().filter({params})"
+        table_string = "self.table_class({queryset})"
         search = self.exclude_registry_invalid(search)
         search = table_string.format(queryset=search)
         for field in self.model_type_fields:

@@ -264,15 +264,26 @@ def check_cpf_cnpj_exist(model, cpf_cnpj):
         data['exist'] = True
     return data
 
-def get_invalid_data(model):
+
+def get_invalid_data(model, office=None):
+    from django.contrib.auth.models import User
+    from core.models import Office
+
     class_verbose_name_invalid = model._meta.verbose_name.upper(
     ) + '-INVÁLIDO'
+    invalid_registry = model.objects.none()
     try:
+        field_name = getattr(model, 'legal_name', model.name).field_name
         invalid_registry = model.objects.filter(
-            name=class_verbose_name_invalid)
+            **{field_name: class_verbose_name_invalid}
+        )
     except:
-        invalid_registry = model.objects.filter(
+        if getattr(model, 'legacy_code', None):
+            invalid_registry = model.objects.filter(
                 legacy_code='REGISTRO-INVÁLIDO')
+    finally:
+        if model not in [User, Office] and office:
+            invalid_registry = invalid_registry.filter(office_id=office.id)
     if invalid_registry:
-        return invalid_registry.earliest('pk')                
+        return invalid_registry.order_by('pk').earliest('pk')
     return None
