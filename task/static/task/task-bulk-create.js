@@ -403,7 +403,17 @@ class TaskBulkCreate {
                     if (courtDistrict && courtDistrict.id !== parseInt(this.courtDistrict)){
                         this.courtDistrictComplement = this.nullData;
                     }
+                    this.folderNumber = this.nullData;
+                    this.enableOnChange = false;
+                    this.lawSuitNumber = this.nullData;                    
+                    this.enableOnChange = true;
+                } else {
+                    this.enableOnChange = false;
+                    this.lawSuitNumber = this.nullData
+                    this.folderNumber = this.nullData
+                    this.enableOnChange = true;
                 }
+
                 this.elCity.attr('disabled', !(!this.courtDistrict));
             }
         });
