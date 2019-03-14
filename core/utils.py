@@ -114,11 +114,9 @@ def get_office_field(request, profile=None):
             initial = DefaultOffice.objects.filter(auth_user=profile).first().office if \
                 DefaultOffice.objects.filter(auth_user=profile).first() else None
         elif request.session.get('custom_session_user'):
-            custom_session_user = list(
-                request.session.get('custom_session_user').values())
+            initial = get_office_session(request)
             queryset = Office.objects.filter(
-                pk=custom_session_user[0]['current_office'])
-            initial = queryset.first().id
+                pk=initial.pk)
         else:
             queryset = request.user.person.offices.active_offices()
             initial = None
@@ -263,3 +261,30 @@ def check_cpf_cnpj_exist(model, cpf_cnpj):
         data.update(model_to_dict(instance, fields=['legal_name', 'name', 'cpf_cnpj', 'id']))
         data['exist'] = True
     return data
+
+
+def get_person_field(request, user=None):
+    """
+    Método para montar o campo de person, de acordo com a sessao do usuario logado
+    :param request:
+    :param user: um objeto User para selecionar o valor inicial do campo
+    :return: forms.ModelChoiceField
+    """
+    from core.models import Person
+    from django import forms
+
+    try:
+        office = get_office_session(request)
+        initial = user.person.id if user else None
+        user_query = Q(Q(auth_user__isnull=True) | Q(auth_user=user)) if user else Q(auth_user__isnull=True)
+        queryset = office.persons.filter(is_active=True).filter(user_query)
+    except Exception:
+        queryset = Person.objects.none()
+        initial = None
+
+    return forms.ModelChoiceField(
+        queryset=queryset,
+        empty_label='',
+        required=False,
+        label=u'Pessoa',
+        initial=initial)
