@@ -46,7 +46,7 @@ from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
 from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, \
-    check_cpf_cnpj_exist, get_office_by_id
+    check_cpf_cnpj_exist, get_office_by_id, get_invalid_data
 from core.view_validators import create_person_office_relation, person_exists
 from core.mail import send_mail_sign_up
 from financial.models import ServicePriceTable
@@ -243,14 +243,10 @@ def remove_invalid_registry(f):
     def wrapper(*args, **kwargs):
         try:
             model = args[0].model
-            class_verbose_name_invalid = model._meta.verbose_name.upper(
-            ) + '-INVÁLIDO'
-            try:
-                invalid_registry = model.objects.filter(
-                    name=class_verbose_name_invalid).first()
-            except:
-                invalid_registry = model.objects.filter(
-                    legacy_code='REGISTRO-INVÁLIDO').first()
+            office = None
+            if getattr(model, 'office', None):
+                office = get_office_session(args[0].request)
+            invalid_registry = get_invalid_data(model, office)
             if invalid_registry:
                 kwargs['remove_invalid'] = invalid_registry.pk
         except:
@@ -498,6 +494,7 @@ class SingleTableViewMixin(SingleTableView):
             return queryset
 
     @set_search_model_attrs
+    @remove_invalid_registry
     def get_context_data(self, **kwargs):
         context = super(SingleTableViewMixin, self).get_context_data(**kwargs)
         context['module'] = self.model.__module__
