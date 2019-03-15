@@ -361,6 +361,8 @@ class CompanyUser(models.Model):
         User, verbose_name='Usuário', related_name='companys')
     company = models.ForeignKey(
         Company, verbose_name='Empresa', related_name='users')
+    show_administrative_menus = models.BooleanField(
+        verbose_name="Mostrar menus administrativos", default=False)
 
     class Meta:
         verbose_name = 'Usuario da empresa'

@@ -1943,6 +1943,7 @@ class ExternalTaskView(UpdateView):
         return render(
             request, self.template_name, {
                 'object': self.object,
+                'show_person_executed_by_in_tab': True,
                 'task': self.object,
                 'form': TaskDetailForm(instance=self.object),
                 'user': custom_settings.default_user,

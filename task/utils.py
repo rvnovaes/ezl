@@ -17,6 +17,7 @@ from django.conf import settings
 from retrying import retry
 import traceback
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -230,3 +231,21 @@ def get_status_to_filter(option):
                TaskStatus.DONE, TaskStatus.RETURN, TaskStatus.REFUSED_SERVICE, TaskStatus.ERROR]
     }
     return sorted(list(status.value for status in status_dict.get(option.upper(), default_status)))
+
+
+def set_performance_place(movement):
+    list_places = [movement.law_suit.court_district.state.initials,
+                   movement.law_suit.court_district.name]
+    if movement.law_suit.court_district_complement:
+        list_places.append(movement.law_suit.court_district_complement.name)
+    elif movement.law_suit.city:
+        list_places.append(movement.law_suit.city.name)
+    performance_place = ' - '.join(list_places)
+
+    return performance_place
+
+
+def get_default_customer(office):
+    if hasattr(office, 'customsettings'):
+        return office.customsettings.default_customer or None
+    return None
