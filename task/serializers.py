@@ -3,6 +3,7 @@ from rest_framework import serializers
 from core.models import Person, Office
 from core.serializers import OfficeDefault, CreateUserDefault, CreateUserSerializerMixin, OfficeSerializerMixin
 from rest_framework.compat import unicode_to_repr
+from rest_framework.pagination import PageNumberPagination
 
 
 class PersonAskedByDefault(object):
@@ -34,17 +35,47 @@ class TypeTaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
 
 class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
 
-    person_asked_by = serializers.HiddenField(default=PersonAskedByDefault())
+    person_asked_by = serializers.HiddenField(default=PersonAskedByDefault())   
+    office_name = serializers.SerializerMethodField()
+    executed_by_name = serializers.SerializerMethodField()
+    type_task_name = serializers.SerializerMethodField()
+    law_suit_number = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+    court_district_name = serializers.SerializerMethodField()
+    external_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        exclude = ('create_date', 'alter_date', 'system_prefix', 'survey_result', 'chat', 'company_chat', 'task_hash')
+        exclude = ('alter_date', 'system_prefix', 'survey_result', 'chat', 'company_chat', 'task_hash')
+    
+    def get_office_name(self, obj):
+        return obj.office.legal_name
+
+    def get_executed_by_name(self, obj):
+        if obj.get_child: 
+            return obj.get_child.office.legal_name            
+        return obj.person_executed_by.legal_name if obj.person_executed_by else ''
+
+    def get_type_task_name(self, obj):
+        return obj.type_task.name
+
+    def get_law_suit_number(self, obj): 
+        return obj.lawsuit_number or ''
+
+    def get_state(self, obj):
+        return obj.court_district.state.initials if obj.court_district else ''
+    
+    def get_court_district_name(self, obj): 
+        return obj.court_district.name if obj.court_district else ''
 
     def validate_person_asked_by(self, value):
         if not value:
             raise serializers.ValidationError("O escritório da sessão não possui um usuário padrão. "
                                               "Entre em contato com o suporte")
         return value
+
+    def get_external_url(self, obj):
+        return 'providencias/external-task-detail/' + obj.task_hash.hex
 
     def validate_legacy_code(self, value):
         office = self.fields['office'].get_default()
@@ -118,3 +149,7 @@ class TaskCheckinSerializer(serializers.ModelSerializer):
 
     def get_type_task_name(self, obj):
         return obj.type_task.name
+
+
+class CustomResultsSetPagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
