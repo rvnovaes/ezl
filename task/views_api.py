@@ -1,18 +1,20 @@
-from .models import TypeTask, Task, Ecm, TypeTaskMain
+from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskStatus
 from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
-    TypeTaskMainSerializer
+    TypeTaskMainSerializer, CustomResultsSetPagination
 from .filters import TaskApiFilter, TypeTaskMainFilter
 from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
 from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
 from lawsuit.models import Folder, Movement
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, F, Max, Subquery, OuterRef
+from django.db.models.functions import Coalesce
 from core.views_api import OfficeMixinViewSet
 
 
@@ -49,15 +51,30 @@ class EcmTaskViewSet(mixins.CreateModelMixin,
 
 @permission_classes((TokenHasReadWriteScope, ))
 class TaskViewSet(OfficeMixinViewSet, ApplicationView):
-    queryset = Task.objects.all()
-    filter_backends = (DjangoFilterBackend, )
+    office_corresp = Task.objects.filter(id=OuterRef('child')).order_by('-id')
+    filter_backends = (DjangoFilterBackend, OrderingFilter, )
     filter_class = TaskApiFilter
+    pagination_class = CustomResultsSetPagination
+    ordering_fields = ('id', 'create_date', 'final_deadline_date', 'office_name', 'task_number', 'type_task_name',
+                       'amount', 'lawsuit_number', 'state', 'court_district_name', 'task_status')
+    default_ordering = ('-final_deadline_date', )
 
     def get_serializer_class(self):
         if self.request.method == "POST":
             return TaskCreateSerializer
         return TaskSerializer
 
+    def get_queryset(self):
+        queryset = Task.objects.all()
+        params = self.request.query_params
+        if params.getlist('office_id[]'):
+            queryset = queryset.filter(office_id__in=params.getlist('office_id[]'))
+        if params.getlist('person_executed_by_id[]'):
+            queryset = queryset.filter(person_executed_by_id__in=params.getlist('person_executed_by_id[]'))
+        if params.getlist('task_status[]'):
+            status_to_filter = params.getlist('task_status[]')
+            queryset = queryset.filter(task_status__in=[getattr(TaskStatus, status) for status in status_to_filter])            
+        return queryset
 
 @api_view(['GET'])
 @permission_classes((TokenHasReadWriteScope, ))

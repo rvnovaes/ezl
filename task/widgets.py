@@ -1,5 +1,7 @@
 import datetime
 from core.models import Person, Office
+from django import forms
+from django_filters.fields import RangeField
 from django.utils.timezone import make_aware
 from import_export.widgets import ForeignKeyWidget, Widget, DateTimeWidget
 from task.models import TaskStatus
@@ -130,3 +132,21 @@ class DateTimeWidgetMixin(DateTimeWidget):
             seconds = int(round((value - 25569) * 86400.0))
             value = make_aware(datetime.datetime.utcfromtimestamp(seconds))
         return super().clean(value, row, *args, **kwargs)
+
+
+class ApiDatetimeRangeField(RangeField):
+    def __init__(self, *args, **kwargs):
+        fields = (
+            forms.DateTimeField(),
+            forms.DateTimeField())
+        super(ApiDatetimeRangeField, self).__init__(fields, *args, **kwargs)
+
+    def compress(self, data_list):
+        if data_list:
+            start_datetime, stop_datetime = data_list
+            if start_datetime:
+                start_datetime = datetime.datetime.combine(start_datetime, datetime.time.min)
+            if stop_datetime:
+                stop_datetime = datetime.datetime.combine(stop_datetime, datetime.time.max)
+            return slice(start_datetime, stop_datetime)
+        return None

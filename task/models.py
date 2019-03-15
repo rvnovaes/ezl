@@ -450,6 +450,7 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                                        null=True,
                                                        related_name='task_company_representative')
     history = HistoricalRecords(bases=[BaseHistoricalModel],
+                                cascade_delete_history=True,
                                 excluded_fields=['task_hash', 'parent', 'task_number', 'movement', 'person_asked_by',
                                                  'person_executed_by', 'person_distributed_by', 'delegation_date',
                                                  'acceptance_date', 'final_deadline_date', 'execution_date',
