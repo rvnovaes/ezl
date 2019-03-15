@@ -18,7 +18,7 @@ from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, 
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism, ContactMechanismType, AddressType, \
     LegalType, Office, Invite, InviteOffice, Team, CustomSettings
-from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain
+from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain, get_person_field
 from core.widgets import TypeaHeadForeignKeyWidget, MDSelect
 from core.models import OfficeMixin, ImportXlsFile
 from django_file_form.forms import MultipleUploadedFileField, FileFormMixin, UploadedFileField
@@ -282,7 +282,7 @@ AddressFormSet = inlineformset_factory(
     Person, Address, form=AddressForm, extra=1, max_num=1)
 
 
-class UserCreateForm(BaseForm, UserCreationForm):
+class UserBaseForm(BaseForm):
     first_name = forms.CharField(
         label='Nome',
         required=True,
@@ -304,6 +304,15 @@ class UserCreateForm(BaseForm, UserCreationForm):
         max_length=255,
         widget=forms.TextInput(attrs={'class': 'form-control'}))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+        self.fields['office'] = get_office_field(self.request, profile=instance)
+        self.fields['office'].label = 'Escritório padrão'
+        self.fields['person'] = get_person_field(self.request, user=instance)
+
+
+class UserCreateForm(UserCreationForm, UserBaseForm):
     username = forms.CharField(
         label='Nome de usuário (login)',
         required=True,
@@ -336,31 +345,8 @@ class UserCreateForm(BaseForm, UserCreationForm):
             'password2', 'groups', 'is_active'
         ]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['office'] = get_office_field(self.request)
-        self.fields['office'].label = 'Escritório padrão'
 
-
-class UserUpdateForm(UserChangeForm):
-    first_name = forms.CharField(
-        label='Nome',
-        required=True,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
-
-    last_name = forms.CharField(
-        label='Sobrenome',
-        required=True,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
-
-    email = forms.CharField(
-        label='E-mail',
-        required=True,
-        max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
-
+class UserUpdateForm(UserChangeForm, UserBaseForm):
     username = forms.CharField(
         label='Nome de usuário (login)',
         required=True,
@@ -384,13 +370,6 @@ class UserUpdateForm(UserChangeForm):
             'first_name', 'last_name', 'username', 'email', 'password',
             'is_active'
         ]
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
-        self.fields['office'] = get_office_field(
-            self.request, profile=kwargs['instance'])
-        self.fields['office'].label = 'Escritório padrão'
 
 
 class ResetPasswordFormMixin(forms.Form):
