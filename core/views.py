@@ -945,7 +945,7 @@ class UserView(FormView):
                 self.request,
                 "O usuário deve pertencer a pelo menos um grupo. Verifique as permissões do escritório %s"
                 % office)
-            return self.form_invalid(self.get_form())
+            return []
         return groups
 
     def get_create_office_membership(self, office, user):
@@ -999,7 +999,8 @@ class UserCreateView(UserView, AuditFormMixin, CreateView):
             if groups and not form.instance.id:
                 form.save()
                 user_groups = self.manage_user_groups(office, groups, form.instance)
-
+            else: 
+                return self.form_invalid(form)
         super().form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
