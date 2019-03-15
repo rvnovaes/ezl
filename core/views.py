@@ -992,15 +992,18 @@ class UserCreateView(UserView, AuditFormMixin, CreateView):
 
     def form_valid(self, form):
         form.save(commit=False)
-        if form.is_valid:
-            self.update_user_person(form)
-            office = get_office_session(self.request)
-            groups = self.clean_groups(office)
-            if groups and not form.instance.id:
+        try:
+            with transaction.atomic():
+                self.update_user_person(form)
+                office = get_office_session(self.request)
+                groups = self.clean_groups(office)
+                if not groups:
+                    raise Exception()
                 form.save()
-                user_groups = self.manage_user_groups(office, groups, form.instance)
-            else: 
-                return self.form_invalid(form)
+                self.manage_user_groups(office, groups, form.instance)
+        except Exception:
+            return self.form_invalid(form)
+
         super().form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
@@ -1021,14 +1024,18 @@ class UserUpdateView(UserView, AuditFormMixin, UpdateView):
     def form_valid(self, form):
         form.save(commit=False)
         checker = ObjectPermissionChecker(self.request.user)
-        if form.is_valid:
-            self.update_user_person(form)
-            for office in form.instance.person.offices.active_offices():
-                if checker.has_perm('group_admin', office):
-                    groups = self.clean_groups(office)
-                    user_groups = self.manage_user_groups(office, groups, form.instance)
-
-            form.save()
+        try:
+            with transaction.atomic():
+                self.update_user_person(form)
+                for office in form.instance.person.offices.active_offices():
+                    if checker.has_perm('group_admin', office):
+                        groups = self.clean_groups(office)
+                        if not groups:
+                            raise Exception()
+                        self.manage_user_groups(office, groups, form.instance)
+                form.save()
+        except Exception:
+            return self.form_invalid(form)
 
         super(UserView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
