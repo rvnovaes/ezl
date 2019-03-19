@@ -2688,6 +2688,8 @@ class StateAutocomplete(autocomplete.Select2QuerySetView):
 
 class CustomMessagesView(View):
     def get(self, request, *args, **kwargs):        
-        messages = CustomMessage.objects.filter(finish_date__lt=timezone.now())        
+        messages = CustomMessage.objects.filter(
+            initial_date__lte=timezone.now(), 
+            finish_date__gte=timezone.now())        
         return JsonResponse(
             CustomMessageSerializer(messages, many=True).data, safe=False)
