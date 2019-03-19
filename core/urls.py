@@ -263,4 +263,5 @@ urlpatterns = [
         login_required(views.ImportCityList.as_view()),
         name='import_city_list'),
     url(r'^state-autocomplete/$', views.StateAutocomplete.as_view(), name='state-autocomplete'),
+    url(r'^custom_messages/$', views.CustomMessagesView.as_view(), name='custom_messages')
 ]

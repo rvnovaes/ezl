@@ -1,7 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 from pycpfcnpj import cpfcnpj
-from .models import Person, Office, Company, Address, ContactMechanism
+from .models import Person, Office, Company, Address, ContactMechanism, CustomMessage
 from .view_validators import create_person_office_relation, person_exists
 from .messages import person_cpf_cnpj_already_exists, invalid_field
 from .utils import get_office_session, get_office_api
@@ -111,3 +111,9 @@ class ContactMechanismSerializer(serializers.ModelSerializer):
     class Meta: 
         model = ContactMechanism
         fields = '__all__'
+
+class CustomMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomMessage
+        fields = '__all__'
+

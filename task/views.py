@@ -868,7 +868,7 @@ class DashboardView(CustomLoginRequiredView, TemplateView):
             context['messages'] = [{
                 'tags': 'error',
                 'message': NO_PERMISSIONS_DEFINED
-            }]
+            }]        
         return context
 
     def get_data(self, person, checker):
@@ -2329,4 +2329,4 @@ class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['filter'] = self.filter_class
-        return context
+        return context        
