@@ -870,7 +870,7 @@ class BaseHistoricalModel(models.Model):
         abstract = True
 
 
-class CustomMessage(Audit):
+class CustomMessage(models.Model):
     initial_date = models.DateTimeField(verbose_name='Data inicial')
     finish_date = models.DateTimeField(verbose_name='Data final')
     message = models.TextField(verbose_name='Mensagem')
