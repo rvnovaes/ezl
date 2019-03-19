@@ -868,3 +868,16 @@ class BaseHistoricalModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class CustomMessage(Audit):
+    initial_date = models.DateTimeField(verbose_name='Data inicial')
+    finish_date = models.DateTimeField(verbose_name='Data final')
+    message = models.TextField(verbose_name='Mensagem')
+    link = models.URLField(verbose_name='Link', null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Mensagens Customizadas"
+
+    def __str__(self):
+        return self.message
