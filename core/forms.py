@@ -24,6 +24,23 @@ from core.models import OfficeMixin, ImportXlsFile
 from django_file_form.forms import MultipleUploadedFileField, FileFormMixin, UploadedFileField
 from core.utils import validate_xlsx_header
 from django.core.exceptions import ValidationError
+from codemirror import CodeMirrorTextarea
+
+
+code_mirror = CodeMirrorTextarea(
+    mode="python",
+    theme="material",
+    config={
+        'fixedGutter': True
+    }
+)
+code_mirror_schema = CodeMirrorTextarea(
+    mode="javascript",
+    theme="material",
+    config={
+        'fixedGutter': True
+    }
+)
 
 
 class BaseModelForm(FileFormMixin, forms.ModelForm):

@@ -1,30 +1,14 @@
 from django import forms
 from .models import Dashboard, Card, DoughnutChart, LineChart, BarChart
-from codemirror import CodeMirrorTextarea
 import json
 from .schemas import *
+from core.forms import code_mirror, code_mirror_schema
 
 
 class DashboardForm(forms.ModelForm):
     class Meta:
         model = Dashboard
         fields = '__all__'
-
-
-code_mirror = CodeMirrorTextarea(
-    mode="python",
-    theme="material",
-    config={
-        'fixedGutter': True
-    }
-)
-code_mirror_schema = CodeMirrorTextarea(
-    mode="javascript",
-    theme="material",
-    config={
-        'fixedGutter': True
-    }
-)
 
 
 class ComponentForm(forms.ModelForm):
