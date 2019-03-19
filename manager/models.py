@@ -5,6 +5,8 @@ from django.db import models
 from enum import Enum
 
 from .schemas import PARAMETERS
+from core.models import Audit
+from financial.utils import remove_special_char
 
 
 class TypeTemplate(Enum):
@@ -23,11 +25,15 @@ class TypeTemplate(Enum):
         return [(x.name, x.value) for x in cls]
 
 
-class Template(models.Model):
+class Template(Audit):
     name = models.CharField(verbose_name='Nome',
                             null=False,
                             blank=False,
                             max_length=255)
+    key_schema = models.CharField(verbose_name='Chave',
+                                  null=True,
+                                  blank=True,
+                                  max_length=255)
     description = models.TextField(verbose_name='Descrição',
                                    null=True,
                                    blank=True)
@@ -46,6 +52,12 @@ class Template(models.Model):
         ordering = ('name', 'type')
         verbose_name = 'Template de configuração'
         verbose_name_plural = 'Templates de configuração'
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        if not self.key_schema:
+            self.key_schema = remove_special_char(self.name).strip().lower().replace(' ', '_')
+        return super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.name

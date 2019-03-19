@@ -13,5 +13,9 @@ class TemplateForm(forms.ModelForm):
         model = Template
         fields = '__all__'
         widgets = {
-            'parameters': JSONEditorWidget(PARAMETERS, collapsed=False),
+            'parameters': JSONEditorWidget(PARAMETERS, collapsed=False, sceditor=True),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['key_schema'].widget.attrs['readonly'] = True
