@@ -6,6 +6,7 @@ from manager.forms import TemplateForm
 @admin.register(Template)
 class TemplateModelAdmin(admin.ModelAdmin):
     form = TemplateForm
+    list_display = ('name', 'key_schema', 'type')
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)

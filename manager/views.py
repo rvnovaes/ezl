@@ -1,3 +1,9 @@
 from django.shortcuts import render
+from core.views import CustomLoginRequiredView, SingleTableViewMixin
+from .models import TemplateAnswers
+from .tables import TemplateAnswersTable
 
-# Create your views here.
+
+class TemplateAnswersListView(CustomLoginRequiredView, SingleTableViewMixin):
+    model = TemplateAnswers
+    table_class = TemplateAnswersTable

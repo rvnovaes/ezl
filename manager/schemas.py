@@ -34,7 +34,7 @@ PARAMETERS = {
                         "options": {
                             "ace": {
                               "theme": "ace/theme/vibrant_ink",
-                              "tabSize": 2,
+                              "tabSize": 4,
                               "useSoftTabs": True,
                               "wrap": True
                             }

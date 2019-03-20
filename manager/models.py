@@ -5,7 +5,7 @@ from django.db import models
 from enum import Enum
 
 from .schemas import PARAMETERS
-from core.models import Audit
+from core.models import Audit, OfficeMixin, OfficeManager
 from financial.utils import remove_special_char
 
 
@@ -22,7 +22,9 @@ class TypeTemplate(Enum):
 
     @classmethod
     def choices(cls):
-        return [(x.name, x.value) for x in cls]
+        choices = [(x.name, x.value) for x in cls]
+        choices.sort(key=lambda tup: tup[1])
+        return choices
 
 
 class Template(Audit):
@@ -33,7 +35,8 @@ class Template(Audit):
     key_schema = models.CharField(verbose_name='Chave',
                                   null=True,
                                   blank=True,
-                                  max_length=255)
+                                  max_length=255,
+                                  unique=True)
     description = models.TextField(verbose_name='Descrição',
                                    null=True,
                                    blank=True)
@@ -61,3 +64,20 @@ class Template(Audit):
 
     def __str__(self):
         return self.name
+
+
+class TemplateAnswers(OfficeMixin, Audit):
+
+    template = models.ForeignKey(Template, verbose_name='Configuração')
+    answers = JSONField(
+        null=True,
+        blank=True,
+        verbose_name='Respostas',
+        default=json.dumps({}, indent=4))
+
+    objects = OfficeManager()
+
+    class Meta:
+        ordering = ('office', 'template')
+        verbose_name = 'Configuração por escritório'
+        verbose_name_plural = 'Configurações por escritório'
