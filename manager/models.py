@@ -12,7 +12,7 @@ from financial.utils import remove_special_char
 class TypeTemplate(Enum):
     BOOLEAN = 'Boleano'
     SIMPLE_TEXT = 'Texto Simples'
-    LONG_TEXT = 'Texto'
+    LONG_TEXT = 'Texto Longo'
     FOREIGN_KEY = 'Chave estrangeira'
     INTEGER = 'Inteiro'
     DECIMAL = 'Decimal'
@@ -66,14 +66,13 @@ class Template(Audit):
         return self.name
 
 
-class TemplateAnswers(OfficeMixin, Audit):
+class TemplateValue(OfficeMixin, Audit):
 
     template = models.ForeignKey(Template, verbose_name='Configuração')
-    answers = JSONField(
+    value = models.TextField(
         null=True,
         blank=True,
-        verbose_name='Respostas',
-        default=json.dumps({}, indent=4))
+        verbose_name='Valor')
 
     objects = OfficeManager()
 
@@ -81,3 +80,7 @@ class TemplateAnswers(OfficeMixin, Audit):
         ordering = ('office', 'template')
         verbose_name = 'Configuração por escritório'
         verbose_name_plural = 'Configurações por escritório'
+
+    @property
+    def use_upload(self):
+        return False

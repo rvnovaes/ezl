@@ -5,6 +5,9 @@ from manager import views
 
 urlpatterns = [
     url(r'^listar/$',
-        login_required(views.TemplateAnswersListView.as_view()),
+        login_required(views.TemplateValueListView.as_view()),
         name='template_answers_list'),
+    url(r'^get_office_template_value/$',
+        views.get_office_template_value,
+        name='get_office_template_value'),
 ]
