@@ -76,10 +76,12 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
 
   var getContacts = function () {
     if ($scope.listOffices) {
+      $scope.chatsLoading = true;
       chatApiService.getContacts().then(function(data){
         $scope.realContacts = data;
         if (!$scope.search.length) {
           $scope.contacts = data;
+          $scope.chatsLoading = false;
         }
       });
     }
