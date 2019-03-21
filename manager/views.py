@@ -33,11 +33,11 @@ class TemplateValueListView(CustomLoginRequiredView, TemplateView):
         if office:
             for template_value in template_values:
                 new_value = request.POST.get('template-value-{}'.format(template_value.id), None)
-                if new_value:
+                if new_value != template_value.value.get('value'):
                     value = template_value.value
                     value['value'] = new_value
                     value['office_id'] = office.id
-                    value['template_key'] = template_value.template_key
+                    value['template_key'] = template_value.template.template_key
                     template_value.value = value
                     template_value.save()
         data = {

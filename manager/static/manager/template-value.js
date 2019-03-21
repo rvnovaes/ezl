@@ -5,7 +5,6 @@ class TemplateValue {
         this._elFormOfficeConfig = $('#form-office-config');
         this._elTemplateValuesTable = $('#template-values-table');
         this._elBtnSave = $('#btn-save');
-        this.onFormValidteDontSubmit();
         this.onSaveSubmit();
         this.onDocumentReady();
     }
@@ -33,7 +32,7 @@ class TemplateValue {
                 break;
             case 'BOOLEAN':
                 inputElement = this.getInputElement('checkbox', elementName);
-                if(value === 'true'){
+                if(value === 'on'){
                     inputElement.attr('checked', true);
                 }
                 break;
@@ -159,15 +158,6 @@ class TemplateValue {
                 },
                 dataType: 'json'
             });
-        });
-    }
-
-    onFormValidteDontSubmit(){
-        $(document).on('submit','.validateDontSubmit',(el) => {
-            //prevent the form from doing a submit
-            debugger
-            el.preventDefault();
-            return false;
         });
     }
 
