@@ -45,3 +45,9 @@ PARAMETERS = {
         },
     },
 }
+
+DEFAULT_VALUE = {
+    'office_id': None,
+    'template_key': None,
+    'value': None,
+}

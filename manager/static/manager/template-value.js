@@ -2,8 +2,11 @@ class TemplateValue {
     constructor() {
         this.officeTemplateValue = {};
         this.templateValuesTable = null;
-        this._templateValuesTable = $('#template-values-table');
-
+        this._elFormOfficeConfig = $('#form-office-config');
+        this._elTemplateValuesTable = $('#template-values-table');
+        this._elBtnSave = $('#btn-save');
+        this.onFormValidteDontSubmit();
+        this.onSaveSubmit();
         this.onDocumentReady();
     }
 
@@ -53,6 +56,21 @@ class TemplateValue {
         return element[0].outerHTML;
     }
 
+    static swalLoading(title='', message=''){
+	    swal({
+            title: title,
+            html: message,
+            allowOutsideClick: false,
+            onOpen: () => {
+                swal.showLoading();
+            }
+        });
+    }
+
+    get formData() {
+		return this._elFormOfficeConfig.serializeArray();
+	}
+
     async ajaxGetOfficeTemplateValues (){
         return await $.ajax({
             type: 'GET',
@@ -62,7 +80,7 @@ class TemplateValue {
     }
 
     async createDataTable(){
-        return await this._templateValuesTable
+        return await this._elTemplateValuesTable
             .DataTable({
                 destroy: true,
                 paging: false,
@@ -84,7 +102,8 @@ class TemplateValue {
                 let templateDescription = row.template__description;
                 let templateParameters = row.template__parameters;
                 let templateType = row.template__type;
-                let value = TemplateValue.getTableField(rowId, templateType, templateParameters, row.value);
+                let rowValue  = row.value.value || '';
+                let value = TemplateValue.getTableField(rowId, templateType, templateParameters, rowValue);
                 let templateRow = this.templateValuesTable.row.add(
                     [
                         rowId,
@@ -108,6 +127,48 @@ class TemplateValue {
         this.addDataTableRows();
 
         return true;
+    }
+
+    checkFormValidity(){
+        this._elFormOfficeConfig.removeClass('validateDontSubmit');
+        return this._elFormOfficeConfig[0].checkValidity();
+    }
+
+    onSaveSubmit() {
+        this._elBtnSave.on('click', (el) => {
+            if(! this.checkFormValidity()){
+                this._elFormOfficeConfig.addClass('validateDontSubmit');
+                $('<input type="submit">').hide().appendTo(this._elFormOfficeConfig).click().remove();
+                return false;
+            }
+            TemplateValue.swalLoading('Aguarde');
+            let data = this.formData;
+            $.ajax({
+                type: 'POST',
+                url: window.location,
+                data: data,
+                success: (result) => {
+                    swal.close();
+                },
+                error: (request, status, error) => {
+                    swal.close();
+                    showToast('error', 'Atenção', error, 0, false);
+                },
+                beforeSend: (xhr, settings) => {
+                    xhr.setRequestHeader('X-CSRFToken', data.csrfmiddlewaretoken);
+                },
+                dataType: 'json'
+            });
+        });
+    }
+
+    onFormValidteDontSubmit(){
+        $(document).on('submit','.validateDontSubmit',(el) => {
+            //prevent the form from doing a submit
+            debugger
+            el.preventDefault();
+            return false;
+        });
     }
 
     onDocumentReady(){

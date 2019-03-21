@@ -3,7 +3,7 @@
 {% block search %}
 {% endblock %}
 {% block content %}
-    <form action="#" method="post" id="formTable">
+    <form action="#" method="post" id="form-office-config">
         {% csrf_token %}
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -30,6 +30,11 @@
                         </thead>
                     </table>
                 </div>
+            </div>
+            <div class="panel-footer text-center">
+                <button class="btn btn-success waves-effect waves-light" id="btn-save" type="button">
+                    <span class="btn-label"><i class="fa fa-save"></i></span>Salvar
+                </button>
             </div>
         </div>
     </form>

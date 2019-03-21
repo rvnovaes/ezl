@@ -18,7 +18,7 @@ class TaskBulkCreate {
         this.elPerformancePlace = $('#id_performance_place');
         this.elPersonAskedBy = $('#id_person_asked_by');
         this.labelLawSuitNumber = $('label[for=id_task_law_suit_number]');
-        this.elBtnAddFolder = $("#btn_add_folder");
+        this.elBtnAddFolder = $('#btn_add_folder');
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
 		this.onChangeLawSuitNumber();

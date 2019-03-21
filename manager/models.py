@@ -4,7 +4,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from enum import Enum
 
-from .schemas import PARAMETERS
+from .schemas import DEFAULT_VALUE
 from core.models import Audit, OfficeMixin, OfficeManager
 from financial.utils import remove_special_char
 
@@ -32,11 +32,11 @@ class Template(Audit):
                             null=False,
                             blank=False,
                             max_length=255)
-    key_schema = models.CharField(verbose_name='Chave',
-                                  null=True,
-                                  blank=True,
-                                  max_length=255,
-                                  unique=True)
+    template_key = models.CharField(verbose_name='Chave',
+                                    null=True,
+                                    blank=True,
+                                    max_length=255,
+                                    unique=True)
     description = models.TextField(verbose_name='Descrição',
                                    null=True,
                                    blank=True)
@@ -46,10 +46,9 @@ class Template(Audit):
                             max_length=15,
                             choices=TypeTemplate.choices())
     parameters = JSONField(
-        null=True,
-        blank=True,
-        verbose_name='Características disponíveis',
-        default=json.dumps(PARAMETERS, indent=4))
+        null=False,
+        blank=False,
+        verbose_name='Características disponíveis',)
 
     class Meta:
         ordering = ('name', 'type')
@@ -58,8 +57,8 @@ class Template(Audit):
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        if not self.key_schema:
-            self.key_schema = remove_special_char(self.name).strip().lower().replace(' ', '_')
+        if not self.template_key:
+            self.template_key = remove_special_char(self.name).strip().lower().replace(' ', '_')
         return super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
@@ -69,10 +68,11 @@ class Template(Audit):
 class TemplateValue(OfficeMixin, Audit):
 
     template = models.ForeignKey(Template, verbose_name='Configuração')
-    value = models.TextField(
+    value = JSONField(
         null=True,
         blank=True,
-        verbose_name='Valor')
+        verbose_name='Valor',
+        default=json.dumps(DEFAULT_VALUE, indent=4))
 
     objects = OfficeManager()
 
