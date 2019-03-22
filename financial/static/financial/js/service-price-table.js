@@ -18,7 +18,7 @@ class ServicePriceTable {
   }
 
   initTable() {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve)=>{
       resolve(this.elPriceTable = this.elPriceTable.DataTable())
     })
   }
@@ -26,7 +26,7 @@ class ServicePriceTable {
   requestPayload() {
     return $.ajax({
       method: 'GET', 
-      url: `/providencias/${this.taskId}/service_price_table`, 
+      url: `/financeiro/${this.taskId}/service_price_table_of_task`, 
       success: (response=>{
         return response
       })      

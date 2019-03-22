@@ -105,6 +105,8 @@ def get_child_recipients(parent_status):
     return CHILD_RECIPIENTS.get(parent_status, {})
 
 
+
+# Todo: Verificar se esta classe realmente deve estar neste arquivo
 class CorrespondentsTable(object):
     def __init__(self, task, office_session, type_task_qs=None,
                  type_task=None):

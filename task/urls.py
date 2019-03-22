@@ -104,8 +104,6 @@ urlpatterns = [
     url(r'^type_task_main/(?P<pk>[0-9]+)/get$',
         login_required(views.GetTypeTaskMainCharacteristics.as_view()),
         name='typetaskmain_get'),
-    url(r'^(?P<pk>[0-9]+)/service_price_table$', login_required(views.TaskServicePriceTableView.as_view()),
-        name='task_service_price_table'),
 
     url(r'^batch_change_tasks(?:/(?P<option>[A-Z]+))?(?:/)?$', login_required(views.BatchChangeTasksView.as_view()),
         name='batch_change_tasks'),

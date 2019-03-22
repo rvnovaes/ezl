@@ -28,4 +28,7 @@ urlpatterns = [
     url(r'^politica-de-precos/criar/$', views.PolicyPriceCreateView.as_view(), name='policyprice_add'),
     url(r'^politica-de-precos/(?P<pk>[0-9]+)/$', views.PolicyPriceUpdateView.as_view(), name='policyprice_update'),
     url(r'^politica-de-precos/excluir$', views.PolicyPriceDeleteView.as_view(), name='policyprice_delete'),    
+    url(r'^(?P<task>[0-9]+)/service_price_table_of_task$', login_required(views.ServicePriceTableOfTaskView.as_view()),
+    name='service_price_table_of_task'),
 ]
+
