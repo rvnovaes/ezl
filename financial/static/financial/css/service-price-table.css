@@ -1,0 +1,13 @@
+#modal-service-price-table > .modal-dialog {
+	margin-top: 10px;
+}
+
+#modal-service-price-table > .modal-dialog > .modal-content > .modal-body  {	
+	font-size: 13px;
+}   
+
+@media screen and (min-width: 1300px) {
+	#modal-service-price-table > .modal-dialog{    
+		width: 1250px !important;
+	}	 
+}
