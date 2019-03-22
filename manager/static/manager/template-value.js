@@ -9,52 +9,6 @@ class TemplateValue {
         this.onDocumentReady();
     }
 
-    static getInputElement(type, name){
-        let inputElementObj = {
-            type: type,
-            name: name
-        };
-        return $('<input>', inputElementObj);
-    }
-
-    static getTableField(id, type, parameters, value){
-        let isRequired = parameters.is_required;
-        let element = $('<div class="form-group col-sm-12"></div>');
-        let inputElement = null;
-        let elementName = `template-value-${id}`;
-        switch (type) {
-            case 'SIMPLE_TEXT':
-                inputElement = this.getInputElement('text', elementName);
-                inputElement.val(value);
-                break;
-            case 'LONG_TEXT':
-                inputElement = $(`<textarea name="template-value-${id}">${value}</textarea>`);
-                break;
-            case 'BOOLEAN':
-                inputElement = this.getInputElement('checkbox', elementName);
-                if(value === 'on'){
-                    inputElement.attr('checked', true);
-                }
-                break;
-            case 'INTEGER':
-                inputElement = this.getInputElement('number', elementName);
-                inputElement.val(value);
-                break;
-            case 'DECIMAL':
-                inputElement = this.getInputElement('number', elementName);
-                inputElement.val(value);
-                inputElement.attr('step', '0.1');
-                break;
-
-        }
-        if (isRequired && inputElement) {
-            element.addClass('ezl-required');
-            inputElement.prop('required', true);
-        }
-        element.append(inputElement);
-        return element[0].outerHTML;
-    }
-
     static swalLoading(title='', message=''){
 	    swal({
             title: title,
@@ -66,9 +20,94 @@ class TemplateValue {
         });
     }
 
+    static getInputElement(type, name){
+        let inputElementObj = {
+            type: type,
+            name: name
+        };
+        return $('<input>', inputElementObj);
+    }
+
+    async getForeignKeySelect(parameters, name, value=null){
+        let data = parameters.model[0];
+        window.dados = data;
+        let foreignKeyData = {};
+        foreignKeyData = await this.ajaxGetForeignKeyData(data);
+        let select = $('<select></select>')
+            .attr('name', name)
+            .addClass('select2')
+            .attr('data-language', 'pt-BR')
+            .attr('data-placeholder', 'Procurar...');
+        select.append($('<option></option>').attr('value', null).text('Escolha uma opção'));
+        $.each(foreignKeyData.values,(index,option) => {
+            let selected = '';
+            if (parseInt(value) === option.id){
+                selected = 'selected';
+            }
+            select.append($(`<option ${selected}></option>`).attr('value', option.id).text(option.text_select));
+        });
+        return select;
+    }
+
+    async getTableField(id, type, parameters, value){
+        let isRequired = parameters.is_required;
+        let element = $('<div class="form-group col-sm-12"></div>');
+        let inputElement = null;
+        let elementName = `template-value-${id}`;
+        switch (type) {
+            case 'SIMPLE_TEXT':
+                inputElement = TemplateValue.getInputElement('text', elementName);
+                inputElement.val(value);
+                break;
+            case 'LONG_TEXT':
+                inputElement = $(`<textarea name="template-value-${id}">${value}</textarea>`);
+                break;
+            case 'BOOLEAN':
+                inputElement = TemplateValue.getInputElement('checkbox', elementName);
+                if(value === 'on'){
+                    inputElement.attr('checked', true);
+                }
+                break;
+            case 'INTEGER':
+                inputElement = TemplateValue.getInputElement('number', elementName);
+                inputElement.val(value);
+                break;
+            case 'DECIMAL':
+                inputElement = TemplateValue.getInputElement('number', elementName);
+                inputElement.val(value);
+                inputElement.attr('step', '0.1');
+                break;
+            case 'FOREIGN_KEY':
+                inputElement = await this.getForeignKeySelect(parameters, elementName, value);
+                break;
+
+        }
+        if (isRequired && inputElement) {
+            element.addClass('ezl-required');
+            inputElement.prop('required', true);
+        }
+        element.append(inputElement);
+        return element[0].outerHTML;
+    }
+
     get formData() {
 		return this._elFormOfficeConfig.serializeArray();
 	}
+
+
+	async ajaxGetForeignKeyData (data){
+        try {
+            return await $.ajax({
+                type: 'GET',
+                url: '/configuracoes/get_foreign_key_data/',
+                dataType: 'json',
+                data: data,
+            });
+        } catch (e) {
+            console.log(e);
+            throw e;
+        }
+    }
 
     async ajaxGetOfficeTemplateValues (){
         return await $.ajax({
@@ -95,14 +134,14 @@ class TemplateValue {
 
     addDataTableRows(){
         if (this.officeTemplateValue.template_values.length > 0){
-            this.officeTemplateValue.template_values.forEach((row) => {
+            this.officeTemplateValue.template_values.forEach(async (row) => {
                 let rowId = row.id;
                 let templateName = row.template__name;
                 let templateDescription = row.template__description;
                 let templateParameters = row.template__parameters;
                 let templateType = row.template__type;
                 let rowValue  = row.value.value || '';
-                let value = TemplateValue.getTableField(rowId, templateType, templateParameters, rowValue);
+                let value = await this.getTableField(rowId, templateType, templateParameters, rowValue);
                 let templateRow = this.templateValuesTable.row.add(
                     [
                         rowId,
@@ -114,6 +153,7 @@ class TemplateValue {
                 this.templateValuesTable.draw(false);
             });
         }
+        return 'teste'
     }
 
 	async createTemplateValueTable(){
@@ -122,8 +162,7 @@ class TemplateValue {
         if (!this.templateValuesTable) {
             this.templateValuesTable = await this.createDataTable();
         }
-
-        this.addDataTableRows();
+        await this.addDataTableRows();
 
         return true;
     }
@@ -163,7 +202,10 @@ class TemplateValue {
 
     onDocumentReady(){
 	    $(document).ready(()=>{
-	        this.createTemplateValueTable();
+	        this.createTemplateValueTable()
+	        setTimeout(function () {
+                $('.select2').select2();
+            }, 400);
         });
     }
 }

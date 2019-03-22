@@ -1,9 +1,13 @@
+import ast
 import json
+from django.apps import apps
 from django.contrib.auth.decorators import login_required
+from django.db.models import F
 from django.http import JsonResponse
 from django.views.generic import TemplateView
-from core.views import CustomLoginRequiredView
 from core.utils import get_office_session
+from core.views import CustomLoginRequiredView
+from core.widgets import MDSelect
 from .models import TemplateValue
 
 
@@ -59,6 +63,36 @@ def get_office_template_value(request):
                                'value', 'id')
                      )))
         status = 200
+    else:
+        status = 405
+    return JsonResponse(data, status=status)
+
+
+@login_required
+def get_foreign_key_data(request):
+    data = {}
+    if request.method == 'GET':
+        app_label, model_name = request.GET.get('model', '.').split('.')
+        filter_params = ast.literal_eval(request.GET.get('extra_params', {}))
+        if not (app_label and model_name):
+            status = 400
+        else:
+            model = apps.get_model(app_label=app_label, model_name=model_name)
+            office = get_office_session(request)
+            if getattr(model, 'office', None):
+                qs = model.objects.get_queryset(office=office)
+            elif model_name == 'Person':
+                qs = office.persons.all()
+            else:
+                qs = model.objects.all()
+            qs = qs.filter(**filter_params).annotate(text_select=F(request.GET.get('field_list', 'name')))
+            list_values = ['id', 'text_select']
+            data['values'] = json.loads(
+                json.dumps(
+                    list(
+                        qs.values(*list_values).order_by(list_values[1])
+                    )))
+            status = 200
     else:
         status = 405
     return JsonResponse(data, status=status)

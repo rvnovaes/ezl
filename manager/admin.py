@@ -14,4 +14,5 @@ class TemplateModelAdmin(admin.ModelAdmin):
             form.base_fields['create_user'].initial = request.user
         else:
             form.base_fields['alter_user'].initial = request.user
+            form.base_fields['template_key'].widget.attrs['disabled'] = True
         return form

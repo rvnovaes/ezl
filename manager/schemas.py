@@ -19,13 +19,22 @@ PARAMETERS = {
                 "type": "object",
                 "title": "Modelo",
                 "properties": {
-                    "table": {
+                    "model": {
                         "title": "Classe",
                         "type": "string",
                         "enum": [
-                            "Person",
+                            "core.Person",
                         ],
-                        "default": "Person"
+                        "default": "core.Person"
+                    },
+                    "field_list": {
+                        "title": "Campo utilizado para a lista de opções",
+                        "type": "string",
+                        "enum": [
+                            "legal_name",
+                            "name",
+                            "username",
+                        ]
                     },
                     "extra_params": {
                         "title": "Parâmetros extra",
