@@ -22,3 +22,13 @@ def template_post_save(sender, instance, created, **kwargs):
                                              create_user=instance.create_user,
                                              value=value))
         TemplateValue.objects.bulk_create(create_list)
+    else:
+        templates_value = TemplateValue.objects.filter(
+            template=instance
+        ).exclude(
+            value__template_key=instance.template_key,
+            value__template_type=instance.type)
+        for template_value in templates_value:
+            template_value.value['template_key'] = instance.template_key
+            template_value.value['template_type'] = instance.type
+            template_value.save()

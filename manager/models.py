@@ -33,8 +33,8 @@ class Template(Audit):
                             blank=False,
                             max_length=255)
     template_key = models.CharField(verbose_name='Chave',
-                                    null=True,
-                                    blank=True,
+                                    null=False,
+                                    blank=False,
                                     max_length=255,
                                     unique=True)
     description = models.TextField(verbose_name='Descrição',
