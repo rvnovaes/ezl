@@ -31,6 +31,7 @@
     <link href="{% static 'libs/bootstrap-rating/bootstrap-rating.css' %}" rel="stylesheet">
 
     {% include 'task/task_to_assign.html' with task=task %}
+    {% include 'task/includes/service-price-table/service-price-table.html' %}
     <form id="task_detail" action="" method="post">{% csrf_token %}            
 
         {% include 'task/task_detail/tab.html' %}
@@ -133,11 +134,16 @@
     <script src="{% static 'libs/jQuery-File-Upload/js/basic-upload.js' %}?rev={{request.REVIEW}}"></script>
 
     <!-- datatables -->
-    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}?rev={{request.REVIEW}}"></script>    
     {% include 'questionnaire/generic_survey.html' %}
     {% include 'questionnaire/company_representative_questionnarie.html'%}
     {% include 'billing/modal/checkout.html' %}
     <script src='{% static "task/task-detail.js" %}?rev={{request.REVIEW}}'></script>
+    <script src='{% static "task/service-price-table.js" %}?rev={{request.REVIEW}}'></script>
+    <script>
+        let priceTable = new ServicePriceTable()
+        priceTable.showModal()
+    </script>
     <script src="{% static 'billing/js/checkout.js' %}?rev={{request.REVIEW}}"></script>
     <script type="text/javascript">
     var taskDetail;

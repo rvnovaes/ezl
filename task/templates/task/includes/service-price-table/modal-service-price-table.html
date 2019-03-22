@@ -1,0 +1,21 @@
+<div id="modal-service-price-table" class="modal fade" role="dialog" aria-labelledby="modal-service-price-table">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        {% block modal_service_price_table_header %} 
+          {% include 'task/includes/service-price-table/modal-service-price-table-header.html' %}
+        {% endblock %}        
+      </div>
+      <div class="modal-body">
+        {% block modal_service_price_table_body %}
+          {% include 'task/includes/service-price-table/modal-service-price-table-body.html' %}              
+        {% endblock modal_service_price_table_body %}        
+      </div>
+      <div class="modal-footer">
+        {% block modal_service_price_table_footer %}
+            {% include 'task/includes/service-price-table/modal-service-price-table-footer.html' %}
+        {% endblock modal_service_price_table_footer%}        
+      </div>
+    </div>
+  </div>
+</div>
