@@ -39,7 +39,7 @@ class CompanyAdmin(admin.ModelAdmin):
 
 @admin.register(CompanyUser)
 class CompanyUserAdmin(admin.ModelAdmin):
-    list_display = ['company', 'user']
+    list_display = ['company', 'user', 'show_administrative_menus']
 
 
 @admin.register(ContactMechanismType)

@@ -12,6 +12,7 @@ from etl.utils import get_message_log_default, save_error_log, get_clients_to_im
 from ezl import settings
 from lawsuit.models import Movement, Folder, CourtDistrict
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
+from task.utils import set_performance_place
 from etl.utils import get_message_log_default, save_error_log
 from etl.models import InconsistencyETL, Inconsistencies
 
@@ -236,12 +237,7 @@ class TaskETL(GenericETL):
                                     Inconsistencies.INVALIDCOURTDISTRICT)
                         })
                     else:
-                        if movement.law_suit.court_district_complement:
-                            performance_place = movement.law_suit.court_district_complement.name
-                        elif movement.law_suit.city:
-                            performance_place = movement.law_suit.city.name
-                        else:
-                            performance_place = movement.law_suit.court_district.name
+                        performance_place = set_performance_place(movement)
 
                 if task:
                     task.requested_date = requested_date
@@ -255,7 +251,6 @@ class TaskETL(GenericETL):
                     task.execution_date = execution_date
                     task.blocked_payment_date = blocked_payment_date
                     task.finished_date = finished_date
-                    task.requested_date = requested_date
                     task.movement = movement
                     task.performance_place = performance_place
                     if task.task_status == TaskStatus.ERROR.value and status_code_advwin != TaskStatus.ERROR:
@@ -266,7 +261,7 @@ class TaskETL(GenericETL):
                     update_fields = [
                         'requested_date', 'final_deadline_date', 'description', 'task_status', 'alter_user',
                         'person_asked_by', 'type_task', 'refused_date', 'execution_date', 'blocked_payment_date',
-                        'finished_date', 'requested_date', 'movement', 'performance_place'
+                        'finished_date', 'movement', 'performance_place'
                     ]
 
                     task.save(update_fields=update_fields, skip_signal=True)

@@ -6,7 +6,7 @@ from django_file_form.forms import MultipleUploadedFileField
 
 from core.models import Person, ImportXlsFile
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session
-from core.widgets import MDDateTimepicker, MDDatePicker, TypeaHeadForeignKeyWidget, MDSelect
+from core.widgets import MDDateTimepicker, MDSelect
 from core.forms import BaseForm, XlsxFileField
 from lawsuit.models import CourtDistrict, CourtDistrictComplement, City, Movement, LawSuit, Folder
 from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer
@@ -27,8 +27,8 @@ class TaskForm(BaseForm):
     class Meta:
         model = Task
         fields = [
-            'office', 'task_number', 'person_asked_by', 'person_company_representative', 'type_task', 'final_deadline_date', 'performance_place',
-            'description', 'is_active', 'legacy_code'
+            'office', 'task_number', 'person_asked_by', 'person_company_representative', 'type_task',
+            'final_deadline_date', 'performance_place', 'description', 'is_active', 'legacy_code'
         ]
 
     person_asked_by = forms.ModelChoiceField(
@@ -126,7 +126,7 @@ class TaskBulkCreateForm(TaskCreateForm):
     folder_number = forms.ModelChoiceField(label='Nº da Pasta',
                                            required=False,
                                            widget=MDSelect(url='/processos/folder_autocomplete_2',
-                                                           forward=['task_law_suit_number']),
+                                                           forward=['task_law_suit_number', 'person_customer']),
                                            queryset=Folder.objects.all())
     movement = forms.ModelChoiceField(label='Movimentação',
                                       required=False,
@@ -199,7 +199,7 @@ class TaskDetailForm(ModelForm):
 
     def clean_amount(self):
         amount = (self.cleaned_data['amount']
-                             if self.cleaned_data['amount'] else str(0))
+                  if self.cleaned_data['amount'] else str(0))
         amount = amount.replace('.', '')
         amount = amount.replace(',', '.')
         return float(amount)
@@ -232,6 +232,16 @@ class TaskToAssignForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['person_executed_by'].required = True
+
+
+class TaskChangeAskedBy(BaseForm):
+    class Meta:
+        model = Task
+        fields = ['person_asked_by']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['person_asked_by'].required = True
 
 
 class TypeTaskMainForm(forms.ModelForm):

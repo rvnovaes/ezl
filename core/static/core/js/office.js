@@ -83,7 +83,6 @@ class Office {
 
 	onClickBtnEditOffice() {
 		this._elBtnEditOffice.on('click', ()=>{
-		    console.log('aqui');
 			this.showOfficeForm();
 		});
 	}

@@ -1,6 +1,7 @@
+from datetime import datetime, time
 from django.forms import Select, Textarea, RadioSelect
 from django_filters import FilterSet, ModelChoiceFilter, NumberFilter, CharFilter, ChoiceFilter, MultipleChoiceFilter, \
-    BooleanFilter, ModelMultipleChoiceFilter
+    BooleanFilter, ModelMultipleChoiceFilter, RangeFilter, Filter
 from dal import autocomplete
 from django.db.models import Q
 from core.models import Person, State, Office, Team
@@ -9,9 +10,10 @@ from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ, CourtDistrictComplement
 from task.models import TypeTask, Task, Filter, TaskStatus
+from task.widgets import ApiDatetimeRangeField
 from .models import DashboardViewModel, TypeTaskMain
 from core.utils import get_office_session
-from django import forms
+from task.utils import get_status_to_filter
 
 from django_filters import rest_framework as filters
 
@@ -28,10 +30,29 @@ GROUP_BY_TASK_TO_RECEIVE_TYPE = (
 )
 
 
+class DatetimeFromToRangeFilter(RangeFilter):
+    field_class = ApiDatetimeRangeField
+
+
+class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
+    def filter(self, qs, value):
+        # value is either a list or an 'empty' value
+        values = value or []
+        qs = super(MultiValueCharFilter, self).filter(qs, values)
+
+        return qs
+
 class TaskApiFilter(FilterSet):
+    is_hearing = filters.BooleanFilter(name='type_task__type_task_main__is_hearing')
+    office_id = MultiValueCharFilter(name='office_id', lookup_expr='in')
+    person_executed_by_id = MultiValueCharFilter(name='person_executed_by_id', lookup_expr='in')
+    final_deadline_date = DatetimeFromToRangeFilter()
+    task_status = MultiValueCharFilter(name='task_status', lookup_expr='in')
+
     class Meta:
         model = Task
-        fields = ['legacy_code', 'task_number']
+        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date', 
+        'task_status', 'person_executed_by_id']
 
 
 class TaskFilter(FilterSet):
@@ -182,26 +203,24 @@ class TaskFilter(FilterSet):
         if custom_settings and custom_settings.task_status_show:
             task_status_choices = list(
                 custom_settings.task_status_show.values_list(
-                    'status_to_show', flat=True))
-            self.filters['task_status'].extra['choices'] = list(
-                map(lambda x: (TaskStatus(x).name, x), task_status_choices))
+                    'status_to_show', flat=True).order_by('status_to_show'))
+            self.filters['task_status'].extra['choices'] = self.set_task_status_choices(task_status_choices)
 
     class Meta:
         model = DashboardViewModel
         fields = []
         order_by = ['final_deadline_date']
 
+    @staticmethod
+    def set_task_status_choices(status_choices):
+        return list(map(lambda x: (TaskStatus(x).name, x), status_choices))
+
 
 class BatchChangTaskFilter(TaskFilter):
     def __init__(self, data=None, queryset=None, prefix=None, strict=None, request=None):
         super().__init__(data, queryset, prefix, strict, request)
-        if request.option in ['A', 'D']:
-            status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED]
-        else: 
-            status_to_filter = [TaskStatus.ACCEPTED_SERVICE, TaskStatus.REQUESTED, TaskStatus.OPEN, 
-            TaskStatus.DONE, TaskStatus.ERROR]
-        self.filters['task_status'].extra['choices'] = list(
-            map(lambda x: (TaskStatus(x).name, x), status_to_filter))
+        status_to_filter = get_status_to_filter(request.option)
+        self.filters['task_status'].extra['choices'] = self.set_task_status_choices(status_to_filter)
 
 
 class TaskReportFilterBase(FilterSet):

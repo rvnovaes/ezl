@@ -18,7 +18,7 @@ from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from core.serializers import OfficeSerializer, AddressSerializer, ContactMechanismSerializer
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.db.models import ProtectedError, Q, F
+from django.db.models import ProtectedError, Q, F, Sum, Case, When, IntegerField
 from django.db import transaction, IntegrityError
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -41,11 +41,12 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     USER_CREATE_SUCCESS_MESSAGE, person_cpf_cnpj_already_exists
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
     OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser, CustomSettings, \
-    OfficeOffices
+    OfficeOffices, AreaOfExpertise
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
-from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, check_cpf_cnpj_exist
+from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, \
+    check_cpf_cnpj_exist, get_office_by_id, get_invalid_data, set_user_default_office
 from core.view_validators import create_person_office_relation, person_exists
 from core.mail import send_mail_sign_up
 from financial.models import ServicePriceTable
@@ -242,14 +243,10 @@ def remove_invalid_registry(f):
     def wrapper(*args, **kwargs):
         try:
             model = args[0].model
-            class_verbose_name_invalid = model._meta.verbose_name.upper(
-            ) + '-INVÁLIDO'
-            try:
-                invalid_registry = model.objects.filter(
-                    name=class_verbose_name_invalid).first()
-            except:
-                invalid_registry = model.objects.filter(
-                    legacy_code='REGISTRO-INVÁLIDO').first()
+            office = None
+            if getattr(model, 'office', None):
+                office = get_office_session(args[0].request)
+            invalid_registry = get_invalid_data(model, office)
             if invalid_registry:
                 kwargs['remove_invalid'] = invalid_registry.pk
         except:
@@ -497,6 +494,7 @@ class SingleTableViewMixin(SingleTableView):
             return queryset
 
     @set_search_model_attrs
+    @remove_invalid_registry
     def get_context_data(self, **kwargs):
         context = super(SingleTableViewMixin, self).get_context_data(**kwargs)
         context['module'] = self.model.__module__
@@ -914,79 +912,103 @@ class UserListView(CustomLoginRequiredView, SingleTableViewMixin):
         return context
 
 
-class UserCreateView(AuditFormMixin, CreateView):
+class UserView(FormView):
     model = User
     form_class = UserCreateForm
     success_url = reverse_lazy('user_list')
     template_name = 'auth/user_create.html'
     success_message = CREATE_SUCCESS_MESSAGE
 
-    def get_success_url(self):
-        create_person
-        return reverse_lazy('user_list')
-
-    def form_valid(self, form):
-        form.save(commit=False)
-        offices_user = []
-        if form.is_valid:
-            have_group = False
-            for office in self.request.user.person.offices.all():
-                groups = self.request.POST.getlist('office_' + str(office.id),
-                                                   '')
-                if groups and not form.instance.id:
-                    form.save()
-                    for group_office in office.office_groups.all():
-                        if str(group_office.group.id) in groups:
-                            if office not in offices_user:
-                                offices_user.append(office)
-                            offices_user.append(office)
-                            group_office.group.user_set.add(form.instance)
-                            have_group = True
-            if not have_group:
-                messages.error(
-                    self.request,
-                    "O usuário deve pertencer a pelo menos um grupo")
-                return self.form_invalid(form)
-
-            for office in offices_user:
-                member, created = OfficeMembership.objects.get_or_create(
-                    person=form.instance.person,
-                    office=office,
-                    defaults={
-                        'create_user': self.request.user,
-                        'is_active': True
-                    })
-                if not created:
-                    # Caso o relacionamento exista mas esta inativo
-                    member.is_active = True
-                    member.save()
-
-            default_office = form.cleaned_data['office']
-            obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
-            if obj:
-                obj.office = default_office
-                obj.alter_user = self.request.user
-                obj.save()
-            else:
-                DefaultOffice.objects.create(
-                    auth_user=form.instance,
-                    office=default_office,
-                    create_user=self.request.user)
-
-        super(UserCreateView, self).form_valid(form)
-        return HttpResponseRedirect(self.success_url)
-
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         kw['request'] = self.request
         return kw
 
+    def form_valid(self, form):
+        if not form.instance.id:
+            form.save()
+        default_office = set_user_default_office(
+            form.cleaned_data['office'],
+            form.instance,
+            self.request.user
+        )
+        super().form_valid(form)
+        return HttpResponseRedirect(self.success_url)
 
-class UserUpdateView(AuditFormMixin, UpdateView):
-    model = User
+    def clean_groups(self, office):
+        groups = self.request.POST.getlist('office_' + str(office.id), '')
+        if not groups:
+            messages.error(
+                self.request,
+                "O usuário deve pertencer a pelo menos um grupo. Verifique as permissões do escritório %s"
+                % office)
+            return []
+        return groups
 
+    def get_create_office_membership(self, office, user):
+        member, created = OfficeMembership.objects.get_or_create(
+            person=user.person,
+            office=office,
+            defaults={
+                'create_user': self.request.user,
+                'is_active': True
+            })
+        if not created:
+            # Caso o relacionamento exista mas esta inativo
+            member.is_active = True
+            member.save()
+
+    def manage_user_groups(self, office, groups, user):
+        for group_office in office.office_groups.all():
+            if str(group_office.group.id) in groups:
+                self.get_create_office_membership(office, user)
+                group_office.group.user_set.add(user)
+            else:
+                group_office.group.user_set.remove(user)
+        if not user.groups.all():
+            messages.error(
+                self.request,
+                "O usuário deve pertencer a pelo menos um grupo")
+            return self.form_invalid(self.get_form())
+        return user.groups.all()
+
+    def update_user_person(self, form):
+        person = form.cleaned_data.get('person')
+        if person:
+            old_person = form.instance.person if form.instance.id else None
+            if old_person:
+                old_person.auth_user = None
+                old_person.save()
+            form.instance.person = person
+
+
+class UserCreateView(UserView, AuditFormMixin, CreateView):
+
+    def get_success_url(self):
+        return reverse_lazy('user_list')
+
+    def form_valid(self, form):
+        form.save(commit=False)
+        try:
+            with transaction.atomic():
+                self.update_user_person(form)
+                office = get_office_session(self.request)
+                groups = self.clean_groups(office)
+                if not groups:
+                    raise Exception()
+                form.save()
+                self.manage_user_groups(office, groups, form.instance)
+        except Exception:
+            return self.form_invalid(form)
+
+        super().form_valid(form)
+        return HttpResponseRedirect(self.success_url)
+
+
+class UserUpdateView(UserView, AuditFormMixin, UpdateView):
     form_class = UserUpdateForm
     success_message = UPDATE_SUCCESS_MESSAGE
+    template_name = 'auth/user_form.html'
 
     def get_success_url(self):
         return self.request.META.get('HTTP_REFERER', reverse_lazy('user_list'))
@@ -999,38 +1021,20 @@ class UserUpdateView(AuditFormMixin, UpdateView):
     def form_valid(self, form):
         form.save(commit=False)
         checker = ObjectPermissionChecker(self.request.user)
-        if form.is_valid:
-            for office in form.instance.person.offices.active_offices():
-                if checker.has_perm('group_admin', office):
-                    groups = self.request.POST.getlist(
-                        'office_' + str(office.id), '')
-                    if not groups:
-                        messages.error(
-                            self.request,
-                            "O usuário deve pertencer a pelo menos um grupo. Verifique as permissões do escritório %s"
-                            % office)
-                        return self.form_invalid(form)
+        try:
+            with transaction.atomic():
+                self.update_user_person(form)
+                for office in form.instance.person.offices.active_offices():
+                    if checker.has_perm('group_admin', office):
+                        groups = self.clean_groups(office)
+                        if not groups:
+                            raise Exception()
+                        self.manage_user_groups(office, groups, form.instance)
+                form.save()
+        except Exception:
+            return self.form_invalid(form)
 
-                    for group_office in office.office_groups.all():
-                        if str(group_office.group.id) in groups:
-                            group_office.group.user_set.add(form.instance)
-                        else:
-                            group_office.group.user_set.remove(form.instance)
-
-            form.save()
-            default_office = form.cleaned_data['office']
-            obj = DefaultOffice.objects.filter(auth_user=form.instance).first()
-            if obj:
-                obj.office = default_office
-                obj.alter_user = self.request.user
-                obj.save()
-            else:
-                DefaultOffice.objects.create(
-                    auth_user=form.instance,
-                    office=default_office,
-                    create_user=self.request.user)
-
-        super(UserUpdateView, self).form_valid(form)
+        super(UserView, self).form_valid(form)
         return HttpResponseRedirect(self.success_url)
 
     def get_context_data(self, **kwargs):
@@ -1058,11 +1062,6 @@ class UserUpdateView(AuditFormMixin, UpdateView):
         if cache.get('user_page'):
             self.success_url = cache.get('user_page')
         return super(UserUpdateView, self).post(request, *args, **kwargs)
-
-    def get_form_kwargs(self):
-        kw = super().get_form_kwargs()
-        kw['request'] = self.request
-        return kw
 
 
 class UserDeleteView(CustomLoginRequiredView, MultiDeleteView):
@@ -2446,15 +2445,20 @@ class TermsView(TemplateView):
 
 class OfficeProfileDataView(View):
     def get(self, request, *args, **kwargs):
-        office = get_office_session(request)
+        office_id = kwargs.get('pk', None)
+        office = get_office_by_id(office_id) if office_id else get_office_session(request)
         return JsonResponse(OfficeSerializer(office).data)
 
     def post(self, request, *args, **kwargs):
+        office_session = get_office_session(request)
+        office_id = kwargs.get('pk', None)
+        if office_id and office_session != get_office_by_id(office_id):
+            return JsonResponse({'error': 'Só é possível alterar o escritório da sessão'})
         office_serializer = OfficeSerializer(data=request.POST, instance=get_office_session(request))
         if office_serializer.is_valid():
             office_serializer.save()
             return JsonResponse(office_serializer.data)
-        return JsonResponse({'error': office_serializer.errors})            
+        return JsonResponse({'error': office_serializer.errors})
 
 
 class OfficeProfileView(TemplateView):
@@ -2465,43 +2469,70 @@ class OfficeProfileView(TemplateView):
     success_message = UPDATE_SUCCESS_MESSAGE
     object_list_url = 'office_list'
 
-    def get_context_data(self, **kwargs):        
-        self.object = get_office_session(self.request)
+    def get_context_data(self, **kwargs):
+        office_id = kwargs.get('pk', None)
+        office_session = get_office_session(self.request)
+        office_profile = get_office_by_id(office_id)
+        self.object = office_profile or office_session
+
         kwargs.update({
             'table':
-            AddressOfficeTable(self.object.get_address()),
+                AddressOfficeTable(self.object.get_address()),
             'table_members':
-            OfficeMembershipTable(
-                self.object.officemembership_set.filter(
-                    is_active=True,
-                    person__auth_user__isnull=False,
-                    person__auth_user__is_superuser=False).exclude(
+                OfficeMembershipTable(
+                    self.object.officemembership_set.filter(
+                        is_active=True,
+                        person__auth_user__isnull=False,
+                        person__auth_user__is_superuser=False
+                    ).exclude(
                         person__auth_user=self.request.user)),
             'table_offices':
-            OfficeTable(
-                Office.objects.get(pk=self.object.pk).offices.all().
-                order_by('legal_name')),
+                OfficeTable(self.object.offices.all().order_by('legal_name')),
             'table_contact_mechanism':
-            ContactMechanismOfficeTable(
-                self.object.contactmechanism_set.all()),
-            'table_billing_details': BillingDetailsTable(
-                self.object.billingdetails_office.all()),
+                ContactMechanismOfficeTable(self.object.contactmechanism_set.all()),
+            'table_billing_details':
+                BillingDetailsTable(self.object.billingdetails_office.all()),
         })
         data = super().get_context_data(**kwargs)
-        data['inviteofficeform'] = InviteForm(self.request.POST) \
-            if InviteForm(self.request.POST).is_valid() else InviteForm()
-        RequestConfig(
-            self.request, paginate=False).configure(
-                kwargs.get('table_members'))
-        RequestConfig(
-            self.request, paginate=False).configure(
-                kwargs.get('table_offices'))
-        data['office'] = get_office_session(self.request)
-        data['form_office'] = self.form_class(instance=data['office']) 
-        data['form_address'] = AddressForm()      
-        data['form_contact_mechanism'] = ContactMechanismForm()
-        data['form_billing_details'] = BillingAddressCombinedForm
+        data['office'] = self.object
+        data['is_session_office'] = False
+        if self.object == office_session:
+            data['is_session_office'] = True
+            data['inviteofficeform'] = InviteForm(self.request.POST) \
+                if InviteForm(self.request.POST).is_valid() else InviteForm()
+            RequestConfig(
+                self.request, paginate=False).configure(
+                    kwargs.get('table_members'))
+            RequestConfig(
+                self.request, paginate=False).configure(
+                    kwargs.get('table_offices'))
+            data['form_office'] = self.form_class(instance=data['office'])
+            data['form_address'] = AddressForm()
+            data['form_contact_mechanism'] = ContactMechanismForm()
+            data['form_billing_details'] = BillingAddressCombinedForm
+            data['areas_expertise'] = AreaOfExpertise.objects.annotate(
+                total_office=Sum(
+                    Case(
+                        When(offices=self.object, then=1),
+                        default=0, output_field=IntegerField()
+                    ))).values('id', 'area', 'total_office')
         return data
+
+
+class OfficeAreasOfExpertiseUpdateView(View):
+
+    def post(self, request, *args, **kwargs):
+        office = get_office_session(request)
+        areas_of_expoertise = AreaOfExpertise.objects.all()
+        list_areas = []
+        for area in areas_of_expoertise:
+            if int(request.POST.get('area_{}'.format(area.id), 0)) == 0:
+                area.offices.remove(office)
+            else:
+                list_areas.append(area.area)
+                area.offices.add(office)
+        return JsonResponse({'status': 'ok',
+                             'areas': list_areas}, status=200)
 
 
 class OfficeProfileUpdateView(UpdateView):
@@ -2511,8 +2542,17 @@ class OfficeProfileUpdateView(UpdateView):
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST, request.FILES, instance=get_office_session(request))
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('office_profile'))
+            try:
+                form.save()
+                return HttpResponseRedirect(reverse('office_profile'))
+            except IntegrityError as e:
+                if 'cpf_cnpj' in e.args[0]:
+                    error = {'errors': {'cpf_cnpj': ['Já existe um escritório com o CPF ou CNPJ informado']}}
+                else:
+                    error = {'errors': {'__all__': [e.__str__()]}}
+                return JsonResponse(error, status=500)
+            except Exception as e:
+                return JsonResponse({'errors': {'__all__': [e.__str__()]}}, status=500)
         else:
             return JsonResponse({'errors': form.errors}, status=400)
 

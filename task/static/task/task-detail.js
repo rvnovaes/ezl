@@ -278,11 +278,10 @@ class TaskDetail {
 			            html: '<h4>Aguarde...</h4>',
                         onOpen: () => {
                             swal.showLoading();
-                            debugger;
                             $('input[name=amount]').removeAttr('disabled');
                             $('#task_detail').unbind('submit').submit();            
                         }
-                    })
+                    });
                 }
         }        
     }
@@ -381,9 +380,12 @@ class TaskDetail {
     }    
 
     onClickRowServicePriceTable() {
+        $('.office_correspondent').click(function (e) {
+            e.stopPropagation();
+        });
         let self = this;
-        $("#correspondents-table tbody tr").on('click', function(){            
-            $("#servicepricetable-alert").addClass("hidden");            
+        $("#correspondents-table tbody tr").on('click', function(){
+            $("#servicepricetable-alert").addClass("hidden");
             let rowId = $(this).data('id');
             let amount = $(this).data('value').toString();
             let priceCategory = $(this).data('price-category');

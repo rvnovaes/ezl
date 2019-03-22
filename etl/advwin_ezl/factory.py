@@ -28,21 +28,13 @@ class InvalidObjectFactory(object):
     ]
 
     @staticmethod
-    def create():
-        # cria usuário padrão
-
-        print(signals)
-        user = User.objects.filter(username='invalid_user').first()
-        admin = User.objects.filter(username='admin').first()
-        if not user:
-            user = User.objects.create_superuser(
-                'invalid_user', 'invalid_user@mttech.com.br', 'admin')
-        if not admin:
-            admin = User.objects.create_superuser(
-                'admin', 'admin@mttech.com.br', 'admin')
-
-        default_office = get_default_office()
-
+    def create_invalid_data(default_office, user):
+        """
+        Metodo que cria os registros invalidos, 
+        foi separado da funcao create pois nao sera 
+        executado enquanto nao houver outro escritorio
+        que utiliza etl
+        """
         # Registros inválidos para o app core
         invalid_country, created = Country.objects.get_or_create(
             name=Country._meta.verbose_name.upper() + invalid_registry,
@@ -176,6 +168,23 @@ class InvalidObjectFactory(object):
             name=CostCenter._meta.verbose_name.upper() + invalid_registry,
             legacy_code=invalid_legacy_code,
             office=default_office)
+
+    @staticmethod
+    def create():
+        # cria usuário padrão
+
+        print(signals)
+        user = User.objects.filter(username='invalid_user').first()
+        admin = User.objects.filter(username='admin').first()
+        if not user:
+            user = User.objects.create_superuser(
+                'invalid_user', 'invalid_user@mttech.com.br', 'admin')
+        if not admin:
+            admin = User.objects.create_superuser(
+                'admin', 'admin@mttech.com.br', 'admin')
+
+        default_office = get_default_office()
+
 
     @staticmethod
     def get_invalid_model(model):
