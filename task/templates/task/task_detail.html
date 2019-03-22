@@ -141,8 +141,8 @@
     <script src='{% static "task/task-detail.js" %}?rev={{request.REVIEW}}'></script>
     <script src='{% static "task/service-price-table.js" %}?rev={{request.REVIEW}}'></script>
     <script>
-        let priceTable = new ServicePriceTable()
-        priceTable.showModal()
+        let priceTable = new ServicePriceTable('{{object.pk}}')        
+        priceTable.bootstrap()
     </script>
     <script src="{% static 'billing/js/checkout.js' %}?rev={{request.REVIEW}}"></script>
     <script type="text/javascript">

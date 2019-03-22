@@ -1,8 +1,9 @@
 from .models import ServicePriceTable, CostCenter, PolicyPrice, BillingMoment
 from rest_framework import serializers
 from .utils import valid_court_district, check_service_price_table_unique, check_office_correspondent_relation
-from core.serializers import CreateUserSerializerMixin, OfficeSerializerMixin
-
+from core.serializers import CreateUserSerializerMixin, OfficeSerializerMixin, OfficeSerializer, PersonSerializer
+from lawsuit.serializers import CourtDistrictSerializer, CourtDistrictComplementSerializer
+from task.serializers import TypeTaskSerializer
 
 class PolicyPriceSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin): 
     class Meta: 
@@ -12,10 +13,32 @@ class PolicyPriceSerializer(serializers.ModelSerializer, CreateUserSerializerMix
 
 class ServicePriceTableSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
     policy_price = PolicyPriceSerializer(many=False, read_only=True)
+    office_correspondent = OfficeSerializer(many=False, read_only=True)
+    type_task = TypeTaskSerializer(many=False, read_only=True)
+    office_network = OfficeSerializer(many=False, read_only=True)
+    state = serializers.SerializerMethodField()
+    court_district = CourtDistrictSerializer(many=False, read_only=True)
+    court_district_complement = CourtDistrictComplementSerializer(many=False, read_only=True)
+    city = serializers.SerializerMethodField()
+    client = PersonSerializer(many=False, read_only=True)
+    office_rating = serializers.SerializerMethodField()
+    office_return_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = ServicePriceTable
         exclude = ('system_prefix', 'create_date', 'alter_date', 'alter_user')
+
+    def get_state(self, obj):
+        return obj.state.initials if obj.state else None
+
+    def get_city(self, obj): 
+        return obj.city.name if obj.city else None
+
+    def get_office_rating(self, obj):
+        return obj.office_rating
+
+    def get_office_return_rating(self, obj):
+        return obj.office_return_rating
 
     def validate(self, data):
         pk = self.instance.id if self.instance else None
