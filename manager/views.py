@@ -9,6 +9,7 @@ from core.utils import get_office_session
 from core.views import CustomLoginRequiredView
 from core.widgets import MDSelect
 from .models import TemplateValue
+from .utils import get_model_by_str, get_filter_params_by_str
 
 
 class TemplateValueListView(CustomLoginRequiredView, TemplateView):
@@ -41,6 +42,7 @@ class TemplateValueListView(CustomLoginRequiredView, TemplateView):
                     value = template_value.value
                     value['value'] = new_value
                     value['office_id'] = office.id
+                    value['template_type'] = template_value.template.type
                     value['template_key'] = template_value.template.template_key
                     template_value.value = value
                     template_value.save()
@@ -72,16 +74,17 @@ def get_office_template_value(request):
 def get_foreign_key_data(request):
     data = {}
     if request.method == 'GET':
-        app_label, model_name = request.GET.get('model', '.').split('.')
-        filter_params = ast.literal_eval(request.GET.get('extra_params', {}))
-        if not (app_label and model_name):
+        model_str = request.GET.get('model', '')
+        if not model_str or '.' not in model_str:
             status = 400
         else:
-            model = apps.get_model(app_label=app_label, model_name=model_name)
+            model = get_model_by_str(model_str)
+            filter_params = get_filter_params_by_str(request.GET.get('extra_params', '{}'))
+
             office = get_office_session(request)
             if getattr(model, 'office', None):
                 qs = model.objects.get_queryset(office=office)
-            elif model_name == 'Person':
+            elif model._meta.object_name == 'Person':
                 qs = office.persons.all()
             else:
                 qs = model.objects.all()

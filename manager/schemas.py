@@ -58,5 +58,6 @@ PARAMETERS = {
 DEFAULT_VALUE = {
     'office_id': None,
     'template_key': None,
+    'template_type': None,
     'value': None,
 }

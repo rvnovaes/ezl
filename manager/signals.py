@@ -14,6 +14,7 @@ def template_post_save(sender, instance, created, **kwargs):
             value = {
                 'office_id': office.id,
                 'template_key': instance.template_key,
+                'template_type': instance.type,
                 'value': None,
             }
             create_list.append(TemplateValue(office=office,
