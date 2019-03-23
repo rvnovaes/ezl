@@ -58,6 +58,20 @@ class CustomMessage {
       self.setVisualizedMessage(idMessage)
     })
   }
+  getLinkButton(message) {
+    let linkButton = ''
+    if (message.link) {
+      linkButton = `                 
+        <div class="row">
+          <div class="col-md-2 col-md-offset-5">
+          <a href="${message.link}" class="btn btn-xs btn-default" target="_blank"> Veja mais!</a>
+          </div>
+        </div>      
+      `
+    }
+    return linkButton
+  }
+
   loadMessages() {
     if (localStorage.getItem('ezl-count-pages') <= 1) {
       fetch('/custom_messages/').then(response => {
@@ -67,15 +81,13 @@ class CustomMessage {
               let storedMessage = this.findMessage(message.id)
               if (!storedMessage || storedMessage.visualized === false) {
                 this.messagesTemplate += `
-                <div class="alert alert-default ezl-panel alert-dismissible message-alert" role="alert" data-message="${message.id}">
-                  <button id="${message.id}" style="opacity: 1; color:#fff" type="button" class="close" data-dismiss="alert" aria-label="Fechar">
-                    <span aria-hidden="false">&times;</span>
-                  </button>
-                  <strong style="color: #fff">${message.message}</strong>
-                  <br/>                  
-                  <br/>
-                  <a href="${message.link}" class="btn btn-info" target="_blank">Veja mais!</a>                  
-                </div>            
+                <div class="alert alert-info">    
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span>
+                </button>  
+                  <i class="fa fa-2x fa-check-circle" aria-hidden="true"> </i>  
+                  <strong>${message.message}</strong>                                    
+                  ${this.getLinkButton(message)}                               
+                </div>                                                                  
                 `
                 this.addMessage(message)
               }

@@ -878,6 +878,7 @@ class CustomMessage(models.Model):
 
     class Meta:
         verbose_name = "Mensagens Customizadas"
+        verbose_name_plural = "Mensagens Customizadas"
 
     def __str__(self):
         return self.message

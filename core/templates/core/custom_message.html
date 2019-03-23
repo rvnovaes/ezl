@@ -1,12 +1,12 @@
 {% load static %}
 <div id="custom-messages">
   <!--As mensagens sao renderizadas pelo script custom-message.js -->
-</div>
 
-{% block extra_scripts %}  
-  <script src='{% static "core/js/custom-message.js" %}?rev={{request.REVIEW}}'></script>
-  <script>
-    let customMessage = new CustomMessage()
-    customMessage.loadMessages()    
-  </script>
+</div>
+{% block extra_scripts %}
+<script src='{% static "core/js/custom-message.js" %}?rev={{request.REVIEW}}'></script>
+<script>
+  let customMessage = new CustomMessage()
+  customMessage.loadMessages()    
+</script>
 {% endblock %}
