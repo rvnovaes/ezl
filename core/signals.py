@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from core.permissions import create_permission
 from guardian.shortcuts import get_groups_with_perms
 from task.models import TaskShowStatus, TaskWorkflow, TaskStatus
+from core.utils import create_office_template_value
 
 
 def create_office_custom_settings(office, i_work_alone):
@@ -126,6 +127,7 @@ def office_post_save(sender, instance, created, **kwargs):
     i_work_alone = getattr(instance, '_i_work_alone', False)
     if created:
         post_create_office(instance)
+        create_office_template_value(instance)
         create_office_custom_settings(instance, i_work_alone)
     if created or not get_groups_with_perms(instance):
         create_permission(instance)

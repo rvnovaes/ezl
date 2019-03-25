@@ -3,6 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from manager.models import Template, TemplateValue
+from manager.utils import get_new_template_value_obj
 from core.models import Office
 
 
@@ -11,16 +12,7 @@ def template_post_save(sender, instance, created, **kwargs):
     if created:
         create_list = []
         for office in Office.objects.all():
-            value = {
-                'office_id': office.id,
-                'template_key': instance.template_key,
-                'template_type': instance.type,
-                'value': None,
-            }
-            create_list.append(TemplateValue(office=office,
-                                             template=instance,
-                                             create_user=instance.create_user,
-                                             value=value))
+            create_list.append(get_new_template_value_obj(instance, office))
         TemplateValue.objects.bulk_create(create_list)
     else:
         templates_value = TemplateValue.objects.filter(

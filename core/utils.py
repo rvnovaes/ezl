@@ -336,3 +336,10 @@ def set_user_default_office(default_office, user, alter_user=None):
             create_user=alter_user
         )
     return obj
+
+
+def create_office_template_value(office):
+    from manager.models import Template
+    from manager.utils import get_new_template_value_obj
+    for template in Template.objects.filter(is_active=True):
+        get_new_template_value_obj(template, office).save()
