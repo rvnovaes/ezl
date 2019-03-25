@@ -66,7 +66,7 @@ from allauth.socialaccount.providers.oauth2.views import *
 from allauth.socialaccount.providers.google.views import *
 from billing.tables import BillingDetailsTable
 from billing.forms import BillingDetailsForm, BillingAddressCombinedForm
-from core.utils import cpf_is_valid, cnpj_is_valid
+from core.utils import cpf_is_valid, cnpj_is_valid, post_create_new_user
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -2383,26 +2383,12 @@ class NewRegister(TemplateView):
             user.save()
             authenticate(username=username, password=password)
             auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
-            send_mail_sign_up(first_name, email)            
-            if not request.POST.get('request_invite'):
-                office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user, cpf_cnpj=office_cpf_cnpj)            
-                office.customsettings.email_to_notification = email
-                office.customsettings.save()
-                DefaultOffice.objects.create(
-                    auth_user=user,
-                    office=office,
-                    create_user=user)
-                return JsonResponse({'redirect': reverse_lazy('dashboard')})
-            else:
-                office = Office.objects.get(pk=request.POST.get('office_pk'))
-                Invite.objects.create(
-                    office=office,
-                    person=user.person,
-                    status='N',
-                    create_user=user,
-                    invite_from='P',
-                    is_active=True)                
-                return JsonResponse({'redirect': reverse_lazy('office_instance')})
+            request_invite = request.POST.get('request_invite')
+            office_pk = request.POST.get('office_pk')
+
+            send_mail_sign_up(first_name, email)
+            url_return = post_create_new_user(request_invite, office_name, user, email, office_cpf_cnpj, office_pk)
+            return JsonResponse({'redirect': reverse_lazy(url_return)})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
@@ -2414,27 +2400,14 @@ class SocialRegister(TemplateView):
         try:
             office_name = request.POST.get('office')
             office_cpf_cnpj = request.POST.get('cpf_cnpj')
-            user = request.user    
-            if not request.POST.get('request_invite'):
-                office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
-                office.customsettings.email_to_notification = user.email
-                office.customsettings.save()
-                DefaultOffice.objects.create(
-                    auth_user=user,
-                    office=office,
-                    create_user=user)
+            user = request.user
+            office_pk = request.POST.get('office_pk')
+            request_invite = request.POST.get('request_invite')
+            url_return = post_create_new_user(request_invite, office_name, user, user.email, office_cpf_cnpj, office_pk)
+            if not request_invite:
                 send_mail_sign_up(user.first_name, user.email)
-                return JsonResponse({'redirect': reverse_lazy('dashboard')})
-            else:
-                office = Office.objects.get(pk=request.POST.get('office_pk'))
-                Invite.objects.create(
-                    office=office,
-                    person=user.person,
-                    status='N',
-                    create_user=user,
-                    invite_from='P',
-                    is_active=True)                
-                return JsonResponse({'redirect': reverse_lazy('office_instance')})                    
+
+            return JsonResponse({'redirect': reverse_lazy(url_return)})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 

@@ -61,6 +61,10 @@ class ListTemplateValues(GenericTemplateValues):
     def list_template_values(self):
         return self.dispatch()
 
+    def get_value_by_key(self, key):
+        template_value = GetTemplateValue(self.office, key)
+        return template_value.value
+
 
 class GetTemplateValue(GenericTemplateValues):
 

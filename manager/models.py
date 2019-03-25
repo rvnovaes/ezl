@@ -32,6 +32,7 @@ class TemplateKeys(Enum):
     EMAIL_NOTIFICATION = 'E-mail de notificação'
     USE_SERVICE = 'Equipe conferência dados'
     USE_ETL = 'Importa dados de outros sistemas'
+    I_WORK_ALONE = 'Trabalho sozinho'
 
     def __str__(self):
         return str(self.value)

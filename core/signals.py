@@ -20,7 +20,6 @@ def create_office_setting_i_work_alone(office, i_work_alone):
         create_user_id=office.create_user_id,
         office_id=office.id,
         default_user_id=office.create_user_id,
-        email_to_notification=office.create_user.email,
         i_work_alone=i_work_alone,
         is_active=True
     )

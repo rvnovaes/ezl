@@ -24,6 +24,8 @@ from simple_history.signals import (
 import sys
 import traceback
 from babel.numbers import format_currency
+from manager.template_values import ListTemplateValues
+from manager.models import TemplateKeys
 
 
 logger = logging.getLogger(__name__)
@@ -164,6 +166,7 @@ def workflow_task(sender, instance, created, **kwargs):
 
 def workflow_send_mail(sender, instance, created, **kwargs):
     try:
+        manager = ListTemplateValues(instance.office)
         custom_settings = CustomSettings.objects.filter(
             office=instance.office).first()
         if custom_settings:
@@ -172,7 +175,7 @@ def workflow_send_mail(sender, instance, created, **kwargs):
             if status_to_show and status_to_show.send_mail_template:
                 email = None
                 if custom_settings.i_work_alone:
-                    email = TaskMail([custom_settings.email_to_notification],
+                    email = TaskMail([manager.get_value_by_key(TemplateKeys.EMAIL_NOTIFICATION.name)],
                                      instance,
                                      status_to_show.send_mail_template.template_id)
                 else:
