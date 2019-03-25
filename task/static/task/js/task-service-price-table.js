@@ -1,4 +1,4 @@
-class ServicePriceTable {
+class TaskServicePriceTable {
   constructor(taskId, typeServiceId, typeServiceName) {    
     this.taskId = taskId
     this.typeServiceId = typeServiceId    
@@ -52,7 +52,7 @@ class ServicePriceTable {
   requestPayload() {
     return $.ajax({
       method: 'GET',
-      url: `/financeiro/${this.taskId}/service_price_table_of_task`,
+      url: `/providencias/${this.taskId}/service_price_table_of_task`,
       success: (response => {
         return response
       })

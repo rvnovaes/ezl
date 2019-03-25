@@ -2266,3 +2266,11 @@ class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
         context = super().get_context_data(**kwargs)
         context['filter'] = self.filter_class
         return context
+
+
+class ServicePriceTableOfTaskView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):
+        task = Task.objects.get(pk=pk)
+        price_table = CorrespondentsTable(task, task.office)
+        data = ServicePriceTableSerializer(price_table.correspondents_qs, many=True).data
+        return JsonResponse(data, safe=False)            

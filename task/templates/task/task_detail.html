@@ -10,7 +10,7 @@
     <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
     <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
     <!-- Service Price Table Style -->
-    <link href="{% static 'financial/css/service-price-table.css' %}" rel="stylesheet">
+    <link href="{% static 'task/css/task-service-price-table.css' %}" rel="stylesheet">
     <style>
         table.dataTable.row-border tbody tr:first-child th, table.dataTable.row-border tbody tr:first-child td, table.dataTable.display tbody tr:first-child th, table.dataTable.display tbody tr:first-child td {
             font-size: small !important;
@@ -34,7 +34,7 @@
     <link href="{% static 'libs/bootstrap-rating/bootstrap-rating.css' %}" rel="stylesheet">
 
     {% include 'task/task_to_assign.html' with task=task %}
-    {% include 'financial/service-price-table/service-price-table.html' %}
+    {% include 'task/includes/task-service-price-table/task-service-price-table.html' %}
     <form id="task_detail" action="" method="post">{% csrf_token %}            
 
         {% include 'task/task_detail/tab.html' %}
@@ -142,9 +142,9 @@
     {% include 'questionnaire/company_representative_questionnarie.html'%}
     {% include 'billing/modal/checkout.html' %}
     <script src='{% static "task/task-detail.js" %}?rev={{request.REVIEW}}'></script>
-    <script src='{% static "financial/js/service-price-table.js" %}?rev={{request.REVIEW}}'></script>
+    <script src='{% static "task/js/task-service-price-table.js" %}?rev={{request.REVIEW}}'></script>
     <script>
-        let priceTable = new ServicePriceTable(
+        let priceTable = new TaskServicePriceTable(
             '{{object.pk}}', '{{object.type_task.pk}}' , '{{object.type_task.name}}')        
         priceTable.bootstrap()
     </script>

@@ -346,11 +346,3 @@ class PolicyPriceDeleteView(AuditFormMixin, MultiDeleteViewMixin):
     success_message = DELETE_SUCCESS_MESSAGE.format(
         model._meta.verbose_name_plural)
     object_list_url = 'policyprice_list'
-
-
-class ServicePriceTableOfTaskView(CustomLoginRequiredView, View):
-    def get(self, request, task, *args, **kwargs):
-        task = Task.objects.get(pk=task)
-        price_table = CorrespondentsTable(task, task.office)
-        data = ServicePriceTableSerializer(price_table.correspondents_qs, many=True).data
-        return JsonResponse(data, safe=False)    

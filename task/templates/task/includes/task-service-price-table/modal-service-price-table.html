@@ -2,7 +2,7 @@
 {% block extra_stylesheet %}
     <link href="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.css' %}" rel="stylesheet" type="text/css" />
     <link href="//cdn.datatables.net/buttons/1.2.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
-    <link href="{% static 'financial/css/service-price-table.css' %}" rel="stylesheet">
+    <link href="{% static 'task/css/task-service-price-table.css' %}" rel="stylesheet">
 {% endblock extra_stylesheet %}
 
 <div id="modal-service-price-table" class="modal fade" role="dialog" aria-labelledby="modal-service-price-table">
@@ -10,17 +10,17 @@
     <div class="modal-content">
       <div class="modal-header">
         {% block modal_service_price_table_header %} 
-          {% include 'financial/service-price-table/modal-service-price-table-header.html' %}
+          {% include 'task/includes/task-service-price-table/modal-service-price-table-header.html' %}
         {% endblock %}        
       </div>
       <div class="modal-body">
         {% block modal_service_price_table_body %}
-          {% include 'financial/service-price-table/modal-service-price-table-body.html' %}              
+          {% include 'task/includes/task-service-price-table/modal-service-price-table-body.html' %}              
         {% endblock modal_service_price_table_body %}        
       </div>
       <div class="modal-footer">
         {% block modal_service_price_table_footer %}
-            {% include 'financial/service-price-table/modal-service-price-table-footer.html' %}
+            {% include 'task/includes/task-service-price-table/modal-service-price-table-footer.html' %}
         {% endblock modal_service_price_table_footer%}        
       </div>
     </div>
