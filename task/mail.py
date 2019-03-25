@@ -14,6 +14,8 @@ import base64
 import traceback
 import logging
 from django.utils import timezone
+from manager.template_values import GetTemplateValue
+from manager.enums import TemplateKeys
 
 logger = logging.getLogger(__name__)
 
@@ -64,22 +66,21 @@ class SendMail:
 class TaskFinishedEmail(object):
     def __init__(self, task, by_person):
         self.task = task
-        self.custom_settings = CustomSettings.objects.filter(
-            office=self.task.office).first()
+        self.default_user = GetTemplateValue(office=self.task.office,
+                                             template_key=TemplateKeys.DEFAULT_USER.name).value
 
     def get_url_change_password(self):
         token_generator = default_token_generator
-        temp_key = token_generator.make_token(
-            self.custom_settings.default_user)
+        temp_key = token_generator.make_token(self.default_user)
         path = reverse(
             "account_reset_password_from_key",
             kwargs=dict(
-                uidb36=user_pk_to_url_str(self.custom_settings.default_user),
+                uidb36=user_pk_to_url_str(self.default_user),
                 key=temp_key))
         return '{}{}'.format(settings.WORKFLOW_URL_EMAIL, path)
 
     def get_dynamic_template_data(self):
-        if not self.custom_settings.default_user.last_login:
+        if not self.default_user.last_login:
             return {
                 "task_number": self.task.task_number,
                 "type_task": self.task.type_task.name,
@@ -87,7 +88,7 @@ class TaskFinishedEmail(object):
                                                                                type_task=self.task.type_task.name),
                 "office_name": self.task.parent.office.legal_name,
                 "office_correspondent_name": self.task.parent.office.legal_name,
-                "username": self.custom_settings.default_user.username,
+                "username": self.default_user.username,
                 "btn_finished": self.get_url_change_password(),
             }
         return False

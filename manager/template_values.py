@@ -1,5 +1,6 @@
 from decimal import Decimal
-from .models import TemplateValue, TypeTemplate
+from .enums import TypeTemplate
+from .models import TemplateValue
 from .utils import get_filter_params_by_str, get_model_by_str
 
 

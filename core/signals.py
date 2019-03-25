@@ -13,7 +13,14 @@ from guardian.shortcuts import get_groups_with_perms
 from task.models import TaskShowStatus, TaskWorkflow, TaskStatus
 from core.utils import create_office_template_value, add_create_user_to_admin_group
 from manager.utils import get_template_by_key, create_template_value
-from manager.models import TemplateKeys
+from manager.enums import TemplateKeys
+from manager.template_values import ListTemplateValues
+
+
+def create_office_setting_default_user(office):
+    template = get_template_by_key(TemplateKeys.DEFAULT_USER.name)
+    value = office.create_user_id
+    create_template_value(template, office, value)
 
 
 def create_office_setting_i_work_alone(office):
@@ -21,13 +28,6 @@ def create_office_setting_i_work_alone(office):
     template = get_template_by_key(TemplateKeys.I_WORK_ALONE.name)
     value = i_work_alone
     create_template_value(template, office, value)
-    # CustomSettings.objects.create(
-    #     create_user_id=office.create_user_id,
-    #     office_id=office.id,
-    #     default_user_id=office.create_user_id,
-    #     i_work_alone=i_work_alone,
-    #     is_active=True
-    # )
 
 
 def create_office_setting_default_customer(office):
@@ -133,6 +133,14 @@ def office_post_save(sender, instance, created, **kwargs):
         create_office_template_value(instance)
         create_office_setting_default_customer(instance)
         create_office_setting_i_work_alone(instance)
+        create_office_setting_default_user(instance)
+
+        # TODO: Retirar metodo a seguir depois de eliminar a relacao entre CustomSettings e TaskWorkflow e
+        #  TaskStatusToShow
+        CustomSettings.objects.create(
+            create_user_id=instance.create_user_id,
+            is_active=True
+        )
     if created or not get_groups_with_perms(instance):
         create_permission(instance)
         add_create_user_to_admin_group(instance)
@@ -150,7 +158,9 @@ def office_post_delete(sender, instance, **kwargs):
 
 @receiver(post_save, sender=CustomSettings)
 def custom_settings_post_save(sender, instance, created, **kwargs):
-    if instance.i_work_alone:
+    manager = ListTemplateValues(instance.office)
+    i_work_alone = manager.get_value_by_key(TemplateKeys.I_WORK_ALONE.name)
+    if i_work_alone:
         status_to_show = [
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.OPEN, send_mail_template=EmailTemplate.objects.filter(
@@ -202,10 +212,11 @@ def custom_settings_post_save(sender, instance, created, **kwargs):
                                                  status_to_show=TaskStatus.ERROR), )
     if created:
         instance.task_status_show.bulk_create(status_to_show)
-        if instance.i_work_alone:
+        if i_work_alone:
             instance.office.use_etl = False
             instance.office.use_service = False
-            instance.default_user.groups.add(
+            default_user = manager.get_value_by_key(TemplateKeys.DEFAULT_USER.name)
+            default_user.groups.add(
                 Group.objects.filter(
                     name='Correspondente-{}'.format(instance.office.pk)).first())
             task_workflows = [
@@ -214,13 +225,13 @@ def custom_settings_post_save(sender, instance, created, **kwargs):
                     create_user=instance.create_user,
                     task_from=TaskStatus.REQUESTED,
                     task_to=TaskStatus.ACCEPTED_SERVICE,
-                    responsible_user=instance.default_user),
+                    responsible_user=default_user),
                 TaskWorkflow(
                     custtom_settings_id=instance.id,
                     create_user=instance.create_user,
                     task_from=TaskStatus.ACCEPTED_SERVICE,
                     task_to=TaskStatus.OPEN,
-                    responsible_user=instance.default_user),
+                    responsible_user=default_user),
             ]
             instance.task_workflows.bulk_create(task_workflows)
         instance.save()

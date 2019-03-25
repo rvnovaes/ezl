@@ -9,7 +9,8 @@ from core.utils import get_office_session
 from core.views import CustomLoginRequiredView
 from core.widgets import MDSelect
 from .models import TemplateValue
-from .utils import get_model_by_str, get_filter_params_by_str
+from .utils import get_model_by_str, get_filter_params_by_str, update_template_value
+from .template_values import ListTemplateValues
 
 
 class TemplateValueListView(CustomLoginRequiredView, TemplateView):
@@ -34,18 +35,13 @@ class TemplateValueListView(CustomLoginRequiredView, TemplateView):
 
     def post(self, request, *args, **kwargs):
         office = get_office_session(request)
-        template_values = office.templatevalue_office.filter(is_active=True).select_related('template')
+        manager = ListTemplateValues(office)
+        template_values = manager.instance_values
         if office:
             for template_value in template_values:
                 new_value = request.POST.get('template-value-{}'.format(template_value.id), None)
                 if new_value != template_value.value.get('value'):
-                    value = template_value.value
-                    value['value'] = new_value
-                    value['office_id'] = office.id
-                    value['template_type'] = template_value.template.type
-                    value['template_key'] = template_value.template.template_key
-                    template_value.value = value
-                    template_value.save()
+                    update_template_value(template_value, new_value)
         data = {
             'status': 'Updated'
         }

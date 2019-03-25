@@ -25,7 +25,7 @@ import sys
 import traceback
 from babel.numbers import format_currency
 from manager.template_values import ListTemplateValues
-from manager.models import TemplateKeys
+from manager.enums import TemplateKeys
 
 
 logger = logging.getLogger(__name__)

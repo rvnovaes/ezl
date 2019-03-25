@@ -2,46 +2,10 @@ import json
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from enum import Enum
 
 from .schemas import DEFAULT_VALUE
+from .enums import TemplateKeys, TypeTemplate
 from core.models import Audit, OfficeMixin, OfficeManager
-from financial.utils import remove_special_char
-
-
-class TypeTemplate(Enum):
-    BOOLEAN = 'Boleano'
-    SIMPLE_TEXT = 'Texto Simples'
-    LONG_TEXT = 'Texto Longo'
-    FOREIGN_KEY = 'Chave estrangeira'
-    INTEGER = 'Inteiro'
-    DECIMAL = 'Decimal'
-
-    def __str__(self):
-        return str(self.value)
-
-    @classmethod
-    def choices(cls):
-        choices = [(x.name, x.value) for x in cls]
-        choices.sort(key=lambda tup: tup[1])
-        return choices
-
-
-class TemplateKeys(Enum):
-    DEFAULT_CUSTOMER = 'Cliente padrão'
-    EMAIL_NOTIFICATION = 'E-mail de notificação'
-    USE_SERVICE = 'Equipe conferência dados'
-    USE_ETL = 'Importa dados de outros sistemas'
-    I_WORK_ALONE = 'Trabalho sozinho'
-
-    def __str__(self):
-        return str(self.value)
-
-    @classmethod
-    def choices(cls):
-        choices = [(x.name, x.value) for x in cls]
-        choices.sort(key=lambda tup: tup[1])
-        return choices
 
 
 class Template(Audit):
@@ -72,12 +36,6 @@ class Template(Audit):
         ordering = ('name', 'type')
         verbose_name = 'Template de configuração'
         verbose_name_plural = 'Templates de configuração'
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        if not self.template_key:
-            self.template_key = remove_special_char(self.name).strip().lower().replace(' ', '_')
-        return super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return self.name

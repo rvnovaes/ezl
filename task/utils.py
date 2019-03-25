@@ -17,7 +17,7 @@ from django.conf import settings
 from retrying import retry
 import traceback
 import logging
-from manager.models import TemplateKeys
+from manager.enums import TemplateKeys
 from manager.template_values import GetTemplateValue
 
 logger = logging.getLogger(__name__)

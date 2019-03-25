@@ -1,6 +1,5 @@
 import ast
 from django.apps import apps
-from .models import TemplateValue, Template
 
 
 def get_model_by_str(model_str):
@@ -14,10 +13,14 @@ def get_filter_params_by_str(params_str):
 
 
 def get_template_by_key(key):
+    from .models import Template
+
     return Template.objects.filter(template_key=key).first()
 
 
 def new_template_value_obj(template, office, value=None):
+    from .models import TemplateValue
+
     value_dict = {
         'office_id': office.id,
         'template_key': template.template_key,
@@ -33,3 +36,13 @@ def new_template_value_obj(template, office, value=None):
 def create_template_value(template, office, value=None):
     template_value = new_template_value_obj(template, office, value)
     return template_value.save()
+
+
+def update_template_value(template_value, new_value):
+    value = template_value.value
+    value['value'] = new_value
+    value['office_id'] = template_value.office_id
+    value['template_type'] = template_value.template.type
+    value['template_key'] = template_value.template.template_key
+    template_value.value = value
+    template_value.save()

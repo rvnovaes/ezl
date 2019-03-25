@@ -823,7 +823,7 @@ class ControlFirstAccessUser(models.Model):
 
 class CustomSettings(Audit):
     office = models.OneToOneField(Office, verbose_name='Escritório')
-    default_user = models.ForeignKey(User, verbose_name='Usuário default')
+    default_user = models.ForeignKey(User, verbose_name='Usuário default', blank=True, null=True)
     email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações',
                                               null=True, blank=True)
     i_work_alone = models.BooleanField(default=True)

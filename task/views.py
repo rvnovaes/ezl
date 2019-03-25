@@ -66,8 +66,8 @@ from dal import autocomplete
 from billing.gerencianet_api import api as gn_api
 import logging
 import operator
-from manager.template_values import ListTemplateValues
-from manager.models import TemplateKeys
+from manager.template_values import ListTemplateValues, GetTemplateValue
+from manager.enums import TemplateKeys
 
 logger = logging.getLogger(__name__)
 
@@ -1009,6 +1009,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
         # pega as configuracoes personalizadas do escritorio
         context['custom_settings'] = office_session.customsettings
+        manager = ListTemplateValues(self.object.office)
+        context['i_work_alone']: manager.get_value_by_key(TemplateKeys.I_WORK_ALONE.name)
 
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
@@ -1937,7 +1939,7 @@ class ExternalTaskView(UpdateView):
         custom_settings = CustomSettings.objects.filter(
             office=self.object.office).first()
         manager = ListTemplateValues(self.object.office)
-        request.user = custom_settings.default_user
+        request.user = manager.get_value_by_key(TemplateKeys.DEFAULT_USER.name)
         set_office_session(request)
         ecms = Ecm.objects.filter(task_id=self.object.id)
         task_history = TaskHistory.objects.filter(
@@ -1951,7 +1953,7 @@ class ExternalTaskView(UpdateView):
                 'show_person_executed_by_in_tab': True,
                 'task': self.object,
                 'form': TaskDetailForm(instance=self.object),
-                'user': custom_settings.default_user,
+                'user': request.user,
                 'ecms': ecms,
                 'task_history': task_history,
                 'survey_data': survey_data,
@@ -1961,10 +1963,11 @@ class ExternalTaskView(UpdateView):
 
     def post(self, request, task_hash, *args, **kwargs):
         task = Task.objects.filter(task_hash=task_hash).first()
-        custom_settings = CustomSettings.objects.filter(office=task.office)
+        default_user = GetTemplateValue(office=task.office,
+                                        template_key=TemplateKeys.DEFAULT_USER.name).value
         form = self.form_class(request.POST, instance=task)
-        if custom_settings.exists():
-            form.instance.alter_user = custom_settings.first().default_user
+        if default_user:
+            form.instance.alter_user = default_user
         form.instance.task_status = TaskStatus[
                                         self.request.POST['action']] or TaskStatus.INVALID
         if form.is_valid():
@@ -1995,9 +1998,9 @@ class EcmExternalCreateView(CreateView):
     def post(self, request, task_hash, *args, **kwargs):
         files = request.FILES.getlist('path')
         task = Task.objects.filter(task_hash=task_hash).first()
-        custom_settings = CustomSettings.objects.filter(
-            office=task.office).first()
-        request.user = custom_settings.default_user
+        default_user = GetTemplateValue(office=task.office,
+                                        template_key=TemplateKeys.DEFAULT_USER.name).value
+        request.user = default_user
         data = {'success': False, 'message': exception_create()}
 
         for file in files:
