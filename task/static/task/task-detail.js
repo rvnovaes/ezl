@@ -1,7 +1,10 @@
 class TaskDetail {
-    constructor(taskId, taskStatus, officeWorkAlone, pendingSurveys, pendingList, surveyCompanyRepresentative, csrfToken, billing, chargeId, typeTask) {
+    constructor(
+        taskId, taskStatus, officeWorkAlone, pendingSurveys, pendingList, surveyCompanyRepresentative, csrfToken, 
+        billing, chargeId, typeTaskId, typeTaskName, useService) {
+
         this.csrfToken = csrfToken;
-        this.taskId = taskId;
+        this.taskId = taskId;        
         this.taskStatus = taskStatus;
         this.chargeId = chargeId;
         this.officeWorkAlone = (officeWorkAlone === 'True');
@@ -9,9 +12,11 @@ class TaskDetail {
         this.pendingList = pendingList;
         this.surveyCompanyRepresentative=surveyCompanyRepresentative;
         this.billing = billing;
-        this.typeTask = typeTask;
+        this.typeTaskId = typeTaskId
+        this.typeTask = typeTaskName;        
         this.expanded = false;            
         this.servicePriceTable = {};
+        this.useService = useService === 'True' ? true : false;
         this._elTaskTitle = $('#task-title');
         this._elExecutionDate = $("input[name=execution_date]"); 
         this._elModalAction = $('#confirmAction');
@@ -24,7 +29,9 @@ class TaskDetail {
         this._elNotes = $('textarea[id=notes_id]');
         this._elBtnCompanyRepresentative = $('#btn-company_representative');
         this._elModalSurveyCompanyRepresentative = $("#survey-company-representative");
-        this._elExecutionDate.attr({'required': true, 'placeholder': 'Data de Cumprimento'});
+        this._elExecutionDate.attr({'required': true, 'placeholder': 'Data de Cumprimento'});        
+        // Instancia da classe javascript que gera a tabela de precos
+        this.priceTable = new TaskServicePriceTable(this.taskId, this.typeTaskName, this.typeTask)        
         this.initFeedbackRating();
         this.initCpfCnpjField();
         this.onClickRowServicePriceTable();  
@@ -130,8 +137,12 @@ class TaskDetail {
         }
     }
 
-    showModalAction() {
-        this._elModalAction.modal('show');
+    showModalAction() {                
+        if (this.taskStatus === 'ACCEPTED_SERVICE' || (this.taskStatus === 'REQUESTED' && this.useService)) {
+            this.priceTable.bootstrap()
+        } else {
+            this._elModalAction.modal('show');
+        }        
     }
 
     hideModalAction() {
@@ -191,7 +202,7 @@ class TaskDetail {
         });
     }
 
-    formatModalAction(status) {
+    formatModalAction(status) {        
         this._elModalNextText.innerHTML = this.nextState[status]['text'];
         $('#icon').addClass(this.nextState[status]['icon']);
         actionButton.innerHTML = "<i class='"+this.nextState[status]['icon']+"'></i> "+
@@ -209,7 +220,7 @@ class TaskDetail {
         this._elFeedbackRating.hide().rating({});
     }
 
-    makeTaskAction(value) {
+    makeTaskAction(value) {        
         let taskStatus = value.id;
         this.validSurvey();
         this.makeRatingProccess(taskStatus);
@@ -440,7 +451,7 @@ class TaskDetail {
                 let url_string = window.location.href;
                 let url = new URL(url_string);
                 let action = url.searchParams.get("action");
-                if (action === 'delegate') {
+                if (action === 'delegate') {                    
                     $('#OPEN').click();
                 }
                 if (action === 'assign') {

@@ -8,7 +8,8 @@ class TaskServicePriceTable {
     this.idPriceTableElement = '#price-table'
     this.elPriceTable = $(this.idPriceTableElement)    
     this.priceTableIdSelected = null
-    this.elPriceSelected = $('#price-selected')    
+    this.elPriceSelected = $('#price-selected')
+    this.elBtnAction = $('#btn-action')    
   }
   
   get typeServiceName() {
@@ -34,6 +35,15 @@ class TaskServicePriceTable {
   showModal() {
     return this.elModal.modal('show')
   }  
+
+  initOnBtnAction() {
+    return new Promise((resolve)=> {
+      this.elBtnAction.on('click', ()=>{
+        alert('executa a acao')
+      })
+      resolve(true)
+    })
+  }
 
   initOnClickRowEvent() {
     return new Promise((resolve)=>{
