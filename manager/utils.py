@@ -1,6 +1,6 @@
 import ast
 from django.apps import apps
-from .models import TemplateValue
+from .models import TemplateValue, Template
 
 
 def get_model_by_str(model_str):
@@ -13,14 +13,23 @@ def get_filter_params_by_str(params_str):
     return ast.literal_eval(params_str)
 
 
-def get_new_template_value_obj(template, office):
-    value = {
+def get_template_by_key(key):
+    return Template.objects.filter(template_key=key).first()
+
+
+def new_template_value_obj(template, office, value=None):
+    value_dict = {
         'office_id': office.id,
         'template_key': template.template_key,
         'template_type': template.type,
-        'value': None,
+        'value': value,
     }
     return TemplateValue(office=office,
                          template=template,
                          create_user=template.create_user,
-                         value=value)
+                         value=value_dict)
+
+
+def create_template_value(template, office, value=None):
+    template_value = new_template_value_obj(template, office, value)
+    return template_value.save()

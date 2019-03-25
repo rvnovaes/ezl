@@ -17,6 +17,8 @@ from django.conf import settings
 from retrying import retry
 import traceback
 import logging
+from manager.models import TemplateKeys
+from manager.template_values import GetTemplateValue
 
 logger = logging.getLogger(__name__)
 
@@ -246,6 +248,6 @@ def set_performance_place(movement):
 
 
 def get_default_customer(office):
-    if hasattr(office, 'customsettings'):
-        return office.customsettings.default_customer or None
-    return None
+    key = TemplateKeys.DEFAULT_CUSTOMER.name
+    manager = GetTemplateValue(office, key)
+    return manager.value

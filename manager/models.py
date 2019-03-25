@@ -27,6 +27,22 @@ class TypeTemplate(Enum):
         return choices
 
 
+class TemplateKeys(Enum):
+    DEFAULT_CUSTOMER = 'Cliente padrão'
+    EMAIL_NOTIFICATION = 'E-mail de notificação'
+    USE_SERVICE = 'Equipe conferência dados'
+    USE_ETL = 'Importa dados de outros sistemas'
+
+    def __str__(self):
+        return str(self.value)
+
+    @classmethod
+    def choices(cls):
+        choices = [(x.name, x.value) for x in cls]
+        choices.sort(key=lambda tup: tup[1])
+        return choices
+
+
 class Template(Audit):
     name = models.CharField(verbose_name='Nome',
                             null=False,
@@ -36,7 +52,8 @@ class Template(Audit):
                                     null=False,
                                     blank=False,
                                     max_length=255,
-                                    unique=True)
+                                    unique=True,
+                                    choices=TemplateKeys.choices())
     description = models.TextField(verbose_name='Descrição',
                                    null=True,
                                    blank=True)

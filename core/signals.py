@@ -11,10 +11,22 @@ from django.template.loader import render_to_string
 from core.permissions import create_permission
 from guardian.shortcuts import get_groups_with_perms
 from task.models import TaskShowStatus, TaskWorkflow, TaskStatus
-from core.utils import create_office_template_value
+from core.utils import create_office_template_value, add_create_user_to_admin_group
+from manager.utils import get_template_by_key, new_template_value_obj, create_template_value
 
 
-def create_office_custom_settings(office, i_work_alone):
+def create_office_setting_i_work_alone(office, i_work_alone):
+    CustomSettings.objects.create(
+        create_user_id=office.create_user_id,
+        office_id=office.id,
+        default_user_id=office.create_user_id,
+        email_to_notification=office.create_user.email,
+        i_work_alone=i_work_alone,
+        is_active=True
+    )
+
+
+def create_office_setting_default_customer(office):
     default_customer = Person.objects.filter(legal_name=office.legal_name,
                                              name=office.legal_name,
                                              is_customer=True).first()
@@ -29,18 +41,13 @@ def create_office_custom_settings(office, i_work_alone):
                                             office_id=office.id,
                                             create_user_id=office.create_user.id,
                                             is_active=True)
-    CustomSettings.objects.create(
-        create_user_id=office.create_user_id,
-        default_customer=default_customer,
-        office_id=office.id,
-        default_user_id=office.create_user_id,
-        email_to_notification=office.create_user.email,
-        i_work_alone=i_work_alone,
-        is_active=True
-    )
+
+    template = get_template_by_key('clientePadrao')
+    value = default_customer.id
+    create_template_value(template, office, value)
 
 
-def post_create_office(office):
+def create_membership_and_groups(office):
     member, created = OfficeMembership.objects.get_or_create(
         person=office.create_user.person,
         office=office,
@@ -61,14 +68,7 @@ def post_create_office(office):
                     'create_user': office.create_user,
                     'is_active': True
                 })
-    if not office.create_user.is_superuser:
-        for group in {
-            group
-            for group, perms in get_groups_with_perms(
-            office, attach_perms=True).items()
-            if 'group_admin' in perms
-        }:
-            office.create_user.groups.add(group)
+    add_create_user_to_admin_group(office)
     create_default_type_tasks(office)
 
 
@@ -126,19 +126,12 @@ models.signals.post_save.connect(
 def office_post_save(sender, instance, created, **kwargs):
     i_work_alone = getattr(instance, '_i_work_alone', False)
     if created:
-        post_create_office(instance)
+        create_membership_and_groups(instance)
         create_office_template_value(instance)
-        create_office_custom_settings(instance, i_work_alone)
+        create_office_setting_default_customer(instance)
     if created or not get_groups_with_perms(instance):
         create_permission(instance)
-        if not instance.create_user.is_superuser:
-            for group in {
-                group
-                for group, perms in get_groups_with_perms(
-                instance, attach_perms=True).items()
-                if 'group_admin' in perms
-            }:
-                instance.create_user.groups.add(group)
+        add_create_user_to_admin_group(instance)
     else:
         for group in get_groups_with_perms(instance):
             group.name = '{}-{}'.format(group.name.split('-')[0], instance.pk)

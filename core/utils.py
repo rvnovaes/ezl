@@ -340,6 +340,19 @@ def set_user_default_office(default_office, user, alter_user=None):
 
 def create_office_template_value(office):
     from manager.models import Template
-    from manager.utils import get_new_template_value_obj
+    from manager.utils import create_template_value
     for template in Template.objects.filter(is_active=True):
-        get_new_template_value_obj(template, office).save()
+        create_template_value(template, office)
+
+
+def add_create_user_to_admin_group(office):
+    from guardian.shortcuts import get_groups_with_perms
+
+    if not office.create_user.is_superuser:
+        for group in {
+            group
+            for group, perms in get_groups_with_perms(
+            office, attach_perms=True).items()
+            if 'group_admin' in perms
+        }:
+            office.create_user.groups.add(group)

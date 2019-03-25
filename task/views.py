@@ -51,7 +51,7 @@ from financial.models import ServicePriceTable
 from financial.utils import recalculate_values
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
-    has_task_parent, set_instance_values, get_status_to_filter
+    has_task_parent, set_instance_values, get_status_to_filter, get_default_customer
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -153,9 +153,11 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         office = get_office_session(self.request)
         context['default_customer'] = None
         context['lawsuit_form'] = LawSuitForm()
-        if hasattr(office, 'customsettings') and office.customsettings.default_customer:
-            context['default_customer'] = {'id': office.customsettings.default_customer.id,
-                                           'text': office.customsettings.default_customer.legal_name}
+
+        default_customer = get_default_customer(office)
+        if default_customer:
+            context['default_customer'] = {'id': default_customer.id,
+                                           'text': default_customer.legal_name}
         return context
 
     def post(self, request, *args, **kwargs):
