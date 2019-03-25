@@ -1,11 +1,13 @@
 class ServicePriceTable {
-  constructor(taskId, typeServiceId, typeServiceName) {
+  constructor(taskId, typeServiceId, typeServiceName) {    
     this.taskId = taskId
     this.typeServiceId = typeServiceId    
     this.elModal = $('#modal-service-price-table')
     this.elTypeService = $('#type-service')
     this.typeServiceName = typeServiceName
-    this.elPriceTable = $('#price-table')    
+    this.idPriceTableElement = '#price-table'
+    this.elPriceTable = $(this.idPriceTableElement)    
+    this.priceTableIdSelected = null
   }
   
   get typeServiceName() {
@@ -24,6 +26,19 @@ class ServicePriceTable {
     return this.elModal.modal('show')
   }  
 
+  initOnClickRowEvent() {
+    return new Promise((resolve)=>{
+      let self = this
+      $(`${this.idPriceTableElement} tbody`).on('click', 'tr', function(){        
+        let row = self.elPriceTable.row(this)                      
+        self.priceTableIdSelected = row.node().id
+        $(row.node()).siblings().removeClass('row-selected')        
+        $(row.node()).addClass('row-selected')                
+        resolve(true)
+      })
+    })
+  }
+
   requestPayload() {
     return $.ajax({
       method: 'GET',
@@ -39,7 +54,7 @@ class ServicePriceTable {
       this.requestPayload()
         .then(prices => {
           for (let price of prices) {
-            let row = this.elPriceTable.row.add(
+            this.elPriceTable.row.add(
               [
                 price.office_correspondent.legal_name,
                 price.type_task.name,
@@ -53,8 +68,7 @@ class ServicePriceTable {
                 price.office_rating,
                 price.office_return_rating
               ]
-            ).node();
-            row.id = price.id;
+            ).node().id = price.id;                        
             this.elPriceTable.draw(false);
           }
           resolve(true)
@@ -71,6 +85,7 @@ class ServicePriceTable {
           dom: 'frti',
           buttons: [],
           destroy: true,
+          rowID: 'id',
           language: {
             "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
           },
@@ -90,8 +105,8 @@ class ServicePriceTable {
       .then(() => {
         this.populateTable()
           .then(() => {
-            this.showModal()
-          })
+            this.initOnClickRowEvent().then(this.showModal())
+          })          
       })
   }  
 }

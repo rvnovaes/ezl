@@ -11,3 +11,9 @@
 		width: 1250px !important;
 	}	 
 }
+
+.row-selected {	
+    color: #FFFFFF;
+    font-weight: bolder;
+    background-color: var(--ezl-open-color) !important;
+}
