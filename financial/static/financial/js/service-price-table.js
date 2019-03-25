@@ -1,44 +1,28 @@
 class ServicePriceTable {
-  constructor(taskId, typeServiceId) {
+  constructor(taskId, typeServiceId, typeServiceName) {
     this.taskId = taskId
-    this.typeServiceId = typeServiceId
+    this.typeServiceId = typeServiceId    
     this.elModal = $('#modal-service-price-table')
     this.elTypeService = $('#type-service')
-    this.elPriceTable = $('#price-table')
+    this.typeServiceName = typeServiceName
+    this.elPriceTable = $('#price-table')    
+  }
+  
+  get typeServiceName() {
+    return this.elTypeService.text()
   }
 
-  bootstrap() {
-    this.initTable()
-      .then(() => {
-        this.populateTable()
-          .then(() => {
-            this.showModal()
-          })
-      })
+  set typeServiceName(value) {
+    this.elTypeService.text(value)
   }
 
-  initTable() {
-    return new Promise((resolve) => {
-      resolve(this.elPriceTable = this.elPriceTable.DataTable(
-        {
-          paging: false,
-          order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
-          dom: 'frti',
-          buttons: [],
-          destroy: true,
-          language: {
-            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-          },
-          "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
-            if (aData[1] === '-' || aData[1] === '—') {
-              $("td:eq(1)", nRow).text(typeTask);
-            }
-            return nRow;
-          },
-        }
-      ))
-    })
+  hideModal() {
+    this.elModal.modal('hide')
   }
+  
+  showModal() {
+    return this.elModal.modal('show')
+  }  
 
   requestPayload() {
     return $.ajax({
@@ -78,19 +62,37 @@ class ServicePriceTable {
     })
   }
 
-  showModal() {
-    return this.elModal.modal('show')
-  }
-
-  get typeServiceName() {
-    return this.elTypeService.text()
-  }
-
-  set typeServiceName(value) {
-    this.elTypeService.text(value)
-  }
-
-  hideModal() {
-    this.elModal.modal('hide')
-  }
+  initTable() {
+    return new Promise((resolve) => {
+      resolve(this.elPriceTable = this.elPriceTable.DataTable(
+        {
+          paging: false,
+          order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
+          dom: 'frti',
+          buttons: [],
+          destroy: true,
+          language: {
+            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+          },
+          "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+            if (aData[1] === '-' || aData[1] === '—') {
+              $("td:eq(1)", nRow).text(typeTask);
+            }
+            return nRow;
+          },
+        }
+      ))
+    })
+  }  
+  
+  bootstrap() {
+    this.initTable()
+      .then(() => {
+        this.populateTable()
+          .then(() => {
+            this.showModal()
+          })
+      })
+  }  
 }
+

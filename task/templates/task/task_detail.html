@@ -29,6 +29,7 @@
     {% include 'chat/chat-right-sidebar.html' %}
 {% endblock %}
 {% block content %}    
+    
     <link href="{% static 'skeleton/css/step-bar.css' %}" rel="stylesheet">
     <link href="{% static 'libs/bootstrap-rating/bootstrap-rating.css' %}" rel="stylesheet">
 
@@ -143,7 +144,8 @@
     <script src='{% static "task/task-detail.js" %}?rev={{request.REVIEW}}'></script>
     <script src='{% static "financial/js/service-price-table.js" %}?rev={{request.REVIEW}}'></script>
     <script>
-        let priceTable = new ServicePriceTable('{{object.pk}}')        
+        let priceTable = new ServicePriceTable(
+            '{{object.pk}}', '{{object.type_task.pk}}' , '{{object.type_task.name}}')        
         priceTable.bootstrap()
     </script>
     <script src="{% static 'billing/js/checkout.js' %}?rev={{request.REVIEW}}"></script>
