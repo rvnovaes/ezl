@@ -8,6 +8,7 @@ class ServicePriceTable {
     this.idPriceTableElement = '#price-table'
     this.elPriceTable = $(this.idPriceTableElement)    
     this.priceTableIdSelected = null
+    this.elPriceSelected = $('#price-selected')    
   }
   
   get typeServiceName() {
@@ -16,6 +17,14 @@ class ServicePriceTable {
 
   set typeServiceName(value) {
     this.elTypeService.text(value)
+  }
+
+  get priceSelected() {
+    return this.elPriceSelected.val()
+  }
+
+  set priceSelected(value) {
+    this.elPriceSelected.val(value)
   }
 
   hideModal() {
@@ -32,6 +41,7 @@ class ServicePriceTable {
       $(`${this.idPriceTableElement} tbody`).on('click', 'tr', function(){        
         let row = self.elPriceTable.row(this)                      
         self.priceTableIdSelected = row.node().id
+        self.priceSelected = row.data()[8]
         $(row.node()).siblings().removeClass('row-selected')        
         $(row.node()).addClass('row-selected')                
         resolve(true)
