@@ -66,6 +66,8 @@ from dal import autocomplete
 from billing.gerencianet_api import api as gn_api
 import logging
 import operator
+from manager.template_values import ListTemplateValues
+from manager.models import TemplateKeys
 
 logger = logging.getLogger(__name__)
 
@@ -1934,6 +1936,7 @@ class ExternalTaskView(UpdateView):
         self.object = Task.objects.filter(task_hash=task_hash).first()
         custom_settings = CustomSettings.objects.filter(
             office=self.object.office).first()
+        manager = ListTemplateValues(self.object.office)
         request.user = custom_settings.default_user
         set_office_session(request)
         ecms = Ecm.objects.filter(task_id=self.object.id)
@@ -1952,7 +1955,8 @@ class ExternalTaskView(UpdateView):
                 'ecms': ecms,
                 'task_history': task_history,
                 'survey_data': survey_data,
-                'custom_settings': custom_settings
+                'custom_settings': custom_settings,
+                'i_work_alone': manager.get_value_by_key(TemplateKeys.I_WORK_ALONE.name)
             })
 
     def post(self, request, task_hash, *args, **kwargs):

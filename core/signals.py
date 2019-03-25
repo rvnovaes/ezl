@@ -12,17 +12,22 @@ from core.permissions import create_permission
 from guardian.shortcuts import get_groups_with_perms
 from task.models import TaskShowStatus, TaskWorkflow, TaskStatus
 from core.utils import create_office_template_value, add_create_user_to_admin_group
-from manager.utils import get_template_by_key, new_template_value_obj, create_template_value
+from manager.utils import get_template_by_key, create_template_value
+from manager.models import TemplateKeys
 
 
-def create_office_setting_i_work_alone(office, i_work_alone):
-    CustomSettings.objects.create(
-        create_user_id=office.create_user_id,
-        office_id=office.id,
-        default_user_id=office.create_user_id,
-        i_work_alone=i_work_alone,
-        is_active=True
-    )
+def create_office_setting_i_work_alone(office):
+    i_work_alone = getattr(office, '_i_work_alone', False)
+    template = get_template_by_key(TemplateKeys.I_WORK_ALONE.name)
+    value = i_work_alone
+    create_template_value(template, office, value)
+    # CustomSettings.objects.create(
+    #     create_user_id=office.create_user_id,
+    #     office_id=office.id,
+    #     default_user_id=office.create_user_id,
+    #     i_work_alone=i_work_alone,
+    #     is_active=True
+    # )
 
 
 def create_office_setting_default_customer(office):
@@ -41,7 +46,7 @@ def create_office_setting_default_customer(office):
                                             create_user_id=office.create_user.id,
                                             is_active=True)
 
-    template = get_template_by_key('clientePadrao')
+    template = get_template_by_key(TemplateKeys.DEFAULT_CUSTOMER.name)
     value = default_customer.id
     create_template_value(template, office, value)
 
@@ -123,11 +128,11 @@ models.signals.post_save.connect(
 
 @receiver(post_save, sender=Office)
 def office_post_save(sender, instance, created, **kwargs):
-    i_work_alone = getattr(instance, '_i_work_alone', False)
     if created:
         create_membership_and_groups(instance)
         create_office_template_value(instance)
         create_office_setting_default_customer(instance)
+        create_office_setting_i_work_alone(instance)
     if created or not get_groups_with_perms(instance):
         create_permission(instance)
         add_create_user_to_admin_group(instance)

@@ -174,7 +174,7 @@ def workflow_send_mail(sender, instance, created, **kwargs):
                 status_to_show=instance.task_status).first()
             if status_to_show and status_to_show.send_mail_template:
                 email = None
-                if custom_settings.i_work_alone:
+                if manager.get_value_by_key(TemplateKeys.I_WORK_ALONE.name):
                     email = TaskMail([manager.get_value_by_key(TemplateKeys.EMAIL_NOTIFICATION.name)],
                                      instance,
                                      status_to_show.send_mail_template.template_id)
