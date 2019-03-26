@@ -95,5 +95,30 @@
             "is_required": false
         }
     }
+},
+{
+    "model": "manager.template",
+    "pk": 7,
+    "fields": {
+        "create_date": "2019-03-26T17:24:03.874Z",
+        "create_user": 2,
+        "alter_date": "2019-03-26T17:24:03.874Z",
+        "alter_user": null,
+        "is_active": true,
+        "name": "Usu\u00e1rio Padr\u00e3o",
+        "template_key": "DEFAULT_USER",
+        "description": "Usu\u00e1rio Padr\u00e3o",
+        "type": "FOREIGN_KEY",
+        "parameters": {
+            "model": [
+                {
+                    "model": "auth.User",
+                    "field_list": "username",
+                    "extra_params": "{}"
+                }
+            ],
+            "is_required": true
+        }
+    }
 }
 ]
