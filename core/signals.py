@@ -160,7 +160,7 @@ def office_post_delete(sender, instance, **kwargs):
 def custom_settings_post_save(sender, instance, created, **kwargs):
     manager = ListTemplateValues(instance.office)
     i_work_alone = manager.get_value_by_key(TemplateKeys.I_WORK_ALONE.name)
-    use_etl = manager.get_value_by_key(Template.USE_ETL.name)
+    use_etl = manager.get_value_by_key(TemplateKeys.USE_ETL.name)
     if i_work_alone:
         status_to_show = [
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,

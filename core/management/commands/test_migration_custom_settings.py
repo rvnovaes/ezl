@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logger.info('Iniciando teste')
         error_list = []
-        for office in Office.objects.all():
+        for office in Office.objects.filter(is_active=True):
             if getattr(office, 'customsettings', None):
                 manager = ListTemplateValues(office)
                 office_check_list = []
@@ -24,7 +24,7 @@ class Command(BaseCommand):
                     'template_type': TypeTemplate.FOREIGN_KEY.name
                 })
                 office_check_list.append({
-                    'value': office.customsettings.email_to_notification,
+                    'value': str(office.customsettings.email_to_notification),
                     'office_id': office.id,
                     'template_key': TemplateKeys.EMAIL_NOTIFICATION.name,
                     'template_type': TypeTemplate.LONG_TEXT.name

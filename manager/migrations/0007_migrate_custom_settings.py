@@ -15,7 +15,7 @@ def migrate_custom_settings(apps, schema_editor):
     from core.models import Office
     from django.contrib.auth.models import User
     admin = User.objects.get(username='admin')
-    offices = Office.objects.all()
+    offices = Office.objects.filter(is_active=True)
     total = offices.count()
     i = 0
     with transaction.atomic():
