@@ -24,9 +24,7 @@ def create_office_setting_default_user(office):
 
 def create_office_setting_i_work_alone(office):
     i_work_alone = getattr(office, '_i_work_alone', False)
-    template = get_template_by_key(TemplateKeys.I_WORK_ALONE.name)
-    value = i_work_alone
-    create_template_value(template, office, value)
+    office.i_work_alone = i_work_alone
 
 
 def create_office_setting_default_customer(office):

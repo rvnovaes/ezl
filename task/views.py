@@ -1010,7 +1010,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         # pega as configuracoes personalizadas do escritorio
         context['custom_settings'] = office_session.customsettings
         manager = ListTemplateValues(self.object.office)
-        context['i_work_alone']: manager.get_value_by_key(TemplateKeys.I_WORK_ALONE.name)
+        context['i_work_alone']: office_session.i_work_alone
 
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
@@ -1958,7 +1958,7 @@ class ExternalTaskView(UpdateView):
                 'task_history': task_history,
                 'survey_data': survey_data,
                 'custom_settings': custom_settings,
-                'i_work_alone': manager.get_value_by_key(TemplateKeys.I_WORK_ALONE.name)
+                'i_work_alone': self.object.office.i_work_alone
             })
 
     def post(self, request, task_hash, *args, **kwargs):

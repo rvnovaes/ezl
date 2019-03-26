@@ -17,7 +17,7 @@ from allauth.account.adapter import get_adapter
 from allauth.account.utils import filter_users_by_username, user_pk_to_url_str, user_email
 from core.fields import CustomBooleanField
 from core.models import ContactUs, Person, Address, City, ContactMechanism, ContactMechanismType, AddressType, \
-    LegalType, Office, Invite, InviteOffice, Team, CustomSettings
+    LegalType, Office, Invite, InviteOffice, Team
 from core.utils import filter_valid_choice_form, get_office_field, get_office_session, get_domain, get_person_field
 from core.widgets import TypeaHeadForeignKeyWidget, MDSelect
 from core.models import OfficeMixin, ImportXlsFile
@@ -630,19 +630,6 @@ class XlsxFileField(forms.FileField):
             msg = 'Cabeçalho inválido. O arquivo deve conter por padrão o seguinte cabeçalho: {}'.format(
                 ' | '.join(self.headers_to_check))
             raise ValidationError((msg), code='invalid')
-
-
-class CustomSettingsForm(BaseForm):
-    class Meta:
-        model = CustomSettings
-        fields = ('office', 'email_to_notification', 'default_customer', 'is_active')
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        office = get_office_session(self.request)
-        self.fields['office'] = get_office_field(self.request)
-        qs = self.fields['default_customer'].queryset
-        self.fields['default_customer'].queryset = qs.filter(officemembership__office_id=office.id)
 
 
 class ImportCityListForm(forms.ModelForm):

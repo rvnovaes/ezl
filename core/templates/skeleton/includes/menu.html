@@ -118,15 +118,9 @@
             {% include 'task/includes/menus/menu-batch-change-tasks.html' %}
             {% if 'can_access_settings' in office_session_perms or request.user.is_superuser %}
                 <li>
-                    <a href="{% url 'custom_settings_create' %}" target="_self">
-                        <i class="fa fa-cogs fa-fw"></i>
-                        <span class="hide-menu">Configurações</span>
-                    </a>
-                </li>
-                <li>
                     <a href="{% url 'template_answers_list' %}" target="_self">
                         <i class="fa fa-cogs fa-fw"></i>
-                        <span class="hide-menu">Configurações (novo)</span>
+                        <span class="hide-menu">Configurações</span>
                     </a>
                 </li>
             {% endif %}
