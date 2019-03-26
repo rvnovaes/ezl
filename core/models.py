@@ -473,19 +473,51 @@ class Office(AbstractPerson):
             self.cpf_cnpj = clear_cpf_cnpj(self.cpf_cnpj)
         return super().save(*args, **kwargs)
 
-    def get_template_value(self, template_key):
+    def get_template(self, template_key):
         from manager.template_values import GetTemplateValue
-        return GetTemplateValue(self, template_key).value
+        return GetTemplateValue(self, template_key)
+
+    def get_template_value(self, template_key):
+        return self.get_template(template_key).value
 
     @property
     def use_service(self):
         from manager.enums import TemplateKeys
         return self.get_template_value(TemplateKeys.USE_SERVICE.name)
 
+    @use_service.setter
+    def use_service(self, value):
+        from manager.enums import TemplateKeys
+        from manager.utils import update_template_value
+        new_value = 'on' if value else ''
+        template_obj = self.get_template(TemplateKeys.USE_SERVICE.name).get_template_value_obj
+        update_template_value(template_obj, new_value)
+
     @property
     def use_etl(self):
         from manager.enums import TemplateKeys
         return self.get_template_value(TemplateKeys.USE_SERVICE.name)
+
+    @use_etl.setter
+    def use_etl(self, value):
+        from manager.enums import TemplateKeys
+        from manager.utils import update_template_value
+        new_value = 'on' if value else ''
+        template_obj = self.get_template(TemplateKeys.USE_ETL.name).get_template_value_obj
+        update_template_value(template_obj, new_value)
+
+    @property
+    def i_work_alone(self):
+        from manager.enums import TemplateKeys
+        return self.get_template_value(TemplateKeys.I_WORK_ALONE.name)
+
+    @i_work_alone.setter
+    def i_work_alone(self, value):
+        from manager.enums import TemplateKeys
+        from manager.utils import update_template_value
+        new_value = 'on' if value else ''
+        template_obj = self.get_template(TemplateKeys.I_WORK_ALONE.name).get_template_value_obj
+        update_template_value(template_obj, new_value)
 
 
 class OfficeMixin(models.Model):
