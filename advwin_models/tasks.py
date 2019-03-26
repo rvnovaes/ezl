@@ -413,9 +413,9 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
-            'descricao': 'Solicitada ao correspondente ('+person_executed_by_legal_name or '' +
-                         ') por BackOffice: {}'.format(
-                task.person_distributed_by.legal_name),
+            'descricao': 'Solicitada ao correspondente {} por BackOffice: {}'.format(
+                person_executed_by_legal_name or '', 
+                task.person_distributed_by.legal_name if task.person_distributed_by else ''),
         }
     if values:
         try:
