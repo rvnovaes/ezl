@@ -83,7 +83,6 @@ class CustomMessage {
         response.json()
           .then(result => {                        
             for (let message of result) {
-              console.log(message)
               let storedMessage = this.findMessage(message.id)
               if (!storedMessage || storedMessage.visualized === false) {
                 this.showSideBarNotifications();
@@ -97,11 +96,11 @@ class CustomMessage {
                     </button>
                     <h5>${message.title}</h5>                              
                     <span class="mail-desc">
-                      ${message.message}  
-                    </span> 
-                    ${this.getLinkButton(message)}
+                      ${message.message}                        
+                    </span>               
+                    ${this.getLinkButton(message)}                          
                   </div>
-                </div>                                                                                              
+                </div>                  
                 `
                 this.addMessage(message)
               }
@@ -125,8 +124,10 @@ class CustomMessage {
 
   onClosePage() {
     let self = this;
+    console.log("carregou")
     $(window).unload(function () {
-      if (parseInt(localStorage.getItem('ezl-count-pages')) === 1 && !self.isRefrash) {
+      console.log(parseInt(localStorage.getItem('ezl-count-pages')))
+      if (parseInt(localStorage.getItem('ezl-count-pages')) <= 1 && !self.isRefrash) {
         localStorage.removeItem(self.storageKey)
       }
     })

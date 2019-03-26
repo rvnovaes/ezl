@@ -169,7 +169,7 @@ class OfficeNetworkAdmin(admin.ModelAdmin):
 @admin.register(CustomMessage)
 class CustomMessageAdmin(admin.ModelAdmin):
     search_fields = ['message', 'link']    
-    fields = ('initial_date', 'finish_date', 'message', 'link')
+    fields = ('initial_date', 'finish_date', 'title', 'message', 'link')
 
 
 admin.site.register(AddressType)
