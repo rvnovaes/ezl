@@ -16,6 +16,10 @@ class CustomMessage {
     localStorage.setItem(this.storageKey, JSON.stringify(messages))
   }
 
+  showSideBarNotifications() {
+    $('.right-sidebar').show()
+  }
+
   addMessage(message) {
     message.visualized = false;
     let messages = this.storeMessages
@@ -53,20 +57,21 @@ class CustomMessage {
 
   onCloseMessage() {
     let self = this
-    $('.message-alert').on('close.bs.alert', function () {
+    $('.close').on('click', function (el) {
       const idMessage = $(this).attr('data-message');
       self.setVisualizedMessage(idMessage)
+      $(this).parent().parent().hide()
+
     })
   }
+
   getLinkButton(message) {
     let linkButton = ''
     if (message.link) {
-      linkButton = `                 
-        <div class="row">
-          <div class="col-md-2 col-md-offset-5">
-          <a href="${message.link}" class="btn btn-xs btn-default" target="_blank"> Veja mais!</a>
-          </div>
-        </div>      
+      linkButton = `        
+        <a href="${message.link}" target="_blank" class="btn btn btn-rounded btn-default btn-outline m-r-5">
+          <i class="ti-check text-success m-r-5"></i>Veja mais
+        </a>               
       `
     }
     return linkButton
@@ -76,44 +81,54 @@ class CustomMessage {
     if (localStorage.getItem('ezl-count-pages') <= 1) {
       fetch('/custom_messages/').then(response => {
         response.json()
-          .then(result => {
+          .then(result => {                        
             for (let message of result) {
+              console.log(message)
               let storedMessage = this.findMessage(message.id)
               if (!storedMessage || storedMessage.visualized === false) {
+                this.showSideBarNotifications();
                 this.messagesTemplate += `
-                <div class="alert alert-info">    
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">×</span>
-                </button>  
-                  <i class="fa fa-2x fa-check-circle" aria-hidden="true"> </i>  
-                  <strong>${message.message}</strong>                                    
-                  ${this.getLinkButton(message)}                               
-                </div>                                                                  
+                <div class="comment-body">
+                  <div class="user-img"> 
+                    <i class="fa fa-2x fa-check-circle text-success"></i>          
+                  </div>
+                  <div class="mail-contnet">
+                    <button type="button" data-message="${message.id}"class="close" aria-label="Close"> <span aria-hidden="true">×</span>                    
+                    </button>
+                    <h5>${message.title}</h5>                              
+                    <span class="mail-desc">
+                      ${message.message}  
+                    </span> 
+                    ${this.getLinkButton(message)}
+                  </div>
+                </div>                                                                                              
                 `
                 this.addMessage(message)
               }
             }
-            this.el.append(this.messagesTemplate)
+            this.el.append(this.messagesTemplate)            
             this.onCloseMessage()
           })
       })
     }
   }
 
-  onRefrash(){
-    let self=this;
-    $(document).on('keydown', function(e){
+  onRefrash() {
+    let self = this;
+    $(document).on('keydown', function (e) {
       const key = e.which;
-      if(key === 116) {
+      if (key === 116) {
         self.isRefrash = true
       }
     })
   }
+
   onClosePage() {
-    let self = this;  
+    let self = this;
     $(window).unload(function () {
       if (parseInt(localStorage.getItem('ezl-count-pages')) === 1 && !self.isRefrash) {
         localStorage.removeItem(self.storageKey)
-      }      
+      }
     })
   }
 }

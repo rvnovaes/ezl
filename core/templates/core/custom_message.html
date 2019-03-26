@@ -1,12 +1,28 @@
-{% load static %}
-<div id="custom-messages">
-  <!--As mensagens sao renderizadas pelo script custom-message.js -->
 
-</div>
-{% block extra_scripts %}
+{% extends 'skeleton/includes/rigth-sidebar.html' %}
+
+{% load static %}
+
+{% block right-sidebar-header %}
+  <strong>Notificações</strong>
+{% endblock right-sidebar-header %}
+
+{% block right-sidebar-body %}
+  <div class="white-box">
+    <h3 class="box-title">Últimas notificações</h3>    
+    <div class="comment-center p-t-10" id="custom-messages">
+      <!--As mensagens sao renderizadas pelo script custom-message.js -->
+    </div>
+  </div>
+{% endblock %}
+
+{% block 'extra_scripts' %} 
+{{block.super}}
 <script src='{% static "core/js/custom-message.js" %}?rev={{request.REVIEW}}'></script>
 <script>
-  let customMessage = new CustomMessage()
-  customMessage.loadMessages()    
-</script>
+  $(document).ready(function(){            
+    let customMessage = new CustomMessage()    
+    customMessage.loadMessages()    
+  })
+</script> 
 {% endblock %}
