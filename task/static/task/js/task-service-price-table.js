@@ -1,17 +1,17 @@
 class TaskServicePriceTable {
-  constructor(taskId, typeServiceId, typeServiceName) {    
+  constructor(taskId, typeServiceId, typeServiceName) {
     this.taskId = taskId
-    this.typeServiceId = typeServiceId    
+    this.typeServiceId = typeServiceId
     this.elModal = $('#modal-service-price-table')
     this.elTypeService = $('#type-service')
     this.typeServiceName = typeServiceName
     this.idPriceTableElement = '#price-table'
-    this.elPriceTable = $(this.idPriceTableElement)    
+    this.elPriceTable = $(this.idPriceTableElement)
     this.priceTableIdSelected = null
     this.elPriceSelected = $('#price-selected')
-    this.elBtnAction = $('#btn-action')    
+    this.elBtnAction = $('#btn-action')
   }
-  
+
   get typeServiceName() {
     return this.elTypeService.text()
   }
@@ -31,32 +31,71 @@ class TaskServicePriceTable {
   hideModal() {
     this.elModal.modal('hide')
   }
-  
+
   showModal() {
     return this.elModal.modal('show')
-  }  
+  }
+
+  makeAction() {
+    return new Promise((resolve) => {
+      if (!this.priceTableIdSelected) {
+        alert('Não selecionou preço')
+      } else {
+        $('<input />').attr('type', 'hidden')
+          .attr('name', 'action')
+          .attr('value', 'OPEN')
+          .appendTo('#task_detail');
+        if (this.servicePriceTable.policy_price.billing_moment === 'PRE_PAID') {
+          this.hideModalAction();
+          this.billing.createCharge(this.csrfToken)
+        } else {
+          swal({
+            title: 'Delegando',
+            html: '<h4>Aguarde...</h4>',
+            onOpen: () => {
+              swal.showLoading();
+              $('input[name=amount]').removeAttr('disabled');
+              $('#task_detail').unbind('submit').submit();
+            }
+          });
+
+        }
+      }
+      resolve(true)
+    })
+  }
 
   initOnBtnAction() {
-    return new Promise((resolve)=> {
-      this.elBtnAction.on('click', ()=>{
-        alert('executa a acao')
+    return new Promise((resolve) => {
+      this.elBtnAction.on('click', () => {
+        this.makeAction()
       })
       resolve(true)
     })
   }
 
   initOnClickRowEvent() {
-    return new Promise((resolve)=>{
+    return new Promise((resolve) => {
       let self = this
-      $(`${this.idPriceTableElement} tbody`).on('click', 'tr', function(){        
-        let row = self.elPriceTable.row(this)                      
+      $(`${this.idPriceTableElement} tbody`).on('click', 'tr', function () {
+        let row = self.elPriceTable.row(this)
         self.priceTableIdSelected = row.node().id
         self.priceSelected = row.data()[8]
-        $(row.node()).siblings().removeClass('row-selected')        
-        $(row.node()).addClass('row-selected')                
+        $(row.node()).siblings().removeClass('row-selected')
+        $(row.node()).addClass('row-selected')
         resolve(true)
       })
     })
+  }
+
+  getServicePriceDetail(servicePriceTableId) {
+    $.ajax({
+      method: 'GET',
+      url: `/financeiro/tabelas-de-precos/detalhes/${servicePriceTableId}/`,
+      success: (response) => {
+        return response
+      }
+    });
   }
 
   requestPayload() {
@@ -72,27 +111,27 @@ class TaskServicePriceTable {
   populateTable() {
     return new Promise((resolve) => {
       this.requestPayload()
-        .then(prices => {
-          for (let price of prices) {
-            this.elPriceTable.row.add(
-              [
-                price.office_correspondent.legal_name,
-                price.type_task.name,
-                price.office_network ? price.office_network.legal_name : '-',
-                price.state || '-',
-                price.court_district ? price.court_district.name : '-',
-                price.court_district_complement ? price.court_district_complement.name : '-',
-                price.city || '-',
-                price.client ? price.client.legal_name : '-',
-                parseFloat(price.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-                price.office_rating,
-                price.office_return_rating
-              ]
-            ).node().id = price.id;                        
-            this.elPriceTable.draw(false);
-          }
-          resolve(true)
-        })
+      .then(prices => {
+        for (let price of prices) {
+          this.elPriceTable.row.add(
+            [
+              price.office_correspondent.legal_name,
+              price.type_task.name,
+              price.office_network ? price.office_network.legal_name : '-',
+              price.state || '-',
+              price.court_district ? price.court_district.name : '-',
+              price.court_district_complement ? price.court_district_complement.name : '-',
+              price.city || '-',
+              price.client ? price.client.legal_name : '-',
+              parseFloat(price.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+              price.office_rating,
+              price.office_return_rating
+            ]
+          ).node().id = price.id;
+          this.elPriceTable.draw(false);
+        }
+        resolve(true)
+      })
     })
   }
 
@@ -118,16 +157,17 @@ class TaskServicePriceTable {
         }
       ))
     })
-  }  
-  
+  }
+
   bootstrap() {
     this.initTable()
       .then(() => {
         this.populateTable()
           .then(() => {
-            this.initOnClickRowEvent().then(this.showModal())
-          })          
+            this.initOnClickRowEvent()
+              .then(this.initOnBtnAction().then(this.showModal()))
+          })
       })
-  }  
+  }
 }
 

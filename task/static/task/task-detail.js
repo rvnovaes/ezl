@@ -31,7 +31,7 @@ class TaskDetail {
         this._elModalSurveyCompanyRepresentative = $("#survey-company-representative");
         this._elExecutionDate.attr({'required': true, 'placeholder': 'Data de Cumprimento'});        
         // Instancia da classe javascript que gera a tabela de precos
-        this.priceTable = new TaskServicePriceTable(this.taskId, this.typeTaskName, this.typeTask)        
+        this.priceTable = new TaskServicePriceTable(this.taskId, this.typeTaskId, this.typeTask)        
         this.initFeedbackRating();
         this.initCpfCnpjField();
         this.onClickRowServicePriceTable();  
