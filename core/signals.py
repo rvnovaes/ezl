@@ -27,6 +27,16 @@ def create_office_setting_i_work_alone(office):
     office.i_work_alone = i_work_alone
 
 
+def create_office_setting_use_service(office):
+    use_service = getattr(office, '_use_servie', True)
+    office.use_service = use_service
+
+
+def create_office_setting_use_etl(office):
+    use_etl = getattr(office, '_use_etl', True)
+    office.use_etl = use_etl
+
+
 def create_office_setting_default_customer(office):
     default_customer = Person.objects.filter(legal_name=office.legal_name,
                                              name=office.legal_name,
@@ -130,6 +140,8 @@ def office_post_save(sender, instance, created, **kwargs):
         create_office_template_value(instance)
         create_office_setting_default_customer(instance)
         create_office_setting_i_work_alone(instance)
+        create_office_setting_use_etl(instance)
+        create_office_setting_use_service(instance)
         create_office_setting_default_user(instance)
 
         # TODO: Retirar metodo a seguir depois de eliminar a relacao entre CustomSettings e TaskWorkflow e

@@ -469,6 +469,8 @@ class Office(AbstractPerson):
 
     def save(self, *args, **kwargs):
         self._i_work_alone = kwargs.pop('i_work_alone', False)
+        self._use_service = kwargs.pop('use_service', True)
+        self._use_etl = kwargs.pop('use_etl', True)
         if self.cpf_cnpj:
             self.cpf_cnpj = clear_cpf_cnpj(self.cpf_cnpj)
         return super().save(*args, **kwargs)
