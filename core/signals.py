@@ -12,7 +12,7 @@ from core.permissions import create_permission
 from guardian.shortcuts import get_groups_with_perms
 from task.models import TaskShowStatus, TaskWorkflow, TaskStatus
 from core.utils import create_office_template_value, add_create_user_to_admin_group
-from manager.utils import get_template_by_key, create_template_value, update_template_value
+from manager.utils import get_template_by_key, create_template_value, get_template_default_value
 from manager.enums import TemplateKeys
 
 
@@ -23,17 +23,20 @@ def create_office_setting_default_user(office):
 
 
 def create_office_setting_i_work_alone(office):
-    i_work_alone = getattr(office, '_i_work_alone', False)
+    template = get_template_by_key(TemplateKeys.I_WORK_ALONE.name)
+    i_work_alone = getattr(office, '_i_work_alone', template.default_value)
     office.i_work_alone = i_work_alone
 
 
 def create_office_setting_use_service(office):
-    use_service = getattr(office, '_use_servie', True)
+    template = get_template_by_key(TemplateKeys.USE_SERVICE.name)
+    use_service = getattr(office, '_use_servie', template.default_value)
     office.use_service = use_service
 
 
 def create_office_setting_use_etl(office):
-    use_etl = getattr(office, '_use_etl', True)
+    template = get_template_by_key(TemplateKeys.USE_ETL.name)
+    use_etl = getattr(office, '_use_etl', template.default_value)
     office.use_etl = use_etl
 
 

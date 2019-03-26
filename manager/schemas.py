@@ -1,5 +1,8 @@
 PARAMETERS = {
     'type': 'object',
+    'options': {
+        'disable_edit_json': True,
+    },
     'title': 'Parâmetros de configuração',
     'required': [
         'is_required'
@@ -9,6 +12,19 @@ PARAMETERS = {
             'title': 'Obrigatório',
             'type': 'boolean',
             'format': 'checkbox'
+        },
+        "boolean_default": {
+            "title": "Valor padrão para campos boolean",
+            "type": "string",
+            "enum": [
+                "True",
+                "False"
+            ],
+            "enum_titles": [
+                True,
+                False
+            ],
+            "default": "core.Person"
         },
         "model": {
             "type": "array",

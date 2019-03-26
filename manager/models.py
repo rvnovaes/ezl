@@ -40,6 +40,11 @@ class Template(Audit):
     def __str__(self):
         return self.name
 
+    @property
+    def default_value(self):
+        from manager.template import GenericTemplate
+        return GenericTemplate(self).default_python_value
+
 
 class TemplateValue(OfficeMixin, Audit):
 

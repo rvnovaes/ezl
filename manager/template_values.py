@@ -15,7 +15,7 @@ class GenericTemplateValues(object):
         self.only_active = only_active
         self.convert_class = {
             TypeTemplate.BOOLEAN.name: BooleanConvertTemplateValue(),
-            TypeTemplate.INTEGER.name: BooleanConvertTemplateValue(),
+            TypeTemplate.INTEGER.name: IntegerConvertTemplateValue(),
             TypeTemplate.DECIMAL.name: DecimalConvertTemplateValue(),
             TypeTemplate.FOREIGN_KEY.name: FKConvertTemplateValue(),
         }
@@ -45,6 +45,11 @@ class GenericTemplateValues(object):
         return self.convert_class.get(
             value_obj.template.type, GenericConvertTemplateValue()
         ).to_python(value_obj.value, value_obj.template.parameters)
+
+    def _get_default_value(self, template_obj):
+        return self.convert_class.get(
+            template_obj.type, GenericConvertTemplateValue()
+        ).default_value(template_obj.parameters)
 
     def dispatch(self):
         values = self.instance_values
@@ -89,6 +94,11 @@ class GetTemplateValue(GenericTemplateValues):
         values = self.dispatch()
         return values.get('value')
 
+    @property
+    def default_value(self):
+        template_obj = self.get_template_value_obj.template
+        return self._get_default_value(template_obj)
+
     def dispatch(self):
         values = super().dispatch()
         if values:
@@ -114,6 +124,9 @@ class GenericConvertTemplateValue(object):
         self._set_dict_value(value_dict, str(value))
         return value_dict
 
+    def default_value(self, template_parameters):
+        return ''
+
 
 class BooleanConvertTemplateValue(GenericConvertTemplateValue):
 
@@ -121,6 +134,10 @@ class BooleanConvertTemplateValue(GenericConvertTemplateValue):
         value = self._get_value_from_dict(value_dict)
         self._set_dict_value(value_dict, True if value == 'on' else False)
         return value_dict
+
+    def default_value(self, template_parameters):
+        default_value = template_parameters.get('boolean_default', 'on')
+        return 'on' if default_value == 'True' else ''
 
 
 class IntegerConvertTemplateValue(GenericConvertTemplateValue):

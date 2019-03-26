@@ -46,3 +46,6 @@ def update_template_value(template_value, new_value):
     value['template_key'] = template_value.template.template_key
     template_value.value = value
     template_value.save()
+
+def get_template_default_value(template):
+    pass
