@@ -81,6 +81,10 @@ class GetTemplateValue(GenericTemplateValues):
         return self.dispatch()
 
     @property
+    def get_template_value_obj(self):
+        return self.instance_values.first()
+
+    @property
     def value(self):
         values = self.dispatch()
         return values.get('value')

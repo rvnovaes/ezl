@@ -24,6 +24,7 @@ PARAMETERS = {
                         "type": "string",
                         "enum": [
                             "core.Person",
+                            "auth.User"
                         ],
                         "default": "core.Person"
                     },
@@ -31,9 +32,9 @@ PARAMETERS = {
                         "title": "Campo utilizado para a lista de opções",
                         "type": "string",
                         "enum": [
-                            "auth_user__username",
                             "legal_name",
                             "name",
+                            "username",
                         ]
                     },
                     "extra_params": {

@@ -78,10 +78,13 @@ def get_foreign_key_data(request):
             filter_params = get_filter_params_by_str(request.GET.get('extra_params', '{}'))
 
             office = get_office_session(request)
-            if getattr(model, 'office', None):
+            if getattr(model, 'office', None) and model_str != 'auth.User':
                 qs = model.objects.get_queryset(office=office)
             elif model._meta.object_name == 'Person':
                 qs = office.persons.all()
+            elif model._meta.object_name == 'User':
+                qs = model.objects.filter(person__in=office.persons.all(),
+                                          is_superuser=False)
             else:
                 qs = model.objects.all()
             qs = qs.filter(**filter_params).annotate(text_select=F(request.GET.get('field_list', 'name')))

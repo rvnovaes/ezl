@@ -19,7 +19,6 @@ urlpatterns = [
         login_required(views.ZipCodeCitySelect2Autocomplete.as_view()),
         name='city_zip_code_autocomplete_select2'),
     url(r'^$', views.login, name='login'),
-    # url(r'^registrar/', views.RegisterNewUser.as_view(), name='register_user'),
     url(r'^registrar/', views.NewRegister.as_view(), name='register_user'),
     url(r'^logout/', views.logout_user, name='logout'),
     url(r'^inicial/', login_required(views.inicial), name='inicial'),

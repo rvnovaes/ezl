@@ -523,8 +523,7 @@ class OfficeForm(BaseModelForm):
     class Meta:
         model = Office
         fields = [
-            'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'use_service',
-            'use_etl', 'is_active'
+            'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_active'
         ]
 
     def clean(self):
@@ -555,8 +554,7 @@ class OfficeProfileForm(OfficeForm):
     class Meta:
         model = Office
         fields = [
-            'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'use_service',
-            'use_etl', 'is_active', 'logo'
+            'legal_name', 'name', 'legal_type', 'cpf_cnpj', 'is_active', 'logo'
         ]    
 
 

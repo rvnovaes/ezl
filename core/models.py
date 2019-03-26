@@ -437,11 +437,11 @@ class Office(AbstractPerson):
     offices = models.ManyToManyField('self', blank=True, through='OfficeOffices', symmetrical=False)
     public_office = models.BooleanField(
         default=False, verbose_name='Escritório público')
-    use_service = models.BooleanField(
+    use_service_old = models.BooleanField(
         default=True,
         verbose_name=
         'Possuo equipe de conferência de dados na delegação e validação da OS')
-    use_etl = models.BooleanField(
+    use_etl_old = models.BooleanField(
         default=True,
         verbose_name='Possuo processo de importação de dados de outros sistemas'
     )
@@ -472,6 +472,20 @@ class Office(AbstractPerson):
         if self.cpf_cnpj:
             self.cpf_cnpj = clear_cpf_cnpj(self.cpf_cnpj)
         return super().save(*args, **kwargs)
+
+    def get_template_value(self, template_key):
+        from manager.template_values import GetTemplateValue
+        return GetTemplateValue(self, template_key).value
+
+    @property
+    def use_service(self):
+        from manager.enums import TemplateKeys
+        return self.get_template_value(TemplateKeys.USE_SERVICE.name)
+
+    @property
+    def use_etl(self):
+        from manager.enums import TemplateKeys
+        return self.get_template_value(TemplateKeys.USE_SERVICE.name)
 
 
 class OfficeMixin(models.Model):
