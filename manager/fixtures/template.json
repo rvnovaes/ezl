@@ -67,7 +67,7 @@
         "description": "Cliente Padr\u00e3o",
         "type": "FOREIGN_KEY",
         "parameters": {
-            "model": [
+            "foreign_key_default": [
                 {
                     "model": "core.Person",
                     "field_list": "legal_name",
@@ -110,7 +110,7 @@
         "description": "Usu\u00e1rio Padr\u00e3o",
         "type": "FOREIGN_KEY",
         "parameters": {
-            "model": [
+            "foreign_key_default": [
                 {
                     "model": "auth.User",
                     "field_list": "username",

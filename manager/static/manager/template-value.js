@@ -29,7 +29,7 @@ class TemplateValue {
     }
 
     async getForeignKeySelect(parameters, name, value=null){
-        let data = parameters.model[0];
+        let data = parameters.foreign_key_default[0];
         window.dados = data;
         let foreignKeyData = {};
         foreignKeyData = await this.ajaxGetForeignKeyData(data);

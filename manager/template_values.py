@@ -162,9 +162,9 @@ class FKConvertTemplateValue(GenericConvertTemplateValue):
         value = None
         try:
             value_id = int(self._get_value_from_dict(value_dict, '0'))
-            model_parameters = extra_params.get('model', [{}])[0]
-            model = get_model_by_str(model_parameters.get('model'))
-            filter_params = get_filter_params_by_str(model_parameters.get('extra_params', '{}'))
+            fk_parameters = extra_params.get('foreign_key_default', [{}])[0]
+            model = get_model_by_str(fk_parameters.get('model'))
+            filter_params = get_filter_params_by_str(fk_parameters.get('extra_params', '{}'))
             filter_params['id'] = value_id
             value = model.objects.filter(**filter_params).first()
         except Exception:

@@ -15,7 +15,7 @@ class TemplateAdmin {
         let initialValues = this.jsonEditor.getValue();
         switch (this.type) {
             case 'BOOLEAN':
-                TemplateAdmin.removeFromObj(initialValues, 'model');
+                TemplateAdmin.removeFromObj(initialValues, 'foreign_key_default');
                 break;
             case 'FOREIGN_KEY':
                 TemplateAdmin.removeFromObj(initialValues, 'boolean_default');
@@ -41,7 +41,7 @@ class TemplateAdmin {
                 requiredList.push("boolean_default");
                 break;
             case 'FOREIGN_KEY':
-                requiredList.push("model");
+                requiredList.push("foreign_key_default");
                 break;
         }
         return requiredList;

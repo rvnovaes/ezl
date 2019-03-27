@@ -26,7 +26,7 @@ PARAMETERS = {
             ],
             "default": "core.Person"
         },
-        "model": {
+        "foreign_key_default": {
             "type": "array",
             "format": "select",
             "title": "Tabelas de chave estrangeira",
