@@ -66,8 +66,9 @@ from dal import autocomplete
 from billing.gerencianet_api import api as gn_api
 import logging
 import operator
-from manager.template_values import ListTemplateValues, GetTemplateValue
+from manager.template_values import ListTemplateValues
 from manager.enums import TemplateKeys
+from manager.utils import get_template_value_value
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +154,7 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         office = get_office_session(self.request)
+        context['min_hour_os'] = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
         context['default_customer'] = None
         context['lawsuit_form'] = LawSuitForm()
 
@@ -1963,8 +1965,8 @@ class ExternalTaskView(UpdateView):
 
     def post(self, request, task_hash, *args, **kwargs):
         task = Task.objects.filter(task_hash=task_hash).first()
-        default_user = GetTemplateValue(office=task.office,
-                                        template_key=TemplateKeys.DEFAULT_USER.name).value
+        default_user = get_template_value_value(office=task.office,
+                                                template_key=TemplateKeys.DEFAULT_USER.name)
         form = self.form_class(request.POST, instance=task)
         if default_user:
             form.instance.alter_user = default_user
@@ -1998,8 +2000,8 @@ class EcmExternalCreateView(CreateView):
     def post(self, request, task_hash, *args, **kwargs):
         files = request.FILES.getlist('path')
         task = Task.objects.filter(task_hash=task_hash).first()
-        default_user = GetTemplateValue(office=task.office,
-                                        template_key=TemplateKeys.DEFAULT_USER.name).value
+        default_user = get_template_value_value(office=task.office,
+                                                template_key=TemplateKeys.DEFAULT_USER.name)
         request.user = default_user
         data = {'success': False, 'message': exception_create()}
 

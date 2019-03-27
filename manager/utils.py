@@ -47,5 +47,14 @@ def update_template_value(template_value, new_value):
     template_value.value = value
     template_value.save()
 
-def get_template_default_value(template):
-    pass
+
+def get_template_value_values(office, template_key):
+    from .template_values import GetTemplateValue
+    manager = GetTemplateValue(office, template_key)
+    return manager.template_values
+
+
+def get_template_value_value(office, template_key):
+    from .template_values import GetTemplateValue
+    manager = GetTemplateValue(office, template_key)
+    return manager.value

@@ -12,7 +12,7 @@ from core.permissions import create_permission
 from guardian.shortcuts import get_groups_with_perms
 from task.models import TaskShowStatus, TaskWorkflow, TaskStatus
 from core.utils import create_office_template_value, add_create_user_to_admin_group
-from manager.utils import get_template_by_key, create_template_value, get_template_default_value
+from manager.utils import get_template_by_key, create_template_value
 from manager.enums import TemplateKeys
 
 
