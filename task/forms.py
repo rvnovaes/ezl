@@ -15,6 +15,8 @@ from task.widgets import code_mirror_schema
 from .schemas import *
 from .fields import JSONFieldMixin
 from survey.models import Survey
+from manager.utils import get_template_value_value
+from manager.enums import TemplateKeys
 
 
 class TaskForm(BaseForm):
@@ -86,6 +88,16 @@ class TaskForm(BaseForm):
             if Person.objects.requesters().filter(auth_user=self.request.user):
                 self.fields[
                     'person_asked_by'].initial = self.request.user.person
+
+    def clean(self):
+        super().clean()
+        office = self.cleaned_data.get('office')
+        min_hour_os = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
+        if min_hour_os > 0 \
+                and timezone.localtime() + timezone.timedelta(hours=min_hour_os) > \
+                    self.cleaned_data.get('final_deadline_date'):
+            msg = 'O prazo de cumprimento da OS é inferior a {} horas.'.format(min_hour_os)
+            self.add_error('final_deadline_date', forms.ValidationError(msg))
 
 
 class TaskCreateForm(TaskForm):

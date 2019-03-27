@@ -257,7 +257,7 @@ class TaskCreateView(AuditFormMixin, CreateView):
         form.instance.movement_id = self.kwargs.get('movement')
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
         form.instance.__server = get_domain(self.request)
-        response = super(TaskCreateView, self).form_valid(form)
+        response = super().form_valid(form)
 
         documents = self.request.FILES.getlist('file')
         if documents:
