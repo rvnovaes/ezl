@@ -77,10 +77,12 @@ class TaskServicePriceTable {
   initOnClickRowEvent() {
     return new Promise((resolve) => {
       let self = this
-      $(`${this.idPriceTableElement} tbody`).on('click', 'tr', function () {
+      $(`${this.idPriceTableElement} tbody`).on('click', 'tr', function () {        
         let row = self.elPriceTable.row(this)
         self.priceTableIdSelected = row.node().id
         self.priceSelected = row.data()[8]
+        console.log(self.priceTableIdSelected)
+        console.log(self.priceSelected)
         $(row.node()).siblings().removeClass('row-selected')
         $(row.node()).addClass('row-selected')
         resolve(true)
@@ -160,12 +162,16 @@ class TaskServicePriceTable {
   }
 
   bootstrap() {
+    $('#processing').show()
     this.initTable()
       .then(() => {
         this.populateTable()
           .then(() => {
             this.initOnClickRowEvent()
-              .then(this.initOnBtnAction().then(this.showModal()))
+              .then(this.initOnBtnAction().then(()=>{
+                this.showModal()
+                $('#processing').hide()
+              }))
           })
       })
   }

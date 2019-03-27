@@ -31,7 +31,7 @@ class TaskDetail {
         this._elModalSurveyCompanyRepresentative = $("#survey-company-representative");
         this._elExecutionDate.attr({'required': true, 'placeholder': 'Data de Cumprimento'});        
         // Instancia da classe javascript que gera a tabela de precos
-        this.priceTable = new TaskServicePriceTable(this.taskId, this.typeTaskId, this.typeTask)        
+        this.priceTable;
         this.initFeedbackRating();
         this.initCpfCnpjField();
         this.onClickRowServicePriceTable();  
@@ -138,7 +138,8 @@ class TaskDetail {
     }
 
     showModalAction() {                
-        if (this.taskStatus === 'ACCEPTED_SERVICE' || (this.taskStatus === 'REQUESTED' && this.useService)) {
+        if (this.taskStatus === 'ACCEPTED_SERVICE' || (this.taskStatus === 'REQUESTED' && !this.useService)) {
+            this.priceTable = new TaskServicePriceTable(this.taskId, this.typeTaskId, this.typeTask)        
             this.priceTable.bootstrap()
         } else {
             this._elModalAction.modal('show');
