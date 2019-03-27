@@ -30,6 +30,10 @@ PARAMETERS = {
             "title": "Valor padrão",
             "type": "integer",
         },
+        "decimal_default": {
+            "title": "Valor padrão",
+            "type": "number",
+        },
         "foreign_key_default": {
             "type": "array",
             "format": "select",
