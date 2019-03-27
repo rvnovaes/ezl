@@ -114,10 +114,10 @@ class TaskServicePriceTable {
       this.requestPayload()
         .then(prices => {
           this.prices = prices;          
-          for (let price of prices) {
+          for (let price of prices) {            
             this.elPriceTable.row.add(
               [
-                price.office_correspondent.legal_name,
+                `<a href="/office_profile/${price.office_correspondent.id}" target="_blank" class="price-table-link-to-office">${price.office_correspondent.legal_name}</a>`,
                 price.type_task.name,
                 price.office_network ? price.office_network.legal_name : '-',
                 price.state || '-',
