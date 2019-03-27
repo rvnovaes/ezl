@@ -23,11 +23,12 @@ class TaskServicePriceTable {
   }
 
   get priceDefined() {
-    return this.elPriceDefined.val()
+    return this.elPriceDefined.maskMoney('unmasked')[0]
   }
 
-  set priceDefined(value) {
-    this.elPriceDefined.maskMoney('mask', value)
+  set priceDefined(value) {        
+    this.elPriceDefined.val(parseFloat(value).toLocaleString('pt-BR'))
+    this.elPriceDefined.focus()
   }
 
   getPriceObject(priceTableId) {
