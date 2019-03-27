@@ -149,7 +149,8 @@
                 correspondenteValue: cheapestPrice.value, 
                 note: ''                    
             };
-            setChosenPrice(chosenPrice);
+            setChosenPrice(chosenPrice);            
+            servicePrices[taskId] = chosenPrice;
             $(`td [btn-data-id=${taskId}]`).attr('disabled', false);
         }         
     };
@@ -164,7 +165,8 @@
         var total = tasksToDelegate.length;
         var delegateTasks = function() {
             tasksToDelegate.forEach(function(taskId){
-                var chosenPrice = servicePrices[taskId].chosenPrice;
+                debugger;
+                var chosenPrice = servicePrices[taskId];
                 $.ajax({
                     method: 'post', 
                     url: `/providencias/${taskId}/batch/delegar`, 
