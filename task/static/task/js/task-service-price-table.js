@@ -9,7 +9,8 @@ class TaskServicePriceTable {
     this.typeServiceName = typeServiceName
     this.idPriceTableElement = '#price-table'
     this.elPriceTable = $(this.idPriceTableElement)
-    this.elPriceSelected = $('#price-selected')
+    this.elPriceDefined = $('#price-defined')
+      .maskMoney({ 'prefix': 'R$ ', 'decimal': ',', 'thousands': '.', 'allowZero': true })
     this.elBtnAction = $('#btn-action')
   }
 
@@ -19,6 +20,14 @@ class TaskServicePriceTable {
 
   set typeServiceName(value) {
     this.elTypeService.text(value)
+  }
+
+  get priceDefined() {
+    return this.elPriceDefined.val()
+  }
+
+  set priceDefined(value) {
+    this.elPriceDefined.maskMoney('mask', value)
   }
 
   getPriceObject(priceTableId) {
@@ -44,7 +53,9 @@ class TaskServicePriceTable {
           .attr('name', 'action')
           .attr('value', 'OPEN')
           .appendTo('#task_detail');
-        $('[name=servicepricetable_id]').val(this.priceSelected.id)        
+        $('[name=servicepricetable_id]').val(this.priceSelected.id)
+        debugger;
+        $('[name=amount]').val(parseFloat(this.priceSelected.value))
         if (this.priceSelected.policy_price.billing_moment === 'PRE_PAID') {
           this.hideModalAction();
           this.billing.createCharge(this.csrfToken)
@@ -80,6 +91,7 @@ class TaskServicePriceTable {
       $(`${this.idPriceTableElement} tbody`).on('click', 'tr', function () {
         let row = self.elPriceTable.row(this)
         self.priceSelected = self.getPriceObject(row.node().id)
+        self.priceDefined = self.priceSelected.value
         $(row.node()).siblings().removeClass('row-selected')
         $(row.node()).addClass('row-selected')
         resolve(true)
@@ -101,7 +113,7 @@ class TaskServicePriceTable {
     return new Promise((resolve) => {
       this.requestPayload()
         .then(prices => {
-          this.prices = prices;
+          this.prices = prices;          
           for (let price of prices) {
             this.elPriceTable.row.add(
               [
@@ -125,27 +137,38 @@ class TaskServicePriceTable {
     })
   }
 
+  destroyTable() {
+    return new Promise(resolve => {      
+      if ($.fn.DataTable.isDataTable(this.idPriceTableElement)) {
+        this.elPriceTable.empty()
+      }
+      resolve(true)
+    })
+  }
+
   initTable() {
     return new Promise((resolve) => {
-      resolve(this.elPriceTable = this.elPriceTable.DataTable(
-        {
-          paging: false,
-          order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
-          dom: 'frti',
-          buttons: [],
-          destroy: true,
-          rowID: 'id',
-          language: {
-            "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-          },
-          "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
-            if (aData[1] === '-' || aData[1] === '—') {
-              $("td:eq(1)", nRow).text(typeTask);
-            }
-            return nRow;
-          },
-        }
-      ))
+      this.destroyTable().then(() => {
+        resolve(this.elPriceTable = this.elPriceTable.DataTable(
+          {
+            paging: false,
+            order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
+            dom: 'frti',
+            buttons: [],
+            destroy: true,
+            rowID: 'id',
+            language: {
+              "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
+            },
+            "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+              if (aData[1] === '-' || aData[1] === '—') {
+                $("td:eq(1)", nRow).text(typeTask);
+              }
+              return nRow;
+            },
+          }
+        ))
+      })
     })
   }
 

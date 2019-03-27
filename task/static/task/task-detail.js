@@ -139,6 +139,9 @@ class TaskDetail {
 
     showModalAction() {                
         if (this.taskStatus === 'ACCEPTED_SERVICE' || (this.taskStatus === 'REQUESTED' && !this.useService)) {
+            if (this.priceTable) {
+                delete this.priceTable
+            }
             this.priceTable = new TaskServicePriceTable(this.taskId, this.typeTaskId, this.typeTask)        
             this.priceTable.bootstrap()
         } else {
