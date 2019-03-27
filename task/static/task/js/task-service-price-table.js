@@ -2,12 +2,13 @@ class TaskServicePriceTable {
   constructor(taskId, typeServiceId, typeServiceName) {
     this.taskId = taskId
     this.typeServiceId = typeServiceId
+    this.prices = []
+    this.priceSelected = {}
     this.elModal = $('#modal-service-price-table')
     this.elTypeService = $('#type-service')
     this.typeServiceName = typeServiceName
     this.idPriceTableElement = '#price-table'
     this.elPriceTable = $(this.idPriceTableElement)
-    this.priceTableIdSelected = null
     this.elPriceSelected = $('#price-selected')
     this.elBtnAction = $('#btn-action')
   }
@@ -20,12 +21,10 @@ class TaskServicePriceTable {
     this.elTypeService.text(value)
   }
 
-  get priceSelected() {
-    return this.elPriceSelected.val()
-  }
-
-  set priceSelected(value) {
-    this.elPriceSelected.val(value)
+  getPriceObject(priceTableId) {
+    return this.prices
+      .filter(price => price.id == priceTableId)
+      .reduce(item => item)
   }
 
   hideModal() {
@@ -38,14 +37,15 @@ class TaskServicePriceTable {
 
   makeAction() {
     return new Promise((resolve) => {
-      if (!this.priceTableIdSelected) {
+      if (!this.priceSelected) {
         alert('Não selecionou preço')
       } else {
         $('<input />').attr('type', 'hidden')
           .attr('name', 'action')
           .attr('value', 'OPEN')
           .appendTo('#task_detail');
-        if (this.servicePriceTable.policy_price.billing_moment === 'PRE_PAID') {
+        $('[name=servicepricetable_id]').val(this.priceSelected.id)        
+        if (this.priceSelected.policy_price.billing_moment === 'PRE_PAID') {
           this.hideModalAction();
           this.billing.createCharge(this.csrfToken)
         } else {
@@ -77,27 +77,14 @@ class TaskServicePriceTable {
   initOnClickRowEvent() {
     return new Promise((resolve) => {
       let self = this
-      $(`${this.idPriceTableElement} tbody`).on('click', 'tr', function () {        
+      $(`${this.idPriceTableElement} tbody`).on('click', 'tr', function () {
         let row = self.elPriceTable.row(this)
-        self.priceTableIdSelected = row.node().id
-        self.priceSelected = row.data()[8]
-        console.log(self.priceTableIdSelected)
-        console.log(self.priceSelected)
+        self.priceSelected = self.getPriceObject(row.node().id)
         $(row.node()).siblings().removeClass('row-selected')
         $(row.node()).addClass('row-selected')
         resolve(true)
       })
     })
-  }
-
-  getServicePriceDetail(servicePriceTableId) {
-    $.ajax({
-      method: 'GET',
-      url: `/financeiro/tabelas-de-precos/detalhes/${servicePriceTableId}/`,
-      success: (response) => {
-        return response
-      }
-    });
   }
 
   requestPayload() {
@@ -113,27 +100,28 @@ class TaskServicePriceTable {
   populateTable() {
     return new Promise((resolve) => {
       this.requestPayload()
-      .then(prices => {
-        for (let price of prices) {
-          this.elPriceTable.row.add(
-            [
-              price.office_correspondent.legal_name,
-              price.type_task.name,
-              price.office_network ? price.office_network.legal_name : '-',
-              price.state || '-',
-              price.court_district ? price.court_district.name : '-',
-              price.court_district_complement ? price.court_district_complement.name : '-',
-              price.city || '-',
-              price.client ? price.client.legal_name : '-',
-              parseFloat(price.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-              price.office_rating,
-              price.office_return_rating
-            ]
-          ).node().id = price.id;
-          this.elPriceTable.draw(false);
-        }
-        resolve(true)
-      })
+        .then(prices => {
+          this.prices = prices;
+          for (let price of prices) {
+            this.elPriceTable.row.add(
+              [
+                price.office_correspondent.legal_name,
+                price.type_task.name,
+                price.office_network ? price.office_network.legal_name : '-',
+                price.state || '-',
+                price.court_district ? price.court_district.name : '-',
+                price.court_district_complement ? price.court_district_complement.name : '-',
+                price.city || '-',
+                price.client ? price.client.legal_name : '-',
+                parseFloat(price.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                price.office_rating,
+                price.office_return_rating
+              ]
+            ).node().id = price.id;
+            this.elPriceTable.draw(false);
+          }
+          resolve(true)
+        })
     })
   }
 
@@ -168,7 +156,7 @@ class TaskServicePriceTable {
         this.populateTable()
           .then(() => {
             this.initOnClickRowEvent()
-              .then(this.initOnBtnAction().then(()=>{
+              .then(this.initOnBtnAction().then(() => {
                 this.showModal()
                 $('#processing').hide()
               }))
