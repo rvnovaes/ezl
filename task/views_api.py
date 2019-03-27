@@ -13,8 +13,7 @@ from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
 from lawsuit.models import Folder, Movement
 from django.utils import timezone
-from django.db.models import Q, F, Max, Subquery, OuterRef
-from django.db.models.functions import Coalesce
+from django.db.models import Q
 from core.views_api import OfficeMixinViewSet
 
 
@@ -51,7 +50,6 @@ class EcmTaskViewSet(mixins.CreateModelMixin,
 
 @permission_classes((TokenHasReadWriteScope, ))
 class TaskViewSet(OfficeMixinViewSet, ApplicationView):
-    office_corresp = Task.objects.filter(id=OuterRef('child')).order_by('-id')
     filter_backends = (DjangoFilterBackend, OrderingFilter, )
     filter_class = TaskApiFilter
     pagination_class = CustomResultsSetPagination
@@ -75,6 +73,7 @@ class TaskViewSet(OfficeMixinViewSet, ApplicationView):
             status_to_filter = params.getlist('task_status[]')
             queryset = queryset.filter(task_status__in=[getattr(TaskStatus, status) for status in status_to_filter])            
         return queryset
+
 
 @api_view(['GET'])
 @permission_classes((TokenHasReadWriteScope, ))

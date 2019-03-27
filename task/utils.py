@@ -7,7 +7,6 @@ from ecm.models import DefaultAttachmentRule, Attachment
 from financial.utils import recalculate_values
 from task.workflow import get_child_recipients
 from task.models import *
-from task.serializers import *
 from task.mail import SendMail
 from task.rules import RuleViewTask
 from core.utils import get_office_session
@@ -193,6 +192,7 @@ def delegate_child_task(object_parent, office_correspondent, type_task=None):
 
 
 def get_offices_to_pay(tasks):
+    from task.serializers import OfficeToPaySerializer
     return [OfficeToPaySerializer(task.office).data for task in tasks]    
 
 
