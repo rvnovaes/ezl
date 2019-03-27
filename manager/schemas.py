@@ -14,7 +14,7 @@ PARAMETERS = {
             'format': 'checkbox'
         },
         "boolean_default": {
-            "title": "Valor padrão para campos boolean",
+            "title": "Valor padrão",
             "type": "string",
             "enum": [
                 "True",
@@ -25,6 +25,10 @@ PARAMETERS = {
                 False
             ],
             "default": "core.Person"
+        },
+        "integer_default": {
+            "title": "Valor padrão",
+            "type": "integer",
         },
         "foreign_key_default": {
             "type": "array",

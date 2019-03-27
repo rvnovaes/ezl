@@ -26,6 +26,7 @@ class TemplateKeys(Enum):
     USE_SERVICE = 'Equipe conferência dados'
     USE_ETL = 'Importa dados de outros sistemas'
     I_WORK_ALONE = 'Trabalho sozinho'
+    MIN_HOUR_OS = 'Limite para abertura de OS'
 
     def __str__(self):
         return str(self.value)

@@ -20,10 +20,11 @@ class TemplateValue {
         });
     }
 
-    static getInputElement(type, name){
+    static getInputElement(type, name, value=null){
         let inputElementObj = {
             type: type,
-            name: name
+            name: name,
+            value: value
         };
         return $('<input>', inputElementObj);
     }
@@ -33,7 +34,7 @@ class TemplateValue {
         window.dados = data;
         let foreignKeyData = {};
         foreignKeyData = await this.ajaxGetForeignKeyData(data);
-        let select = $('<select></select>')
+        let select = $('<select style="max-width: 330px"></select>')
             .attr('name', name)
             .addClass('select2')
             .attr('data-language', 'pt-BR')
@@ -56,8 +57,7 @@ class TemplateValue {
         let elementName = `template-value-${id}`;
         switch (type) {
             case 'SIMPLE_TEXT':
-                inputElement = TemplateValue.getInputElement('text', elementName);
-                inputElement.val(value);
+                inputElement = TemplateValue.getInputElement('text', elementName, value);
                 break;
             case 'LONG_TEXT':
                 inputElement = $(`<textarea name="template-value-${id}">${value}</textarea>`);
@@ -69,12 +69,10 @@ class TemplateValue {
                 }
                 break;
             case 'INTEGER':
-                inputElement = TemplateValue.getInputElement('number', elementName);
-                inputElement.val(value);
+                inputElement = TemplateValue.getInputElement('number', elementName, parseInt(value));
                 break;
             case 'DECIMAL':
-                inputElement = TemplateValue.getInputElement('number', elementName);
-                inputElement.val(value);
+                inputElement = TemplateValue.getInputElement('number', elementName, parseFloat(value));
                 inputElement.attr('step', '0.1');
                 break;
             case 'FOREIGN_KEY':
@@ -127,7 +125,7 @@ class TemplateValue {
                 language: {'url': '//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json'},
                 columnDefs: [
                     {'targets': [0], 'visible': false, 'searchable': false, 'orderable': false  },
-                    {'targets': [3], 'visible': true, 'searchable': false, 'orderable': false  },
+                    {'targets': [3], 'visible': true, 'searchable': false, 'orderable': false, 'width': 330  },
                 ],
             });
     }
@@ -153,7 +151,7 @@ class TemplateValue {
                 this.templateValuesTable.draw(false);
             });
         }
-        return 'teste'
+        return '';
     }
 
 	async createTemplateValueTable(){
@@ -204,7 +202,10 @@ class TemplateValue {
 	    $(document).ready(()=>{
 	        this.createTemplateValueTable()
 	        setTimeout(function () {
-                $('.select2').select2();
+                $('.select2').select2({
+                    containerCss : { maxWidth: '330px', },
+                    dropdownCss: { maxWidth: '330px', },
+                } );
             }, 400);
         });
     }

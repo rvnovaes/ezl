@@ -13,14 +13,14 @@ class TemplateAdmin {
 
     get initial(){
         let initialValues = this.jsonEditor.getValue();
-        switch (this.type) {
-            case 'BOOLEAN':
-                TemplateAdmin.removeFromObj(initialValues, 'foreign_key_default');
-                break;
-            case 'FOREIGN_KEY':
-                TemplateAdmin.removeFromObj(initialValues, 'boolean_default');
-                break;
+        let requiredList = this.getRequiredList();
+        let data = this.options.schema.properties;
+        for (let k in data) {
+            if (data.hasOwnProperty(k) && !(k in requiredList)){
+               TemplateAdmin.removeFromObj(initialValues, k);
+            }
         }
+
         return this.jsonEditor.getValue();
     }
 
@@ -36,13 +36,9 @@ class TemplateAdmin {
 
     getRequiredList(){
         let requiredList = ["is_required"];
-        switch (this.type) {
-            case 'BOOLEAN':
-                requiredList.push("boolean_default");
-                break;
-            case 'FOREIGN_KEY':
-                requiredList.push("foreign_key_default");
-                break;
+        let type = this.type.toLowerCase();
+        if (this.options.schema.properties.hasOwnProperty(`${type}_default`)){
+            requiredList.push(`${type}_default`);
         }
         return requiredList;
     }

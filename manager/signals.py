@@ -11,8 +11,9 @@ from core.models import Office
 def template_post_save(sender, instance, created, **kwargs):
     if created:
         create_list = []
+        default_value = instance.parameters.get('{}_default'.format(instance.type.lower()), None)
         for office in Office.objects.all():
-            create_list.append(new_template_value_obj(instance, office))
+            create_list.append(new_template_value_obj(instance, office, default_value))
         TemplateValue.objects.bulk_create(create_list)
     else:
         templates_value = TemplateValue.objects.filter(
