@@ -79,11 +79,12 @@
             {% endif %}
         </div>
     </div>
-{% include 'financial/service-price-table/service-price-table.html' %}    
+    {% include 'task/includes/task-service-price-table/task-service-price-table.html' %}   
+    {% include 'task/modal/processing.html' %}
 </div>
 
 {% block extra_scripts %} 
-<script src='{% static "financial/js/service-price-table.js" %}?rev={{request.REVIEW}}'></script>
+<script src='{% static "task/js/task-service-price-table.js" %}?rev={{request.REVIEW}}'></script>
 <script type="text/javascript">    
 
     var servicePrices = {};
@@ -138,38 +139,22 @@
         return elTable
     };
 
-    var setCorrespondents = function(taskIds) {         
-        $.ajax({
-            method: 'GET', 
-            url: `/providencias/batch/service_price_table`, 
-            data: {
-                task_ids: taskIds
-            }, 
-            success: function(response){
-                response.forEach(function(data){
-                    data.chosenPrice = {
-                      taskId: data.task.id, 
-                      servicePriceTableId: data.cheapest_correspondent.id, 
-                      correspondenteName: data.cheapest_correspondent.office_correspondent, // Nome
-                      correspondenteValue: data.cheapest_correspondent.value, 
-                      note: ''                    
-                    };
-                    servicePrices[data.task.id]=data;
-                    setChosenPrice(data.chosenPrice);
-                    $(`td [btn-data-id=${data.task.id}]`).attr('disabled', false);
-                })                                             
-            },
-            error: function(error) {
-              console.log(error)
-            }, 
-            beforeSend: function (xhr, settings) {
-              xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-            },
-            dataType: 'json'                 
-        })
+    var setCorrespondents = async function(taskIds) {
+        for (let taskId of taskIds) {
+            cheapestPrice = await TaskServicePriceTable.getCheapestPrice(taskId)
+            let chosenPrice = {
+                taskId: taskId, 
+                servicePriceTableId: cheapestPrice.id, 
+                correspondenteName: cheapestPrice.office_correspondent.legal_name, // Nome
+                correspondenteValue: cheapestPrice.value, 
+                note: ''                    
+            };
+            setChosenPrice(chosenPrice);
+            $(`td [btn-data-id=${taskId}]`).attr('disabled', false);
+        }         
     };
     $('.btn-change-office-correspondent').on('click', function() {
-        let priceTable = new ServicePriceTable($(this).attr('btn-data-id'))
+        let priceTable = new TaskServicePriceTable($(this).attr('btn-data-id'))
         priceTable.bootstrap()
     });
 

@@ -163,18 +163,16 @@ class TaskServicePriceTable {
     })
   }
 
-  getCheapestPrice() {
+  static getCheapestPrice(taskId) {
     return new Promise(resolve => {
       $.ajax({
         method: 'GET',
-        url: `/providencias/${this.taskId}/service_price_table_cheapest_of_task`,
+        url: `/providencias/${taskId}/service_price_table_cheapest_of_task`,
         success: (response => {
-          this.cheapestPrice = this.priceSelected = response
-          this.setTrCheapstPrice(this.cheapestPrice.id)
-          return resolve(true)
+          return resolve(response)
         })
       })
-    })
+    })    
   }
 
   destroyTable() {
@@ -221,9 +219,11 @@ class TaskServicePriceTable {
         this.populateTable()
           .then(() => {
             //Busca o preco mais barato e define como preco selecionado
-            this.getCheapestPrice()
-              .then(() => {
+            this.constructor.getCheapestPrice(this.taskId)
+              .then((result) => {
                 // Seta a linha da tabela que representa o preco mais barato
+                this.cheapestPrice = this.priceSelected = result
+                this.setTrCheapstPrice(this.cheapestPrice.id)                                
                 // Inicializa o evento de click na linha
                 this.initOnClickRowEvent()
                   // Inicializa o evento de click no botao da acao
