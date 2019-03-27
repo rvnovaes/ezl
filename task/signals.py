@@ -424,37 +424,47 @@ def post_save_geolocation(sender, instance, **kwargs):
 
 @receiver(pre_create_historical_record)
 def pre_create_historical_record_callback(sender, **kwargs):
-    history_instance = kwargs.get('history_instance')
-    history_instance.history_office = get_office_session(HistoricalRecords.thread.request)
-    instance = kwargs.get('instance')
-    if instance.history.exists():
-        if not get_history_changes(history_instance):
-            history_instance.pk = instance.history.latest('pk').pk
+    try:
+        history_instance = kwargs.get('history_instance')
+        history_instance.history_office = get_office_session(HistoricalRecords.thread.request)
+        instance = kwargs.get('instance')
+        if instance.history.exists():
+            if not get_history_changes(history_instance):
+                history_instance.pk = instance.history.latest('pk').pk
+    except AttributeError as e:
+        # Caso a task seja salva pelo terminal, nao exite request, por isso faco este 
+        # tratamento
+        pass
 
 
 @receiver(post_create_historical_record)
 def post_create_historical_record_callback(sender, **kwargs):
-    history_instance = kwargs.get('history_instance')
-    instance = kwargs.get('instance')
-    status = get_child_status(instance.status) if instance.get_child else None
-    request = HistoricalRecords.thread.request
-    msg = request.POST.get('notes', '')
-    task_number = None
-    if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
-        task_number = instance.get_child.task_number
-    if instance.task_status == TaskStatus.REFUSED and instance.parent:
-        task_number = instance.task_number
-    if task_number:
-        msg = """
-        A OS {} foi recusada pelo escritório pelo motivo: {}
-        """.format(task_number, msg)
-    if field_has_changed(history_instance, 'amount'):
-        change = get_history_changes(history_instance).get('amount')
-        if float(change.old) != float(change.new):
-            msg += "Valor alterado de {} para {}".format(
-                format_currency(change.old, 'R$', locale='pt_BR'),
-                format_currency(change.new, 'R$', locale='pt_BR'))
-    history_instance.history_notes = msg
-    history_instance.save()
-    if instance.legacy_code:
-        export_task_history.delay(history_instance.pk)
+    try:
+        history_instance = kwargs.get('history_instance')
+        instance = kwargs.get('instance')
+        status = get_child_status(instance.status) if instance.get_child else None
+        request = HistoricalRecords.thread.request
+        msg = request.POST.get('notes', '')
+        task_number = None
+        if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
+            task_number = instance.get_child.task_number
+        if instance.task_status == TaskStatus.REFUSED and instance.parent:
+            task_number = instance.task_number
+        if task_number:
+            msg = """
+            A OS {} foi recusada pelo escritório pelo motivo: {}
+            """.format(task_number, msg)
+        if field_has_changed(history_instance, 'amount'):
+            change = get_history_changes(history_instance).get('amount')
+            if float(change.old) != float(change.new):
+                msg += "Valor alterado de {} para {}".format(
+                    format_currency(change.old, 'R$', locale='pt_BR'),
+                    format_currency(change.new, 'R$', locale='pt_BR'))
+        history_instance.history_notes = msg
+        history_instance.save()
+        if instance.legacy_code:
+            export_task_history.delay(history_instance.pk)
+    except AttributeError as e: 
+        # Caso a task seja salva pelo terminal, nao exite request, por isso faco este 
+        # tratamento        
+        pass            

@@ -54,9 +54,8 @@ class TaskServicePriceTable {
           .attr('name', 'action')
           .attr('value', 'OPEN')
           .appendTo('#task_detail');
-        $('[name=servicepricetable_id]').val(this.priceSelected.id)
-        debugger;
-        $('[name=amount]').val(parseFloat(this.priceSelected.value))
+        $('[name=servicepricetable_id]').val(this.priceSelected.id)        
+        $('[name=amount]').val(this.priceDefined.toLocaleString('pt-BR'))
         if (this.priceSelected.policy_price.billing_moment === 'PRE_PAID') {
           this.hideModalAction();
           this.billing.createCharge(this.csrfToken)

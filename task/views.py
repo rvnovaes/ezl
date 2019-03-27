@@ -339,7 +339,7 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
             note = request.POST.get('note', '')
             form = TaskDetailForm(request.POST, instance=task)
             if form.is_valid():
-                form.instance.task_status = TaskStatus.OPEN
+                form.instance.task_status = TaskStatus.OPEN                
                 form.instance.amount = Decimal(amount)
                 form.instance.amount_to_pay = Decimal(amount_to_pay)
                 form.instance.amount_to_receive = Decimal(amount_to_receive)
@@ -967,7 +967,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             form.instance.delegation_date = timezone.now()
             if not form.instance.person_distributed_by:
                 form.instance.person_distributed_by = self.request.user.person
-            default_amount = Decimal('0.00') if not form.instance.amount else form.instance.amount
+            default_amount = Decimal('0.00') if not form.instance.amount else form.instance.amount                        
             form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else default_amount)
             servicepricetable_id = (
                 self.request.POST['servicepricetable_id']
