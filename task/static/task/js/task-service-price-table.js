@@ -1,5 +1,7 @@
 class TaskServicePriceTable {
-  constructor(taskId, typeServiceId, typeServiceName) {
+  constructor(taskId, typeServiceId, typeServiceName, billing = null, csrfToken = null) {
+    this.csrfToken = csrfToken
+    this.billing = billing
     this.taskId = taskId
     this.typeServiceId = typeServiceId
     this.prices = []
@@ -10,7 +12,6 @@ class TaskServicePriceTable {
     this.idPriceTableElement = '#price-table'
     this.elPriceTable = $(this.idPriceTableElement)
     this.elPriceDefined = $('#price-defined')
-      .maskMoney({ 'prefix': 'R$ ', 'decimal': ',', 'thousands': '.', 'allowZero': true })
     this.elBtnAction = $('#btn-action')
   }
 
@@ -26,7 +27,7 @@ class TaskServicePriceTable {
     return this.elPriceDefined.maskMoney('unmasked')[0]
   }
 
-  set priceDefined(value) {        
+  set priceDefined(value) {
     this.elPriceDefined.val(parseFloat(value).toLocaleString('pt-BR'))
     this.elPriceDefined.focus()
   }
@@ -45,6 +46,16 @@ class TaskServicePriceTable {
     return this.elModal.modal('show')
   }
 
+  setBillingItem() {
+    this.billing.item =
+      {
+        task_id: this.taskId,
+        service_price_table_id: this.priceSelected.id,
+        name: ' Para ' + this.officeToDelegateName,
+        value: Number(this.priceDefined).toFixed(2).replace('.', '')
+      };
+  }
+
   makeAction() {
     return new Promise((resolve) => {
       if (!this.priceSelected) {
@@ -54,10 +65,11 @@ class TaskServicePriceTable {
           .attr('name', 'action')
           .attr('value', 'OPEN')
           .appendTo('#task_detail');
-        $('[name=servicepricetable_id]').val(this.priceSelected.id)        
+        $('[name=servicepricetable_id]').val(this.priceSelected.id)
         $('[name=amount]').val(this.priceDefined.toLocaleString('pt-BR'))
         if (this.priceSelected.policy_price.billing_moment === 'PRE_PAID') {
-          this.hideModalAction();
+          this.hideModal();
+          this.setBillingItem()
           this.billing.createCharge(this.csrfToken)
         } else {
           swal({
@@ -78,7 +90,7 @@ class TaskServicePriceTable {
 
   initOnBtnAction() {
     return new Promise((resolve) => {
-      this.elBtnAction.on('click', () => {
+      this.elBtnAction.on('click', () => {        
         this.makeAction()
       })
       resolve(true)
@@ -113,13 +125,13 @@ class TaskServicePriceTable {
     return new Promise((resolve) => {
       this.requestPayload()
         .then(prices => {
-          this.prices = prices;          
-          for (let price of prices) {            
+          this.prices = prices;
+          for (let price of prices) {
             this.elPriceTable.row.add(
               [
                 `<a href="/office_profile/${price.office_correspondent.id}" target="_blank" class="price-table-link-to-office">${price.office_correspondent.legal_name}</a>`,
                 price.type_task.name,
-                price.office_network ? price.office_network.legal_name : '-',
+                price.office_network ? price.office_network : '-',
                 price.state || '-',
                 price.court_district ? price.court_district.name : '-',
                 price.court_district_complement ? price.court_district_complement.name : '-',
@@ -137,8 +149,36 @@ class TaskServicePriceTable {
     })
   }
 
+  setTrCheapstPrice() {
+    return new Promise(resolve => {
+      this.priceDefined = this.cheapestPrice.value
+      this.elPriceDefined.maskMoney({ 'prefix': 'R$ ', 'decimal': ',', 'thousands': '.', 'allowZero': true })
+      // Recurso utilizado para poder setar a mascara no campo 
+      // Infelizmente o plugin maskMoney so e setadi a partir do primeiro focus
+      // no campo. Assim Se deu a necessidade de fazer este ajuste tecnico. 
+      setTimeout(() => this.elPriceDefined.focus, 100)
+      setTimeout(() => $(`${this.idPriceTableElement} tbody tr[id=${this.cheapestPrice.id}]`).click(), 200)
+      setTimeout(() => $(`#modal-service-price-table-body`).scrollTop(0), 300)
+      resolve(true)
+    })
+  }
+
+  getCheapestPrice() {
+    return new Promise(resolve => {
+      $.ajax({
+        method: 'GET',
+        url: `/providencias/${this.taskId}/service_price_table_cheapest_of_task`,
+        success: (response => {
+          this.cheapestPrice = this.priceSelected = response
+          this.setTrCheapstPrice(this.cheapestPrice.id)
+          return resolve(true)
+        })
+      })
+    })
+  }
+
   destroyTable() {
-    return new Promise(resolve => {      
+    return new Promise(resolve => {
       if ($.fn.DataTable.isDataTable(this.idPriceTableElement)) {
         this.elPriceTable.empty()
       }
@@ -174,15 +214,28 @@ class TaskServicePriceTable {
 
   bootstrap() {
     $('#processing').show()
+    // Inicializa a tabela com as configuacoes de dataTables
     this.initTable()
       .then(() => {
+        // Busca os dados no backend e popula a tabela
         this.populateTable()
           .then(() => {
-            this.initOnClickRowEvent()
-              .then(this.initOnBtnAction().then(() => {
-                this.showModal()
-                $('#processing').hide()
-              }))
+            //Busca o preco mais barato e define como preco selecionado
+            this.getCheapestPrice()
+              .then(() => {
+                // Seta a linha da tabela que representa o preco mais barato
+                // Inicializa o evento de click na linha
+                this.initOnClickRowEvent()
+                  // Inicializa o evento de click no botao da acao
+                  .then(this.initOnBtnAction()
+                    .then(() => {
+                      this.showModal()
+                      this.setTrCheapstPrice()
+                        .then(() => {
+                        })
+                      $('#processing').hide()
+                    }))
+              })
           })
       })
   }

@@ -15,7 +15,7 @@ class ServicePriceTableSerializer(serializers.ModelSerializer, CreateUserSeriali
     policy_price = PolicyPriceSerializer(many=False, read_only=True)
     office_correspondent = OfficeSerializer(many=False, read_only=True)
     type_task = TypeTaskSerializer(many=False, read_only=True)
-    office_network = OfficeSerializer(many=False, read_only=True)
+    office_network = serializers.SerializerMethodField()
     state = serializers.SerializerMethodField()
     court_district = CourtDistrictSerializer(many=False, read_only=True)
     court_district_complement = CourtDistrictComplementSerializer(many=False, read_only=True)
@@ -27,6 +27,9 @@ class ServicePriceTableSerializer(serializers.ModelSerializer, CreateUserSeriali
     class Meta:
         model = ServicePriceTable
         exclude = ('system_prefix', 'create_date', 'alter_date', 'alter_user')
+
+    def get_office_network(self, obj):
+        return obj.office_network.name if obj.office_network else ''
 
     def get_state(self, obj):
         return obj.state.initials if obj.state else None

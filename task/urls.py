@@ -124,5 +124,8 @@ urlpatterns = [
         name='task_checkin_report'),
 
     url(r'^(?P<pk>[0-9]+)/service_price_table_of_task$', login_required(views.ServicePriceTableOfTaskView.as_view()),
-    name='service_price_table_of_task'),        
+    name='service_price_table_of_task'),   
+
+    url(r'^(?P<pk>[0-9]+)/service_price_table_cheapest_of_task$', login_required(views.ServicePriceTableCheapestOfTaskView.as_view()),
+    name='service_price_table_cheapest_of_task')
 ]

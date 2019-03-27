@@ -12,7 +12,7 @@ class CourtDistrictSerializer(serializers.ModelSerializer):
 
 class CourtDistrictComplementSerializer(serializers.ModelSerializer):
     class Meta: 
-        models = CourtDistrictComplement 
+        model = CourtDistrictComplement 
         fields = '__all__'
 
 

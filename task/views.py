@@ -2273,4 +2273,12 @@ class ServicePriceTableOfTaskView(CustomLoginRequiredView, View):
         task = Task.objects.get(pk=pk)
         price_table = CorrespondentsTable(task, task.office)
         data = ServicePriceTableSerializer(price_table.correspondents_qs, many=True).data
-        return JsonResponse(data, safe=False)            
+        return JsonResponse(data, safe=False)
+
+
+class ServicePriceTableCheapestOfTaskView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):
+        task = Task.objects.get(pk=pk)
+        price_table = CorrespondentsTable(task, task.office)
+        data = ServicePriceTableSerializer(price_table.get_cheapest_correspondent()).data
+        return JsonResponse(data)

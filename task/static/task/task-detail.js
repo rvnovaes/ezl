@@ -142,7 +142,7 @@ class TaskDetail {
             if (this.priceTable) {
                 delete this.priceTable
             }
-            this.priceTable = new TaskServicePriceTable(this.taskId, this.typeTaskId, this.typeTask)        
+            this.priceTable = new TaskServicePriceTable(this.taskId, this.typeTaskId, this.typeTask, this.billing, this.csrfToken)        
             this.priceTable.bootstrap()
         } else {
             this._elModalAction.modal('show');
