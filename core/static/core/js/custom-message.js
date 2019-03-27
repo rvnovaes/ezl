@@ -6,6 +6,7 @@ class CustomMessage {
     this.onClosePage();
     this.isRefrash = false;
     this.onRefrash();
+    this.messagesShow = [];
   }
 
   get storeMessages() {
@@ -58,10 +59,13 @@ class CustomMessage {
   onCloseMessage() {
     let self = this
     $('.close').on('click', function (el) {
-      const idMessage = $(this).attr('data-message');
+      const idMessage = $(this).attr('data-message');      
+      self.messagesShow = self.messagesShow.filter(message => message != idMessage)      
       self.setVisualizedMessage(idMessage)
-      $(this).parent().parent().hide()
-
+      $(this).parent().parent().hide()      
+      if (!self.messagesShow.length) {
+        $('.right-sidebar').hide()
+      }
     })
   }
 
@@ -78,38 +82,37 @@ class CustomMessage {
   }
 
   loadMessages() {
-    if (localStorage.getItem('ezl-count-pages') <= 1) {
-      fetch('/custom_messages/').then(response => {
-        response.json()
-          .then(result => {                        
-            for (let message of result) {
-              let storedMessage = this.findMessage(message.id)
-              if (!storedMessage || storedMessage.visualized === false) {
-                this.showSideBarNotifications();
-                this.messagesTemplate += `
-                <div class="comment-body">
-                  <div class="user-img"> 
-                    <i class="fa fa-2x fa-check-circle text-success"></i>          
-                  </div>
-                  <div class="mail-contnet">
-                    <button type="button" data-message="${message.id}"class="close" aria-label="Close"> <span aria-hidden="true">×</span>                    
-                    </button>
-                    <h5>${message.title}</h5>                              
-                    <span class="mail-desc">
-                      ${message.message}                        
-                    </span>               
-                    ${this.getLinkButton(message)}                          
-                  </div>
-                </div>                  
-                `
-                this.addMessage(message)
-              }
+    fetch('/custom_messages/').then(response => {
+      response.json()
+        .then(result => {                        
+          for (let message of result) {
+            let storedMessage = this.findMessage(message.id)
+            if (!storedMessage || storedMessage.visualized === false) {
+              this.showSideBarNotifications();
+              this.messagesShow.push(message.id);                
+              this.messagesTemplate += `
+              <div class="comment-body">
+                <div class="user-img"> 
+                  <i class="fa fa-2x fa-check-circle text-success"></i>          
+                </div>
+                <div class="mail-contnet">
+                  <button type="button" data-message="${message.id}"class="close" aria-label="Close"> <span aria-hidden="true">×</span>                    
+                  </button>
+                  <h5>${message.title}</h5>                              
+                  <span class="mail-desc">
+                    ${message.message}                        
+                  </span>               
+                  ${this.getLinkButton(message)}                          
+                </div>
+              </div>                  
+              `
+              this.addMessage(message)
             }
-            this.el.append(this.messagesTemplate)            
-            this.onCloseMessage()
-          })
-      })
-    }
+          }
+          this.el.append(this.messagesTemplate)            
+          this.onCloseMessage()
+        })
+    })       
   }
 
   onRefrash() {
@@ -123,13 +126,9 @@ class CustomMessage {
   }
 
   onClosePage() {
-    let self = this;
-    console.log("carregou")
+    let self = this;    
     $(window).unload(function () {
-      console.log(parseInt(localStorage.getItem('ezl-count-pages')))
-      if (parseInt(localStorage.getItem('ezl-count-pages')) <= 1 && !self.isRefrash) {
-        localStorage.removeItem(self.storageKey)
-      }
+      localStorage.removeItem(self.storageKey)
     })
   }
 }
