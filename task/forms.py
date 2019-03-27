@@ -11,6 +11,7 @@ from core.forms import BaseForm, XlsxFileField
 from lawsuit.models import CourtDistrict, CourtDistrictComplement, City, Movement, LawSuit, Folder
 from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer
 from task.resources import COLUMN_NAME_DICT
+from task.utils import validate_final_deadline_date
 from task.widgets import code_mirror_schema
 from .schemas import *
 from .fields import JSONFieldMixin
@@ -92,10 +93,8 @@ class TaskForm(BaseForm):
     def clean(self):
         super().clean()
         office = self.cleaned_data.get('office')
-        min_hour_os = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
-        if min_hour_os > 0 \
-                and timezone.localtime() + timezone.timedelta(hours=min_hour_os) > \
-                    self.cleaned_data.get('final_deadline_date'):
+        if not validate_final_deadline_date(self.cleaned_data.get('final_deadline_date'), office):
+            min_hour_os = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
             msg = 'O prazo de cumprimento da OS é inferior a {} horas.'.format(min_hour_os)
             self.add_error('final_deadline_date', forms.ValidationError(msg))
 

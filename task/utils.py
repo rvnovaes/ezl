@@ -2,6 +2,7 @@ import copy
 import uuid
 from decimal import Decimal
 from django.template.loader import render_to_string
+from django.utils import timezone
 from ecm.models import DefaultAttachmentRule, Attachment
 from financial.utils import recalculate_values
 from task.workflow import get_child_recipients
@@ -18,7 +19,7 @@ from retrying import retry
 import traceback
 import logging
 from manager.enums import TemplateKeys
-from manager.template_values import GetTemplateValue
+from manager.utils import get_template_value_value
 
 logger = logging.getLogger(__name__)
 
@@ -249,5 +250,10 @@ def set_performance_place(movement):
 
 def get_default_customer(office):
     key = TemplateKeys.DEFAULT_CUSTOMER.name
-    manager = GetTemplateValue(office, key)
-    return manager.value
+    return get_template_value_value(office, key)
+
+
+def validate_final_deadline_date(final_deadline_date, office):
+    min_hour_os = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
+    return not (min_hour_os > 0
+                and timezone.localtime() + timezone.timedelta(hours=min_hour_os) > final_deadline_date)

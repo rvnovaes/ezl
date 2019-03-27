@@ -3,10 +3,13 @@ from core.models import Person, State, City
 from financial.models import CostCenter
 from lawsuit.models import Folder, LawSuit, CourtDistrict, Instance, CourtDistrictComplement, CourtDivision, Organ, \
     TypeLawsuit, TypeMovement
-from task.utils import get_default_customer, self_or_none
+from task.utils import get_default_customer, self_or_none, validate_final_deadline_date
 from task.messages import column_error, incorrect_natural_key, required_one_in_group, record_not_found, \
-    required_column, required_column_related, default_customer_missing
+    required_column, required_column_related, default_customer_missing, min_hour_error
 from task.models import Task, Movement, TypeTask
+from manager.utils import get_template_value_value
+from manager.enums import TemplateKeys
+from task.widgets import DateTimeWidgetMixin
 
 TRUE_FALSE_DICT = {'V': True, 'F': False}
 
@@ -197,6 +200,7 @@ class ImportTask(object):
         self.office = office
         self._office_id = self.office.id
         self._create_args = {}
+        self.model = Task
 
     @staticmethod
     def _filter_queryset(qs, **kwargs):
@@ -230,8 +234,26 @@ class ImportTask(object):
             qs = TypeTask.objects.get_queryset(office=[self._office_id])
             return True if self._filter_queryset(qs, **{'name__unaccent__iexact': str(value)}).first() else False
 
+    def validate_final_deadline_date(self, value):
+        date_value = DateTimeWidgetMixin().clean(value)
+        return validate_final_deadline_date(date_value, self.office)
+
     def get_errors(self):
         return self.row_errors
+
+    def _get_formated_error(self, field, value):
+        try:
+            column_type = self.model._meta.get_field(field).get_internal_type()
+        except:
+            column_type = 'ForeignKey'
+
+        error_dict = {
+            'ForeignKey': incorrect_natural_key(COLUMN_NAME_DICT[field]['verbose_name'],
+                                                COLUMN_NAME_DICT[field]['column_name'], value),
+            'DateTimeField': min_hour_error(get_template_value_value(self.office, TemplateKeys.MIN_HOUR_OS.name))
+        }
+
+        return column_error(COLUMN_NAME_DICT[field]['column_name'], error_dict.get(column_type))
 
     def validate_task(self):
         """
@@ -242,7 +264,7 @@ class ImportTask(object):
         row = self.row
         row_errors = self.row_errors
         required_fields = ['person_asked_by', 'type_task', 'final_deadline_date']
-        check_fields = ['person_asked_by', 'person_company_representative', 'type_task']
+        check_fields = ['person_asked_by', 'person_company_representative', 'type_task', 'final_deadline_date']
 
         for field in required_fields:
             if not row.get(field):
@@ -252,10 +274,7 @@ class ImportTask(object):
             validation_method = getattr(self, 'validate_{}'.format(field))
             value = row.get(field)
             if validation_method and not validation_method(value):
-                row_errors.append(column_error(COLUMN_NAME_DICT[field]['column_name'],
-                                               incorrect_natural_key(COLUMN_NAME_DICT[field]['verbose_name'],
-                                                                     COLUMN_NAME_DICT[field]['column_name'],
-                                                                     value)))
+                row_errors.append(self._get_formated_error(field, value))
         return row_errors == []
 
 
@@ -266,6 +285,7 @@ class ImportFolder(ImportTask):
         self._cost_center = None
         self._cost_center_update = False
         self.folder = None
+        self.model = Folder
 
     def _get_person_customer(self, row):
         if not row.get('folder_person_customer'):
@@ -319,8 +339,8 @@ class ImportFolder(ImportTask):
             if not cost_center:
                 key = 'folder_cost_center'
                 row_errors.append(incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
-                                                           COLUMN_NAME_DICT[key]['column_name'],
-                                                           row.get(key, '')))
+                                                        COLUMN_NAME_DICT[key]['column_name'],
+                                                        row.get(key, '')))
             else:
                 self._set_cost_center(cost_center)
                 if isinstance(cost_center, CostCenter):
@@ -386,6 +406,7 @@ class ImportLawSuit(ImportTask):
         self.folder = folder
         self.lawsuit = None
         self.update_lawsuit = False
+        self.model = LawSuit
 
     def _set_lawsuit(self, lawsuit):
         self.lawsuit = lawsuit
@@ -652,6 +673,7 @@ class ImportMovement(ImportTask):
         self.folder = getattr(lawsuit, 'folder', None)
         self.movement = None
         self.update_movement = False
+        self.model = Movement
 
     def _set_movement(self, movement):
         self.movement = movement
