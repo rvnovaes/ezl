@@ -1,9 +1,17 @@
 class TaskServicePriceTable {
-  constructor(taskId, typeServiceId, typeServiceName, billing = null, csrfToken = null) {
-    this.csrfToken = csrfToken
-    this.billing = billing
-    this.taskId = taskId
-    this.typeServiceId = typeServiceId
+  /**
+   * Classe generica para a tabela de precos da task
+   * @param {string} taskId - ID da task
+   * @param {string} typeServiceName - Nome do tipo de servico da task
+   * @param {object|null} parentInstance - Instancia de quem instanciou esta classe
+   * @param {Function|null} handleCallback - Funcao de calback utilizado no metodo handle
+   */
+
+  constructor(taskId, typeServiceName, parentInstance, handleCallback) {
+    this.taskId = taskId    
+    this.parentInstance = parentInstance
+    this.handleCallback = handleCallback
+    this.bestPrice = {}
     this.prices = []
     this.priceSelected = {}
     this.elModal = $('#modal-service-price-table')
@@ -12,7 +20,7 @@ class TaskServicePriceTable {
     this.idPriceTableElement = '#price-table'
     this.elPriceTable = $(this.idPriceTableElement)
     this.elPriceDefined = $('#price-defined')
-    this.elBtnAction = $('#btn-action')
+    this.elBtnAction = $('#btn-action')    
   }
 
   get typeServiceName() {
@@ -46,52 +54,10 @@ class TaskServicePriceTable {
     return this.elModal.modal('show')
   }
 
-  setBillingItem() {
-    this.billing.item =
-      {
-        task_id: this.taskId,
-        service_price_table_id: this.priceSelected.id,
-        name: ' Para ' + this.officeToDelegateName,
-        value: Number(this.priceDefined).toFixed(2).replace('.', '')
-      };
-  }
-
-  makeAction() {
-    return new Promise((resolve) => {
-      if (!this.priceSelected) {
-        alert('Não selecionou preço')
-      } else {
-        $('<input />').attr('type', 'hidden')
-          .attr('name', 'action')
-          .attr('value', 'OPEN')
-          .appendTo('#task_detail');
-        $('[name=servicepricetable_id]').val(this.priceSelected.id)
-        $('[name=amount]').val(this.priceDefined.toLocaleString('pt-BR'))
-        if (this.priceSelected.policy_price.billing_moment === 'PRE_PAID') {
-          this.hideModal();
-          this.setBillingItem()
-          this.billing.createCharge(this.csrfToken)
-        } else {
-          swal({
-            title: 'Delegando',
-            html: '<h4>Aguarde...</h4>',
-            onOpen: () => {
-              swal.showLoading();
-              $('input[name=amount]').removeAttr('disabled');
-              $('#task_detail').unbind('submit').submit();
-            }
-          });
-
-        }
-      }
-      resolve(true)
-    })
-  }
-
   initOnBtnAction() {
     return new Promise((resolve) => {
-      this.elBtnAction.on('click', () => {        
-        this.makeAction()
+      this.elBtnAction.on('click', () => {
+        this.handle()
       })
       resolve(true)
     })
@@ -151,34 +117,39 @@ class TaskServicePriceTable {
 
   setTrCheapstPrice() {
     return new Promise(resolve => {
-      this.priceDefined = this.cheapestPrice.value
+      this.priceDefined = this.bestPrice.value
       this.elPriceDefined.maskMoney({ 'prefix': 'R$ ', 'decimal': ',', 'thousands': '.', 'allowZero': true })
       // Recurso utilizado para poder setar a mascara no campo 
       // Infelizmente o plugin maskMoney so e setadi a partir do primeiro focus
       // no campo. Assim Se deu a necessidade de fazer este ajuste tecnico. 
       setTimeout(() => this.elPriceDefined.focus, 100)
-      setTimeout(() => $(`${this.idPriceTableElement} tbody tr[id=${this.cheapestPrice.id}]`).click(), 200)
+      setTimeout(() => $(`${this.idPriceTableElement} tbody tr[id=${this.bestPrice.id}]`).click(), 200)
       setTimeout(() => $(`#modal-service-price-table-body`).scrollTop(0), 300)
       resolve(true)
     })
   }
 
-  static getCheapestPrice(taskId) {
+  static getBestPrice(taskId) {
     return new Promise(resolve => {
       $.ajax({
         method: 'GET',
         url: `/providencias/${taskId}/service_price_table_cheapest_of_task`,
         success: (response => {
+          response.taskId = taskId
           return resolve(response)
         })
       })
-    })    
+    })
   }
 
   destroyTable() {
     return new Promise(resolve => {
       if ($.fn.DataTable.isDataTable(this.idPriceTableElement)) {
-        this.elPriceTable.empty()
+        try {
+          $(this.idPriceTableElement).empty()
+        } catch (e) {
+          console.error(e)
+        }
       }
       resolve(true)
     })
@@ -187,7 +158,7 @@ class TaskServicePriceTable {
   initTable() {
     return new Promise((resolve) => {
       this.destroyTable().then(() => {
-        resolve(this.elPriceTable = this.elPriceTable.DataTable(
+        resolve(this.elPriceTable = $(this.idPriceTableElement).DataTable(
           {
             paging: false,
             order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
@@ -219,11 +190,11 @@ class TaskServicePriceTable {
         this.populateTable()
           .then(() => {
             //Busca o preco mais barato e define como preco selecionado
-            this.constructor.getCheapestPrice(this.taskId)
+            this.constructor.getBestPrice(this.taskId)
               .then((result) => {
                 // Seta a linha da tabela que representa o preco mais barato
-                this.cheapestPrice = this.priceSelected = result
-                this.setTrCheapstPrice(this.cheapestPrice.id)                                
+                this.bestPrice = this.priceSelected = result
+                this.setTrCheapstPrice(this.bestPrice.id)
                 // Inicializa o evento de click na linha
                 this.initOnClickRowEvent()
                   // Inicializa o evento de click no botao da acao
@@ -239,5 +210,88 @@ class TaskServicePriceTable {
           })
       })
   }
+
+  handle() {
+    if (this.handleCallback) {
+      this.priceSelected.value = Number(this.priceDefined).toFixed('2')
+      this.handleCallback(this.parentInstance, this)
+      this.hideModal()
+    }
+  }
 }
 
+class TaskDetailServicePriceTable extends TaskServicePriceTable {
+  /**
+   * Classe que herda da TaskServicePriceTable com costumizacoes pra ser utilizada
+   * na TaskDetail
+   * 
+   * @param {string} taskId - ID da task
+   * @param {string} typeServiceName - Nome do tipo de servico da task
+   * @param {object|null} parentInstance - Instancia de quem instanciou esta classe
+   * @param {Function|null} handleCallback - Funcao de calback utilizado no metodo handle
+   */
+  constructor(taskId, typeServiceName, parentInstance, handleCallback) {
+    super(taskId, typeServiceName, parentInstance, handleCallback)
+    this.billing = parentInstance.billing
+    this.csrfToken = parentInstance.csrfToken
+  }
+
+  setBillingItem() {
+    this.billing.item =
+      {
+        task_id: this.taskId,
+        service_price_table_id: this.priceSelected.id,
+        name: ' Para ' + this.officeToDelegateName,
+        value: Number(this.priceDefined).toFixed(2).replace('.', '')
+      };
+  }
+
+  handle() {
+    return new Promise((resolve) => {
+      if (!this.priceSelected) {
+        alert('Não selecionou preço')
+      } else {
+        $('<input />').attr('type', 'hidden')
+          .attr('name', 'action')
+          .attr('value', 'OPEN')
+          .appendTo('#task_detail');
+        $('[name=servicepricetable_id]').val(this.priceSelected.id)
+        $('[name=amount]').val(this.priceDefined.toLocaleString('pt-BR'))
+        if (this.priceSelected.policy_price.billing_moment === 'PRE_PAID') {
+          this.hideModal();
+          this.setBillingItem()
+          this.billing.createCharge(this.csrfToken)
+        } else {
+          swal({
+            title: 'Delegando',
+            html: '<h4>Aguarde...</h4>',
+            onOpen: () => {
+              swal.showLoading();
+              $('input[name=amount]').removeAttr('disabled');
+              $('#task_detail').unbind('submit').submit();
+            }
+          });
+
+        }
+      }
+      resolve(true)
+    })
+  }
+}
+
+
+class TaskServicePriceTableBatch extends TaskServicePriceTable {
+  /**
+   * Classe que herda da TaskServicePriceTable com costumizacoes pra ser utilizada
+   * na TaskDetail
+   * 
+   * @param {string} taskId - ID da task
+   * @param {string} typeServiceName - Nome do tipo de servico da task
+   * @param {object|null} parentInstance - Instancia de quem instanciou esta classe
+   * @param {Function|null} handleCallback - Funcao de calback utilizado no metodo handle
+   */  
+
+  handle() {
+    super.handle()
+  }
+}
