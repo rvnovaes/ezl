@@ -35,7 +35,7 @@
               </div>
               <div>
                 <ul class="chatonline style-none" style="overflow: hidden; width: auto; height: 100%;" ng-if="listOffices">
-                  <div class="slimScroll">           
+                  <div class="slimScrool chat-list slimscrool">
                     <li class="text-center" ng-show="chatsLoading" ng-if="contacts.length == 0">
                       Carregando...
                     </li>                                             
@@ -75,7 +75,7 @@
                             Carregando...
                           </li>
                           <li class="list-chat" ng-repeat="chat in chats" ng-click="getMessages(chat)" scroll-bottom="scroll-bottom">
-<a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
+                            <a class="chat-list-a" href="#" data-chat-label="{{chat.label}}">
                             <div>
                               <span class="label label-rouded label-primary pull-right hide" id="notify-1251" style="color:#fff"></span>
                                 <div class="row">

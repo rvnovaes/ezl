@@ -1,7 +1,7 @@
 angular.module('app').controller('chatCtrl', function($scope, $interval, chatApiService,
     $location, $anchorScroll){
 
-  $('.bg-title').css('display', 'none')
+  $('.bg-title').css('display', 'none');
   $scope.inMessage = false;
   $scope.hideEmptyChats = true;
   $scope.realContacts = [];
@@ -22,6 +22,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $scope.listScrollChat = false;
   $scope.existsUnread = false;
   $scope.search = '';
+  $scope.getingContacts = false;
 
   $('#list-chat-scroll').ready(function(){
     resizeChat();
@@ -75,9 +76,12 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   };
 
   var getContacts = function () {
-    if ($scope.listOffices) {
+    if ($scope.listOffices && !$scope.getingContacts) {
       $scope.chatsLoading = true;
+      console.log($scope.getingContacts);
+      $scope.getingContacts = true;
       chatApiService.getContacts().then(function(data){
+        $scope.getingContacts = false;
         $scope.realContacts = data;
         if (!$scope.search.length) {
           $scope.contacts = data;
