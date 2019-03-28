@@ -78,7 +78,6 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   var getContacts = function () {
     if ($scope.listOffices && !$scope.getingContacts) {
       $scope.chatsLoading = true;
-      console.log($scope.getingContacts);
       $scope.getingContacts = true;
       chatApiService.getContacts().then(function(data){
         $scope.getingContacts = false;
