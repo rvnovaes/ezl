@@ -2182,7 +2182,7 @@ class NewRegister(TemplateView):
             office_pk = request.POST.get('office_pk')
 
             send_mail_sign_up(first_name, email)
-            url_return = post_create_new_user(request_invite, office_name, user, email, office_cpf_cnpj, office_pk)
+            url_return = post_create_new_user(request_invite, office_name, user, office_cpf_cnpj, office_pk)
             return JsonResponse({'redirect': reverse_lazy(url_return)})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
@@ -2198,7 +2198,7 @@ class SocialRegister(TemplateView):
             user = request.user
             office_pk = request.POST.get('office_pk')
             request_invite = request.POST.get('request_invite')
-            url_return = post_create_new_user(request_invite, office_name, user, user.email, office_cpf_cnpj, office_pk)
+            url_return = post_create_new_user(request_invite, office_name, user, office_cpf_cnpj, office_pk)
             if not request_invite:
                 send_mail_sign_up(user.first_name, user.email)
 

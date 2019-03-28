@@ -342,7 +342,7 @@ def create_office_template_value(office):
     from manager.models import Template
     from manager.utils import create_template_value
     for template in Template.objects.filter(is_active=True):
-        create_template_value(template, office)
+        create_template_value(template, office, template.default_value)
 
 
 def add_create_user_to_admin_group(office):
@@ -358,17 +358,13 @@ def add_create_user_to_admin_group(office):
             office.create_user.groups.add(group)
 
 
-def post_create_new_user(request_invite, office_name, user, email, office_cpf_cnpj=None, office_pk=None):
+def post_create_new_user(request_invite, office_name, user, office_cpf_cnpj=None, office_pk=None):
     from core.models import Office, DefaultOffice, Invite
-    from manager.enums import TemplateKeys
-    from manager.utils import create_template_value, get_template_by_key
     if not request_invite:
         office = Office.objects.create(name=office_name,
                                        legal_name=office_name,
                                        create_user=user,
                                        cpf_cnpj=office_cpf_cnpj)
-        template = get_template_by_key(TemplateKeys.EMAIL_NOTIFICATION.name)
-        create_template_value(template, office, email)
         DefaultOffice.objects.create(
             auth_user=user,
             office=office,

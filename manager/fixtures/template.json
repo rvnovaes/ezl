@@ -23,7 +23,7 @@
     "fields": {
         "create_date": "2019-03-21T16:33:43.392Z",
         "create_user": 2,
-        "alter_date": "2019-03-22T17:29:36.836Z",
+        "alter_date": "2019-03-28T15:52:26.973Z",
         "alter_user": null,
         "is_active": true,
         "name": "Possuo equipe de confer\u00eancia de dados na delega\u00e7\u00e3o e valida\u00e7\u00e3o da OS",
@@ -31,7 +31,8 @@
         "description": "Possui equipe de confer\u00eancia de dados na delega\u00e7\u00e3o e valida\u00e7\u00e3o da OS",
         "type": "BOOLEAN",
         "parameters": {
-            "is_required": false
+            "is_required": false,
+            "boolean_default": "True"
         }
     }
 },
@@ -41,7 +42,7 @@
     "fields": {
         "create_date": "2019-03-21T16:34:35.907Z",
         "create_user": 2,
-        "alter_date": "2019-03-21T16:34:35.907Z",
+        "alter_date": "2019-03-28T15:56:07.914Z",
         "alter_user": null,
         "is_active": true,
         "name": "Possuo processo de importa\u00e7\u00e3o de dados de outros sistemas:",
@@ -49,7 +50,8 @@
         "description": "Possui processo de importa\u00e7\u00e3o de dados de outros sistemas (ETL)",
         "type": "BOOLEAN",
         "parameters": {
-            "is_required": false
+            "is_required": false,
+            "boolean_default": "True"
         }
     }
 },
@@ -84,7 +86,7 @@
     "fields": {
         "create_date": "2019-03-25T17:43:43.182Z",
         "create_user": 2,
-        "alter_date": "2019-03-25T18:05:40.918Z",
+        "alter_date": "2019-03-28T15:53:06.380Z",
         "alter_user": null,
         "is_active": true,
         "name": "Trabalho Sozinho",
@@ -92,7 +94,8 @@
         "description": "Define se o escrit\u00f3rio possui equipe interna de advogados",
         "type": "BOOLEAN",
         "parameters": {
-            "is_required": false
+            "is_required": false,
+            "boolean_default": "False"
         }
     }
 },

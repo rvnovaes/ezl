@@ -482,6 +482,9 @@ class Office(AbstractPerson):
     def get_template_value(self, template_key):
         return self.get_template(template_key).value
 
+    def get_template_value_obj(self, template_key):
+        return self.get_template(template_key).get_template_value_obj
+
     @property
     def use_service(self):
         from manager.enums import TemplateKeys
@@ -492,20 +495,20 @@ class Office(AbstractPerson):
         from manager.enums import TemplateKeys
         from manager.utils import update_template_value
         new_value = 'on' if value else ''
-        template_obj = self.get_template(TemplateKeys.USE_SERVICE.name).get_template_value_obj
+        template_obj = self.get_template_value_obj(TemplateKeys.USE_SERVICE.name)
         update_template_value(template_obj, new_value)
 
     @property
     def use_etl(self):
         from manager.enums import TemplateKeys
-        return self.get_template_value(TemplateKeys.USE_SERVICE.name)
+        return self.get_template_value(TemplateKeys.USE_ETL.name)
 
     @use_etl.setter
     def use_etl(self, value):
         from manager.enums import TemplateKeys
         from manager.utils import update_template_value
         new_value = 'on' if value else ''
-        template_obj = self.get_template(TemplateKeys.USE_ETL.name).get_template_value_obj
+        template_obj = self.get_template_value_obj(TemplateKeys.USE_ETL.name)
         update_template_value(template_obj, new_value)
 
     @property
@@ -518,7 +521,7 @@ class Office(AbstractPerson):
         from manager.enums import TemplateKeys
         from manager.utils import update_template_value
         new_value = 'on' if value else ''
-        template_obj = self.get_template(TemplateKeys.I_WORK_ALONE.name).get_template_value_obj
+        template_obj = self.get_template_value_obj(TemplateKeys.USE_SERVICE.name)
         update_template_value(template_obj, new_value)
 
 

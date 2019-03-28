@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from core.models import Office
-from core.permissions import *
+from core.permissions import create_permission
 
 
 class Command(BaseCommand):
