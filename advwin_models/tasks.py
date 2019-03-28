@@ -298,7 +298,7 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
         person_distributed_by_legacy_code = task.person_distributed_by.legacy_code
     person_executed_by_legacy_code = None
     person_executed_by_legal_name = None
-    justification = task_history.history_notes[:1000]
+    justification = task_history.history_notes[:1000] if task_history.history_notes else ''
     values = {}
     if task.get_child:
         person_executed_by_legacy_code = None
@@ -413,9 +413,9 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
             'data_operacao': timezone.localtime(task_history.history_date),
             'justificativa': justification,
             'usuario': username,
-            'descricao': 'Solicitada ao correspondente ('+person_executed_by_legal_name +
-                         ') por BackOffice: {}'.format(
-                task.person_distributed_by.legal_name),
+            'descricao': 'Solicitada ao correspondente {} por BackOffice: {}'.format(
+                person_executed_by_legal_name or '', 
+                task.person_distributed_by.legal_name if task.person_distributed_by else ''),
         }
     if values:
         try:
@@ -507,8 +507,8 @@ def export_task(self, task_id, task=None, execute=True):
                         advwin_advogado = user.person.legacy_code
                         break
         else:
-            advwin_advogado = task.person_executed_by.legacy_code
-            delegated_to = task.person_executed_by.auth_user.username
+            advwin_advogado = task.person_executed_by.legacy_code if task.person_executed_by else None
+            delegated_to = task.person_executed_by.auth_user.username if task.person_executed_by else None
 
         values = {
             'SubStatus': 30,
