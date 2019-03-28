@@ -428,7 +428,10 @@ def post_save_geolocation(sender, instance, **kwargs):
 @receiver(pre_create_historical_record)
 def pre_create_historical_record_callback(sender, **kwargs):
     history_instance = kwargs.get('history_instance')
-    history_instance.history_office = get_office_session(HistoricalRecords.thread.request)
+    try:
+        history_instance.history_office = get_office_session(HistoricalRecords.thread.request)
+    except:
+        history_instance.history_office = getattr(kwargs.get('instance'), 'office', None)
     instance = kwargs.get('instance')
     if instance.history.exists():
         if not get_history_changes(history_instance):
@@ -440,8 +443,11 @@ def post_create_historical_record_callback(sender, **kwargs):
     history_instance = kwargs.get('history_instance')
     instance = kwargs.get('instance')
     status = get_child_status(instance.status) if instance.get_child else None
-    request = HistoricalRecords.thread.request
-    msg = request.POST.get('notes', '')
+    try:
+        request = HistoricalRecords.thread.request
+        msg = request.POST.get('notes', '')
+    except:
+        msg = ''
     task_number = None
     if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
         task_number = instance.get_child.task_number

@@ -254,6 +254,6 @@ def get_default_customer(office):
 
 
 def validate_final_deadline_date(final_deadline_date, office):
-    min_hour_os = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
+    min_hour_os = float(get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name))
     return not (min_hour_os > 0
                 and timezone.localtime() + timezone.timedelta(hours=min_hour_os) > final_deadline_date)
