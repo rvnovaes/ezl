@@ -47,5 +47,7 @@ def update_template_value(template_value, new_value):
     template_value.value = value
     template_value.save()
 
-def get_template_default_value(template):
-    pass
+
+def exist_template_value(office, template_key):
+    from manager.template_values import GetTemplateValue
+    return GetTemplateValue(office, template_key).instance_values.exists()

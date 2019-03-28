@@ -12,35 +12,55 @@ from core.permissions import create_permission
 from guardian.shortcuts import get_groups_with_perms
 from task.models import TaskShowStatus, TaskWorkflow, TaskStatus
 from core.utils import create_office_template_value, add_create_user_to_admin_group
-from manager.utils import get_template_by_key, create_template_value, get_template_default_value
+from manager.utils import get_template_by_key, create_template_value, exist_template_value, update_template_value
 from manager.enums import TemplateKeys
 
 
+def create_office_setting_email_notification(office):
+    template_key = TemplateKeys.EMAIL_NOTIFICATION.name
+    value = office.create_user.email
+    if not exist_template_value(office, template_key):
+        template = get_template_by_key(template_key)
+        create_template_value(template, office, value)
+    else:
+        template_obj = office.get_template_value_obj(template_key)
+        update_template_value(template_obj, value)
+
+
 def create_office_setting_default_user(office):
-    template = get_template_by_key(TemplateKeys.DEFAULT_USER.name)
+    template_key = TemplateKeys.DEFAULT_USER.name
     value = office.create_user_id
-    create_template_value(template, office, value)
+    if not exist_template_value(office, template_key):
+        template = get_template_by_key(template_key)
+        create_template_value(template, office, value)
+    else:
+        template_obj = office.get_template_value_obj(template_key)
+        update_template_value(template_obj, value)
 
 
 def create_office_setting_i_work_alone(office):
-    template = get_template_by_key(TemplateKeys.I_WORK_ALONE.name)
+    template_key = TemplateKeys.I_WORK_ALONE.name
+    template = get_template_by_key(template_key)
     i_work_alone = getattr(office, '_i_work_alone', template.default_value)
     office.i_work_alone = i_work_alone
 
 
 def create_office_setting_use_service(office):
-    template = get_template_by_key(TemplateKeys.USE_SERVICE.name)
+    template_key = TemplateKeys.USE_SERVICE.name
+    template = get_template_by_key(template_key)
     use_service = getattr(office, '_use_servie', template.default_value)
     office.use_service = use_service
 
 
 def create_office_setting_use_etl(office):
-    template = get_template_by_key(TemplateKeys.USE_ETL.name)
+    template_key = TemplateKeys.USE_ETL.name
+    template = get_template_by_key(template_key)
     use_etl = getattr(office, '_use_etl', template.default_value)
     office.use_etl = use_etl
 
 
 def create_office_setting_default_customer(office):
+    template_key = TemplateKeys.DEFAULT_CUSTOMER.name
     default_customer = Person.objects.filter(legal_name=office.legal_name,
                                              name=office.legal_name,
                                              is_customer=True).first()
@@ -56,9 +76,12 @@ def create_office_setting_default_customer(office):
                                             create_user_id=office.create_user.id,
                                             is_active=True)
 
-    template = get_template_by_key(TemplateKeys.DEFAULT_CUSTOMER.name)
-    value = default_customer.id
-    create_template_value(template, office, value)
+    if not exist_template_value(office, template_key):
+        template = get_template_by_key(template_key)
+        create_template_value(template, office, default_customer.id)
+    else:
+        template_obj = office.get_template_value_obj(template_key)
+        update_template_value(template_obj, default_customer.id)
 
 
 def create_membership_and_groups(office):
@@ -146,20 +169,18 @@ def office_post_save(sender, instance, created, **kwargs):
         create_office_setting_use_etl(instance)
         create_office_setting_use_service(instance)
         create_office_setting_default_user(instance)
+        create_office_setting_email_notification(instance)
 
         # TODO: Retirar metodo a seguir depois de eliminar a relacao entre CustomSettings e TaskWorkflow e
         #  TaskStatusToShow
         CustomSettings.objects.create(
+            office=instance,
             create_user_id=instance.create_user_id,
             is_active=True
         )
-    if created or not get_groups_with_perms(instance):
-        create_permission(instance)
+    create_permission(instance)
+    if created:
         add_create_user_to_admin_group(instance)
-    else:
-        for group in get_groups_with_perms(instance):
-            group.name = '{}-{}'.format(group.name.split('-')[0], instance.pk)
-            group.save()
 
 
 @receiver(post_delete, sender=Office)
