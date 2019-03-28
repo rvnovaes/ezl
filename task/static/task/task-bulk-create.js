@@ -546,7 +546,7 @@ class TaskBulkCreate {
         }
         if (this.minHourOS > 0 &&
             moment().add(this.minHourOS, 'hour') > moment(this.finalDeadlineDate, 'DD/MM/YYYY HH:mm')){
-            this.insertFormErrors(`O prazo de cumprimento da OS é inferior a ${this.minHourOS} horas.`,
+            this.insertFormErrors(`O prazo de cumprimento da OS foi configurado para não poder ser inferior à ${this.minHourOS} hora(s).`,
                 [this.elFinalDeadlineDate]);
         }
 

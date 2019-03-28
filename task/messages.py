@@ -19,7 +19,7 @@ DEFAULT_CUSTOMER_MISSING = "O escritório {} não possui cliente padrão configu
 MISSING_ACCEPTANCE_SERVICE_DATE = "A data de aceite pelo service é obrigatória caso o status da OS seja " \
                                   "Aceita pelo Service"
 
-MIN_HOUR_ERROR = 'O prazo de cumprimento da OS é inferior a {} horas.'
+MIN_HOUR_ERROR = 'O prazo de cumprimento da OS foi configurado para não poder ser inferior à {} hora(s).'
 
 
 def columns_not_available(column, columns_list):
