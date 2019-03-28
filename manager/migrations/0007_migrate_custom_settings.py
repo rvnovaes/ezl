@@ -40,7 +40,8 @@ def migrate_custom_settings(apps, schema_editor):
                     'USE_ETL': use_etl,
                 }
 
-                manager = ListTemplateValues(office)
+                manager = ListTemplateValues(office, ['DEFAULT_CUSTOMER', 'DEFAULT_USER', 'EMAIL_NOTIFICATION',
+                                                      'I_WORK_ALONE', 'USE_SERVICE', 'USE_ETL'])
                 template_values = manager.instance_values
                 for template_value in template_values:
                     new_value = values_by_template_key.get(template_value.value.get('template_key'))

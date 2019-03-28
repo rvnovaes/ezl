@@ -151,7 +151,7 @@ class IntegerConvertTemplateValue(GenericConvertTemplateValue):
 class DecimalConvertTemplateValue(GenericConvertTemplateValue):
 
     def to_python(self, value_dict, extra_params):
-        value = self._get_value_from_dict(value_dict, '0')
+        value = self._get_value_from_dict(value_dict, '0') or '0'
         self._set_dict_value(value_dict, Decimal(value))
         return value_dict
 

@@ -136,7 +136,7 @@
         "type": "DECIMAL",
         "parameters": {
             "is_required": true,
-            "decimal_default": 0.5
+            "decimal_default": 0
         }
     }
 }

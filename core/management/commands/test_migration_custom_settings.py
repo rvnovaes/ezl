@@ -15,7 +15,8 @@ class Command(BaseCommand):
         error_list = []
         for office in Office.objects.filter(is_active=True):
             if getattr(office, 'customsettings', None):
-                manager = ListTemplateValues(office)
+                manager = ListTemplateValues(office, ['DEFAULT_CUSTOMER', 'DEFAULT_USER', 'EMAIL_NOTIFICATION',
+                                                      'I_WORK_ALONE', 'USE_SERVICE', 'USE_ETL'])
                 office_check_list = []
                 office_check_list.append({
                     'value': office.customsettings.default_customer,

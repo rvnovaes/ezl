@@ -19,7 +19,7 @@ class TaskBulkCreate {
         this.elPersonAskedBy = $('#id_person_asked_by');
         this.labelLawSuitNumber = $('label[for=id_task_law_suit_number]');
         this.elBtnAddFolder = $('#btn_add_folder');
-        this.minHourOS = 2;
+        this.minHourOS = parseFloat('0.0');
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
 		this.onChangeLawSuitNumber();
