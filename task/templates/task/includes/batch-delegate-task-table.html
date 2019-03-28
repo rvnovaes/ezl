@@ -15,7 +15,7 @@
                 {% block table.thead %}
                     <thead>
                     <tr>
-                    	<th><input type="checkbox" name="checkbox-delegate" id="check-all-tasks" disabled/></th>
+                    	<th><input type="checkbox" name="checkbox-delegate" id="check-all-tasks"/></th>
                         {% for column in table.columns %}
 
                             {% if column.orderable %}
@@ -89,7 +89,7 @@
 <script type="text/javascript">    
     var taskDelegateBatch // trocar para let
     $(document).ready(()=>{
-        taskDelegateBatch = new TaskDelegateBatch(TaskServicePriceTableBatch)
+        taskDelegateBatch = new TaskDelegateBatch(TaskServicePriceTableBatch, '{{csrf_token}}')
         taskDelegateBatch.bootstrap()
     })     
 </script>

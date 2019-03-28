@@ -1,9 +1,11 @@
 class TaskDelegateBatch {
-  constructor(PriceClass) {
+  constructor(PriceClass, csrfToken) {
     this.PriceClass = PriceClass
+    this.csrfToken = csrfToken
     this.priceInstances = {}
     this.bestPrices = []
     this.taskIds = []
+    this.tasksToDelegate = []
     this._elTable = $('#table-batch-change-tasks')
     this.initOnCheckAll()
     this.initOnCheck()
@@ -13,26 +15,28 @@ class TaskDelegateBatch {
 
   initOnCheckAll() {
     // Seta ou nao todas as tasks a serem delegadas ao clicar em marcar todos
+    let self = this
     $('#check-all-tasks').on('change', function () {
       if ($(this).is(':checked')) {
         $('.checkbox-delegate').prop('checked', true)
         $('.checkbox-delegate').each(function () {
-          tasksToDelegate.push($(this).attr('id'))
+          self.tasksToDelegate.push($(this).attr('id'))
         })
       } else {
         $('.checkbox-delegate').prop('checked', false)
-        tasksToDelegate = [];
+        self.tasksToDelegate = [];
       }
     })
   }
 
   initOnCheck() {
     // Seta task selecionada para ser delegada
+    let self = this
     $('.checkbox-delegate').on('change', function () {
       if ($(this).is(':checked')) {
-        tasksToDelegate.push($(this).attr('id'))
+        self.tasksToDelegate.push($(this).attr('id'))
       } else {
-        tasksToDelegate.splice(tasksToDelegate.indexOf($(this).attr('id')), 1)
+        self.tasksToDelegate.splice(self.tasksToDelegate.indexOf($(this).attr('id')), 1)
       }
     })
   }
@@ -47,30 +51,13 @@ class TaskDelegateBatch {
     })
   }
 
-  populatTaskIds() {
-    // Alimenta a lista de ids existentes
-    $(`#table-batch-change-tasks tbody tr`).each(function () {
-      $('#check-all-tasks').attr('disabled', false);
-      this.taskIds.push($(this).attr('data-id'))
-    }).promise().done(function () {
-      var tasksToGetPrice = true;
-      while (tasksToGetPrice) {
-        this.setCorrespondents(taskIds.splice(0, 2));
-        // tasksToGetPrice = false;
-        if (taskIds.length === 0) {
-          tasksToGetPrice = false;
-        }
-      }
-    })
-  }
-
   // Formata preco para padrao Brasileiro, trocar para toLocaleString
   formatPrice(price) {
     return `R$${price.replace(".", ",")}`
   }
 
   // Atualiza o elemento da tabela
-  setElTr(obj, taskId, price) {        
+  setElTr(obj, taskId, price) {
     let elTr = obj._elTable.find(`[data-id=${taskId}]`)
     elTr.attr('service-price-id', price.id);
     elTr.find('td [td-correspondent]').text(price.office_correspondent.legal_name);
@@ -99,41 +86,34 @@ class TaskDelegateBatch {
     //Funcao de chamada ao clicar no botao trocar
     let self = this
     $('.btn-change-office-correspondent').on('click', function () {
-      self.priceInstances[$(this).attr('btn-data-id')].bootstrap()      
+      self.priceInstances[$(this).attr('btn-data-id')].bootstrap()
     });
   }
 
-  // Funcao de delega todas as Tasks selecionadas
-  async sendTasksToDelegate() {
-    var current = 0;
-    var total = tasksToDelegate.length;
-    var delegateTasks = function () {
-      tasksToDelegate.forEach(function (taskId) {        
-        var chosenPrice = servicePrices[taskId];
-        $.ajax({
-          method: 'post',
-          url: `/providencias/${taskId}/batch/delegar`,
-          data: {
-            task_id: taskId,
-            servicepricetable_id: chosenPrice.servicePriceTableId,
-            amount: chosenPrice.correspondenteValue,
-            note: chosenPrice.note,
-          },
-          success: function (response) {
-            current += 1            
-          },
-          error: function (request, status, error) {
-          },
-          beforeSend: function (xhr, settings) {
-            xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-          },
-          dataType: 'json'
-        })
-      });
-      return;
-    };
+  delegateTask(taskId, price) {
+    return new Promise(resolve => {
+      return $.ajax({
+        method: 'POST',
+        url: `/providencias/${taskId}/batch/delegar`,
+        data: {
+          task_id: taskId,
+          servicepricetable_id: price.id,
+          amount: price.value,
+          note: price.note ? price.note : ''
+        },
+        success: response => resolve(response),
+        beforeSend: function (xhr, settings) {
+          xhr.setRequestHeader("X-CSRFToken", self.csrfToken);
+        },
+        dataType: 'json'
+      })
+    })
+  }
 
-    // Separa em outra funcao
+  async delegateTasks() {
+    let total = this.tasksToDelegate.length
+    let current = 0
+    let delegateInterval;
     swal({
       title: 'Delegando ordens de serviço',
       html: '<h3>Delegando <strong></strong></h3>',
@@ -142,34 +122,35 @@ class TaskDelegateBatch {
           delegateInterval = setInterval(() => {
             swal.getContent().querySelector('strong')
               .textContent = `${current} de ${total}`
-            if (current == total) {
-              swal({
-                type: 'success',
-                title: `${total} ordens de serviço foram delegadas!`,
-                onClose: () => {
-                  tasksToDelegate = [];
-                  location.reload();
-                }
-              })
-            }
-          }, 0),
-          delegateTasks();
+          }, 100)
       },
-      onClose: () => {
-        clearInterval(delegateInterval);
-      }
-
-    }).then((result) => {
-      if (result.dismiss === swal.DismissReason.timer) {
-        
-      }
-    });
+    })
+    let self = this
+    let requests = []
+    for (let taskId of this.tasksToDelegate) {
+      current += 1
+      let bestPrice = await this.PriceClass.getBestPrice(taskId)
+      let selectedPrice = this.priceInstances[taskId].priceSelected
+      let price = Object.keys(selectedPrice).length ? selectedPrice : bestPrice
+      let teste = this.delegateTask(taskId, price)
+    }
+    Promise.all(requests).then(result => {
+      clearInterval(delegateInterval)
+      swal({
+        type: 'success',
+        title: `${total} ordens de serviço foram delegadas!`,
+        onClose: () => {          
+          location.reload();
+        }
+      })      
+    })
   }
 
   initOnClickDelegate() {
     // Acao ao clicar no botao delegar
+    self = this
     $('#btn-delegate').on('click', function () {
-      if (tasksToDelegate.length === 0) {
+      if (self.tasksToDelegate.length === 0) {
         swal({
           type: 'error',
           title: 'Você precisa selecionar no mínimo uma Ordem de serviço!'
@@ -186,7 +167,7 @@ class TaskDelegateBatch {
           confirmButtonText: 'Sim, quero delegar'
         }).then((result) => {
           if (result.value) {
-            sendTasksToDelegate();
+            self.delegateTasks()
           }
         })
       }
@@ -194,25 +175,25 @@ class TaskDelegateBatch {
   }
 
   async pupulatePriceInstances(PriceClass, taskIds) {
-    for (let taskId of taskIds) {                  
-      let priceInstance = new PriceClass(taskId, "", this, this.callbackChangePrice)      
-      this.priceInstances[taskId] = priceInstance         
+    for (let taskId of taskIds) {
+      let priceInstance = new PriceClass(taskId, "", this, this.callbackChangePrice)
+      this.priceInstances[taskId] = priceInstance
       let bestPrice = await PriceClass.getBestPrice(taskId)
       this.setElTr(this, taskId, bestPrice)
     }
   }
 
-  callbackChangePrice(obj, priceInstance) {   
+  callbackChangePrice(obj, priceInstance) {
     obj.setElTr(obj, priceInstance.taskId, priceInstance.priceSelected)
   }
 
   async bootstrap() {
     return new Promise(async resolve => {
-      let taskIds = await this.getTaskIds()      
-      this.pupulatePriceInstances(this.PriceClass, taskIds)          
+      let taskIds = await this.getTaskIds()
+      this.pupulatePriceInstances(this.PriceClass, taskIds)
       return resolve(true)
     })
-  }  
+  }
 }
 
 

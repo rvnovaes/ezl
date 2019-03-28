@@ -20,7 +20,7 @@ class TaskServicePriceTable {
     this.idPriceTableElement = '#price-table'
     this.elPriceTable = $(this.idPriceTableElement)
     this.elPriceDefined = $('#price-defined')
-    this.elBtnAction = $('#btn-action')    
+    this.elBtnAction = $('#btn-action')        
   }
 
   get typeServiceName() {
@@ -47,11 +47,14 @@ class TaskServicePriceTable {
   }
 
   hideModal() {
+    this.elBtnAction.unbind()
     this.elModal.modal('hide')
   }
 
   showModal() {
-    return this.elModal.modal('show')
+    this.elBtnAction.unbind()
+    this.initOnBtnAction()
+    return this.elModal.modal('show')    
   }
 
   initOnBtnAction() {
@@ -61,6 +64,10 @@ class TaskServicePriceTable {
       })
       resolve(true)
     })
+  }
+
+  unBindBtnAction() {
+    this.elBtnAction.unbind()
   }
 
   initOnClickRowEvent() {
@@ -212,6 +219,7 @@ class TaskServicePriceTable {
   }
 
   handle() {
+    console.log(this.taskId)
     if (this.handleCallback) {
       this.priceSelected.value = Number(this.priceDefined).toFixed('2')
       this.handleCallback(this.parentInstance, this)
