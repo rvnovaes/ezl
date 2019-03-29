@@ -2,10 +2,7 @@ class CustomMessage {
   constructor() {
     this.el = $('#custom-messages')
     this.storageKey = 'custom-messages'
-    this.messagesTemplate = ``
-    this.onClosePage();
-    this.isRefrash = false;
-    this.onRefrash();
+    this.messagesTemplate = ``    
     this.messagesShow = [];
   }
 
@@ -44,7 +41,7 @@ class CustomMessage {
 
   setVisualizedMessage(idMessage) {
     let message = this.findMessage(idMessage)
-    message.visualized = true
+    message.visualized = new Date().toLocaleDateString()
     this.updateMessage(message)
   }
 
@@ -54,7 +51,7 @@ class CustomMessage {
       return messages.reduce(message => message)
     }
     return undefined
-  }
+  }  
 
   onCloseMessage() {
     let self = this
@@ -86,8 +83,8 @@ class CustomMessage {
       response.json()
         .then(result => {                        
           for (let message of result) {
-            let storedMessage = this.findMessage(message.id)
-            if (!storedMessage || storedMessage.visualized === false) {
+            let storedMessage = this.findMessage(message.id)            
+            if (!storedMessage || storedMessage.visualized !== new Date().toLocaleDateString()) {
               this.showSideBarNotifications();
               this.messagesShow.push(message.id);                
               this.messagesTemplate += `
@@ -105,7 +102,7 @@ class CustomMessage {
                   ${this.getLinkButton(message)}                          
                 </div>
               </div>                  
-              `
+              `              
               this.addMessage(message)
             }
           }
@@ -114,21 +111,4 @@ class CustomMessage {
         })
     })       
   }
-
-  onRefrash() {
-    let self = this;
-    $(document).on('keydown', function (e) {
-      const key = e.which;
-      if (key === 116) {
-        self.isRefrash = true
-      }
-    })
-  }
-
-  onClosePage() {
-    let self = this;    
-    $(window).unload(function () {
-      localStorage.removeItem(self.storageKey)
-    })
-  }
-}
+ }
