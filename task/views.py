@@ -45,10 +45,11 @@ from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.tasks import import_xls_task_list
 from task.rules import RuleViewTask
-from task.workflow import CorrespondentsTable
+from task.workflow import CorrespondentsTable, CorrespondentsTablePostPaid
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
 from financial.utils import recalculate_values
+from financial.serializers import ServicePriceTableSerializer
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
     has_task_parent, set_instance_values, get_status_to_filter, get_default_customer
@@ -344,7 +345,7 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
             note = request.POST.get('note', '')
             form = TaskDetailForm(request.POST, instance=task)
             if form.is_valid():
-                form.instance.task_status = TaskStatus.OPEN
+                form.instance.task_status = TaskStatus.OPEN                
                 form.instance.amount = Decimal(amount)
                 form.instance.amount_to_pay = Decimal(amount_to_pay)
                 form.instance.amount_to_receive = Decimal(amount_to_receive)
@@ -972,7 +973,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
             form.instance.delegation_date = timezone.now()
             if not form.instance.person_distributed_by:
                 form.instance.person_distributed_by = self.request.user.person
-            default_amount = Decimal('0.00') if not form.instance.amount else form.instance.amount
+            default_amount = Decimal('0.00') if not form.instance.amount else form.instance.amount                        
             form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else default_amount)
             servicepricetable_id = (
                 self.request.POST['servicepricetable_id']
@@ -2127,71 +2128,6 @@ class BatchChangeTasksView(CustomPermissionRequiredMixin, DashboardSearchView):
         context['office'] = get_office_session(self.request)
         return context
 
-
-class BatchServicePriceTable(CustomLoginRequiredView, View):
-    def get(self, request, *args, **kwargs):
-        datas = []
-        tasks = Task.objects.filter(pk__in=request.GET.getlist('task_ids[]'))
-        for task in tasks:
-            price_table = CorrespondentsTable(task, task.office)
-            cheapest_correspondent = price_table.get_cheapest_correspondent()
-            prices = [{
-                'id': price.id,
-                'court_district': {
-                    'id': price.court_district.pk if price.court_district else '-',
-                    'name': price.court_district.name if price.court_district else '-',
-                },
-                'court_district_complement': {
-                    'id': price.court_district_complement.pk if price.court_district_complement else '-',
-                    'name': price.court_district_complement.name if price.court_district_complement else '-',
-                },
-                'create_user': price.create_user.pk,
-                'client': price.client if price.client else '-',
-                'city': price.city.name if price.city else '-',
-                'office': {
-                    'id': price.office.pk,
-                    'legal_name': price.office.legal_name
-                },
-                'office_correspondent': {
-                    'id': price.office_correspondent.pk,
-                    'legal_name': price.office_correspondent.legal_name
-                },
-                'office_network': {
-                    'id': price.office_network.pk if price.office_network else '-',
-                    'name': price.office_network.name if price.office_network else '-'
-                },
-                'state': price.state.initials if price.state else '-',
-                'type_task': {
-                    'id': price.type_task.pk if price.type_task else '-',
-                    'name': price.type_task.name if price.type_task else '-'
-                },
-                'office_rating': price.office_rating,
-                'office_return_rating': price.office_return_rating,
-                'value': price.value_to_receive.amount,
-                'price_category': price.policy_price.category
-
-            } for price in price_table.correspondents_qs]
-
-            data = {
-                'task': {
-                    'id': task.pk,
-                    'type_task': {
-                        'id': task.type_task.pk,
-                        'name': task.type_task.name
-                    }
-                },
-                'prices': prices,
-                'cheapest_correspondent': {
-                    'count': len(price_table.correspondents_qs),
-                    'id': cheapest_correspondent.pk if cheapest_correspondent else '',
-                    'office_correspondent': cheapest_correspondent.office_correspondent.legal_name if cheapest_correspondent else '',
-                    'value': cheapest_correspondent.value if cheapest_correspondent else ''
-                }
-            }
-            datas.append(data)
-        return JsonResponse(datas, safe=False)
-
-
 class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.GET.get('task_id'))
@@ -2341,3 +2277,25 @@ class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
         context = super().get_context_data(**kwargs)
         context['filter'] = self.filter_class
         return context
+
+
+class ServicePriceTableOfTaskView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):
+        task = Task.objects.get(pk=pk)
+        if request.GET.get('billing_moment') == 'POST_PAID':         
+            price_table = CorrespondentsTablePostPaid(task, task.office)
+        else:
+            price_table = CorrespondentsTable(task, task.office)
+        data = ServicePriceTableSerializer(price_table.correspondents_qs, many=True).data
+        return JsonResponse(data, safe=False)
+
+
+class ServicePriceTableCheapestOfTaskView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):
+        task = Task.objects.get(pk=pk)
+        if request.GET.get('billing_moment') == 'POST_PAID':         
+            price_table = CorrespondentsTablePostPaid(task, task.office)
+        else:
+            price_table = CorrespondentsTable(task, task.office)                
+        data = ServicePriceTableSerializer(price_table.get_cheapest_correspondent()).data
+        return JsonResponse(data)

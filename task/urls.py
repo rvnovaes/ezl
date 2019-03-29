@@ -31,10 +31,7 @@ urlpatterns = [
         name='batch_task_change_asked_by'),
     url(r'^(?P<pk>[0-9]+)/batch/delegar$',
         login_required(views.BatchTaskToDelegateView.as_view()),
-        name='batch_task_to_delegate'),        
-    url(r'^batch/service_price_table$',
-        login_required(views.BatchServicePriceTable.as_view()),
-        name='batch_service_price_table'),         
+        name='batch_task_to_delegate'),         
     url(r'^(?P<pk>[0-9]+)/batch/batch_cheapest_correspondent$',
         login_required(views.BatchCheapestCorrespondent.as_view()),
         name='batch_cheapest_correspondent'),               
@@ -125,4 +122,10 @@ urlpatterns = [
     url(r'^task_checkin_report/$',
         login_required(views.TaskCheckinReportView.as_view()),
         name='task_checkin_report'),
+
+    url(r'^(?P<pk>[0-9]+)/service_price_table_of_task$', login_required(views.ServicePriceTableOfTaskView.as_view()),
+    name='service_price_table_of_task'),   
+
+    url(r'^(?P<pk>[0-9]+)/service_price_table_cheapest_of_task$', login_required(views.ServicePriceTableCheapestOfTaskView.as_view()),
+    name='service_price_table_cheapest_of_task')
 ]

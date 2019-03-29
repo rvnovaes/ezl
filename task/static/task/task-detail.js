@@ -1,7 +1,10 @@
 class TaskDetail {
-    constructor(taskId, taskStatus, officeWorkAlone, pendingSurveys, pendingList, surveyCompanyRepresentative, csrfToken, billing, chargeId, typeTask) {
+    constructor(
+        taskId, taskStatus, officeWorkAlone, pendingSurveys, pendingList, surveyCompanyRepresentative, csrfToken, 
+        billing, chargeId, typeTaskId, typeTaskName, useService) {
+
         this.csrfToken = csrfToken;
-        this.taskId = taskId;
+        this.taskId = taskId;        
         this.taskStatus = taskStatus;
         this.chargeId = chargeId;
         this.officeWorkAlone = (officeWorkAlone === 'True');
@@ -9,9 +12,11 @@ class TaskDetail {
         this.pendingList = pendingList;
         this.surveyCompanyRepresentative=surveyCompanyRepresentative;
         this.billing = billing;
-        this.typeTask = typeTask;
+        this.typeTaskId = typeTaskId
+        this.typeTask = typeTaskName;        
         this.expanded = false;            
         this.servicePriceTable = {};
+        this.useService = useService === 'True' ? true : false;
         this._elTaskTitle = $('#task-title');
         this._elExecutionDate = $("input[name=execution_date]"); 
         this._elModalAction = $('#confirmAction');
@@ -24,10 +29,11 @@ class TaskDetail {
         this._elNotes = $('textarea[id=notes_id]');
         this._elBtnCompanyRepresentative = $('#btn-company_representative');
         this._elModalSurveyCompanyRepresentative = $("#survey-company-representative");
-        this._elExecutionDate.attr({'required': true, 'placeholder': 'Data de Cumprimento'});
+        this._elExecutionDate.attr({'required': true, 'placeholder': 'Data de Cumprimento'});        
+        // Instancia da classe javascript que gera a tabela de precos
+        this.priceTable;
         this.initFeedbackRating();
-        this.initCpfCnpjField();
-        this.onClickRowServicePriceTable();  
+        this.initCpfCnpjField();        
         this.checkPaymentPending();
         this.onDocumentReady();
     }
@@ -39,28 +45,6 @@ class TaskDetail {
             }
             return htmlListItens;
         }
-
-    get servicePriceTableId(){
-        let servicePriceTableId = $('input[name=servicepricetable_id]').val();
-        this.setServicePriceDetail(servicePriceTableId);
-        return servicePriceTableId;
-    }
-
-    set servicePriceTableId(value) {
-        $('input[name=servicepricetable_id]').val(value);
-    }
-
-    get officeToDelegate() {
-        return $("#office-" + this.servicePriceTableId);
-    }    
-
-    get officeToDelegateName() {
-        return $(this.officeToDelegate).find('td.office_correspondent').text()
-    }
-
-    get officeToDelegateValue() {
-        return this.officeToDelegate.data('value');
-    }
 
     get nextState() {
         return {
@@ -85,29 +69,6 @@ class TaskDetail {
         }
     }
 
-    setServicePriceDetail(servicePriceTableId) {
-        $.ajax({
-            method: 'GET', 
-            url: `/financeiro/tabelas-de-precos/detalhes/${servicePriceTableId}/`, 
-            success: (response) => {
-                this.servicePriceTable = response;
-            }
-        });
-    }
-
-
-    setBillingItem() {
-        this.billing.item =
-          {
-            task_id: this.taskId, 
-            service_price_table_id: this.servicePriceTableId,
-            name: this._elTaskTitle.text() + ' para ' + this.officeToDelegateName, 
-            value: parseInt(String(this.officeToDelegate.data('value'))
-                .replace('.', '')
-                .replace(', ', ''))
-          };         
-    }
-
     setExecutionDateRequire(status) {
         if (this._elExecutionDate.length > 0) {
             if (status === 'ACCEPTED'){
@@ -130,8 +91,17 @@ class TaskDetail {
         }
     }
 
-    showModalAction() {
-        this._elModalAction.modal('show');
+    showModalAction() {                
+        if (this.taskStatus === 'ACCEPTED_SERVICE' || (this.taskStatus === 'REQUESTED' && !this.useService)) {
+            if (this.priceTable) {
+                delete this.priceTable
+            }
+            this.priceTable = new TaskDetailServicePriceTable(
+                this.taskId, this.typeTask, this, null, this.csrfToken)        
+            this.priceTable.bootstrap()
+        } else {
+            this._elModalAction.modal('show');
+        }        
     }
 
     hideModalAction() {
@@ -191,7 +161,7 @@ class TaskDetail {
         });
     }
 
-    formatModalAction(status) {
+    formatModalAction(status) {        
         this._elModalNextText.innerHTML = this.nextState[status]['text'];
         $('#icon').addClass(this.nextState[status]['icon']);
         actionButton.innerHTML = "<i class='"+this.nextState[status]['icon']+"'></i> "+
@@ -201,22 +171,17 @@ class TaskDetail {
         this._elModalActionButton.attr('value', status);
     }
 
-    hideServicePriceTableAlert() {
-        $('#servicepricetable-alert').addClass('hidden');
-    }
-
     initFeedbackRating() {
         this._elFeedbackRating.hide().rating({});
     }
 
-    makeTaskAction(value) {
+    makeTaskAction(value) {        
         let taskStatus = value.id;
         this.validSurvey();
         this.makeRatingProccess(taskStatus);
         this.checkExecutionDate(taskStatus);
         this.showModalAction();
-        this.formatModalAction(taskStatus);
-        this.hideServicePriceTableAlert();
+        this.formatModalAction(taskStatus);        
         this.configNotesField(taskStatus);
         return true;
     }
@@ -256,36 +221,6 @@ class TaskDetail {
         $('#actionButton').removeAttr('disabled');
     }        
 
-    checkDelegationOffice() {        
-        $('#task_detail').submit(function (e) {
-            e.preventDefault();                
-        });
-        if (this.servicePriceTableId === ""){
-            $("#alert-correspondent").remove();
-            $("#servicepricetable-alert").removeClass("hidden");
-            this._elModalActionButton.removeAttr('disabled');        
-        } else{
-            $('<input />').attr('type', 'hidden')
-                .attr('name', 'action')
-                .attr('value', 'OPEN')
-                .appendTo('#task_detail');
-                if (this.servicePriceTable.policy_price.billing_moment === 'PRE_PAID') {
-                    this.hideModalAction();
-                    this.billing.createCharge(this.csrfToken)
-                } else {
-                    swal({
-                        title: 'Delegando', 
-			            html: '<h4>Aguarde...</h4>',
-                        onOpen: () => {
-                            swal.showLoading();
-                            $('input[name=amount]').removeAttr('disabled');
-                            $('#task_detail').unbind('submit').submit();            
-                        }
-                    });
-                }
-        }        
-    }
-
 // Todo: Ajustar de desmembrar
     submitTaskDetail(actionButton, use_service) {
         let task_status = actionButton.value;
@@ -293,9 +228,7 @@ class TaskDetail {
         let ret;
         actionButton.disabled = true;
         if ((task_status === 'DONE' || task_status === 'FINISHED' && use_service === 'False') && have_survey){
-            this.beforeSubmit(task_status);
-        } else if(task_status === 'OPEN'){
-            this.checkDelegationOffice();
+            this.beforeSubmit(task_status);        
         } else{
             ret = true;
             $('#task_detail [required]').each(function(index) {
@@ -379,53 +312,6 @@ class TaskDetail {
         showToast('error', 'Atenção', msg, 0, false);
     }    
 
-    onClickRowServicePriceTable() {
-        $('.office_correspondent').click(function (e) {
-            e.stopPropagation();
-        });
-        let self = this;
-        $("#correspondents-table tbody tr").on('click', function(){
-            $("#servicepricetable-alert").addClass("hidden");
-            let rowId = $(this).data('id');
-            let amount = $(this).data('value').toString();
-            let priceCategory = $(this).data('price-category');
-            let elAmount =$('input[name=amount]');
-            $('input[name=servicepricetable_id]').val(rowId);
-            elAmount.val(amount.replace(".", ","));
-            $(this).addClass("ezl-bg-open");
-            $(this).siblings().removeClass("ezl-bg-open");
-            if (priceCategory === 'NETWORK'){
-                elAmount.attr("disabled", "disabled");
-            } else {
-                elAmount.removeAttr("disabled");
-                elAmount.focus();
-            }
-            self.setBillingItem();
-        });
-    };
-
-    setWindowTable() {
-        let columnDefs = [{ 'targets': [ 1 ], 'defaultContent': 'TESTE'  }];
-        let typeTask = this.typeTask;
-        window.table = $('#correspondents-table').DataTable({
-            paging: false,
-            order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
-            dom: 'frti',
-            buttons: [],
-            destroy: true,
-            columnDefs: columnDefs,
-            language: {
-                "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
-            },
-            "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
-                if(aData[1] === '-' || aData[1] === '—'){
-                    $("td:eq(1)", nRow).text(typeTask);
-                }
-                return nRow;
-            },
-        });
-    }
-
     onKeypressAmountField() {
         $('input[id=id_amount]').keypress(function(e) {
             if(e.which == 13) {
@@ -440,7 +326,7 @@ class TaskDetail {
                 let url_string = window.location.href;
                 let url = new URL(url_string);
                 let action = url.searchParams.get("action");
-                if (action === 'delegate') {
+                if (action === 'delegate') {                    
                     $('#OPEN').click();
                 }
                 if (action === 'assign') {
@@ -451,7 +337,8 @@ class TaskDetail {
 	        this.setExecutionDateRequire(this.taskStatus);
         });
     }
-
+    
+    // Todo: Analisar e Levar para service-price-table.js
     delegateTaskPaid(gnData, intervalCheck) {
         if (gnData.status === 'paid' &&
             (this.taskStatus === 'ACCEPTED_SERVICE' || this.taskStatus === 'REQUESTED')) {
