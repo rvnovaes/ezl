@@ -31,17 +31,16 @@ from allauth.account.views import LoginView, PasswordResetView
 from django.contrib.auth import authenticate, login as auth_login
 from dal import autocomplete
 from django_tables2 import SingleTableView, RequestConfig
-from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, RegisterNewUserForm, \
-    ResetPasswordFormMixin, OfficeForm, InviteForm, InviteOfficeForm, ContactMechanismForm, TeamForm, \
-    CustomSettingsForm, ImportCityListForm, OfficeProfileForm
+from core.forms import PersonForm, AddressForm, UserUpdateForm, UserCreateForm, ResetPasswordFormMixin, OfficeForm, \
+    InviteForm, InviteOfficeForm, ContactMechanismForm, TeamForm, ImportCityListForm, OfficeProfileForm
 from core.generic_search import GenericSearchForeignKey, GenericSearchFormat, \
     set_search_model_attrs
 from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete_error_protected, \
     DELETE_SUCCESS_MESSAGE, ADDRESS_UPDATE_ERROR_MESSAGE, ADDRESS_UPDATE_SUCCESS_MESSAGE, \
     USER_CREATE_SUCCESS_MESSAGE, person_cpf_cnpj_already_exists
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
-    OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser, CustomSettings, \
-    OfficeOffices, AreaOfExpertise
+    OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser, OfficeOffices, \
+    AreaOfExpertise
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
@@ -66,7 +65,7 @@ from allauth.socialaccount.providers.oauth2.views import *
 from allauth.socialaccount.providers.google.views import *
 from billing.tables import BillingDetailsTable
 from billing.forms import BillingDetailsForm, BillingAddressCombinedForm
-from core.utils import cpf_is_valid, cnpj_is_valid
+from core.utils import cpf_is_valid, cnpj_is_valid, post_create_new_user
 
 
 class AutoCompleteView(autocomplete.Select2QuerySetView):
@@ -1184,172 +1183,6 @@ class OfficeDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
     object_list_url = 'office_list'
 
 
-class RegisterNewUser(CreateView):
-    model = User
-    fields = ('username', 'password')
-    success_message = USER_CREATE_SUCCESS_MESSAGE
-
-    def post(self, request, *args, **kwargs):
-        invite_code = request.POST.get('invite_code')
-        first_name = request.POST.get('name')
-        last_name = request.POST.get('last_name')
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        confirm_password = request.POST.get('confirmpassword')
-        email = request.POST.get('email')
-        errors = []
-        if first_name == '' or last_name == '':
-            errors.append({
-                'title':
-                'Identificação do Usuário',
-                'error':
-                'Os campos Nome e Sobrenome são obrigatórios'
-            })
-        if not password == confirm_password:
-            errors.append({
-                'title': 'Senha',
-                'error': 'As senhas digitadas não conferem'
-            })
-        else:
-            try:
-                password_validation.validate_password(password)
-            except ValidationError as error:
-                errors.append({'title': 'Senha', 'error': error})
-
-        select_office_register = request.POST.get('select_office_register')
-        selected_plan = request.POST.get('plan')
-        office_pks = request.POST.getlist('office_checkbox')
-        if select_office_register == "":
-            errors.append({
-                'title': 'Forma de Trabalho',
-                'error': 'Nenhuma Forma de trabalho selecionada'
-            })
-        if select_office_register == '1':
-            if not office_pks:
-                errors.append({
-                    'title':
-                    'Escritório',
-                    'error':
-                    'Nenhum escritório selecionado, para vincular com o usuário criado'
-                })
-        elif select_office_register == '2' or select_office_register == '3':
-            if selected_plan == "":
-                errors.append({
-                    'title': 'Plano de acesso',
-                    'error': 'Nenhum plano selecionado'
-                })
-
-        if select_office_register == '2' and request.POST.get(
-                'legal_name') == '':
-            errors.append({
-                'title':
-                'Cadastro de escritório',
-                'error':
-                'É obrigatório que o escrtório cadastrado possua um nome'
-            })
-
-        if errors:
-            return render(request, 'account/register.html', {'errors': errors})
-
-        form = RegisterNewUserForm({
-            'username': username,
-            'first_name': first_name,
-            'last_name': last_name,
-            'email': email,
-            'password1': password,
-            'password2': password
-        })
-        if form.is_valid():
-            instance = form.save()
-            if invite_code or Invite.objects.filter(email=instance.email):
-                for invite in Invite.objects.filter(
-                        Q(Q(status='N') | Q(status='E')),
-                        Q(email=instance.email) | Q(invite_code=invite_code)):
-                    invite.person = Person.objects.filter(
-                        auth_user=instance).first()
-                    invite.status = 'N'
-                    invite.save()
-        else:
-            for title, error in form.errors.items():
-                errors.append({'title': title, 'message': error})
-            return render(request, 'account/register.html', {'errors': errors})
-
-        office_instance = None
-        if select_office_register == '1':
-            for office in Office.objects.filter(id__in=office_pks):
-                Invite.objects.create(
-                    office=office,
-                    person=instance.person,
-                    status='N',
-                    create_user=instance,
-                    invite_from='P',
-                    is_active=True)
-        elif select_office_register == '2':
-            legal_name = request.POST.get(
-                'legal_name') if request.POST.get('legal_name') != '' else None
-            office_name = request.POST.get('office_name') if request.POST.get(
-                'office_name') != '' else None
-            legal_type = request.POST.get(
-                'legal_type') if request.POST.get('legal_type') != '' else None
-            cpf_cnpj = request.POST.get(
-                'cpf_cnpj') if request.POST.get('cpf_cnpj') != '' else None
-            office_instance = Office.objects.create(
-                legal_name=legal_name,
-                name=office_name,
-                legal_type=legal_type,
-                cpf_cnpj=cpf_cnpj,
-                is_active=True,
-                create_user=instance)
-            DefaultOffice.objects.create(
-                auth_user=instance,
-                office=office_instance,
-                create_user=instance)
-        elif select_office_register == '3':
-            legal_name = '{} {}'.format(first_name, last_name)
-            office_name = legal_name
-            legal_type = 'F'
-            office_instance = Office()
-            office_instance.legal_name = legal_name
-            office_instance.use_service = False
-            office_instance.use_etl = False
-            office_instance.name = office_name
-            office_instance.legal_type = legal_type
-            office_instance.is_active = True
-            office_instance.create_user = instance
-            # Isto cria as configuracoes basicas de um Office que trabalha sozinho
-            office_instance.save(**{'i_work_alone': True})
-
-            DefaultOffice.objects.create(
-                auth_user=instance,
-                office=office_instance,
-                create_user=instance)
-        if office_instance:
-            plan = Plan.objects.get(pk=selected_plan)
-            PlanOffice.objects.create(
-                office=office_instance,
-                plan=plan,
-                month_value=plan.month_value,
-                task_limit=plan.task_limit,
-                create_user=instance)
-
-        messages.add_message(request, messages.SUCCESS,
-                             "Registro concluído com sucesso!", 'add_new_user')
-        return HttpResponseRedirect(reverse_lazy('account_login'))
-
-    def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return HttpResponseRedirect(reverse_lazy('dashboard'))
-        context = {}
-        if request.GET.get('invite_code'):
-            invite = Invite.objects.filter(
-                invite_code=request.GET['invite_code']).first()
-            context['email'] = invite.email
-            context['invite_code'] = request.GET['invite_code']
-        context['offices'] = Office.objects.all().order_by('legal_name')
-        context['plans'] = Plan.objects.filter(is_active=True)
-        return render(request, 'account/register.html', context)
-
-
 class CustomSession(View):
     def post(self, request, *args, **kwargs):
         """
@@ -2231,44 +2064,6 @@ class TeamDeleteView(CustomLoginRequiredView, MultiDeleteViewMixin):
         model._meta.verbose_name_plural)
 
 
-class CustomSettingsCreateView(AuditFormMixin, CreateView):
-    model = CustomSettings
-    form_class = CustomSettingsForm
-    success_message = CREATE_SUCCESS_MESSAGE
-
-    def get_form_kwargs(self):
-        kw = super().get_form_kwargs()
-        kw['request'] = self.request
-        return kw
-
-    def get_success_url(self):
-        if self.object and self.object.pk:
-            return reverse('custom_settings_update', args=(self.object.pk, ))
-        return reverse('custom_settings_create')
-
-    def get(self, request, *args, **kwargs):
-        office_session = get_office_session(request)
-        if CustomSettings.objects.filter(office=office_session).exists():
-            self.object = CustomSettings.objects.filter(
-                office=office_session).first()
-            return HttpResponseRedirect(self.get_success_url())
-        return super().get(self, request)
-
-
-class CustomSettingsUpdateView(AuditFormMixin, UpdateView):
-    model = CustomSettings
-    form_class = CustomSettingsForm
-    success_message = UPDATE_SUCCESS_MESSAGE
-
-    def get_from_kwargs(self):
-        kw = super().get_form_kwargs()
-        kw['request'] = self.request
-        return kw
-
-    def get_success_url(self):
-        return reverse('custom_settings_update', args=(self.object.pk, ))
-
-
 class MediaFileView(LoginRequiredMixin, View):
     def get(self, request, path):
         if os.path.exists(os.path.join(settings.MEDIA_ROOT, path)):
@@ -2383,26 +2178,12 @@ class NewRegister(TemplateView):
             user.save()
             authenticate(username=username, password=password)
             auth_login(request, user, backend='allauth.account.auth_backends.AuthenticationBackend')
-            send_mail_sign_up(first_name, email)            
-            if not request.POST.get('request_invite'):
-                office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user, cpf_cnpj=office_cpf_cnpj)            
-                office.customsettings.email_to_notification = email
-                office.customsettings.save()
-                DefaultOffice.objects.create(
-                    auth_user=user,
-                    office=office,
-                    create_user=user)
-                return JsonResponse({'redirect': reverse_lazy('dashboard')})
-            else:
-                office = Office.objects.get(pk=request.POST.get('office_pk'))
-                Invite.objects.create(
-                    office=office,
-                    person=user.person,
-                    status='N',
-                    create_user=user,
-                    invite_from='P',
-                    is_active=True)                
-                return JsonResponse({'redirect': reverse_lazy('office_instance')})
+            request_invite = request.POST.get('request_invite')
+            office_pk = request.POST.get('office_pk')
+
+            send_mail_sign_up(first_name, email)
+            url_return = post_create_new_user(request_invite, office_name, user, office_cpf_cnpj, office_pk)
+            return JsonResponse({'redirect': reverse_lazy(url_return)})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
@@ -2414,27 +2195,14 @@ class SocialRegister(TemplateView):
         try:
             office_name = request.POST.get('office')
             office_cpf_cnpj = request.POST.get('cpf_cnpj')
-            user = request.user    
-            if not request.POST.get('request_invite'):
-                office = Office.objects.create(name=office_name, legal_name=office_name, create_user=user)            
-                office.customsettings.email_to_notification = user.email
-                office.customsettings.save()
-                DefaultOffice.objects.create(
-                    auth_user=user,
-                    office=office,
-                    create_user=user)
+            user = request.user
+            office_pk = request.POST.get('office_pk')
+            request_invite = request.POST.get('request_invite')
+            url_return = post_create_new_user(request_invite, office_name, user, office_cpf_cnpj, office_pk)
+            if not request_invite:
                 send_mail_sign_up(user.first_name, user.email)
-                return JsonResponse({'redirect': reverse_lazy('dashboard')})
-            else:
-                office = Office.objects.get(pk=request.POST.get('office_pk'))
-                Invite.objects.create(
-                    office=office,
-                    person=user.person,
-                    status='N',
-                    create_user=user,
-                    invite_from='P',
-                    is_active=True)                
-                return JsonResponse({'redirect': reverse_lazy('office_instance')})                    
+
+            return JsonResponse({'redirect': reverse_lazy(url_return)})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 

@@ -18,7 +18,8 @@ class TaskBulkCreate {
         this.elPerformancePlace = $('#id_performance_place');
         this.elPersonAskedBy = $('#id_person_asked_by');
         this.labelLawSuitNumber = $('label[for=id_task_law_suit_number]');
-        this.elBtnAddFolder = $("#btn_add_folder");
+        this.elBtnAddFolder = $('#btn_add_folder');
+        this.minHourOS = parseFloat('0.0');
 		this.onChangeCity();
 		this.onChangeCourtDistrict();
 		this.onChangeLawSuitNumber();
@@ -543,8 +544,9 @@ class TaskBulkCreate {
             this.insertFormErrors('Deve ser informado o prazo de cumprimento da OS.',
                 [this.elFinalDeadlineDate]);
         }
-        if (moment().add(2, 'hour') > moment(this.finalDeadlineDate, "DD/MM/YYYY HH:mm")){
-            this.insertFormErrors('O prazo de cumprimento da OS é inferior a duas horas.',
+        if (this.minHourOS > 0 &&
+            moment().add(this.minHourOS, 'hour') > moment(this.finalDeadlineDate, 'DD/MM/YYYY HH:mm')){
+            this.insertFormErrors(`O prazo de cumprimento da OS foi configurado para não poder ser inferior à ${this.minHourOS} hora(s).`,
                 [this.elFinalDeadlineDate]);
         }
 

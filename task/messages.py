@@ -19,6 +19,8 @@ DEFAULT_CUSTOMER_MISSING = "O escritório {} não possui cliente padrão configu
 MISSING_ACCEPTANCE_SERVICE_DATE = "A data de aceite pelo service é obrigatória caso o status da OS seja " \
                                   "Aceita pelo Service"
 
+MIN_HOUR_ERROR = 'O prazo de cumprimento da OS foi configurado para não poder ser inferior à {} hora(s).'
+
 
 def columns_not_available(column, columns_list):
     return COLUMNS_NOT_AVAILABLE.format(column, columns_list)
@@ -56,3 +58,7 @@ def wrong_task_status(status, valid_status):
 
 def default_customer_missing(office):
     return DEFAULT_CUSTOMER_MISSING.format(office)
+
+
+def min_hour_error(min_hour):
+    return MIN_HOUR_ERROR.format(min_hour)

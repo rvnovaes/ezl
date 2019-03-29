@@ -212,6 +212,7 @@
         var defaultCustomer = {};
         $(document).ready(function(){
             task = new TaskBulkCreate();
+            task.minHourOS = parseFloat('{{ min_hour_os }}'.replace(',', '.'));
             defaultCustomer = {};
             {% if default_customer %} defaultCustomer = {id: {{ default_customer.id }}, text: "{{ default_customer.text }}" }; {% endif %}
             task.personCustomer = defaultCustomer;

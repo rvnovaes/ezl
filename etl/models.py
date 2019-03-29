@@ -9,7 +9,9 @@ solution_dict = dict(
     MOVEMENTLESSPROCESS='Preencher o processo na movimentação',
     TASKINATIVEFOLDER='Alterar o status da pasta para "Especial"',
     INVALIDCOURTDISTRICT='Preencher o campo comarca com um valor válido para Comarca, Cidade ou Complemento de comarca',
-    BLANKCOURTDISTRICT='Preencher o campo comarca com um valor válido para Comarca, Cidade ou Complemento de comarca',)
+    BLANKCOURTDISTRICT='Preencher o campo comarca com um valor válido para Comarca, Cidade ou Complemento de comarca',
+    BLANKFINALDEADLINEDATE='Preencher o campo prazo fatal com um valor válido.',
+    MINHOUROSERROR='Alterar o prazo fatal da OS.',)
 
 
 class Inconsistencies(Enum):
@@ -19,6 +21,8 @@ class Inconsistencies(Enum):
     INVALIDCOURTDISTRICT = 'O valor preenchido no campo comarca não foi encontrado como Comarca, Cidade ou ' \
                            'Complemento de comarca'
     BLANKCOURTDISTRICT = 'O campo comarca não foi preenchido'
+    BLANKFINALDEADLINEDATE = 'O campo prazo fatal não foi preenchido'
+    MINHOUROSERROR = 'O prazo fatal da OS é menor que o mínimo configurado'
 
     def get_solution(self):
         return solution_dict[self.name]

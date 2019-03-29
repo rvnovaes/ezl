@@ -88,8 +88,8 @@ class CompanySerializer(serializers.ModelSerializer):
 
 class OfficeSerializer(serializers.ModelSerializer):
     class Meta: 
-        model  = Office
-        fields = ('id', 'legal_name', 'name', 'is_active', 'logo', 'use_service', 'use_etl', 'cpf_cnpj')
+        model = Office
+        fields = ('id', 'legal_name', 'name', 'is_active', 'logo', 'cpf_cnpj')
 
 
 class AddressSerializer(serializers.ModelSerializer):

@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'^v1/lawsuit/', include('lawsuit.urls_api'), name='lawsuit_api'),
     url(r'^providencias/', include('task.urls'), name='task'),
     url(r'^billing/', include('billing.urls')),
+    url(r'^configuracoes/', include('manager.urls'), name='manager'),
     url(r'^dashboard/$',
         login_required(DashboardView.as_view()),
         name='dashboard'),

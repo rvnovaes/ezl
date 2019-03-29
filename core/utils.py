@@ -336,3 +336,47 @@ def set_user_default_office(default_office, user, alter_user=None):
             create_user=alter_user
         )
     return obj
+
+
+def create_office_template_value(office):
+    from manager.models import Template
+    from manager.utils import create_template_value
+    for template in Template.objects.filter(is_active=True):
+        create_template_value(template, office, template.default_value)
+
+
+def add_create_user_to_admin_group(office):
+    from guardian.shortcuts import get_groups_with_perms
+
+    if not office.create_user.is_superuser:
+        for group in {
+            group
+            for group, perms in get_groups_with_perms(
+            office, attach_perms=True).items()
+            if 'group_admin' in perms
+        }:
+            office.create_user.groups.add(group)
+
+
+def post_create_new_user(request_invite, office_name, user, office_cpf_cnpj=None, office_pk=None):
+    from core.models import Office, DefaultOffice, Invite
+    if not request_invite:
+        office = Office.objects.create(name=office_name,
+                                       legal_name=office_name,
+                                       create_user=user,
+                                       cpf_cnpj=office_cpf_cnpj)
+        DefaultOffice.objects.create(
+            auth_user=user,
+            office=office,
+            create_user=user)
+        return 'dashboard'
+    else:
+        office = Office.objects.get(pk=office_pk)
+        Invite.objects.create(
+            office=office,
+            person=user.person,
+            status='N',
+            create_user=user,
+            invite_from='P',
+            is_active=True)
+        return 'office_instance'

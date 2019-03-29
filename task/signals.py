@@ -24,6 +24,8 @@ from simple_history.signals import (
 import sys
 import traceback
 from babel.numbers import format_currency
+from manager.template_values import ListTemplateValues
+from manager.enums import TemplateKeys
 
 
 logger = logging.getLogger(__name__)
@@ -164,6 +166,7 @@ def workflow_task(sender, instance, created, **kwargs):
 
 def workflow_send_mail(sender, instance, created, **kwargs):
     try:
+        manager = ListTemplateValues(instance.office)
         custom_settings = CustomSettings.objects.filter(
             office=instance.office).first()
         if custom_settings:
@@ -171,8 +174,8 @@ def workflow_send_mail(sender, instance, created, **kwargs):
                 status_to_show=instance.task_status).first()
             if status_to_show and status_to_show.send_mail_template:
                 email = None
-                if custom_settings.i_work_alone:
-                    email = TaskMail([custom_settings.email_to_notification],
+                if instance.office.i_work_alone:
+                    email = TaskMail([manager.get_value_by_key(TemplateKeys.EMAIL_NOTIFICATION.name)],
                                      instance,
                                      status_to_show.send_mail_template.template_id)
                 else:
@@ -425,7 +428,10 @@ def post_save_geolocation(sender, instance, **kwargs):
 @receiver(pre_create_historical_record)
 def pre_create_historical_record_callback(sender, **kwargs):
     history_instance = kwargs.get('history_instance')
-    history_instance.history_office = get_office_session(HistoricalRecords.thread.request)
+    try:
+        history_instance.history_office = get_office_session(HistoricalRecords.thread.request)
+    except:
+        history_instance.history_office = getattr(kwargs.get('instance'), 'office', None)
     instance = kwargs.get('instance')
     if instance.history.exists():
         if not get_history_changes(history_instance):
@@ -437,8 +443,11 @@ def post_create_historical_record_callback(sender, **kwargs):
     history_instance = kwargs.get('history_instance')
     instance = kwargs.get('instance')
     status = get_child_status(instance.status) if instance.get_child else None
-    request = HistoricalRecords.thread.request
-    msg = request.POST.get('notes', '')
+    try:
+        request = HistoricalRecords.thread.request
+        msg = request.POST.get('notes', '')
+    except:
+        msg = ''
     task_number = None
     if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
         task_number = instance.get_child.task_number

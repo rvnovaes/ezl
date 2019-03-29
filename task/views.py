@@ -51,7 +51,7 @@ from financial.models import ServicePriceTable
 from financial.utils import recalculate_values
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
-    has_task_parent, set_instance_values, get_status_to_filter
+    has_task_parent, set_instance_values, get_status_to_filter, get_default_customer
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -66,6 +66,9 @@ from dal import autocomplete
 from billing.gerencianet_api import api as gn_api
 import logging
 import operator
+from manager.template_values import ListTemplateValues
+from manager.enums import TemplateKeys
+from manager.utils import get_template_value_value
 
 logger = logging.getLogger(__name__)
 
@@ -151,11 +154,14 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         office = get_office_session(self.request)
+        context['min_hour_os'] = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
         context['default_customer'] = None
         context['lawsuit_form'] = LawSuitForm()
-        if hasattr(office, 'customsettings') and office.customsettings.default_customer:
-            context['default_customer'] = {'id': office.customsettings.default_customer.id,
-                                           'text': office.customsettings.default_customer.legal_name}
+
+        default_customer = get_default_customer(office)
+        if default_customer:
+            context['default_customer'] = {'id': default_customer.id,
+                                           'text': default_customer.legal_name}
         return context
 
     def post(self, request, *args, **kwargs):
@@ -251,7 +257,7 @@ class TaskCreateView(AuditFormMixin, CreateView):
         form.instance.movement_id = self.kwargs.get('movement')
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
         form.instance.__server = get_domain(self.request)
-        response = super(TaskCreateView, self).form_valid(form)
+        response = super().form_valid(form)
 
         documents = self.request.FILES.getlist('file')
         if documents:
@@ -1005,6 +1011,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
         # pega as configuracoes personalizadas do escritorio
         context['custom_settings'] = office_session.customsettings
+        manager = ListTemplateValues(self.object.office)
+        context['i_work_alone']: office_session.i_work_alone
 
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
@@ -1932,7 +1940,8 @@ class ExternalTaskView(UpdateView):
         self.object = Task.objects.filter(task_hash=task_hash).first()
         custom_settings = CustomSettings.objects.filter(
             office=self.object.office).first()
-        request.user = custom_settings.default_user
+        manager = ListTemplateValues(self.object.office)
+        request.user = manager.get_value_by_key(TemplateKeys.DEFAULT_USER.name)
         set_office_session(request)
         ecms = Ecm.objects.filter(task_id=self.object.id)
         task_history = TaskHistory.objects.filter(
@@ -1946,19 +1955,21 @@ class ExternalTaskView(UpdateView):
                 'show_person_executed_by_in_tab': True,
                 'task': self.object,
                 'form': TaskDetailForm(instance=self.object),
-                'user': custom_settings.default_user,
+                'user': request.user,
                 'ecms': ecms,
                 'task_history': task_history,
                 'survey_data': survey_data,
-                'custom_settings': custom_settings
+                'custom_settings': custom_settings,
+                'i_work_alone': self.object.office.i_work_alone
             })
 
     def post(self, request, task_hash, *args, **kwargs):
         task = Task.objects.filter(task_hash=task_hash).first()
-        custom_settings = CustomSettings.objects.filter(office=task.office)
+        default_user = get_template_value_value(office=task.office,
+                                                template_key=TemplateKeys.DEFAULT_USER.name)
         form = self.form_class(request.POST, instance=task)
-        if custom_settings.exists():
-            form.instance.alter_user = custom_settings.first().default_user
+        if default_user:
+            form.instance.alter_user = default_user
         form.instance.task_status = TaskStatus[
                                         self.request.POST['action']] or TaskStatus.INVALID
         if form.is_valid():
@@ -1989,9 +2000,9 @@ class EcmExternalCreateView(CreateView):
     def post(self, request, task_hash, *args, **kwargs):
         files = request.FILES.getlist('path')
         task = Task.objects.filter(task_hash=task_hash).first()
-        custom_settings = CustomSettings.objects.filter(
-            office=task.office).first()
-        request.user = custom_settings.default_user
+        default_user = get_template_value_value(office=task.office,
+                                                template_key=TemplateKeys.DEFAULT_USER.name)
+        request.user = default_user
         data = {'success': False, 'message': exception_create()}
 
         for file in files:

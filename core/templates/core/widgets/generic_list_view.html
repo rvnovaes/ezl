@@ -24,7 +24,11 @@
 {% block search %} 
     {% include 'core/widgets/generic_search_view.html' %}
 {% endblock%}
-<form action="{% url link_ex %}" method="post" id="formTable">
+    {% if link_ex %}
+    <form action="{% url link_ex %}" method="post" id="formTable">
+    {% else %}
+    <form action="#" method="post" id="formTable">
+    {% endif %}
     {% csrf_token %}
     {% block table %}
         <div class="panel panel-default">

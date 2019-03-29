@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-from core.signals import create_office_custom_settings
+from core.signals import create_office_setting_default_customer
 from django.apps import apps
 import re
 import logging
