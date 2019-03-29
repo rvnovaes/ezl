@@ -208,7 +208,7 @@ class TaskDetailForm(ModelForm):
         required=False,
         widget=forms.Textarea(attrs={"rows": 2}))
 
-    def clean_amount(self):
+    def clean_amount(self):        
         amount = (self.cleaned_data['amount']
                   if self.cleaned_data['amount'] else str(0))
         amount = amount.replace('.', '')

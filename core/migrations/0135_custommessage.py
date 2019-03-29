@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0132_companyuser_show_administrative_menus'),
+        ('core', '0134_auto_20190326_1333'),
     ]
 
     operations = [

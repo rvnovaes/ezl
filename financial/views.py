@@ -16,6 +16,8 @@ from core.messages import (CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE,
 from core.models import Office, ContactMechanismType, EMAIL
 from core.views import (AuditFormMixin, MultiDeleteViewMixin,
                         SingleTableViewMixin)
+from task.models import Task
+from task.workflow import CorrespondentsTable
 from .forms import CostCenterForm, ServicePriceTableForm, ImportServicePriceTableForm, PolicyPriceForm
 from .serializers import ServicePriceTableSerializer
 from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, PolicyPrice

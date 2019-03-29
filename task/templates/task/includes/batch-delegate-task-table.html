@@ -2,7 +2,6 @@
 {% load static %}
 {% load querystring from django_tables2 %}
 {% load bootstrap3 %}
-{% include 'task/includes/batch-service-price-table.html'%}
 <div class="panel panel-default">
     <div class="panel-heading">
         <div class="panel-title form-row">
@@ -16,7 +15,7 @@
                 {% block table.thead %}
                     <thead>
                     <tr>
-                    	<th><input type="checkbox" name="checkbox-delegate" id="check-all-tasks" disabled/></th>
+                    	<th><input type="checkbox" name="checkbox-delegate" id="check-all-tasks"/></th>
                         {% for column in table.columns %}
 
                             {% if column.orderable %}
@@ -50,7 +49,7 @@
                                 </td>
                                 <td>
                                     <button class="btn btn-xs btn-info btn-outline btn-change-office-correspondent"
-                                            btn-data-id="{{row.attrs.pk}}" btn-data-type-task="{{row.record.type_task}}" disabled>
+                                            btn-data-id="{{row.attrs.pk}}" btn-data-type-task="{{row.record.type_task}}">
                                         <i class="fa fa-edit"> Trocar</i>
                                     </button>
                                 </td>
@@ -80,183 +79,18 @@
             {% endif %}
         </div>
     </div>
+    {% include 'task/includes/task-service-price-table/task-service-price-table-batch.html' %}   
+    {% include 'task/modal/processing.html' %}
 </div>
 
 {% block extra_scripts %} 
+<script src='{% static "task/js/task-delegate-batch.js" %}?rev={{request.REVIEW}}'></script>
+<script src='{% static "task/js/task-service-price-table.js" %}?rev={{request.REVIEW}}'></script>
 <script type="text/javascript">    
-
-    var servicePrices = {};
-    var tasksToDelegate = [];
-    $(document).ready(function() {
-        $('#check-all-tasks').on('change', function() {
-            if ($(this).is(':checked')){
-                $('.checkbox-delegate').prop('checked', true);
-                $('.checkbox-delegate').each(function(){
-                    tasksToDelegate.push($(this).attr('id'))
-                })
-            } else {
-                $('.checkbox-delegate').prop('checked', false); 
-                tasksToDelegate = [];
-            }
-        });
-        $('.checkbox-delegate').on('change', function() {            
-            if ($(this).is(':checked')){
-                tasksToDelegate.push($(this).attr('id'))
-            } else {
-                tasksToDelegate.splice(tasksToDelegate.indexOf($(this).attr('id')), 1)
-            }             
-        });
-    });
-
-    $(window).load(function() {
-        var taskIds = [];
-        $(`#table-batch-change-tasks tbody tr`).each(function() {
-            $('#check-all-tasks').attr('disabled', false);
-            taskIds.push($(this).attr('data-id'))            
-        }).promise().done(function() { 
-            var tasksToGetPrice = true;
-            while(tasksToGetPrice) {                
-                setCorrespondents(taskIds.splice(0, 2));
-                // tasksToGetPrice = false;
-                if (taskIds.length === 0) {
-                    tasksToGetPrice = false;
-                }
-            }            
-        })
-    });
-
-    var formatPrice = function(price) {        
-        return `R$${price.replace(".", ",")}`
-    };
-
-    var setChosenPrice = function(chosenPrice) {
-        let elTable = $(`#table-batch-change-tasks [data-id=${chosenPrice.taskId}]`);
-        $(elTable).find('tr').attr('service-price-id', chosenPrice.servicePriceTableId );
-        $(elTable).find('td [td-correspondent]').text(chosenPrice.correspondenteName);
-        $(elTable).find('td [td-correspondent-value]').text(formatPrice(chosenPrice.correspondenteValue))
-        return elTable
-    };
-
-    var setCorrespondents = function(taskIds) {         
-        $.ajax({
-            method: 'GET', 
-            url: `/providencias/batch/service_price_table`, 
-            data: {
-                task_ids: taskIds
-            }, 
-            success: function(response){
-                response.forEach(function(data){
-                    data.chosenPrice = {
-                      taskId: data.task.id, 
-                      servicePriceTableId: data.cheapest_correspondent.id, 
-                      correspondenteName: data.cheapest_correspondent.office_correspondent, // Nome
-                      correspondenteValue: data.cheapest_correspondent.value, 
-                      note: ''                    
-                    };
-                    servicePrices[data.task.id]=data;
-                    setChosenPrice(data.chosenPrice);
-                    $(`td [btn-data-id=${data.task.id}]`).attr('disabled', false);
-                })                                             
-            },
-            error: function(error) {
-              console.log(error)
-            }, 
-            beforeSend: function (xhr, settings) {
-              xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-            },
-            dataType: 'json'                 
-        })
-    };
-    $('.btn-change-office-correspondent').on('click', function() {
-        $('#modal-service-price-table').attr('task-id', $(this).attr('btn-data-id'));
-        $('#modal-service-price-table').attr('type-task', $(this).attr('btn-data-type-task'));
-        $('#modal-service-price-table').modal('show');
-    });
-
-
-    async function sendTasksToDelegate (){
-        var current = 0;
-        var total = tasksToDelegate.length;
-        var delegateTasks = function() {
-            tasksToDelegate.forEach(function(taskId){
-                var chosenPrice = servicePrices[taskId].chosenPrice;
-                $.ajax({
-                    method: 'post', 
-                    url: `/providencias/${taskId}/batch/delegar`, 
-                    data: {
-                        task_id: taskId,
-                        servicepricetable_id: chosenPrice.servicePriceTableId,   
-                        amount: chosenPrice.correspondenteValue, 
-                        note: chosenPrice.note,                               
-                    },
-                    success: function(response) {
-                        current += 1
-                        console.log(response)
-                    },
-                    error: function (request, status, error) {
-                    },
-                    beforeSend: function (xhr, settings) {
-                        xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
-                    },
-                    dataType: 'json'                        
-                })
-            });                    
-            return;
-        };
-        swal({
-            title: 'Delegando ordens de serviço', 
-            html: '<h3>Delegando <strong></strong></h3>',
-            onOpen: () => {
-                swal.showLoading(), 
-                delegateInterval = setInterval(()=>{
-                    swal.getContent().querySelector('strong')
-                    .textContent = `${current} de ${total}`
-                    if (current == total) {
-                        swal({
-                            type: 'success',
-                            title: `${total} ordens de serviço foram delegadas!`, 
-                            onClose: () => {
-                                tasksToDelegate = [];
-                                location.reload();
-                            }
-                        })
-                    }
-                }, 0), 
-                delegateTasks();
-            }, 
-            onClose: () => {
-                clearInterval(delegateInterval);
-            }
-
-        }).then((result)=>{
-            if (result.dismiss === swal.DismissReason.timer) {
-                console.log('I was closed by the timer')
-            }                    
-        });
-    }
-    $('#btn-delegate').on('click', function(){
-        if (tasksToDelegate.length === 0) {
-            swal({
-                type: 'error', 
-                title: 'Você precisa selecionar no mínimo uma Ordem de serviço!'
-            })
-        } else {
-            swal({
-              title: 'Tem certeza que deseja delegar?',
-              html: "Se você já fez todos os ajustes necessários clique em <br/><strong>Sim, quero delegar!</strong>",
-              type: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: '#3085d6',
-              cancelButtonColor: '#d33',
-              cancelButtonText: 'Cancelar',
-              confirmButtonText: 'Sim, quero delegar'
-            }).then((result) => {
-              if (result.value) {
-                sendTasksToDelegate();
-              }
-            })                        
-        }        
-    })  
-
+    var taskDelegateBatch // trocar para let
+    $(document).ready(()=>{
+        taskDelegateBatch = new TaskDelegateBatch(TaskServicePriceTableBatch, '{{csrf_token}}')
+        taskDelegateBatch.bootstrap()
+    })     
 </script>
 {% endblock %}

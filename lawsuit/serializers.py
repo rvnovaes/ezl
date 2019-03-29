@@ -1,5 +1,5 @@
 from .models import CourtDistrict, Folder, Instance, LawSuit, CourtDivision, \
-    TypeMovement, Movement, Organ
+    TypeMovement, Movement, Organ, CourtDistrictComplement
 from rest_framework import serializers
 from core.serializers import OfficeDefault, CreateUserDefault, CreateUserSerializerMixin, OfficeSerializerMixin
 
@@ -8,6 +8,12 @@ class CourtDistrictSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourtDistrict
         fields = ('id', 'name', 'state')
+
+
+class CourtDistrictComplementSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = CourtDistrictComplement 
+        fields = '__all__'
 
 
 class FolderSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,

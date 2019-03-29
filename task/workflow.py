@@ -105,6 +105,8 @@ def get_child_recipients(parent_status):
     return CHILD_RECIPIENTS.get(parent_status, {})
 
 
+
+# Todo: Verificar se esta classe realmente deve estar neste arquivo
 class CorrespondentsTable(object):
     def __init__(self, task, office_session, type_task_qs=None,
                  type_task=None):
@@ -206,3 +208,11 @@ class CorrespondentsTable(object):
             )
 
         return type_task_field
+
+
+class CorrespondentsTablePostPaid(CorrespondentsTable):
+    def get_correspondents_qs(self):
+        qs = super().get_correspondents_qs()                
+        qs = set(filter(lambda i: i.policy_price.billing_moment == 'POST_PAID', qs))
+        return qs
+        
