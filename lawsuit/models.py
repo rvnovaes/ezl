@@ -310,38 +310,60 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
         verbose_name = "Processo"
         verbose_name_plural = "Processos"
 
+    def validate_law_suit_number(self):
+        filter_dict = {}
+        validation_error = {}
+        if self.office.duplicate_process == '1':
+            filter_dict = {
+                'instance': self.instance,
+                'law_suit_number': self.law_suit_number,
+                'type_lawsuit': self.type_lawsuit,
+                'office': self.office,
+                'is_active': True
+            }
+            validation_error = {
+                NON_FIELD_ERRORS: [
+                    'Já existe outro processo com o mesmo número, para a mesma instância cadastrado'
+                ],
+                'law_suit_number': ['Favor verificar o número do processo'],
+                'instance': ['Favor verificar a instância do processo']
+            }
+        elif self.office.duplicate_process == '2':
+            filter_dict = {
+                'instance': self.instance,
+                'law_suit_number': self.law_suit_number,
+                'type_lawsuit': self.type_lawsuit,
+                'office': self.office,
+                'folder__folder_number': self.folder.folder_number,
+                'folder__person_customer': self.folder.person_customer,
+                'is_active': True
+            }
+            validation_error = {
+                NON_FIELD_ERRORS: [
+                    'Já existe outro processo com o mesmo número, do mesmo tipo para a mesma instância cadastrado '
+                    'nessa pasta. '
+                ],
+                'law_suit_number': ['Favor verificar o número do processo'],
+                'instance': ['Favor verificar a instância do processo']
+            }
+        if filter_dict:
+            if LawSuit.objects.exclude(
+                    pk=self.pk
+            ).filter(**filter_dict):
+                raise ValidationError(validation_error)
+        pass
+
     def validate_unique(self, exclude=None):
         """
-        Este metodo faz a validacao dos campos unicos do modelo. Ele esta sendo sobrescrito pela
-        necessidade de checar se existe um registro com os mesmos dados de instance, law_suit_number, office,
-        folder__folder_number, folder__person_customer.
-        (https://ezlawyer.atlassian.net/browse/EZL-939).
-        obs.: unique_together nao funciona para esta classe porque seria necessário verificar campos de dois models
-        distintos, e isso não pode ser feito pelo SQL.
-        (https://stackoverflow.com/questions/4440010/django-unique-together-with-foreign-keys/4440189#4440189)
+        Este metodo faz a validacao dos campos unicos do modelo. Ele está sendo sobrescrito para verificar a
+        duplicidade apenas para processos Judiciais, de acordo com a configuração setada para o escritorio
         :param exclude: Argumento opcional que permite que os campos informados nesta lista, nao sejam validados
         :type exclude: ValidationError
         """
         res = super(LawSuit, self).validate_unique(exclude)
         try:
-            if LawSuit.objects.filter(~Q(pk=self.pk),
-                                      instance=self.instance,
-                                      law_suit_number=self.law_suit_number,
-                                      type_lawsuit=self.type_lawsuit,
-                                      office=self.office,
-                                      folder__folder_number=self.folder.folder_number,
-                                      folder__person_customer=self.folder.person_customer,
-                                      is_active=True):
-                raise ValidationError({
-                    NON_FIELD_ERRORS: [
-                        'Já existe outro processo com o mesmo número, do mesmo tipo para a mesma instância cadastrado '
-                        'nessa pasta. '
-                    ],
-                    'type_lawsuit': ['Favor verificar o tipo do processo'],
-                    'law_suit_number': ['Favor verificar o número do processo'],
-                    'instance': ['Favor verificar a instância do processo']
-
-                })
+            if not self.type_lawsuit == TypeLawsuit.ADMINISTRATIVE.name:
+                self.validate_law_suit_number()
         except ObjectDoesNotExist:
             pass
         return res
