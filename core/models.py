@@ -335,7 +335,7 @@ class AbstractPerson(Audit, LegacyCode):
     @property
     def is_company_representative(self):
         return True if self.auth_user.groups.filter(name__startswith=self.COMPANY_REPRESENTATIVE).first() \
-        else False
+            else False
 
     class Meta:
         abstract = True
@@ -434,18 +434,19 @@ class Office(AbstractPerson):
     logo = models.ImageField(verbose_name='Logo', null=True, blank=True)
     persons = models.ManyToManyField(
         Person, blank=True, related_name='offices', through='OfficeMembership')
-    offices = models.ManyToManyField('self', blank=True, through='OfficeOffices', symmetrical=False)
+    offices = models.ManyToManyField(
+        'self', blank=True, through='OfficeOffices', symmetrical=False)
     public_office = models.BooleanField(
         default=False, verbose_name='Escritório público')
     use_service_old = models.BooleanField(
         default=True,
-        verbose_name=
-        'Possuo equipe de conferência de dados na delegação e validação da OS')
+        verbose_name='Possuo equipe de conferência de dados na delegação e validação da OS')
     use_etl_old = models.BooleanField(
         default=True,
         verbose_name='Possuo processo de importação de dados de outros sistemas'
     )
-    cpf_cnpj = models.CharField(max_length=255, blank=False, null=True, unique=True, verbose_name='CPF/CNPJ')    
+    cpf_cnpj = models.CharField(max_length=255, blank=False, null=True,
+                                unique=True, verbose_name='CPF/CNPJ')
 
     class Meta:
         verbose_name = 'Escritório'
@@ -609,7 +610,8 @@ class DefaultOffice(OfficeMixin, Audit):
 
 class OfficeNetwork(Audit):
     name = models.CharField(verbose_name='Nome do grupo', max_length=255)
-    members = models.ManyToManyField(Office, related_name='network_members', verbose_name='Membros')
+    members = models.ManyToManyField(
+        Office, related_name='network_members', verbose_name='Membros')
 
     class Meta:
         verbose_name = 'Rede de escritórios'
@@ -826,6 +828,15 @@ class Team(Audit, OfficeMixin):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def get_members(user):
+        users = []
+        if user.person.is_supervisor:
+            users.extend(list(
+                Team.objects.filter(
+                    supervisors=user).values_list('members', flat=True)))
+        return users
 
 
 def get_dir_name(instance, filename):

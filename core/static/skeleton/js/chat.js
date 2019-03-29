@@ -5,22 +5,19 @@ $(document).ready(function () {
 
     "use strict";
 
-    $('.chat-left-inner > .chatonline').slimScroll({
-        height: '100%',
-        position: 'right',
-        size: "0px",
-        color: '#dcdcdc'
-
+    $('.slimScroll').slimScroll({
+        height: ($(window).height()) - 160 + 'px',
+        color: '#aaaaaa'
     });
     $(function () {
         $(window).on("load", function () { // On load
-            $('.chat-list').css({
-                'height': (($(window).height()) - 370) + 'px'
+            $('.slimScroll').css({
+                'height': (($(window).height()) - 160) + 'px'
             });
         });
         $(window).on("resize", function () { // On resize
-            $('.chat-list').css({
-                'height': (($(window).height()) - 370) + 'px'
+            $('.slimScroll').css({
+                'height': (($(window).height()) - 160) + 'px'
             });
         });
     });
