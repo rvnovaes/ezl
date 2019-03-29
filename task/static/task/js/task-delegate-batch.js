@@ -64,24 +64,6 @@ class TaskDelegateBatch {
     elTr.find('td [td-correspondent-value]').text(obj.formatPrice(price.value))
   }
 
-
-  // Alimenta todos os melhores precos ao carregar a tela
-  async setCorrespondents(taskIds) {
-    for (let taskId of taskIds) {
-      cheapestPrice = await TaskServicePriceTableBatch.getCheapestPrice(taskId)
-      let chosenPrice = {
-        taskId: taskId,
-        servicePriceTableId: cheapestPrice.id,
-        correspondenteName: cheapestPrice.office_correspondent.legal_name, // Nome
-        correspondenteValue: cheapestPrice.value,
-        note: ''
-      };
-      setChosenPrice(chosenPrice);
-      servicePrices[taskId] = chosenPrice;
-      $(`td [btn-data-id=${taskId}]`).attr('disabled', false);
-    }
-  }
-
   initOnClickChangePrice() {
     //Funcao de chamada ao clicar no botao trocar
     let self = this
@@ -90,7 +72,7 @@ class TaskDelegateBatch {
     });
   }
 
-  delegateTask(taskId, price) {
+  delegateTask(taskId, price, notes) {
     return new Promise(resolve => {
       return $.ajax({
         method: 'POST',
@@ -99,8 +81,8 @@ class TaskDelegateBatch {
           task_id: taskId,
           servicepricetable_id: price.id,
           amount: price.value,
-          note: price.note ? price.note : ''
-        },
+          notes: notes
+        },        
         success: response => resolve(response),
         beforeSend: function (xhr, settings) {
           xhr.setRequestHeader("X-CSRFToken", self.csrfToken);
@@ -132,7 +114,8 @@ class TaskDelegateBatch {
       let bestPrice = await this.PriceClass.getBestPrice(taskId)
       let selectedPrice = this.priceInstances[taskId].priceSelected
       let price = Object.keys(selectedPrice).length ? selectedPrice : bestPrice
-      requests.push(this.delegateTask(taskId, price))
+      let notes = this.priceInstances[taskId].notes || ''
+      requests.push(this.delegateTask(taskId, price, notes))
     }
     Promise.all(requests).then(result => {
       console.log(result)

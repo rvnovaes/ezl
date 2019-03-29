@@ -9,6 +9,7 @@ class TaskServicePriceTable {
 
   constructor(taskId, typeServiceName, parentInstance, handleCallback) {
     this.taskId = taskId
+    this.notes = notes
     this.parentInstance = parentInstance
     this.handleCallback = handleCallback
     this.bestPrice = {}
@@ -184,6 +185,10 @@ class TaskServicePriceTable {
     this.elTypeService.text(this.typeServiceName)
   }
 
+  clearNotes() {
+    $('#notes').val('')
+  }
+
   bootstrap() {
     $('#processing').show()
     // Inicializa a tabela com as configuacoes de dataTables
@@ -207,6 +212,7 @@ class TaskServicePriceTable {
                       this.setTrCheapstPrice()
                         .then(() => {
                           this.setTypeServiceName()
+                          this.clearNotes()
                         })
                       $('#processing').hide()
                     }))
@@ -326,6 +332,7 @@ class TaskServicePriceTableBatch extends TaskServicePriceTable {
   }  
 
   handle() {
+    this.notes = $('#notes').val()
     super.handle()
   }
 }
