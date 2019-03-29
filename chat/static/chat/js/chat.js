@@ -64,7 +64,7 @@ var setBadgeItem = function (items) {
             elm.addClass('hide')
         }
 
-    })
+    });
 };
 
 var chatReadMessage = function (chat_id, csrf_token) {

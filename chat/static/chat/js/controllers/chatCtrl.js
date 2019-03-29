@@ -15,7 +15,6 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
   $scope.sockets = {};
   $scope.messages = [];
   $scope.listOffices = true;
-  $scope.search = "";
   $scope.chatSelected = {};
   $scope.office_id = false;
   $scope.office_id_since = false;
@@ -74,9 +73,16 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     chat.unread_message_quanty = 0;
     $scope.existsUnread = false;
   };
+  var initSlimScroll = function () {
+    $('.slimScroll').slimScroll({
+        height: ($(window).height()) - 160 + 'px',
+        color: '#aaaaaa'
+    });
+  };
 
   var getContacts = function () {
     if ($scope.listOffices && !$scope.getingContacts) {
+      initSlimScroll();
       $scope.chatsLoading = true;
       $scope.getingContacts = true;
       chatApiService.getContacts().then(function(data){
@@ -109,7 +115,7 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
         setTimeout(function(){
           $scope.listScrollChat.update();
         }, 200);
-      })
+      });
     }
   };
 
@@ -239,7 +245,9 @@ angular.module('app').controller('chatCtrl', function($scope, $interval, chatApi
     $scope.listOffices = true;
     $scope.search = '';
     $scope.inMessage = false;
+    $scope.getingContacts = false;
     getContacts();
+    setTimeout(initSlimScroll, 500);
   };
 
   $scope.onEnterKey = function(event){
