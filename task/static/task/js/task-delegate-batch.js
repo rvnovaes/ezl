@@ -110,12 +110,12 @@ class TaskDelegateBatch {
     let self = this
     let requests = []
     for (let taskId of this.tasksToDelegate) {
-      current += 1
+      current += 1      
       let bestPrice = await this.PriceClass.getBestPrice(taskId)
       let selectedPrice = this.priceInstances[taskId].priceSelected
       let price = Object.keys(selectedPrice).length ? selectedPrice : bestPrice
       let notes = this.priceInstances[taskId].notes || ''
-      requests.push(this.delegateTask(taskId, price, notes))
+      this.delegateTask(taskId, price, notes)      
     }
     Promise.all(requests).then(result => {
       console.log(result)
@@ -164,8 +164,7 @@ class TaskDelegateBatch {
 
   async pupulatePriceInstances(PriceClass, taskIds) {
     for (let taskId of taskIds) {
-      let typeServiceName = this.getTypeServiceName(taskId)
-      console.log(typeServiceName)
+      let typeServiceName = this.getTypeServiceName(taskId)      
       let priceInstance = new PriceClass(taskId, typeServiceName, this, this.callbackChangePrice)
       this.priceInstances[taskId] = priceInstance
       let bestPrice = await PriceClass.getBestPrice(taskId)

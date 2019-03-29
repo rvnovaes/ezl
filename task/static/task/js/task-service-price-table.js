@@ -9,7 +9,7 @@ class TaskServicePriceTable {
 
   constructor(taskId, typeServiceName, parentInstance, handleCallback) {
     this.taskId = taskId
-    this.notes = notes
+    this.notes = ''
     this.parentInstance = parentInstance
     this.handleCallback = handleCallback
     this.bestPrice = {}
@@ -134,10 +134,10 @@ class TaskServicePriceTable {
       $.ajax({
         method: 'GET',
         url: `/providencias/${taskId}/service_price_table_cheapest_of_task`,
-        success: (response => {
+        success: response => {
           response.taskId = taskId
           return resolve(response)
-        })
+        }
       })
     })
   }
@@ -327,10 +327,10 @@ class TaskServicePriceTableBatch extends TaskServicePriceTable {
         data: {
           billing_moment: 'POST_PAID'
         },        
-        success: (response => {
+        success: response => {
           response.taskId = taskId
           return resolve(response)
-        })
+        }
       })
     })
   }  
