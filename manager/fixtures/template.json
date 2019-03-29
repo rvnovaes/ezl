@@ -5,12 +5,12 @@
     "fields": {
         "create_date": "2019-03-21T16:32:25.893Z",
         "create_user": 2,
-        "alter_date": "2019-03-22T17:29:02.226Z",
+        "alter_date": "2019-03-29T18:34:43.964Z",
         "alter_user": null,
         "is_active": true,
         "name": "E-mail para receber notifica\u00e7\u00f5es",
         "template_key": "EMAIL_NOTIFICATION",
-        "description": "E-mail para receber notifica\u00e7\u00f5es gerais do EZL",
+        "description": "E-mail para receber notifica\u00e7\u00f5es gerais do EZL. Usado para escrit\u00f3rio da ponta (\u00faltimo da cadeia).",
         "type": "LONG_TEXT",
         "parameters": {
             "is_required": true
@@ -23,12 +23,12 @@
     "fields": {
         "create_date": "2019-03-21T16:33:43.392Z",
         "create_user": 2,
-        "alter_date": "2019-03-28T15:52:26.973Z",
+        "alter_date": "2019-03-29T18:35:05.957Z",
         "alter_user": null,
         "is_active": true,
         "name": "Possuo equipe de confer\u00eancia de dados na delega\u00e7\u00e3o e valida\u00e7\u00e3o da OS",
         "template_key": "USE_SERVICE",
-        "description": "Possui equipe de confer\u00eancia de dados na delega\u00e7\u00e3o e valida\u00e7\u00e3o da OS",
+        "description": "Possui equipe de confer\u00eancia de dados na delega\u00e7\u00e3o e valida\u00e7\u00e3o da OS (service).",
         "type": "BOOLEAN",
         "parameters": {
             "is_required": false,
@@ -42,10 +42,10 @@
     "fields": {
         "create_date": "2019-03-21T16:34:35.907Z",
         "create_user": 2,
-        "alter_date": "2019-03-28T15:56:07.914Z",
+        "alter_date": "2019-03-29T18:35:20.948Z",
         "alter_user": null,
         "is_active": true,
-        "name": "Possuo processo de importa\u00e7\u00e3o de dados de outros sistemas:",
+        "name": "Possuo processo de importa\u00e7\u00e3o de dados de outros sistemas",
         "template_key": "USE_ETL",
         "description": "Possui processo de importa\u00e7\u00e3o de dados de outros sistemas (ETL)",
         "type": "BOOLEAN",
@@ -61,12 +61,12 @@
     "fields": {
         "create_date": "2019-03-21T18:04:48.950Z",
         "create_user": 2,
-        "alter_date": "2019-03-25T17:56:14.560Z",
+        "alter_date": "2019-03-29T18:33:40.421Z",
         "alter_user": null,
         "is_active": true,
-        "name": "Cliente Padr\u00e3o",
+        "name": "Cliente padr\u00e3o",
         "template_key": "DEFAULT_CUSTOMER",
-        "description": "Cliente Padr\u00e3o",
+        "description": "Cliente padr\u00e3o usado na importa\u00e7\u00e3o de OS caso n\u00e3o tenha sido informado o n\u00b0 da pasta ou o nome do cliente.",
         "type": "FOREIGN_KEY",
         "parameters": {
             "is_required": true,
@@ -86,12 +86,12 @@
     "fields": {
         "create_date": "2019-03-25T17:43:43.182Z",
         "create_user": 2,
-        "alter_date": "2019-03-28T15:53:06.380Z",
+        "alter_date": "2019-03-29T18:36:05.346Z",
         "alter_user": null,
         "is_active": true,
-        "name": "Trabalho Sozinho",
+        "name": "Trabalho sozinho",
         "template_key": "I_WORK_ALONE",
-        "description": "Define se o escrit\u00f3rio possui equipe interna de advogados",
+        "description": "Define se o escrit\u00f3rio possui equipe interna de advogados. Advogado da ponta (\u00faltimo da cadeia).",
         "type": "BOOLEAN",
         "parameters": {
             "is_required": false,
@@ -105,12 +105,12 @@
     "fields": {
         "create_date": "2019-03-26T17:24:03.874Z",
         "create_user": 2,
-        "alter_date": "2019-03-26T17:24:03.874Z",
+        "alter_date": "2019-03-29T18:36:38.289Z",
         "alter_user": null,
         "is_active": true,
-        "name": "Usu\u00e1rio Padr\u00e3o",
+        "name": "Usu\u00e1rio padr\u00e3o",
         "template_key": "DEFAULT_USER",
-        "description": "Usu\u00e1rio Padr\u00e3o",
+        "description": "Usu\u00e1rio padr\u00e3o usado para configura\u00e7\u00f5es internas do sistema.",
         "type": "FOREIGN_KEY",
         "parameters": {
             "is_required": true,
@@ -130,16 +130,51 @@
     "fields": {
         "create_date": "2019-03-27T14:20:41.455Z",
         "create_user": 2,
-        "alter_date": "2019-03-27T21:04:42.367Z",
+        "alter_date": "2019-03-29T18:32:45.528Z",
         "alter_user": null,
         "is_active": true,
         "name": "Anteced\u00eancia para abertura de OS",
         "template_key": "MIN_HOUR_OS",
-        "description": "Prazo em horas m\u00ednimo para abertura de uma nova Ordem de Servi\u00e7o",
+        "description": "Prazo m\u00ednimo em horas para abertura de uma nova Ordem de Servi\u00e7o.",
         "type": "DECIMAL",
         "parameters": {
             "is_required": true,
             "decimal_default": 0
+        }
+    }
+},
+{
+    "model": "manager.template",
+    "pk": 12,
+    "fields": {
+        "create_date": "2019-03-29T17:35:36.282Z",
+        "create_user": 2,
+        "alter_date": "2019-03-29T18:46:34.783Z",
+        "alter_user": null,
+        "is_active": true,
+        "name": "N\u00e3o permitir n\u00b0 de processo duplicado",
+        "template_key": "DUPLICATE_PROCESS",
+        "description": "N\u00e3o permite cadastrar n\u00famero de processo duplicado de acordo com a op\u00e7\u00e3o selecionada.\r\nOp\u00e7\u00e3o 1 - n\u00e3o verificar: permite cadastrar processo com n\u00famero repetido.\r\nOp\u00e7\u00e3o 2 - verifica\u00e7\u00e3o padr\u00e3o: para processo do tipo judicial e ativo n\u00e3o permite n\u00famero repetido para a mesma inst\u00e2ncia.\r\nOp\u00e7\u00e3o 3 - verifica\u00e7\u00e3o detalhada: para processo do tipo judicial e ativo n\u00e3o permite n\u00famero repetido para a mesma pasta, cliente, inst\u00e2ncia e tipo de processo.",
+        "type": "LIST",
+        "parameters": {
+            "is_required": false,
+            "list_default": [
+                {
+                    "text": "N\u00e3o verificar",
+                    "value": "0",
+                    "is_default": false
+                },
+                {
+                    "text": "Verifica\u00e7\u00e3o Padr\u00e3o",
+                    "value": "1",
+                    "is_default": true
+                },
+                {
+                    "text": "Verifica\u00e7\u00e3o detalhada",
+                    "value": "2",
+                    "is_default": false
+                }
+            ]
         }
     }
 }
