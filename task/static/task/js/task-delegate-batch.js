@@ -132,9 +132,10 @@ class TaskDelegateBatch {
       let bestPrice = await this.PriceClass.getBestPrice(taskId)
       let selectedPrice = this.priceInstances[taskId].priceSelected
       let price = Object.keys(selectedPrice).length ? selectedPrice : bestPrice
-      let teste = this.delegateTask(taskId, price)
+      requests.push(this.delegateTask(taskId, price))
     }
     Promise.all(requests).then(result => {
+      console.log(result)
       clearInterval(delegateInterval)
       swal({
         type: 'success',
