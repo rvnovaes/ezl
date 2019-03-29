@@ -90,10 +90,15 @@ PARAMETERS = {
                         "title": "Valor",
                         "type": "string",
                     },
-                    "texto": {
+                    "text": {
                         "title": "Texto",
                         "type": "string",
                     },
+                    "is_default": {
+                        "title": "Valor padrão",
+                        "type": "boolean",
+                        "format": "checkbox",
+                    }
                 }
             },
         },

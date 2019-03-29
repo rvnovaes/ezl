@@ -10,7 +10,14 @@ from core.models import Office
 def template_post_save(sender, instance, created, **kwargs):
     if created:
         create_list = []
-        default_value = instance.parameters.get('{}_default'.format(instance.type.lower()), None)
+        if instance.type == 'LIST':
+            default_option = [{'text': 'Procurar...', 'value': '', 'is_default': True}]
+            default_value = [option.get('value', '') for
+                             option in
+                             instance.parameters.get('{}_default'.format(instance.type.lower()), default_option)
+                             if option.get('is_default')][0]
+        else:
+            default_value = instance.parameters.get('{}_default'.format(instance.type.lower()), None)
         for office in Office.objects.all():
             create_list.append(new_template_value_obj(instance, office, default_value))
         TemplateValue.objects.bulk_create(create_list)
