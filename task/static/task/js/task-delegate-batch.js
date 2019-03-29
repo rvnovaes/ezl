@@ -174,9 +174,15 @@ class TaskDelegateBatch {
     })
   }
 
+  getTypeServiceName(taskId) {    
+    return this._elTable.find(`[data-id=${taskId}] td.type_task`).text()   
+  }
+
   async pupulatePriceInstances(PriceClass, taskIds) {
     for (let taskId of taskIds) {
-      let priceInstance = new PriceClass(taskId, "", this, this.callbackChangePrice)
+      let typeServiceName = this.getTypeServiceName(taskId)
+      console.log(typeServiceName)
+      let priceInstance = new PriceClass(taskId, typeServiceName, this, this.callbackChangePrice)
       this.priceInstances[taskId] = priceInstance
       let bestPrice = await PriceClass.getBestPrice(taskId)
       this.setElTr(this, taskId, bestPrice)

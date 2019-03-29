@@ -15,20 +15,12 @@ class TaskServicePriceTable {
     this.prices = []
     this.priceSelected = {}
     this.elModal = $('#modal-service-price-table')
-    this.elTypeService = $('#type-service')
+    this.elTypeService = $('#modal-service-price-table-type-service')
     this.typeServiceName = typeServiceName
     this.idPriceTableElement = '#price-table'
     this.elPriceTable = $(this.idPriceTableElement)
     this.elPriceDefined = $('#price-defined')
     this.elBtnAction = $('#btn-action')        
-  }
-
-  get typeServiceName() {
-    return this.elTypeService.text()
-  }
-
-  set typeServiceName(value) {
-    this.elTypeService.text(value)
   }
 
   get priceDefined() {
@@ -188,6 +180,10 @@ class TaskServicePriceTable {
     })
   }
 
+  setTypeServiceName() {    
+    this.elTypeService.text(this.typeServiceName)
+  }
+
   bootstrap() {
     $('#processing').show()
     // Inicializa a tabela com as configuacoes de dataTables
@@ -210,6 +206,7 @@ class TaskServicePriceTable {
                       this.showModal()
                       this.setTrCheapstPrice()
                         .then(() => {
+                          this.setTypeServiceName()
                         })
                       $('#processing').hide()
                     }))
