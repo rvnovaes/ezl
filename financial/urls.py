@@ -29,3 +29,4 @@ urlpatterns = [
     url(r'^politica-de-precos/(?P<pk>[0-9]+)/$', views.PolicyPriceUpdateView.as_view(), name='policyprice_update'),
     url(r'^politica-de-precos/excluir$', views.PolicyPriceDeleteView.as_view(), name='policyprice_delete'),    
 ]
+
