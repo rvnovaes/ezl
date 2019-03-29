@@ -45,7 +45,7 @@ from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.tasks import import_xls_task_list
 from task.rules import RuleViewTask
-from task.workflow import CorrespondentsTable
+from task.workflow import CorrespondentsTable, CorrespondentsTablePostPaid
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
 from financial.utils import recalculate_values
@@ -2271,7 +2271,10 @@ class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
 class ServicePriceTableOfTaskView(CustomLoginRequiredView, View):
     def get(self, request, pk, *args, **kwargs):
         task = Task.objects.get(pk=pk)
-        price_table = CorrespondentsTable(task, task.office)
+        if request.GET.get('billing_moment') == 'POST_PAID':         
+            price_table = CorrespondentsTablePostPaid(task, task.office)
+        else:
+            price_table = CorrespondentsTable(task, task.office)
         data = ServicePriceTableSerializer(price_table.correspondents_qs, many=True).data
         return JsonResponse(data, safe=False)
 
@@ -2279,6 +2282,9 @@ class ServicePriceTableOfTaskView(CustomLoginRequiredView, View):
 class ServicePriceTableCheapestOfTaskView(CustomLoginRequiredView, View):
     def get(self, request, pk, *args, **kwargs):
         task = Task.objects.get(pk=pk)
-        price_table = CorrespondentsTable(task, task.office)
+        if request.GET.get('billing_moment') == 'POST_PAID':         
+            price_table = CorrespondentsTablePostPaid(task, task.office)
+        else:
+            price_table = CorrespondentsTable(task, task.office)                
         data = ServicePriceTableSerializer(price_table.get_cheapest_correspondent()).data
         return JsonResponse(data)

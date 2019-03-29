@@ -208,3 +208,11 @@ class CorrespondentsTable(object):
             )
 
         return type_task_field
+
+
+class CorrespondentsTablePostPaid(CorrespondentsTable):
+    def get_correspondents_qs(self):
+        qs = super().get_correspondents_qs()                
+        qs = set(filter(lambda i: i.policy_price.billing_moment == 'POST_PAID', qs))
+        return qs
+        

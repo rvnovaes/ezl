@@ -8,7 +8,7 @@ class TaskServicePriceTable {
    */
 
   constructor(taskId, typeServiceName, parentInstance, handleCallback) {
-    this.taskId = taskId    
+    this.taskId = taskId
     this.parentInstance = parentInstance
     this.handleCallback = handleCallback
     this.bestPrice = {}
@@ -20,7 +20,7 @@ class TaskServicePriceTable {
     this.idPriceTableElement = '#price-table'
     this.elPriceTable = $(this.idPriceTableElement)
     this.elPriceDefined = $('#price-defined')
-    this.elBtnAction = $('#btn-action')        
+    this.elBtnAction = $('#btn-action')
   }
 
   get priceDefined() {
@@ -46,7 +46,7 @@ class TaskServicePriceTable {
   showModal() {
     this.elBtnAction.unbind()
     this.initOnBtnAction()
-    return this.elModal.modal('show')    
+    return this.elModal.modal('show')
   }
 
   initOnBtnAction() {
@@ -180,7 +180,7 @@ class TaskServicePriceTable {
     })
   }
 
-  setTypeServiceName() {    
+  setTypeServiceName() {
     this.elTypeService.text(this.typeServiceName)
   }
 
@@ -294,7 +294,36 @@ class TaskServicePriceTableBatch extends TaskServicePriceTable {
    * @param {string} typeServiceName - Nome do tipo de servico da task
    * @param {object|null} parentInstance - Instancia de quem instanciou esta classe
    * @param {Function|null} handleCallback - Funcao de calback utilizado no metodo handle
-   */  
+   */
+
+  requestPayload() {
+    return $.ajax({
+      method: 'GET',
+      url: `/providencias/${this.taskId}/service_price_table_of_task`,
+      data: {
+        billing_moment: 'POST_PAID'
+      },
+      success: (response => {
+        return response
+      })
+    })
+  }
+
+  static getBestPrice(taskId) {
+    return new Promise(resolve => {
+      $.ajax({
+        method: 'GET',
+        url: `/providencias/${taskId}/service_price_table_cheapest_of_task`,
+        data: {
+          billing_moment: 'POST_PAID'
+        },        
+        success: (response => {
+          response.taskId = taskId
+          return resolve(response)
+        })
+      })
+    })
+  }  
 
   handle() {
     super.handle()
