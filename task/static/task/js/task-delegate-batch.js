@@ -117,8 +117,7 @@ class TaskDelegateBatch {
       let notes = this.priceInstances[taskId].notes || ''
       this.delegateTask(taskId, price, notes)      
     }
-    Promise.all(requests).then(result => {
-      console.log(result)
+    Promise.all(requests).then(result => {      
       clearInterval(delegateInterval)
       swal({
         type: 'success',

@@ -259,6 +259,8 @@ class TaskDetailServicePriceTable extends TaskServicePriceTable {
 
   handle() {
     return new Promise((resolve) => {
+      // Este implementacao esta atrelada ao form do task-detail
+      // Criar forma de melhorar esta funcionalidade
       if (!this.priceSelected) {
         alert('Não selecionou preço')
       } else {
@@ -270,8 +272,14 @@ class TaskDetailServicePriceTable extends TaskServicePriceTable {
           .attr('name', 'notes')
           .attr('value', $('#notes').val() + " ")
           .appendTo('#task_detail');          
-        $('[name=servicepricetable_id]').val(this.priceSelected.id)
-        $('[name=amount]').val(this.priceDefined.toLocaleString('pt-BR'))
+        $('<input />').attr('type', 'hidden')
+          .attr('name', 'servicepricetable_id')
+          .attr('value', this.priceSelected.id)
+          .appendTo('#task_detail');
+          $('<input />').attr('type', 'hidden')
+          .attr('name', 'amount')
+          .attr('value', this.priceDefined.toLocaleString('pt-BR'))
+          .appendTo('#task_detail');                           
         if (this.priceSelected.policy_price.billing_moment === 'PRE_PAID') {
           this.hideModal();
           this.setBillingItem()
