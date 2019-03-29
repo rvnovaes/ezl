@@ -11,7 +11,7 @@ $(document).ready(function () {
     });
     $(function () {
         $(window).on("load", function () { // On load
-            $('.slimscroll').css({
+            $('.slimScroll').css({
                 'height': (($(window).height()) - 160) + 'px'
             });
         });
