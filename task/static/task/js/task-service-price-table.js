@@ -266,6 +266,10 @@ class TaskDetailServicePriceTable extends TaskServicePriceTable {
           .attr('name', 'action')
           .attr('value', 'OPEN')
           .appendTo('#task_detail');
+        $('<input />').attr('type', 'hidden')
+          .attr('name', 'notes')
+          .attr('value', $('#notes').val() + " ")
+          .appendTo('#task_detail');          
         $('[name=servicepricetable_id]').val(this.priceSelected.id)
         $('[name=amount]').val(this.priceDefined.toLocaleString('pt-BR'))
         if (this.priceSelected.policy_price.billing_moment === 'PRE_PAID') {
