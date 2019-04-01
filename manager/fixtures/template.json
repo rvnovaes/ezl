@@ -139,7 +139,7 @@
         "type": "DECIMAL",
         "parameters": {
             "is_required": true,
-            "decimal_default": 0
+            "decimal_default": "0.0"
         }
     }
 },
