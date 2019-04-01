@@ -674,8 +674,6 @@ class TaskFeedback(models.Model):
 
 
 def get_dir_name(instance, filename):
-    path = os.path.join('media', 'ECM', str(instance.task_id))
-    os.makedirs(path, exist_ok=True)
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
 
 
