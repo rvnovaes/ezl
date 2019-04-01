@@ -98,7 +98,7 @@ class ServicePriceTableForm(BaseModelForm):
         return Decimal(value)
 
     def clean_values(self):
-        if 'value' in self.changed_data:
+        if 'value' in self.changed_data and self.instance.id:
             instance = self.instance
             old_value = instance.value
             value_to_pay = instance.value_to_pay
@@ -110,7 +110,7 @@ class ServicePriceTableForm(BaseModelForm):
                 old_value, value_to_pay, value_to_receive, new_value, rate_type_pay, rate_type_receive
             )
         else:
-            self.cleaned_data['value_to_pay'], self.cleaned_data['value_to_receive'] = self.cleaned_data['value']
+            self.cleaned_data['value_to_pay'] = self.cleaned_data['value_to_receive'] = self.cleaned_data['value']
 
     def clean(self):
         cleaned_data = super().clean()
