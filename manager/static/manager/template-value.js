@@ -185,6 +185,7 @@ class TemplateValue {
                 data: data,
                 success: (result) => {
                     swal.close();
+                    window.location.reload();
                 },
                 error: (request, status, error) => {
                     swal.close();
@@ -200,13 +201,13 @@ class TemplateValue {
 
     onDocumentReady(){
 	    $(document).ready(()=>{
-	        this.createTemplateValueTable()
+	        this.createTemplateValueTable();
 	        setTimeout(function () {
                 $('.select2').select2({
                     containerCss : { maxWidth: '330px', },
                     dropdownCss: { maxWidth: '330px', },
                 } );
-            }, 400);
+            }, 600);
         });
     }
 }
