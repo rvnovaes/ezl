@@ -155,7 +155,7 @@ def self_or_none(obj):
     return obj if obj else None
 
 
-def delegate_child_task(object_parent, office_correspondent, type_task=None):
+def delegate_child_task(object_parent, office_correspondent, type_task=None, amount_to_receive=None):
     """
     Este metodo e chamado quando um escritorio delega uma OS para outro escritorio
     Ao realizar este processo a nova OS criada devera ficar com o status de Solicitada
@@ -186,6 +186,10 @@ def delegate_child_task(object_parent, office_correspondent, type_task=None):
     new_task.office = office_correspondent
     new_task.task_status = TaskStatus.REQUESTED
     new_task.parent = object_parent
+    new_task.amount = object_parent.amount_delegated
+    new_task.amount_to_pay = Decimal('0.00')
+    new_task.amount_delegated = Decimal('0.00')
+    new_task.amount_to_receive = amount_to_receive
     new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
     new_task.save()
     clone_task_ecms(object_parent, new_task)
@@ -212,14 +216,14 @@ def has_task_parent(task):
     return False
 
 
-def set_instance_values(instance, service_price_table):
-    if instance.amount != service_price_table.value:
+def set_delegate_values(task, service_price_table):
+    if task.amount_delegated != service_price_table.value:
         return recalculate_values(service_price_table.value,
-                                  instance.amount_to_pay,
-                                  instance.amount_to_receive,
-                                  instance.amount,
-                                  instance.rate_type_pay,
-                                  instance.rate_type_receive)
+                                  task.amount_to_pay,
+                                  task.amount_to_receive,
+                                  task.amount_delegated,
+                                  task.rate_type_pay,
+                                  task.rate_type_receive)
 
     return Decimal(service_price_table.value_to_pay.amount), Decimal(service_price_table.value_to_receive.amount)
 
