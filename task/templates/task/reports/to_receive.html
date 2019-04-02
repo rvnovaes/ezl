@@ -121,7 +121,7 @@
                                     <td>{{task.parent.charge.charge_id}}</td>
                                     <td>{{ task.amount }}</td>
                                     <td>{{ task.fee }}</td>
-                                    <td>{{ task.amount_to_pay }}</td>
+                                    <td>{{ task.amount_to_receive }}</td>
                                 </tr>
                             {% endfor %}
                         {% endfor %}
@@ -190,7 +190,7 @@
                                     <td>{{task.parent.charge.charge_id}}</td>
                                     <td class="text-center">{{ task.amount }}</td>
                                     <td class="text-center">{{ task.fee }}</td>
-                                    <td class="text-center">{{ task.amount_to_pay }}</td>
+                                    <td class="text-center">{{ task.amount_to_receive }}</td>
                                 </tr>
                             {% endfor %}
                         {% empty %}
