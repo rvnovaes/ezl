@@ -128,6 +128,10 @@
                 <!-- Right sidebar -->
                 <!-- ============================================================== -->
                 <!-- .right-sidebar -->
+                {% block right-sidebar%}                     
+                
+                {% endblock %}
+
                 {% block right-sidebar-chat %}
                 {% endblock right-sidebar-chat %}
                 <!-- ============================================================== -->
@@ -203,6 +207,7 @@
                 messageDiv.classList.toggle('hide');
             }
         }
+        var countPage = new CountPage()
     </script>
 </body>
 

@@ -36,7 +36,7 @@
 <script src="{% static "js/session.js" %}?rev={{request.REVIEW}}"></script>
 <script src="{% static "js/office.js" %}?rev={{request.REVIEW}}"></script>
 <script src="{% static "js/browser_version.js" %}?rev={{request.REVIEW}}"></script>
-
+<script src="{% static "core/js/count-page.js" %}?rev={{request.REVIEW}}"></script>
 <script>
     /* show dialog do logout system */
     function logout() {
@@ -123,6 +123,4 @@
         }
         filter_office_sesion(field_office_filter.val(), ajax_url)
     }
-
-
 </script>
