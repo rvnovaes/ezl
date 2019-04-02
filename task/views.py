@@ -478,7 +478,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map = {}
         tasks = self.get_queryset()
         total = 0
-        total_to_pay = 0
+        total_to_receive = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
@@ -491,12 +491,12 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map_total = {}
         for office, clients in offices_map.items():
             office_total = 0
-            office_total_to_pay = 0
+            office_total_to_receive = 0
             for client, tasks in clients.items():
                 client_total = sum(map(lambda x: x.amount_to_receive, tasks))
                 client_total_to_receive = sum(map(lambda x: x.amount_to_receive, tasks))
                 office_total = office_total + client_total
-                office_total_to_pay += client_total_to_receive
+                office_total_to_receive += client_total_to_receive
                 offices.append({
                     'office_name': office.name,
                     'client_name': client.name,
@@ -506,14 +506,14 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
                     "client_total_to_pay": client_total_to_receive,
                     "office_total": 0,
                 })
-            offices_map_total[office.name] = {'total': office_total, 'total_to_pay': office_total_to_pay}
+            offices_map_total[office.name] = {'total': office_total, 'total_to_receive': office_total_to_receive}
             total = total + office_total
-            total_to_pay += office_total_to_pay
+            total_to_receive += office_total_to_receive
 
         for item in offices:
             item['office_total'] = offices_map_total[item['office_name']]
 
-        return offices, total, total_to_pay
+        return offices, total, total_to_receive
 
     def get_os_grouped_by_client(self):
         clients = []
@@ -548,7 +548,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
                     "client_total_to_pay": office_total_to_pay,
                     "office_total": 0,
                 })
-            clients_map_total[client.name] = {'total': client_total, 'total_to_pay': client_total_to_receive}
+            clients_map_total[client.name] = {'total': client_total, 'total_to_receive': client_total_to_receive}
             total = total + client_total
             total_to_receive += client_total_to_receive
 
