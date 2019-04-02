@@ -323,7 +323,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
             }
             validation_error = {
                 NON_FIELD_ERRORS: [
-                    'Já existe outro processo com o mesmo número, para a mesma instância cadastrado'
+                    'Já existe outro processo cadastrado com o mesmo número e para a mesma instância'
                 ],
                 'law_suit_number': ['Favor verificar o número do processo'],
                 'instance': ['Favor verificar a instância do processo']
@@ -340,7 +340,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
             }
             validation_error = {
                 NON_FIELD_ERRORS: [
-                    'Já existe outro processo com o mesmo número, do mesmo tipo para a mesma instância cadastrado '
+                    'Já existe outro processo cadastrado com o mesmo número, do mesmo tipo e para a mesma instância '
                     'nessa pasta. '
                 ],
                 'law_suit_number': ['Favor verificar o número do processo'],
