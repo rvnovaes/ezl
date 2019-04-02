@@ -33,6 +33,7 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
 from core.xlsx import XLSXWriter
 from lawsuit.forms import LawSuitForm
 from lawsuit.models import Movement, LawSuit, Folder, TypeMovement
+from task.delegate import DelegateTask
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter, \
     TaskCheckinReportFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
@@ -336,30 +337,11 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         try:
             task = Task.objects.get(pk=kwargs.get('pk'))
-            amount = request.POST.get('amount').replace('R$', '') if request.POST.get('amount') else '0.00'
-            amount_to_pay = request.POST.get('amount_to_pay').replace('R$', '') \
-                if request.POST.get('amount_to_pay') else '0.00'
-            amount_to_receive = request.POST.get('amount_to_receive').replace('R$', '') \
-                if request.POST.get('amount_to_receive') else '0.00'
-            note = request.POST.get('note', '')
             form = TaskDetailForm(request.POST, instance=task)
             if form.is_valid():
-                form.instance.task_status = TaskStatus.OPEN                
-                form.instance.amount = Decimal(amount)
-                form.instance.amount_to_pay = Decimal(amount_to_pay)
-                form.instance.amount_to_receive = Decimal(amount_to_receive)
-                get_task_attachment(self, form)
-                form.instance.delegation_date = timezone.now()
-                if not form.instance.person_distributed_by:
-                    form.instance.person_distributed_by = request.user.person
-                servicepricetable = ServicePriceTable.objects.get(
-                    pk=request.POST.get('servicepricetable_id'))
-                if servicepricetable:
-                    form.instance.amount_to_pay, form.instance.amount_to_receive = get_delegate_amounts(
-                        form.instance, servicepricetable)
-                    delegate_child_task(form.instance,
-                                        servicepricetable.office_correspondent, servicepricetable.type_task)
-                    form.instance.person_executed_by = None
+                form.instance.task_status = TaskStatus.OPEN
+                form = DelegateTask(self.request, form).delegate()
+
                 form.save()
                 return JsonResponse({'status': 'ok'})
             return JsonResponse({'status': 'error', 'errors': form})
@@ -969,29 +951,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         if form.instance.task_status == TaskStatus.REFUSED and not form.instance.person_distributed_by:
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
-            form.instance.delegation_date = timezone.now()
-            if not form.instance.person_distributed_by:
-                form.instance.person_distributed_by = self.request.user.person
-            servicepricetable_id = self.request.POST.get('servicepricetable_id', None)
-            servicepricetable = ServicePriceTable.objects.filter(
-                id=servicepricetable_id).select_related('policy_price').first()
-            get_task_attachment(self, form)
-            if servicepricetable:
-                default_amount = form.instance.amount or Decimal('0.00')
-
-                form.instance.amount_delegated = form.cleaned_data.get('amount') or default_amount
-
-                form.instance.price_category = servicepricetable.policy_price.category
-                form.instance.rate_type_receive = servicepricetable.rate_type_receive
-                form.instance.rate_type_pay = servicepricetable.rate_type_pay
-                amount_to_pay, amount_to_receive = get_delegate_amounts(form.instance, servicepricetable)
-                form.instance.amount_to_pay = amount_to_pay
-
-                delegate_child_task(form.instance,
-                                    servicepricetable.office_correspondent,
-                                    servicepricetable.type_task,
-                                    amount_to_receive)
-                form.instance.person_executed_by = None
+            form = DelegateTask(self.request, form).delegate()
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
         feedback_comment = form.cleaned_data.get('feedback_comment')
