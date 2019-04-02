@@ -12,7 +12,7 @@ from etl.utils import get_message_log_default, save_error_log, get_clients_to_im
 from ezl import settings
 from lawsuit.models import Movement, Folder, CourtDistrict
 from task.models import Task, TypeTask, TaskStatus, TaskHistory
-from task.utils import set_performance_place
+from task.utils import set_performance_place, validate_final_deadline_date
 from etl.utils import get_message_log_default, save_error_log
 from etl.models import InconsistencyETL, Inconsistencies
 
@@ -172,6 +172,24 @@ class TaskETL(GenericETL):
                 folder_legacy_code = row['folder_legacy_code']
                 client = row['Cliente']
                 performance_place = 'Local de cumprimento indefinido'
+                if not final_deadline_date:
+                    status_code_advwin = TaskStatus.ERROR
+                    inconsistencies.append({
+                        "inconsistency":
+                            Inconsistencies.BLANKFINALDEADLINEDATE,
+                        "solution":
+                            Inconsistencies.get_solution(
+                                Inconsistencies.BLANKFINALDEADLINEDATE)
+                    })
+                elif not validate_final_deadline_date(final_deadline_date, default_office):
+                    status_code_advwin = TaskStatus.ERROR
+                    inconsistencies.append({
+                        "inconsistency":
+                            Inconsistencies.MINHOUROSERROR,
+                        "solution":
+                            Inconsistencies.get_solution(
+                                Inconsistencies.MINHOUROSERROR)
+                    })
                 if movement.id == 1:
                     status_code_advwin = TaskStatus.ERROR
                     inconsistencies.append({

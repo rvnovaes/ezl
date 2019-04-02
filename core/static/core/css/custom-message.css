@@ -1,0 +1,10 @@
+.comment-center .mail-contnet .mail-desc {    
+    font-size: 14px;
+    display: block;
+    margin: 15px 0;
+    line-height: 25px;
+    color: #848a96;
+    overflow-y: auto;
+    max-height: 200px;
+    text-overflow: ellipsis;    
+}

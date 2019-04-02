@@ -2,11 +2,11 @@ import copy
 import uuid
 from decimal import Decimal
 from django.template.loader import render_to_string
+from django.utils import timezone
 from ecm.models import DefaultAttachmentRule, Attachment
 from financial.utils import recalculate_values
 from task.workflow import get_child_recipients
 from task.models import *
-from task.serializers import *
 from task.mail import SendMail
 from task.rules import RuleViewTask
 from core.utils import get_office_session
@@ -17,6 +17,8 @@ from django.conf import settings
 from retrying import retry
 import traceback
 import logging
+from manager.enums import TemplateKeys
+from manager.utils import get_template_value_value
 
 logger = logging.getLogger(__name__)
 
@@ -190,6 +192,7 @@ def delegate_child_task(object_parent, office_correspondent, type_task=None):
 
 
 def get_offices_to_pay(tasks):
+    from task.serializers import OfficeToPaySerializer
     return [OfficeToPaySerializer(task.office).data for task in tasks]    
 
 
@@ -246,6 +249,11 @@ def set_performance_place(movement):
 
 
 def get_default_customer(office):
-    if hasattr(office, 'customsettings'):
-        return office.customsettings.default_customer or None
-    return None
+    key = TemplateKeys.DEFAULT_CUSTOMER.name
+    return get_template_value_value(office, key)
+
+
+def validate_final_deadline_date(final_deadline_date, office):
+    min_hour_os = float(get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name))
+    return not (min_hour_os > 0
+                and timezone.localtime() + timezone.timedelta(hours=min_hour_os) > final_deadline_date)

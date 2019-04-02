@@ -51,7 +51,7 @@
                 </div>
             {% endif %}
             {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
-                {% if not custom_settings.i_work_alone %}
+                {% if not i_work_alone %}
                     {% if form.instance.geolocation.last.checkpointtype == 'Checkin' %}
                         <button type="button" onclick="taskDetail.getLocation()" data-url="/providencias/providencias/geolocation/checkin"
                                 data-checkpointtype="Checkout" id="GEOLOCATION" type="button" data-toggle="" data-target="" class="text-white btn btn-primary">

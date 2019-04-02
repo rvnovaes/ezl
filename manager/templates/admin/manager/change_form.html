@@ -1,0 +1,20 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/mode-python.js" type="text/javascript"></script>
+    <script src="{% static 'manager/template-admin.js' %}?rev={{request.REVIEW}}"></script>
+    <script>
+
+    $(document).ready(function () {
+        $('form').one('submit', function(e) {
+            e.preventDefault();
+            $('#id_template_key').removeAttr('disabled');
+            $(this).submit();
+        });
+        window.templateAdmin = new TemplateAdmin(parameters_editor, container);
+    })
+    </script>
+{% endblock %}

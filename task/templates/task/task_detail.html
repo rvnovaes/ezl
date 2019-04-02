@@ -31,7 +31,8 @@
     <link href="{% static 'libs/bootstrap-rating/bootstrap-rating.css' %}" rel="stylesheet">
 
     {% include 'task/task_to_assign.html' with task=task %}
-    <form id="task_detail" action="" method="post">{% csrf_token %}            
+    {% include 'task/includes/task-service-price-table/task-service-price-table.html' %}
+    <form id="task_detail" action="" method="post">{% csrf_token %}
 
         {% include 'task/task_detail/tab.html' %}
         <div class="panel-group" role="tablist" aria-multiselectable="true">
@@ -52,26 +53,6 @@
                              Deseja <span id="actionText">aceitar</span> o prazo? </h4>
                     </div>
                     <div class="modal-body p-30">
-                        {% if form.instance.status.name == 'ACCEPTED_SERVICE' or  form.instance.status.name == 'REQUESTED' and not form.instance.office.use_service%}
-                            {{ form.servicepricetable_id }}
-                            <div class="form-group" style="margin: auto">
-                                <label>Tipo de serviço: </label>
-                                {{ object.type_task }}
-                            </div>
-                            <div id="servicepricetable" class="table-responsive" style="margin: auto">
-                                {% render_table correspondents_table %}
-                                <div id="servicepricetable-alert" class="alert alert-danger alert hidden">
-                                Favor selecionar um escritório correspondente. </div>
-                                <b>Preço*:</b> Podem ser cobrados valores referentes à reembolsos. <br />
-                                <b>Avaliação*:</b> A avaliação é composta pela média móvel dos últimos 3 meses.
-                            </div>
-                            <br>
-                            <div class="form-group" style="margin: auto">
-                                <label>{{ form.amount.label }}</label>
-                                {{ form.amount }}
-                            </div>
-                            <br>
-                        {% endif %}
                         <div class="form-group" style="margin: auto">
                             <label> {{ form.notes.label }}</label>
                             {{ form.notes }}
@@ -138,6 +119,7 @@
     {% include 'questionnaire/company_representative_questionnarie.html'%}
     {% include 'billing/modal/checkout.html' %}
     <script src='{% static "task/task-detail.js" %}?rev={{request.REVIEW}}'></script>
+    <script src='{% static "task/js/task-service-price-table.js" %}?rev={{request.REVIEW}}'></script>>
     <script src="{% static 'billing/js/checkout.js' %}?rev={{request.REVIEW}}"></script>
     <script type="text/javascript">
     var taskDetail;
@@ -159,7 +141,8 @@
     $(document).ready(function(){
         var checkout = new Checkout('{{csrf_token}}', '{{object.charge.charge_id}}');
         let billing = new Billing(checkout);
-        taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, `{{survey_company_representative|safe}}`, '{{csrf_token}}', billing, '{{object.charge.charge_id}}', '{{object.type_task}}');
+        taskDetail = new TaskDetail('{{object.pk}}', '{{object.status.name}}', '{{custom_settings.i_work_alone}}', '{{pending_surveys.status|lower}}', {{ pending_surveys.pending_list|safe }}, `{{survey_company_representative|safe}}`, '{{csrf_token}}', billing, '{{object.charge.charge_id}}', '{{object.type_task.id}}', '{{object.type_task.name}}', '{{object.office.use_service}}');
+
         get_internal_ecms({{form.instance.pk}});
     })
     </script>
@@ -215,29 +198,4 @@
         </div>
     </div>
     {% include 'task/modal/processing.html' %}
-{% endblock %}
-{% block script_document_ready %}
-     {% if form.instance.status.name == 'ACCEPTED_SERVICE' %}
-        $('#confirmAction').on('show.bs.modal', function (event) {
-            if (! window.type_task_id){
-                window.type_task_id = {{ form.instance.type_task.id }}
-            }
-            (window.total) ? window.table_rows = window.total : window.table_rows = {{ correspondents_table.rows|length }};
-        });
-        $('#confirmAction').on('shown.bs.modal', function (event) {
-            if(window.table_rows > 0){
-                taskDetail.setWindowTable();
-                if($('#correspondents-table_filter input').length > 0){
-                    $('#correspondents-table_filter input').focus()
-                }
-            }
-        });
-        /* Ao fechar o modal, limpar a tabela */
-        $('#confirmAction').on('hide.bs.modal', function (event) {
-            if (window.table) {
-                window.table.destroy();
-            }
-        });
-
-    {% endif %}
 {% endblock %}

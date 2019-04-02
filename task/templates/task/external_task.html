@@ -310,7 +310,7 @@
 
         function getId(value) {
             var task_status = value.id;
-            if ((value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED") && ('{{custom_settings.i_work_alone}}' == 'False')){
+            if ((value.id == "BLOCKEDPAYMENT" || value.id == "FINISHED") && ('{{i_work_alone}}' == 'False')){
                 $('.rating-container').show();
             } else {
                 $('.rating-container').hide();

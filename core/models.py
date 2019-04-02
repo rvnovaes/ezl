@@ -335,7 +335,7 @@ class AbstractPerson(Audit, LegacyCode):
     @property
     def is_company_representative(self):
         return True if self.auth_user.groups.filter(name__startswith=self.COMPANY_REPRESENTATIVE).first() \
-        else False
+            else False
 
     class Meta:
         abstract = True
@@ -434,18 +434,19 @@ class Office(AbstractPerson):
     logo = models.ImageField(verbose_name='Logo', null=True, blank=True)
     persons = models.ManyToManyField(
         Person, blank=True, related_name='offices', through='OfficeMembership')
-    offices = models.ManyToManyField('self', blank=True, through='OfficeOffices', symmetrical=False)
+    offices = models.ManyToManyField(
+        'self', blank=True, through='OfficeOffices', symmetrical=False)
     public_office = models.BooleanField(
         default=False, verbose_name='Escritório público')
-    use_service = models.BooleanField(
+    use_service_old = models.BooleanField(
         default=True,
-        verbose_name=
-        'Possuo equipe de conferência de dados na delegação e validação da OS')
-    use_etl = models.BooleanField(
+        verbose_name='Possuo equipe de conferência de dados na delegação e validação da OS')
+    use_etl_old = models.BooleanField(
         default=True,
         verbose_name='Possuo processo de importação de dados de outros sistemas'
     )
-    cpf_cnpj = models.CharField(max_length=255, blank=False, null=True, unique=True, verbose_name='CPF/CNPJ')    
+    cpf_cnpj = models.CharField(max_length=255, blank=False, null=True,
+                                unique=True, verbose_name='CPF/CNPJ')
 
     class Meta:
         verbose_name = 'Escritório'
@@ -469,9 +470,60 @@ class Office(AbstractPerson):
 
     def save(self, *args, **kwargs):
         self._i_work_alone = kwargs.pop('i_work_alone', False)
+        self._use_service = kwargs.pop('use_service', True)
+        self._use_etl = kwargs.pop('use_etl', True)
         if self.cpf_cnpj:
             self.cpf_cnpj = clear_cpf_cnpj(self.cpf_cnpj)
         return super().save(*args, **kwargs)
+
+    def get_template(self, template_key):
+        from manager.template_values import GetTemplateValue
+        return GetTemplateValue(self, template_key)
+
+    def get_template_value(self, template_key):
+        return self.get_template(template_key).value
+
+    def get_template_value_obj(self, template_key):
+        return self.get_template(template_key).get_template_value_obj
+
+    @property
+    def use_service(self):
+        from manager.enums import TemplateKeys
+        return self.get_template_value(TemplateKeys.USE_SERVICE.name)
+
+    @use_service.setter
+    def use_service(self, value):
+        from manager.enums import TemplateKeys
+        from manager.utils import update_template_value
+        new_value = 'on' if value else ''
+        template_obj = self.get_template_value_obj(TemplateKeys.USE_SERVICE.name)
+        update_template_value(template_obj, new_value)
+
+    @property
+    def use_etl(self):
+        from manager.enums import TemplateKeys
+        return self.get_template_value(TemplateKeys.USE_ETL.name)
+
+    @use_etl.setter
+    def use_etl(self, value):
+        from manager.enums import TemplateKeys
+        from manager.utils import update_template_value
+        new_value = 'on' if value else ''
+        template_obj = self.get_template_value_obj(TemplateKeys.USE_ETL.name)
+        update_template_value(template_obj, new_value)
+
+    @property
+    def i_work_alone(self):
+        from manager.enums import TemplateKeys
+        return self.get_template_value(TemplateKeys.I_WORK_ALONE.name)
+
+    @i_work_alone.setter
+    def i_work_alone(self, value):
+        from manager.enums import TemplateKeys
+        from manager.utils import update_template_value
+        new_value = 'on' if value else ''
+        template_obj = self.get_template_value_obj(TemplateKeys.USE_SERVICE.name)
+        update_template_value(template_obj, new_value)
 
 
 class OfficeMixin(models.Model):
@@ -546,7 +598,8 @@ class DefaultOffice(OfficeMixin, Audit):
 
 class OfficeNetwork(Audit):
     name = models.CharField(verbose_name='Nome do grupo', max_length=255)
-    members = models.ManyToManyField(Office, related_name='network_members', verbose_name='Membros')
+    members = models.ManyToManyField(
+        Office, related_name='network_members', verbose_name='Membros')
 
     class Meta:
         verbose_name = 'Rede de escritórios'
@@ -764,6 +817,15 @@ class Team(Audit, OfficeMixin):
     def __str__(self):
         return self.name
 
+    @staticmethod
+    def get_members(user):
+        users = []
+        if user.person.is_supervisor:
+            users.extend(list(
+                Team.objects.filter(
+                    supervisors=user).values_list('members', flat=True)))
+        return users
+
 
 def get_dir_name(instance, filename):
     path = os.path.join('media', 'service_price_table')
@@ -823,8 +885,9 @@ class ControlFirstAccessUser(models.Model):
 
 class CustomSettings(Audit):
     office = models.OneToOneField(Office, verbose_name='Escritório')
-    default_user = models.ForeignKey(User, verbose_name='Usuário default')
-    email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações')
+    default_user = models.ForeignKey(User, verbose_name='Usuário default', blank=True, null=True)
+    email_to_notification = models.EmailField(verbose_name='E-mail para receber notificações',
+                                              null=True, blank=True)
     i_work_alone = models.BooleanField(default=True)
     default_customer = models.ForeignKey(Person, verbose_name='Cliente padrão',
                                          blank=True, null=True,
@@ -868,3 +931,18 @@ class BaseHistoricalModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class CustomMessage(models.Model):
+    initial_date = models.DateTimeField(verbose_name='Data inicial')
+    finish_date = models.DateTimeField(verbose_name='Data final')
+    title = models.CharField(verbose_name="Título", max_length=255)
+    message = models.TextField(verbose_name='Mensagem')
+    link = models.URLField(verbose_name='Link', null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Mensagens Customizadas"
+        verbose_name_plural = "Mensagens Customizadas"
+
+    def __str__(self):
+        return self.title

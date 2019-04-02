@@ -12,7 +12,6 @@ urlpatterns = [
     url(r'^chat_get_messages$',
         views.ChatGetMessages.as_view(),
         name='chat_get_message'),
-    url(r'^chat_teste$', views.chat_teste, name='chat_teste'),
     url(r'^contact/$', views.ChatOfficeContactView.as_view(), name="contact"),
     url(r'^chats_by_office/$',
         views.ChatsByOfficeView.as_view(),

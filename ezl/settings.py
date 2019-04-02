@@ -148,6 +148,7 @@ INSTALLED_APPS = [
     'etl.apps.EtlConfig',
     'financial.apps.FinancialConfig',
     'lawsuit.apps.LawsuitConfig',
+    'manager.apps.ManagerConfig',
     'survey.apps.SurveyConfig',
     'task.apps.TaskConfig',
 
@@ -186,6 +187,7 @@ INSTALLED_APPS = [
     'django_dbconn_retry',
     'rest_auth',
     'simple_history',
+    'django_admin_json_editor'
 ]
 
 MIDDLEWARE = [

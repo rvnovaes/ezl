@@ -4,6 +4,10 @@ from core.models import Person, Office
 from core.serializers import OfficeDefault, CreateUserDefault, CreateUserSerializerMixin, OfficeSerializerMixin
 from rest_framework.compat import unicode_to_repr
 from rest_framework.pagination import PageNumberPagination
+from task.utils import validate_final_deadline_date
+from task.messages import min_hour_error
+from manager.utils import get_template_value_value
+from manager.enums import TemplateKeys
 
 
 class PersonAskedByDefault(object):
@@ -82,6 +86,13 @@ class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, Off
         if Task.objects.filter(office=office, legacy_code=value):
             raise serializers.ValidationError("O legacy_code informado já está sendo utilizado neste escritório")
         return value
+
+    def validate_final_deadline_date(self, obj):
+        office = self.fields['office'].get_default()
+        if not validate_final_deadline_date(obj, office):
+            min_hour = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
+            raise serializers.ValidationError(min_hour_error(min_hour))
+        return obj
 
 
 class TaskCreateSerializer(TaskSerializer):

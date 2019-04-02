@@ -45,13 +45,14 @@ from task.signals import send_notes_execution_date
 from task.tables import TaskTable, DashboardStatusTable, FilterTable, TypeTaskTable
 from task.tasks import import_xls_task_list
 from task.rules import RuleViewTask
-from task.workflow import CorrespondentsTable
+from task.workflow import CorrespondentsTable, CorrespondentsTablePostPaid
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
 from financial.utils import recalculate_values
+from financial.serializers import ServicePriceTableSerializer
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
-    has_task_parent, set_instance_values, get_status_to_filter
+    has_task_parent, set_instance_values, get_status_to_filter, get_default_customer
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -66,6 +67,9 @@ from dal import autocomplete
 from billing.gerencianet_api import api as gn_api
 import logging
 import operator
+from manager.template_values import ListTemplateValues
+from manager.enums import TemplateKeys
+from manager.utils import get_template_value_value
 
 logger = logging.getLogger(__name__)
 
@@ -151,11 +155,14 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         office = get_office_session(self.request)
+        context['min_hour_os'] = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
         context['default_customer'] = None
         context['lawsuit_form'] = LawSuitForm()
-        if hasattr(office, 'customsettings') and office.customsettings.default_customer:
-            context['default_customer'] = {'id': office.customsettings.default_customer.id,
-                                           'text': office.customsettings.default_customer.legal_name}
+
+        default_customer = get_default_customer(office)
+        if default_customer:
+            context['default_customer'] = {'id': default_customer.id,
+                                           'text': default_customer.legal_name}
         return context
 
     def post(self, request, *args, **kwargs):
@@ -251,7 +258,7 @@ class TaskCreateView(AuditFormMixin, CreateView):
         form.instance.movement_id = self.kwargs.get('movement')
         self.kwargs.update({'lawsuit': form.instance.movement.law_suit_id})
         form.instance.__server = get_domain(self.request)
-        response = super(TaskCreateView, self).form_valid(form)
+        response = super().form_valid(form)
 
         documents = self.request.FILES.getlist('file')
         if documents:
@@ -1005,6 +1012,8 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
 
         # pega as configuracoes personalizadas do escritorio
         context['custom_settings'] = office_session.customsettings
+        manager = ListTemplateValues(self.object.office)
+        context['i_work_alone']: office_session.i_work_alone
 
         context['ecms'] = Ecm.objects.filter(task_id=self.object.id)
         context['task_history'] = \
@@ -1932,7 +1941,8 @@ class ExternalTaskView(UpdateView):
         self.object = Task.objects.filter(task_hash=task_hash).first()
         custom_settings = CustomSettings.objects.filter(
             office=self.object.office).first()
-        request.user = custom_settings.default_user
+        manager = ListTemplateValues(self.object.office)
+        request.user = manager.get_value_by_key(TemplateKeys.DEFAULT_USER.name)
         set_office_session(request)
         ecms = Ecm.objects.filter(task_id=self.object.id)
         task_history = TaskHistory.objects.filter(
@@ -1946,19 +1956,21 @@ class ExternalTaskView(UpdateView):
                 'show_person_executed_by_in_tab': True,
                 'task': self.object,
                 'form': TaskDetailForm(instance=self.object),
-                'user': custom_settings.default_user,
+                'user': request.user,
                 'ecms': ecms,
                 'task_history': task_history,
                 'survey_data': survey_data,
-                'custom_settings': custom_settings
+                'custom_settings': custom_settings,
+                'i_work_alone': self.object.office.i_work_alone
             })
 
     def post(self, request, task_hash, *args, **kwargs):
         task = Task.objects.filter(task_hash=task_hash).first()
-        custom_settings = CustomSettings.objects.filter(office=task.office)
+        default_user = get_template_value_value(office=task.office,
+                                                template_key=TemplateKeys.DEFAULT_USER.name)
         form = self.form_class(request.POST, instance=task)
-        if custom_settings.exists():
-            form.instance.alter_user = custom_settings.first().default_user
+        if default_user:
+            form.instance.alter_user = default_user
         form.instance.task_status = TaskStatus[
                                         self.request.POST['action']] or TaskStatus.INVALID
         if form.is_valid():
@@ -1989,9 +2001,9 @@ class EcmExternalCreateView(CreateView):
     def post(self, request, task_hash, *args, **kwargs):
         files = request.FILES.getlist('path')
         task = Task.objects.filter(task_hash=task_hash).first()
-        custom_settings = CustomSettings.objects.filter(
-            office=task.office).first()
-        request.user = custom_settings.default_user
+        default_user = get_template_value_value(office=task.office,
+                                                template_key=TemplateKeys.DEFAULT_USER.name)
+        request.user = default_user
         data = {'success': False, 'message': exception_create()}
 
         for file in files:
@@ -2115,71 +2127,6 @@ class BatchChangeTasksView(CustomPermissionRequiredMixin, DashboardSearchView):
         context['option'] = self.option
         context['office'] = get_office_session(self.request)
         return context
-
-
-class BatchServicePriceTable(CustomLoginRequiredView, View):
-    def get(self, request, *args, **kwargs):
-        datas = []
-        tasks = Task.objects.filter(pk__in=request.GET.getlist('task_ids[]'))
-        for task in tasks:
-            price_table = CorrespondentsTable(task, task.office)
-            cheapest_correspondent = price_table.get_cheapest_correspondent()
-            prices = [{
-                'id': price.id,
-                'court_district': {
-                    'id': price.court_district.pk if price.court_district else '-',
-                    'name': price.court_district.name if price.court_district else '-',
-                },
-                'court_district_complement': {
-                    'id': price.court_district_complement.pk if price.court_district_complement else '-',
-                    'name': price.court_district_complement.name if price.court_district_complement else '-',
-                },
-                'create_user': price.create_user.pk,
-                'client': price.client if price.client else '-',
-                'city': price.city.name if price.city else '-',
-                'office': {
-                    'id': price.office.pk,
-                    'legal_name': price.office.legal_name
-                },
-                'office_correspondent': {
-                    'id': price.office_correspondent.pk,
-                    'legal_name': price.office_correspondent.legal_name
-                },
-                'office_network': {
-                    'id': price.office_network.pk if price.office_network else '-',
-                    'name': price.office_network.name if price.office_network else '-'
-                },
-                'state': price.state.initials if price.state else '-',
-                'type_task': {
-                    'id': price.type_task.pk if price.type_task else '-',
-                    'name': price.type_task.name if price.type_task else '-'
-                },
-                'office_rating': price.office_rating,
-                'office_return_rating': price.office_return_rating,
-                'value': price.value_to_receive.amount,
-                'price_category': price.policy_price.category
-
-            } for price in price_table.correspondents_qs]
-
-            data = {
-                'task': {
-                    'id': task.pk,
-                    'type_task': {
-                        'id': task.type_task.pk,
-                        'name': task.type_task.name
-                    }
-                },
-                'prices': prices,
-                'cheapest_correspondent': {
-                    'count': len(price_table.correspondents_qs),
-                    'id': cheapest_correspondent.pk if cheapest_correspondent else '',
-                    'office_correspondent': cheapest_correspondent.office_correspondent.legal_name if cheapest_correspondent else '',
-                    'value': cheapest_correspondent.value if cheapest_correspondent else ''
-                }
-            }
-            datas.append(data)
-        return JsonResponse(datas, safe=False)
-
 
 class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
@@ -2330,3 +2277,25 @@ class TaskCheckinReportView(CustomLoginRequiredView, TemplateView):
         context = super().get_context_data(**kwargs)
         context['filter'] = self.filter_class
         return context
+
+
+class ServicePriceTableOfTaskView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):
+        task = Task.objects.get(pk=pk)
+        if request.GET.get('billing_moment') == 'POST_PAID':
+            price_table = CorrespondentsTablePostPaid(task, task.office)
+        else:
+            price_table = CorrespondentsTable(task, task.office)
+        data = ServicePriceTableSerializer(price_table.correspondents_qs, many=True).data
+        return JsonResponse(data, safe=False)
+
+
+class ServicePriceTableCheapestOfTaskView(CustomLoginRequiredView, View):
+    def get(self, request, pk, *args, **kwargs):
+        task = Task.objects.get(pk=pk)
+        if request.GET.get('billing_moment') == 'POST_PAID':
+            price_table = CorrespondentsTablePostPaid(task, task.office)
+        else:
+            price_table = CorrespondentsTable(task, task.office)
+        data = ServicePriceTableSerializer(price_table.get_cheapest_correspondent()).data
+        return JsonResponse(data)

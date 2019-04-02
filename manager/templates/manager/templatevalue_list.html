@@ -1,0 +1,60 @@
+{% extends 'core/widgets/generic_list_view.html' %}
+{% load static %}
+{% block search %}
+{% endblock %}
+{% block content %}
+    <form action="#" method="post" id="form-office-config">
+        {% csrf_token %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="panel-title form-row">{{ form_name_plural.capitalize }}</div>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="template-values-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Id
+                                </th>
+                                <th>
+                                    Configuração
+                                </th>
+                                <th>
+                                    Descrição
+                                </th>
+                                <th>
+                                    Valor
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <div class="panel-footer text-center">
+                <button class="btn btn-success waves-effect waves-light" id="btn-save" type="button">
+                    <span class="btn-label"><i class="fa fa-save"></i></span>Salvar
+                </button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script type="text/javascript" src="/static/autocomplete_light/jquery.init.js"></script>
+    <script type="text/javascript" src="/static/autocomplete_light/autocomplete.init.js"></script>
+    <script type="text/javascript" src="/static/autocomplete_light/vendor/select2/dist/js/select2.full.js"></script>
+    <script type="text/javascript" src="/static/autocomplete_light/vendor/select2/dist/js/i18n/pt-BR.js"></script>
+    <script type="text/javascript" src="/static/autocomplete_light/select2.js"></script>'
+    <script src="{% static 'skeleton/plugins/bower_components/datatables/jquery.dataTables.min.js' %}?rev={{request.REVIEW}}"></script>
+    <script src="{% static 'manager/template-value.js' %}?rev={{request.REVIEW}}"></script>
+    <script>
+    new TemplateValue()
+    </script>
+{% endblock %}
+
+{% block extra_stylesheets %}
+    <link href="/static/autocomplete_light/vendor/select2/dist/css/select2.css" type="text/css" media="all" rel="stylesheet" />
+    <link href="/static/autocomplete_light/select2.css" type="text/css" media="all" rel="stylesheet" />
+    <link href="/static/select2.css" type="text/css" media="all" rel="stylesheet" />
+{% endblock %}

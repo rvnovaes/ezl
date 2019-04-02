@@ -4,48 +4,51 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 from django.db.models import Q
-from etl.advwin_ezl.financial.cost_center import CostCenterETL
-from etl.advwin_ezl.law_suit.folder import FolderETL
 from financial.models import CostCenter
 from lawsuit.models import Folder
+try:
+    from etl.advwin_ezl.financial.cost_center import CostCenterETL
+    from etl.advwin_ezl.law_suit.folder import FolderETL
+
+    class CostCenterETLUpdate(CostCenterETL):
+        advwin_table = 'Jurid_Setor'
+        model = CostCenter
+        import_query = """
+                    SELECT DISTINCT
+                      s.Codigo AS legacy_code,
+                      s.Descricao
+                    FROM Jurid_Setor AS s
+                          """
+        has_status = True
 
 
-class CostCenterETLUpdate(CostCenterETL):
-    advwin_table = 'Jurid_Setor'
-    model = CostCenter
-    import_query = """
+    class FolderETLUpdate(FolderETL):
+        _import_query = """
                 SELECT DISTINCT
-                  s.Codigo AS legacy_code,
-                  s.Descricao
-                FROM Jurid_Setor AS s
-                      """
-    has_status = True
+                  p.Codigo_Comp AS legacy_code,
+                  p.Cliente,
+                  p.Setor
+                FROM Jurid_Pastas AS p
+                      LEFT JOIN Jurid_ProcMov AS pm ON
+                        pm.Codigo_Comp = p.Codigo_Comp
+                      INNER JOIN Jurid_agenda_table AS a ON
+                        a.Pasta = p.Codigo_Comp
+                      INNER JOIN Jurid_CodMov AS cm ON
+                        a.CodMov = cm.Codigo
+                WHERE
+                    p.Codigo_Comp IN ('{folders}')
+                        """
 
+        @property
+        def import_query(self):
+            folder_list = list(Folder.objects.filter(~Q(id=1), Q(office_id=1),
+                                                     Q(Q(cost_center__isnull=True) | Q(cost_center_id=1))
+                                                     ).values_list('legacy_code', flat=True))
+            return self._import_query.format(
+                folders="','".join([f for f in folder_list if f]))
 
-class FolderETLUpdate(FolderETL):
-    _import_query = """
-            SELECT DISTINCT
-              p.Codigo_Comp AS legacy_code,
-              p.Cliente,
-              p.Setor
-            FROM Jurid_Pastas AS p
-                  LEFT JOIN Jurid_ProcMov AS pm ON
-                    pm.Codigo_Comp = p.Codigo_Comp
-                  INNER JOIN Jurid_agenda_table AS a ON
-                    a.Pasta = p.Codigo_Comp
-                  INNER JOIN Jurid_CodMov AS cm ON
-                    a.CodMov = cm.Codigo
-            WHERE
-                p.Codigo_Comp IN ('{folders}')
-                    """
-
-    @property
-    def import_query(self):
-        folder_list = list(Folder.objects.filter(~Q(id=1), Q(office_id=1),
-                                                 Q(Q(cost_center__isnull=True) | Q(cost_center_id=1))
-                                                 ).values_list('legacy_code', flat=True))
-        return self._import_query.format(
-            folders="','".join([f for f in folder_list if f]))
+except:
+    pass
 
 
 def update_cost_center(apps, schema_editor):

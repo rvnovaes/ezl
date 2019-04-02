@@ -8,7 +8,6 @@ from core.views import remove_invalid_registry
 from django.contrib.auth.models import Group
 
 
-
 class OfficeMixinViewSet(viewsets.ModelViewSet):
 
     @remove_invalid_registry

@@ -3,7 +3,7 @@ from django.contrib.admin import SimpleListFilter
 from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate
 #Todo: Remover office
 from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings, Company, CompanyUser, City, \
-    State, Country, AreaOfExpertise, OfficeNetwork, OfficeOffices
+    State, Country, AreaOfExpertise, OfficeNetwork, OfficeOffices, CustomMessage
 from task.models import TaskWorkflow, TaskShowStatus
 
 
@@ -24,8 +24,9 @@ class TaskShowStatusInline(admin.TabularInline):
 
 @admin.register(CustomSettings)
 class CustomSettingsAdmin(admin.ModelAdmin):
-    list_display = ('office', 'email_to_notification', 'default_customer', 'i_work_alone')
+    list_display = ('office',)
     search_fields = ['office__legal_name', 'office__name']
+    fields = ['office', 'create_user', 'alter_user']
     inlines = [TaskShowStatusInline, TaskWorkflowInline]
 
     def save_form(self, request, form, change):
@@ -165,6 +166,11 @@ class OfficeNetworkAdmin(admin.ModelAdmin):
     search_fields = ['name', 'members__legal_name']
     list_display = ['name', 'list_members']
     filter_horizontal = ['members']
+
+@admin.register(CustomMessage)
+class CustomMessageAdmin(admin.ModelAdmin):
+    search_fields = ['message', 'link']    
+    fields = ('initial_date', 'finish_date', 'title', 'message', 'link')
 
 
 admin.site.register(AddressType)

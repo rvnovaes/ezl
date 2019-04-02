@@ -11,10 +11,13 @@ from core.forms import BaseForm, XlsxFileField
 from lawsuit.models import CourtDistrict, CourtDistrictComplement, City, Movement, LawSuit, Folder
 from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer
 from task.resources import COLUMN_NAME_DICT
+from task.utils import validate_final_deadline_date
 from task.widgets import code_mirror_schema
 from .schemas import *
 from .fields import JSONFieldMixin
 from survey.models import Survey
+from manager.utils import get_template_value_value
+from manager.enums import TemplateKeys
 
 
 class TaskForm(BaseForm):
@@ -86,6 +89,14 @@ class TaskForm(BaseForm):
             if Person.objects.requesters().filter(auth_user=self.request.user):
                 self.fields[
                     'person_asked_by'].initial = self.request.user.person
+
+    def clean(self):
+        super().clean()
+        office = self.cleaned_data.get('office')
+        if not validate_final_deadline_date(self.cleaned_data.get('final_deadline_date'), office):
+            min_hour_os = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
+            msg = 'O prazo de cumprimento da OS foi configurado para não poder ser inferior à {} hora(s).'.format(min_hour_os)
+            self.add_error('final_deadline_date', forms.ValidationError(msg))
 
 
 class TaskCreateForm(TaskForm):
@@ -197,7 +208,7 @@ class TaskDetailForm(ModelForm):
         required=False,
         widget=forms.Textarea(attrs={"rows": 2}))
 
-    def clean_amount(self):
+    def clean_amount(self):        
         amount = (self.cleaned_data['amount']
                   if self.cleaned_data['amount'] else str(0))
         amount = amount.replace('.', '')
