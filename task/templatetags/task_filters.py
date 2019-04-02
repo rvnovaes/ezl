@@ -100,9 +100,9 @@ def show_delegation_modal(task):
 
 @register.filter
 def show_edit_amount(task):
-    if task.status.name in ['RETURN', 'OPEN', 'ACCEPTED', 'DONE'] and task.price_category != 'NETWORK':
-        return True
-    return False
+    return task.status.name in ['RETURN', 'OPEN', 'ACCEPTED', 'DONE'] \
+           and task.price_category != 'NETWORK' \
+           and task.get_child
 
 
 @register.filter

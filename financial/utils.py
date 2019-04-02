@@ -64,6 +64,16 @@ def check_office_correspondent_relation(office, office_correspondent):
 
 
 def recalculate_values(old_value, value_to_pay, value_to_receive, new_value, rate_type_pay, rate_type_receive):
+    """
+    Calcula os novos valores a pagar e a receber para a tabela de preços, de acordo com os dados antigos
+    :param old_value: Valor autal da tabela de preços
+    :param value_to_pay: Valor atual a pagar (valor que será pago ao correspondente que executar o serviço)
+    :param value_to_receive: Valor atual a receber (valor que será pago ao MTA pela execução do serviço)
+    :param new_value: Novo valor para a tabela de preços
+    :param rate_type_pay: tipo de correção a ser feita para o valor a pagar (PERCENT ou VALUE)
+    :param rate_type_receive: tipo de correção a ser feita para o valor a receber (PERCENT ou VALUE)
+    :return value_to_pay, value_to_receive: novos valores a pagar e a receber pela tabela de peços
+    """
     if hasattr(value_to_pay, 'amount'):
         value_to_pay = value_to_pay.amount
     if hasattr(value_to_receive, 'amount'):

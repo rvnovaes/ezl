@@ -247,7 +247,6 @@ class TaskReturnMailTemplate(object):
 
 class TaskMail(object):
     def __init__(self, email, task, template_id, by_person=None):
-        logger.error('PASSEI AQUI PARA A OS {}-{}'.format(task.pk, task.office))
         self.sg = sendgrid.SendGridAPIClient(
             apikey=settings.EMAIL_HOST_PASSWORD
         )

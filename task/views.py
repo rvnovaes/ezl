@@ -48,11 +48,10 @@ from task.rules import RuleViewTask
 from task.workflow import CorrespondentsTable, CorrespondentsTablePostPaid
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
-from financial.utils import recalculate_values
 from financial.serializers import ServicePriceTableSerializer
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
-    has_task_parent, set_delegate_values, get_status_to_filter, get_default_customer
+    has_task_parent, get_delegate_amounts, get_status_to_filter, get_default_customer, recalculate_amounts
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -356,7 +355,7 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
                 servicepricetable = ServicePriceTable.objects.get(
                     pk=request.POST.get('servicepricetable_id'))
                 if servicepricetable:
-                    form.instance.amount_to_pay, form.instance.amount_to_receive = set_delegate_values(
+                    form.instance.amount_to_pay, form.instance.amount_to_receive = get_delegate_amounts(
                         form.instance, servicepricetable)
                     delegate_child_task(form.instance,
                                         servicepricetable.office_correspondent, servicepricetable.type_task)
@@ -981,19 +980,17 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
                 default_amount = form.instance.amount or Decimal('0.00')
 
                 form.instance.amount_delegated = form.cleaned_data.get('amount') or default_amount
-                if not form.instance.parent:
-                    form.instance.amount = form.cleaned_data.get('amount') or default_amount
 
                 form.instance.price_category = servicepricetable.policy_price.category
                 form.instance.rate_type_receive = servicepricetable.rate_type_receive
                 form.instance.rate_type_pay = servicepricetable.rate_type_pay
-                amount_to_pay, amount_to_receive = set_delegate_values(form.instance, servicepricetable)
-                form.instance.amount_to_pay = amount_to_receive
+                amount_to_pay, amount_to_receive = get_delegate_amounts(form.instance, servicepricetable)
+                form.instance.amount_to_pay = amount_to_pay
 
                 delegate_child_task(form.instance,
                                     servicepricetable.office_correspondent,
                                     servicepricetable.type_task,
-                                    amount_to_pay)
+                                    amount_to_receive)
                 form.instance.person_executed_by = None
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
@@ -2131,6 +2128,7 @@ class BatchChangeTasksView(CustomPermissionRequiredMixin, DashboardSearchView):
         context['office'] = get_office_session(self.request)
         return context
 
+
 class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.GET.get('task_id'))
@@ -2183,30 +2181,36 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.POST.get('task_id'))
-        current_amount = task.amount
-        task.amount = request.POST.get('amount')
-        task.amount_to_pay, task.amount_to_receive = recalculate_values(
+        child_task = task.get_child
+        current_amount = task.amount_delegated
+        new_amount = request.POST.get('amount_delegated')
+        child_task.amount = task.amount_delegated = Decimal(new_amount)
+        amount_to_pay, amount_to_receive = recalculate_amounts(
             current_amount,
             task.amount_to_pay,
-            task.amount_to_receive,
-            task.amount,
+            child_task.amount_to_receive,
+            new_amount,
             task.rate_type_pay,
             task.rate_type_receive
         )
+        task.amount_to_pay = amount_to_pay
+        child_task.amount_to_receive = amount_to_receive
+
         pre_save.disconnect(signals.change_status, sender=Task)
         pre_save.disconnect(signals.pre_save_task, sender=Task)
         post_save.disconnect(signals.post_save_task, sender=Task)
+
         task.save()
-        child_task = task.get_child
-        if child_task:
-            child_task.amount = task.amount
-            child_task.amount_to_pay = task.amount_to_pay
-            child_task.amount_to_receive = task.amount_to_receive
-            child_task.save()
+        child_task.save()
+
         pre_save.connect(signals.change_status, sender=Task)
         pre_save.connect(signals.pre_save_task, sender=Task)
         post_save.connect(signals.post_save_task, sender=Task)
-        return JsonResponse({'message': 'Registro atualizado com sucesso'})
+        data = {
+            'amount_delegated': new_amount,
+            'message': 'Registro atualizado com sucesso'
+        }
+        return JsonResponse(data, status=200)
 
 
 @login_required

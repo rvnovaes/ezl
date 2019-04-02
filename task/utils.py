@@ -14,8 +14,6 @@ from core.tasks import send_mail
 from django.db.models import Q
 from django.core.files.base import ContentFile
 from django.conf import settings
-from retrying import retry
-import traceback
 import logging
 from manager.enums import TemplateKeys
 from manager.utils import get_template_value_value
@@ -197,11 +195,7 @@ def delegate_child_task(object_parent, office_correspondent, type_task=None, amo
 
 def get_offices_to_pay(tasks):
     from task.serializers import OfficeToPaySerializer
-    return [OfficeToPaySerializer(task.office).data for task in tasks]    
-
-
-def get_clients_to_pay():
-    pass
+    return [OfficeToPaySerializer(task.office).data for task in tasks]
 
 
 def get_last_parent(task):
@@ -216,16 +210,16 @@ def has_task_parent(task):
     return False
 
 
-def set_delegate_values(task, service_price_table):
+def get_delegate_amounts(task, service_price_table):
     if task.amount_delegated != service_price_table.value:
-        return recalculate_values(service_price_table.value,
-                                  task.amount_to_pay,
-                                  task.amount_to_receive,
-                                  task.amount_delegated,
-                                  task.rate_type_pay,
-                                  task.rate_type_receive)
+        return recalculate_amounts(service_price_table.value,
+                                   task.amount_to_pay,
+                                   task.amount_to_receive,
+                                   task.amount_delegated,
+                                   task.rate_type_pay,
+                                   task.rate_type_receive)
 
-    return Decimal(service_price_table.value_to_pay.amount), Decimal(service_price_table.value_to_receive.amount)
+    return Decimal(service_price_table.value_to_receive.amount), Decimal(service_price_table.value_to_pay.amount)
 
 
 def get_status_to_filter(option):
@@ -261,3 +255,24 @@ def validate_final_deadline_date(final_deadline_date, office):
     min_hour_os = float(get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name))
     return not (min_hour_os > 0
                 and timezone.localtime() + timezone.timedelta(hours=min_hour_os) > final_deadline_date)
+
+
+def recalculate_amounts(old_amount, amount_to_pay, amount_to_receive, new_amount, rate_type_pay, rate_type_receive):
+    """
+    Calcula os novos valores a pagar e a receber para a ordem de serviço, de acordo com os dados antigos.
+    Este método recebe os dados da OS, e chama o método utilizado para recalcular os valor da tabela de preços,
+    invertendo os valores a pagar e a receber, já que o concieto deles é invertido para a OS
+    :param old_amount: Valor autal de delegação da OS
+    :param amount_to_pay: Valor atual a pagar (valor que será pago ao MTA pela execução do serviço)
+    :param amount_to_receive: Valor atual a receber (valor que será pago ao correspondente que executar o serviço)
+    :param new_amount: Novo valor de delegação da OS
+    :param rate_type_pay: tipo de correção a ser feita para o valor a pagar (PERCENT ou VALUE)
+    :param rate_type_receive: tipo de correção a ser feita para o valor a receber (PERCENT ou VALUE)
+    :return amount_to_pay, amount_to_receive: novos valores a pagar e a receber pela execução do serviço
+    """
+    amount_to_receive, amount_to_pay = recalculate_values(old_amount,
+                                                          amount_to_receive,
+                                                          amount_to_pay,
+                                                          new_amount,
+                                                          rate_type_pay, rate_type_receive)
+    return amount_to_pay, amount_to_receive
