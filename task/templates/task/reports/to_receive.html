@@ -108,10 +108,10 @@
                                     <td>{{ task.finished_date|date:"d/m/Y H:i" }}</td>
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
-                                    <td>{{ task.court_district }}</td>
+                                    <td>{{ task.court_district|default_if_none:"" }}</td>
                                     <td>{{ task.client }}</td>
                                     <td>{{ task.movement.folder.cost_center|default_if_none:"" }}</td>
-                                    <td>{{ task.opposing_party }}</td>
+                                    <td>{{ task.opposing_party|default_if_none:"" }}</td>
                                     {% if task.parent %}
                                         <td>{{ task.parent.task_number }}</td>
                                     {% else %}
@@ -179,8 +179,8 @@
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.movement.folder.cost_center|default_if_none:"" }}</td>
-                                    <td>{{ task.court_district }}</td>
-                                    <td>{{ task.opposing_party }}</td>
+                                    <td>{{ task.court_district|default_if_none:"" }}</td>
+                                    <td>{{ task.opposing_party|default_if_none:"" }}</td>
                                     {% if task.parent %}
                                         <td>{{ task.parent.task_number }}</td>
                                     {% else %}

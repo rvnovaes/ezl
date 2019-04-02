@@ -503,7 +503,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
                     'client_refunds': client.refunds_correspondent_service,
                     'tasks': tasks,
                     "client_total": client_total,
-                    "client_total_to_pay": client_total_to_receive,
+                    "client_total_to_receive": client_total_to_receive,
                     "office_total": 0,
                 })
             offices_map_total[office.name] = {'total': office_total, 'total_to_receive': office_total_to_receive}
@@ -536,16 +536,16 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
             client_total_to_receive = 0
             for office, tasks in offices.items():
                 office_total = sum(map(lambda x: x.amount_to_receive, tasks))
-                office_total_to_pay = sum(map(lambda x: x.amount_to_receive, tasks))
+                office_total_to_receive = sum(map(lambda x: x.amount_to_receive, tasks))
                 client_total = client_total + office_total
-                client_total_to_receive += office_total_to_pay
+                client_total_to_receive += office_total_to_receive
                 # necessário manter a mesma estrutura do get_os_grouped_by_office para não mexer no template.
                 clients.append({
                     'office_name': client.name,
                     'client_name': office.name,
                     'tasks': tasks,
                     "client_total": office_total,
-                    "client_total_to_pay": office_total_to_pay,
+                    "client_total_to_receive": office_total_to_receive,
                     "office_total": 0,
                 })
             clients_map_total[client.name] = {'total': client_total, 'total_to_receive': client_total_to_receive}
