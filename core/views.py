@@ -16,7 +16,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from core.serializers import OfficeSerializer, AddressSerializer, ContactMechanismSerializer
+from core.serializers import OfficeSerializer, AddressSerializer, ContactMechanismSerializer, CustomMessageSerializer
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.db.models import ProtectedError, Q, F, Sum, Case, When, IntegerField
 from django.db import transaction, IntegrityError
@@ -40,7 +40,7 @@ from core.messages import CREATE_SUCCESS_MESSAGE, UPDATE_SUCCESS_MESSAGE, delete
     USER_CREATE_SUCCESS_MESSAGE, person_cpf_cnpj_already_exists
 from core.models import Person, Address, City, State, Country, AddressType, Office, Invite, DefaultOffice, \
     OfficeMixin, InviteOffice, OfficeMembership, ContactMechanism, Team, ControlFirstAccessUser, OfficeOffices, \
-    AreaOfExpertise
+    AreaOfExpertise, CustomMessage
 from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
@@ -2452,3 +2452,12 @@ class StateAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
+
+
+class CustomMessagesView(View):
+    def get(self, request, *args, **kwargs):
+        messages = CustomMessage.objects.filter(
+            initial_date__lte=timezone.now(),
+            finish_date__gte=timezone.now())
+        return JsonResponse(
+            CustomMessageSerializer(messages, many=True).data, safe=False)

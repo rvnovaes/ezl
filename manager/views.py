@@ -1,13 +1,11 @@
 import ast
 import json
-from django.apps import apps
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.http import JsonResponse
 from django.views.generic import TemplateView
-from core.utils import get_office_session
+from core.utils import get_office_session, update_office_custom_settings
 from core.views import CustomLoginRequiredView
-from core.widgets import MDSelect
 from .models import TemplateValue
 from .utils import get_model_by_str, get_filter_params_by_str, update_template_value
 from .template_values import ListTemplateValues
@@ -42,6 +40,7 @@ class TemplateValueListView(CustomLoginRequiredView, TemplateView):
                 new_value = request.POST.get('template-value-{}'.format(template_value.id), None)
                 if new_value != template_value.value.get('value'):
                     update_template_value(template_value, new_value)
+        update_office_custom_settings(office)
         data = {
             'status': 'Updated'
         }
