@@ -3,6 +3,7 @@ from django.dispatch import receiver
 
 from manager.models import Template, TemplateValue
 from manager.utils import new_template_value_obj
+from manager.enums import TemplateKeys
 from core.models import Office
 
 
