@@ -931,3 +931,18 @@ class BaseHistoricalModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class CustomMessage(models.Model):
+    initial_date = models.DateTimeField(verbose_name='Data inicial')
+    finish_date = models.DateTimeField(verbose_name='Data final')
+    title = models.CharField(verbose_name="Título", max_length=255)
+    message = models.TextField(verbose_name='Mensagem')
+    link = models.URLField(verbose_name='Link', null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Mensagens Customizadas"
+        verbose_name_plural = "Mensagens Customizadas"
+
+    def __str__(self):
+        return self.title

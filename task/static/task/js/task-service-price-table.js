@@ -8,73 +8,73 @@ class TaskServicePriceTable {
    */
 
   constructor(taskId, typeServiceName, parentInstance, handleCallback) {
-    this.taskId = taskId
-    this.notes = ''
-    this.parentInstance = parentInstance
-    this.handleCallback = handleCallback
-    this.bestPrice = {}
-    this.prices = []
-    this.priceSelected = {}
-    this.elModal = $('#modal-service-price-table')
-    this.elTypeService = $('#modal-service-price-table-type-service')
-    this.typeServiceName = typeServiceName
-    this.idPriceTableElement = '#price-table'
-    this.elPriceTable = $(this.idPriceTableElement)
-    this.elPriceDefined = $('#price-defined')
-    this.elBtnAction = $('#btn-action')
+    this.taskId = taskId;
+    this.notes = '';
+    this.parentInstance = parentInstance;
+    this.handleCallback = handleCallback;
+    this.bestPrice = {};
+    this.prices = [];
+    this.priceSelected = {};
+    this.elModal = $('#modal-service-price-table');
+    this.elTypeService = $('#modal-service-price-table-type-service');
+    this.typeServiceName = typeServiceName;
+    this.idPriceTableElement = '#price-table';
+    this.elPriceTable = $(this.idPriceTableElement);
+    this.elPriceDefined = $('#price-defined');
+    this.elBtnAction = $('#btn-action');
   }
 
   get priceDefined() {
-    return this.elPriceDefined.maskMoney('unmasked')[0]
+    return this.elPriceDefined.maskMoney('unmasked')[0];
   }
 
   set priceDefined(value) {
-    this.elPriceDefined.val(parseFloat(value).toLocaleString('pt-BR'))
-    this.elPriceDefined.focus()
+    this.elPriceDefined.val(parseFloat(value).toLocaleString('pt-BR'));
+    this.elPriceDefined.focus();
   }
 
   getPriceObject(priceTableId) {
     return this.prices
       .filter(price => price.id == priceTableId)
-      .reduce(item => item)
+      .reduce(item => item);
   }
 
   hideModal() {
-    this.elBtnAction.unbind()
-    this.elModal.modal('hide')
+    this.elBtnAction.unbind();
+    this.elModal.modal('hide');
   }
 
   showModal() {
-    this.elBtnAction.unbind()
-    this.initOnBtnAction()
-    return this.elModal.modal('show')
+    this.elBtnAction.unbind();
+    this.initOnBtnAction();
+    return this.elModal.modal('show');
   }
 
   initOnBtnAction() {
     return new Promise((resolve) => {
       this.elBtnAction.on('click', () => {
-        this.handle()
+        this.handle();
       })
-      resolve(true)
-    })
+      resolve(true);
+    });
   }
 
   unBindBtnAction() {
-    this.elBtnAction.unbind()
+    this.elBtnAction.unbind();
   }
 
   initOnClickRowEvent() {
     return new Promise((resolve) => {
-      let self = this
+      let self = this;
       $(`${this.idPriceTableElement} tbody`).on('click', 'tr', function () {
-        let row = self.elPriceTable.row(this)
-        self.priceSelected = self.getPriceObject(row.node().id)
-        self.priceDefined = self.priceSelected.value
-        $(row.node()).siblings().removeClass('row-selected')
-        $(row.node()).addClass('row-selected')
-        resolve(true)
-      })
-    })
+        let row = self.elPriceTable.row(this);
+        self.priceSelected = self.getPriceObject(row.node().id);
+        self.priceDefined = self.priceSelected.value;
+        $(row.node()).siblings().removeClass('row-selected');
+        $(row.node()).addClass('row-selected');
+        resolve(true);
+      });
+    });
   }
 
   requestPayload() {
@@ -82,9 +82,9 @@ class TaskServicePriceTable {
       method: 'GET',
       url: `/providencias/${this.taskId}/service_price_table_of_task`,
       success: (response => {
-        return response
+        return response;
       })
-    })
+    });
   }
 
   populateTable() {
@@ -96,7 +96,7 @@ class TaskServicePriceTable {
             this.elPriceTable.row.add(
               [
                 `<a href="/office_profile/${price.office_correspondent.id}" target="_blank" class="price-table-link-to-office">${price.office_correspondent.legal_name}</a>`,
-                price.type_task.name,
+                price.type_task ? price.type_task.name : '-',
                 price.office_network ? price.office_network : '-',
                 price.state || '-',
                 price.court_district ? price.court_district.name : '-',
@@ -110,23 +110,23 @@ class TaskServicePriceTable {
             ).node().id = price.id;
             this.elPriceTable.draw(false);
           }
-          resolve(true)
-        })
-    })
+          resolve(true);
+        });
+    });
   }
 
   setTrCheapstPrice() {
     return new Promise(resolve => {
       this.priceDefined = this.bestPrice.value
-      this.elPriceDefined.maskMoney({ 'prefix': 'R$ ', 'decimal': ',', 'thousands': '.', 'allowZero': true })
+      this.elPriceDefined.maskMoney({ 'prefix': 'R$ ', 'decimal': ',', 'thousands': '.', 'allowZero': true });
       // Recurso utilizado para poder setar a mascara no campo 
       // Infelizmente o plugin maskMoney so e setadi a partir do primeiro focus
       // no campo. Assim Se deu a necessidade de fazer este ajuste tecnico. 
-      setTimeout(() => this.elPriceDefined.focus, 100)
-      setTimeout(() => $(`${this.idPriceTableElement} tbody tr[id=${this.bestPrice.id}]`).click(), 200)
-      setTimeout(() => $(`#modal-service-price-table-body`).scrollTop(0), 300)
-      resolve(true)
-    })
+      setTimeout(() => this.elPriceDefined.focus, 100);
+      setTimeout(() => $(`${this.idPriceTableElement} tbody tr[id=${this.bestPrice.id}]`).click(), 200);
+      setTimeout(() => $(`#modal-service-price-table-body`).scrollTop(0), 300);
+      resolve(true);
+    });
   }
 
   static getBestPrice(taskId) {
@@ -135,24 +135,24 @@ class TaskServicePriceTable {
         method: 'GET',
         url: `/providencias/${taskId}/service_price_table_cheapest_of_task`,
         success: response => {
-          response.taskId = taskId
-          return resolve(response)
+          response.taskId = taskId;
+          return resolve(response);
         }
-      })
-    })
+      });
+    });
   }
 
   destroyTable() {
     return new Promise(resolve => {
       if ($.fn.DataTable.isDataTable(this.idPriceTableElement)) {
         try {
-          $(this.idPriceTableElement).empty()
+          $(this.idPriceTableElement).empty();
         } catch (e) {
-          console.error(e)
+          console.error(e);
         }
       }
-      resolve(true)
-    })
+      resolve(true);
+    });
   }
 
   initTable() {
@@ -169,28 +169,28 @@ class TaskServicePriceTable {
             language: {
               "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Portuguese-Brasil.json"
             },
-            "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+            "fnRowCallback": (nRow, aData, iDisplayIndex, iDisplayIndexFull) => {
               if (aData[1] === '-' || aData[1] === '—') {
-                $("td:eq(1)", nRow).text(typeTask);
+                $("td:eq(1)", nRow).text(this.typeServiceName);
               }
               return nRow;
             },
           }
-        ))
-      })
-    })
+        ));
+      });
+    });
   }
 
   setTypeServiceName() {
-    this.elTypeService.text(this.typeServiceName)
+    this.elTypeService.text(this.typeServiceName);
   }
 
   clearNotes() {
-    $('#notes').val('')
+    $('#notes').val('');
   }
 
   bootstrap() {
-    $('#processing').show()
+    $('#processing').show();
     // Inicializa a tabela com as configuacoes de dataTables
     this.initTable()
       .then(() => {
@@ -201,32 +201,32 @@ class TaskServicePriceTable {
             this.constructor.getBestPrice(this.taskId)
               .then((result) => {
                 // Seta a linha da tabela que representa o preco mais barato
-                this.bestPrice = this.priceSelected = result
-                this.setTrCheapstPrice(this.bestPrice.id)
+                this.bestPrice = this.priceSelected = result;
+                this.setTrCheapstPrice(this.bestPrice.id);
                 // Inicializa o evento de click na linha
                 this.initOnClickRowEvent()
                   // Inicializa o evento de click no botao da acao
                   .then(this.initOnBtnAction()
                     .then(() => {
-                      this.showModal()
+                      this.showModal();
                       this.setTrCheapstPrice()
                         .then(() => {
-                          this.setTypeServiceName()
-                          this.clearNotes()
-                        })
-                      $('#processing').hide()
-                    }))
-              })
-          })
-      })
+                          this.setTypeServiceName();
+                          this.clearNotes();
+                        });
+                      $('#processing').hide();
+                    }));
+              });
+          });
+      });
   }
 
   handle() {
-    console.log(this.taskId)
+    console.log(this.taskId);
     if (this.handleCallback) {
-      this.priceSelected.value = Number(this.priceDefined).toFixed('2')
-      this.handleCallback(this.parentInstance, this)
-      this.hideModal()
+      this.priceSelected.value = Number(this.priceDefined).toFixed('2');
+      this.handleCallback(this.parentInstance, this);
+      this.hideModal();
     }
   }
 }
@@ -242,9 +242,9 @@ class TaskDetailServicePriceTable extends TaskServicePriceTable {
    * @param {Function|null} handleCallback - Funcao de calback utilizado no metodo handle
    */
   constructor(taskId, typeServiceName, parentInstance, handleCallback) {
-    super(taskId, typeServiceName, parentInstance, handleCallback)
-    this.billing = parentInstance.billing
-    this.csrfToken = parentInstance.csrfToken
+    super(taskId, typeServiceName, parentInstance, handleCallback);
+    this.billing = parentInstance.billing;
+    this.csrfToken = parentInstance.csrfToken;
   }
 
   setBillingItem() {
@@ -262,7 +262,7 @@ class TaskDetailServicePriceTable extends TaskServicePriceTable {
       // Este implementacao esta atrelada ao form do task-detail
       // Criar forma de melhorar esta funcionalidade
       if (!this.priceSelected) {
-        alert('Não selecionou preço')
+        alert('Não selecionou preço');
       } else {
         $('<input />').attr('type', 'hidden')
           .attr('name', 'action')
@@ -297,8 +297,8 @@ class TaskDetailServicePriceTable extends TaskServicePriceTable {
 
         }
       }
-      resolve(true)
-    })
+      resolve(true);
+    });
   }
 }
 
@@ -322,9 +322,9 @@ class TaskServicePriceTableBatch extends TaskServicePriceTable {
         billing_moment: 'POST_PAID'
       },
       success: (response => {
-        return response
+        return response;
       })
-    })
+    });
   }
 
   static getBestPrice(taskId) {
@@ -336,15 +336,15 @@ class TaskServicePriceTableBatch extends TaskServicePriceTable {
           billing_moment: 'POST_PAID'
         },        
         success: response => {
-          response.taskId = taskId
-          return resolve(response)
+          response.taskId = taskId;
+          return resolve(response);
         }
-      })
-    })
+      });
+    });
   }  
 
   handle() {
-    this.notes = $('#notes').val()
-    super.handle()
+    this.notes = $('#notes').val();
+    super.handle();
   }
 }

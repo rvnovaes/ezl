@@ -20,6 +20,7 @@
     </style>
 {% endblock %}
 {% block content %}
+    {% include 'core/custom_message.html'%}
     {% include 'core/widgets/messages.html' %}
     {% for message in messages %}
     {%endfor%}
