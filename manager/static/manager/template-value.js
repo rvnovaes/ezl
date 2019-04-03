@@ -35,7 +35,7 @@ class TemplateValue {
             .addClass('select2')
             .attr('data-language', 'pt-BR')
             .attr('data-placeholder', 'Procurar...');
-        select.append($('<option></option>').attr('value', null).text('Escolha uma opção'));
+        select.append($('<option></option>').attr('value', '').text('Escolha uma opção'));
         return select;
     }
 
