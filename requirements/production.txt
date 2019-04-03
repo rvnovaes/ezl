@@ -75,3 +75,5 @@ django-rest-auth==0.9.3
 py-moneyed==0.8.0
 # Gerencianet
 gerencianet==1.0.9
+
+tornado<6.0.0
