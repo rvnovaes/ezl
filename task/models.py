@@ -1046,6 +1046,9 @@ class TaskShowStatus(Audit):
             choices=((x.name, x.value) for x in MailRecipients)),
         default=[])
 
+    class Meta:
+        unique_together = ('status_to_show', 'custtom_settings')
+
 
 class TaskSurveyAnswer(Audit):
     tasks = models.ManyToManyField(Task, blank=True)
