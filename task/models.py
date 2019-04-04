@@ -674,8 +674,6 @@ class TaskFeedback(models.Model):
 
 
 def get_dir_name(instance, filename):
-    path = os.path.join('media', 'ECM', str(instance.task_id))
-    os.makedirs(path, exist_ok=True)
     return 'ECM/{0}/{1}'.format(instance.task.pk, filename)
 
 
@@ -773,6 +771,8 @@ class Ecm(Audit, LegacyCode):
     def download(self):
         """Baixamos o arquivo do S3 caso ele não exista localmente"""
         if not self.local_file_exists():
+            path = os.path.join('media', 'ECM', str(self.task_id))
+            os.makedirs(path, exist_ok=True)
             with open(self.local_file_path, 'wb') as local_file:
                 local_file.write(self.path.read())
         return self.local_file_path

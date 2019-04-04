@@ -237,7 +237,8 @@ def ecm_task_post_save(sender, instance, created, **kwargs):
         return
 
     # Copia o Ecm para o sistema de origem
-    if instance.ecm.legacy_code is None and instance.task.legacy_code:
+    # filtra pelo id do office == 1 para exportar apenas ecm do mta
+    if instance.ecm.legacy_code is None and instance.task.legacy_code and instance.task.office.id == 1:
         export_ecm.delay(instance.ecm.id, instance.task.id)
 
     # Copia o EcmTask para todos os pais e filhos recursivamente
