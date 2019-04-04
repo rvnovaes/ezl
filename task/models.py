@@ -12,8 +12,8 @@ from django.urls.base import reverse
 from django.utils import timezone
 from sequences import get_next_value
 from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings, \
-    EmailTemplate
-from lawsuit.models import Movement, Folder
+    EmailTemplate, State
+from lawsuit.models import Movement, Folder, CourtDistrict, CourtDivision
 from chat.models import Chat
 from billing.models import Charge
 from decimal import Decimal
@@ -852,6 +852,18 @@ class DashboardViewModel(Audit, OfficeMixin):
         blank=False,
         null=False,
         verbose_name='Movimentação')
+    court_district = models.ForeignKey(
+        CourtDistrict,
+        on_delete=models.PROTECT,
+        verbose_name='Comarca')
+    court_division = models.ForeignKey(
+        CourtDivision,
+        on_delete=models.PROTECT,
+        verbose_name='Vara')
+    state = models.ForeignKey(
+        State,
+        on_delete=models.PROTECT,
+        verbose_name='UF')
     person_asked_by = models.ForeignKey(
         Person,
         on_delete=models.PROTECT,
@@ -946,9 +958,16 @@ class DashboardViewModel(Audit, OfficeMixin):
     def __str__(self):
         return self.type_task.name
 
-    @property
-    def court_district(self):
-        return self.movement.law_suit.court_district
+    def executed_by(self):
+        task_child = Task(self.id).get_child
+        if task_child:
+            return str(task_child.office)
+        return str(self.person_executed_by)
+
+    def asked_by(self):
+        if self.parent:
+            return str(self.parent.office)
+        return str(self.person_asked_by)
 
     @property
     def court(self):

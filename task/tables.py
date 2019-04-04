@@ -68,17 +68,27 @@ class DashboardStatusTable(tables.Table):
         self.length = self.rows.__len__()
 
     client = tables.Column(orderable=True)
+    description = tables.Column(orderable=False)
     type_task = tables.Column(orderable=True)
     opposing_party = tables.Column(accessor='movement.law_suit.opposing_party')
     origin_code = tables.Column(order_by=('parent_task_number', 'legacy_code'))
     status = tables.TemplateColumn(
         template_name="task/task_status_column.html", orderable=False)
+    executed_by = tables.Column(accessor='executed_by',
+                                verbose_name='Correspondente',
+                                orderable=False)
+    asked_by = tables.Column(accessor='asked_by',
+                             verbose_name='Solicitante',
+                             orderable=False)
+
 
     class Meta:
         model = DashboardViewModel
         fields = [
             'status', 'task_number', 'final_deadline_date', 'type_task',
-            'law_suit_number', 'client', 'opposing_party', 'origin_code'
+            'law_suit_number', 'client', 'opposing_party', 'origin_code',
+            'description', 'asked_by', 'state', 'court_district',
+            'court_division', 'executed_by'
         ]
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {
