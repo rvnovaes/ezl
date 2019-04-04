@@ -226,6 +226,7 @@ class TemplateValue {
                 $('.select2').select2({
                     containerCss : { maxWidth: '330px', },
                     dropdownCss: { maxWidth: '330px', },
+                    allowClear: true,
                 } );
             }, 600);
         });

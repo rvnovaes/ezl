@@ -61,7 +61,7 @@
     "fields": {
         "create_date": "2019-03-21T18:04:48.950Z",
         "create_user": 2,
-        "alter_date": "2019-03-29T18:33:40.421Z",
+        "alter_date": "2019-04-04T13:45:04.454Z",
         "alter_user": null,
         "is_active": true,
         "name": "Cliente padr\u00e3o",
@@ -69,7 +69,7 @@
         "description": "Cliente padr\u00e3o usado na importa\u00e7\u00e3o de OS caso n\u00e3o tenha sido informado o n\u00b0 da pasta ou o nome do cliente.",
         "type": "FOREIGN_KEY",
         "parameters": {
-            "is_required": true,
+            "is_required": false,
             "foreign_key_default": [
                 {
                     "model": "core.Person",
@@ -149,7 +149,7 @@
     "fields": {
         "create_date": "2019-03-29T17:35:36.282Z",
         "create_user": 2,
-        "alter_date": "2019-03-29T18:46:34.783Z",
+        "alter_date": "2019-04-04T13:45:23.073Z",
         "alter_user": null,
         "is_active": true,
         "name": "N\u00e3o permitir n\u00b0 de processo duplicado",
@@ -157,7 +157,7 @@
         "description": "N\u00e3o permite cadastrar n\u00famero de processo duplicado de acordo com a op\u00e7\u00e3o selecionada.\r\nOp\u00e7\u00e3o 1 - n\u00e3o verificar: permite cadastrar processo com n\u00famero repetido.\r\nOp\u00e7\u00e3o 2 - verifica\u00e7\u00e3o padr\u00e3o: para processo do tipo judicial e ativo n\u00e3o permite n\u00famero repetido para a mesma inst\u00e2ncia.\r\nOp\u00e7\u00e3o 3 - verifica\u00e7\u00e3o detalhada: para processo do tipo judicial e ativo n\u00e3o permite n\u00famero repetido para a mesma pasta, cliente, inst\u00e2ncia e tipo de processo.",
         "type": "LIST",
         "parameters": {
-            "is_required": false,
+            "is_required": true,
             "list_default": [
                 {
                     "text": "N\u00e3o verificar",
