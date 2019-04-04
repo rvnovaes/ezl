@@ -15,6 +15,7 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 class TaskWorkflowInline(admin.TabularInline):
     model = TaskWorkflow
     fields = ('create_user', 'task_from', 'task_to', 'responsible_user')
+    extra = 0
 
 
 class TaskShowStatusInline(admin.TabularInline):
