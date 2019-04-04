@@ -29,17 +29,34 @@ class TemplateValue {
         return $('<input>', inputElementObj);
     }
 
+    static getSelectElement(name){
+        let select =  $('<select style="max-width: 330px"></select>')
+            .attr('name', name)
+            .addClass('select2')
+            .attr('data-language', 'pt-BR')
+            .attr('data-placeholder', 'Procurar...');
+        select.append($('<option></option>').attr('value', '').text('Escolha uma opção'));
+        return select;
+    }
+
+    getListSelect(parameters, name, value=null){
+        let select = TemplateValue.getSelectElement(name);
+        $.each(parameters.list_default, (index,option) => {
+            let selected = '';
+            if (value === option.value){
+                selected = 'selected';
+            }
+            select.append($(`<option ${selected}></option>`).attr('value', option.value).text(option.text));
+        });
+        return select;
+    }
+
     async getForeignKeySelect(parameters, name, value=null){
         let data = parameters.foreign_key_default[0];
         window.dados = data;
         let foreignKeyData = {};
         foreignKeyData = await this.ajaxGetForeignKeyData(data);
-        let select = $('<select style="max-width: 330px"></select>')
-            .attr('name', name)
-            .addClass('select2')
-            .attr('data-language', 'pt-BR')
-            .attr('data-placeholder', 'Procurar...');
-        select.append($('<option></option>').attr('value', null).text('Escolha uma opção'));
+        let select = TemplateValue.getSelectElement(name);
         $.each(foreignKeyData.values,(index,option) => {
             let selected = '';
             if (parseInt(value) === option.id){
@@ -77,6 +94,9 @@ class TemplateValue {
                 break;
             case 'FOREIGN_KEY':
                 inputElement = await this.getForeignKeySelect(parameters, elementName, value);
+                break;
+            case 'LIST':
+                inputElement = this.getListSelect(parameters, elementName, value);
                 break;
 
         }
