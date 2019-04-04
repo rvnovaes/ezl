@@ -53,7 +53,7 @@ class TaskApiFilter(FilterSet):
     class Meta:
         model = Task
         fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date',
-                  'task_status', 'person_executed_by_id']
+        'task_status', 'person_executed_by_id']
 
 
 class TaskFilter(FilterSet):
@@ -87,7 +87,7 @@ class TaskFilter(FilterSet):
     type_task_main = ModelMultipleChoiceFilter(
         queryset=TypeTaskMain.objects.all(),
         label='Tipo de Serviço Principal',
-        widget=autocomplete.ModelSelect2Multiple(url='type-task-main-autocomplete'))    
+        widget=autocomplete.ModelSelect2Multiple(url='type-task-main-autocomplete'))
     cost_center = ModelChoiceFilter(
         queryset=filter_valid_choice_form(
             CostCenter.objects.filter(is_active=True)),
@@ -140,7 +140,7 @@ class TaskFilter(FilterSet):
             model=Office,
             field_related='legal_name',
             name='origin_office_asked_by',
-            url='/origin_requester_form'))    
+            url='/origin_requester_form'))
     person_distributed_by = CharFilter(
         label="Contratante",
         required=False,
@@ -202,9 +202,9 @@ class TaskFilter(FilterSet):
                 filter_field].queryset.filter(office=office_session)
         custom_settings = getattr(office_session, 'customsettings', None)
         if custom_settings and custom_settings.task_status_show:
-            task_status_choices = list(set(
+            task_status_choices = list(
                 custom_settings.task_status_show.values_list(
-                    'status_to_show', flat=True).order_by('status_to_show')))
+                    'status_to_show', flat=True).order_by('status_to_show'))
             self.filters['task_status'].extra['choices'] = self.set_task_status_choices(task_status_choices)
 
     class Meta:
@@ -214,6 +214,7 @@ class TaskFilter(FilterSet):
 
     @staticmethod
     def set_task_status_choices(status_choices):
+        status_choices.sort()
         return list(map(lambda x: (TaskStatus(x).name, x), status_choices))
 
 

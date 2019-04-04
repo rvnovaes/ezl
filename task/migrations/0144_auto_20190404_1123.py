@@ -23,7 +23,8 @@ def remove_duplicated_show_status(apps, schema_editor):
                                            status_to_show=status_to_show).earliest('id').id
         TaskShowStatus.objects.filter(custtom_settings_id=custtom_settings_id,
                                       status_to_show=status_to_show).exclude(id=id).delete()
-    assert get_list_duplicated(apps, schema_editor).__len__() == 0
+    assert get_list_duplicated(apps, schema_editor).__len__() == 0, \
+        'Ainda existem registros duplicados de TaskShowStatus'
 
 
 class Migration(migrations.Migration):
