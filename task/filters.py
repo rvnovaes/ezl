@@ -42,6 +42,7 @@ class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
 
         return qs
 
+
 class TaskApiFilter(FilterSet):
     is_hearing = filters.BooleanFilter(name='type_task__type_task_main__is_hearing')
     office_id = MultiValueCharFilter(name='office_id', lookup_expr='in')
@@ -51,8 +52,8 @@ class TaskApiFilter(FilterSet):
 
     class Meta:
         model = Task
-        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date', 
-        'task_status', 'person_executed_by_id']
+        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date',
+                  'task_status', 'person_executed_by_id']
 
 
 class TaskFilter(FilterSet):
@@ -201,9 +202,9 @@ class TaskFilter(FilterSet):
                 filter_field].queryset.filter(office=office_session)
         custom_settings = getattr(office_session, 'customsettings', None)
         if custom_settings and custom_settings.task_status_show:
-            task_status_choices = list(
+            task_status_choices = list(set(
                 custom_settings.task_status_show.values_list(
-                    'status_to_show', flat=True).order_by('status_to_show'))
+                    'status_to_show', flat=True).order_by('status_to_show')))
             self.filters['task_status'].extra['choices'] = self.set_task_status_choices(task_status_choices)
 
     class Meta:
