@@ -88,6 +88,7 @@ def get_dashboard_view_model_sql():
             court_division.id AS court_division_id,
             type_task.name AS type_service,
             law_suit.law_suit_number,
+            law_suit.opposing_party,
             task.office_id,	
             task_parent.task_number AS parent_task_number
         FROM ((((((((task

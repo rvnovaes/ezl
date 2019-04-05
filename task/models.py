@@ -939,6 +939,8 @@ class DashboardViewModel(Audit, OfficeMixin):
         blank=True,
         null=True,
         verbose_name='Número do Processo')
+    opposing_party = models.TextField(
+        blank=True, null=True, verbose_name='Parte adversa')
     parent_task_number = models.PositiveIntegerField(
         default=0, verbose_name='OS Original')
 
@@ -983,10 +985,6 @@ class DashboardViewModel(Audit, OfficeMixin):
         if organ:
             address = organ.address_set.first()
         return address
-
-    @property
-    def opposing_party(self):
-        return self.movement.law_suit.opposing_party
 
     @property
     def cost_center(self):

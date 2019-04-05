@@ -117,8 +117,10 @@ class ExportFilterTask(DefaultXlsFile):
                     {'label': 'Cliente', 'size': 45},
                     {'label': 'Parte Adversa', 'size': 45},
                     {'label': 'OS Original', 'size': 15},
-                    {'label': 'Comarca', 'size': 40},
+                    {'label': 'Descrição', 'size': 50},
                     {'label': 'UF', 'size': 10},
+                    {'label': 'Comarca', 'size': 20},
+                    {'label': 'Vara', 'size': 20},
                     {'label': 'Data Solicitação', 'size': 15},
                 ]
 
@@ -138,23 +140,27 @@ class ExportFilterTask(DefaultXlsFile):
             else:
                 worksheet.write(row_num, 2, final_deadline_date, self.datetime_cell_format.cell_format)
             worksheet.write(row_num, 3, item.get('type_task__name'), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 4, item.get('movement__law_suit__law_suit_number'),
+            worksheet.write(row_num, 4, item.get('law_suit_number'),
                             self.base_cell_format.cell_format)
-            worksheet.write(row_num, 5, item.get('movement__law_suit__folder__person_customer__name'),
+            worksheet.write(row_num, 5, item.get('client'),
                             self.base_cell_format.cell_format)
-            worksheet.write(row_num, 6, item.get('movement__law_suit__opposing_party'),
+            worksheet.write(row_num, 6, item.get('opposing_party'),
                             self.base_cell_format.cell_format)
             worksheet.write(row_num, 7, item.get('origin_code'), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 8, item.get('movement__law_suit__court_district__name'),
+            worksheet.write(row_num, 8, item.get('description'),
                             self.base_cell_format.cell_format)
-            worksheet.write(row_num, 9, item.get('movement__law_suit__court_district__state__initials'),
+            worksheet.write(row_num, 9, item.get('state__initials'),
+                            self.base_cell_format.cell_format)
+            worksheet.write(row_num, 10, item.get('court_district__name'),
+                            self.base_cell_format.cell_format)
+            worksheet.write(row_num, 11, item.get('court_division__name'),
                             self.base_cell_format.cell_format)
             requested_date = item.get('requested_date').astimezone() \
                 if item.get('requested_date') else ''
             if requested_date:
-                worksheet.write_datetime(row_num, 10, requested_date, self.datetime_cell_format.cell_format)
+                worksheet.write_datetime(row_num, 12, requested_date, self.datetime_cell_format.cell_format)
             else:
-                worksheet.write(row_num, 10, requested_date, self.datetime_cell_format.cell_format)
+                worksheet.write(row_num, 12, requested_date, self.datetime_cell_format.cell_format)
         self.workbook.close()
         self.output.seek(0)
         return self.output
