@@ -795,6 +795,23 @@ class OrganAutocompleteView(TypeaHeadGenericSearch):
         return list(data)
 
 
+class OrganFilterSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    @property
+    def base_queryset(self):
+        return filter_valid_choice_form(Organ.objects.filter(office=get_office_session(self.request)))
+
+    def get_queryset(self):
+        qs = self.base_queryset
+        if self.q:
+            filters = Q(Q(legal_name__unaccent__icontains=self.q)
+                        | Q(name__unaccent__icontains=self.q))
+            qs = qs.filter(filters)
+        return qs
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
+
+
 class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
     @staticmethod
     def get_data(module, model, field, q, office, forward_params, extra_params,

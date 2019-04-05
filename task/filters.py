@@ -77,21 +77,21 @@ class TaskFilter(FilterSet):
         choices=[(task_status.name, task_status.value)
                  for task_status in TaskStatus])
     type_task = ModelMultipleChoiceFilter(
-        queryset=TypeTask.objects.filter(is_active=True),
+        queryset=TypeTask.objects.none(),
         label='Tipo de Serviço',
-        widget=autocomplete.ModelSelect2Multiple(url='type-task-autocomplete'))
+        widget=autocomplete.ModelSelect2Multiple(url='type-task-filter-autocomplete'))
     type_task_main = ModelMultipleChoiceFilter(
         queryset=TypeTaskMain.objects.all(),
         label='Tipo de Serviço Principal',
         widget=autocomplete.ModelSelect2Multiple(url='type-task-main-autocomplete'))    
-    cost_center = ModelChoiceFilter(
-        queryset=filter_valid_choice_form(
-            CostCenter.objects.filter(is_active=True)),
-        label="Setor")
-    court = ModelChoiceFilter(
-        queryset=filter_valid_choice_form(
-            Organ.objects.filter(is_active=True)),
-        label="Órgão")
+    cost_center = ModelChoiceFilter(label="Setor",
+                                    required=False,
+                                    widget=MDSelect(url='/financeiro/centros-de-custos/filter_autocomplete',),
+                                    queryset=filter_valid_choice_form(CostCenter.objects.none()),)
+    court = ModelChoiceFilter(label="Órgão",
+                              required=False,
+                              widget=MDSelect(url='/processos/organ_filter_select2_autocomplete', ),
+                              queryset=filter_valid_choice_form(Organ.objects.none()),)
     team = ModelChoiceFilter(
         queryset=filter_valid_choice_form(Team.objects.filter(is_active=True)),
         label="Equipe")

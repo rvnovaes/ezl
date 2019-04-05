@@ -116,7 +116,10 @@ urlpatterns = [
         login_required(views.ImportTaskList.as_view()),
         name='import_task_list'),
     url(r'^type-task-autocomplete/$', views.TypeTaskAutocomplete.as_view(), name='type-task-autocomplete'),
-    url(r'^type-task-main-autocomplete/$', views.TypeTaskMainAutocomplete.as_view(), name='type-task-main-autocomplete'),
+    url(r'^type-task-filter-autocomplete/$', views.TypeTaskFilterAutocomplete.as_view(),
+        name='type-task-filter-autocomplete'),
+    url(r'^type-task-main-autocomplete/$', views.TypeTaskMainAutocomplete.as_view(),
+        name='type-task-main-autocomplete'),
 
     # Relatórios
     url(r'^task_checkin_report/$',
