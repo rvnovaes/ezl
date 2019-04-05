@@ -8,6 +8,7 @@ class TypeTemplate(Enum):
     FOREIGN_KEY = 'Chave estrangeira'
     INTEGER = 'Inteiro'
     DECIMAL = 'Decimal'
+    LIST = 'Lista de opções'
 
     def __str__(self):
         return str(self.value)
@@ -27,6 +28,7 @@ class TemplateKeys(Enum):
     USE_ETL = 'Importa dados de outros sistemas'
     I_WORK_ALONE = 'Trabalho sozinho'
     MIN_HOUR_OS = 'Limite para abertura de OS'
+    DUPLICATE_PROCESS = 'Duplicar número de processo'
 
     def __str__(self):
         return str(self.value)

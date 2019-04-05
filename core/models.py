@@ -525,6 +525,18 @@ class Office(AbstractPerson):
         template_obj = self.get_template_value_obj(TemplateKeys.USE_SERVICE.name)
         update_template_value(template_obj, new_value)
 
+    @property
+    def duplicate_process(self):
+        from manager.enums import TemplateKeys
+        return self.get_template_value(TemplateKeys.DUPLICATE_PROCESS.name)
+
+    @duplicate_process.setter
+    def duplicate_process(self, value):
+        from manager.enums import TemplateKeys
+        from manager.utils import update_template_value
+        template_obj = self.get_template_value_obj(TemplateKeys.DUPLICATE_PROCESS.name)
+        update_template_value(template_obj, str(value))
+
 
 class OfficeMixin(models.Model):
     office = models.ForeignKey(
