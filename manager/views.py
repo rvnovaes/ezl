@@ -4,11 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.http import JsonResponse
 from django.views.generic import TemplateView
-from core.utils import get_office_session, update_office_custom_settings
+from core.utils import get_office_session, create_work_alone_status_to_show, create_work_alone_workflows, \
+    create_use_etl_status_to_show
 from core.views import CustomLoginRequiredView
 from .models import TemplateValue
 from .utils import get_model_by_str, get_filter_params_by_str, update_template_value
 from .template_values import ListTemplateValues
+from .enums import TemplateKeys
 
 
 class TemplateValueListView(CustomLoginRequiredView, TemplateView):
@@ -35,12 +37,19 @@ class TemplateValueListView(CustomLoginRequiredView, TemplateView):
         office = get_office_session(request)
         manager = ListTemplateValues(office)
         template_values = manager.instance_values
+        changed_keys = []
         if office:
             for template_value in template_values:
                 new_value = request.POST.get('template-value-{}'.format(template_value.id), None)
                 if new_value != template_value.value.get('value'):
                     update_template_value(template_value, new_value)
-        update_office_custom_settings(office)
+                    changed_keys.append(template_value.value.get('template_key'))
+
+        if TemplateKeys.I_WORK_ALONE.name in changed_keys:
+            create_work_alone_status_to_show(office, office.i_work_alone)
+            create_work_alone_workflows(office, office.i_work_alone)
+        if TemplateKeys.USE_ETL.name in changed_keys:
+            create_use_etl_status_to_show(office, office.use_etl)
         data = {
             'status': 'Updated'
         }
