@@ -92,9 +92,10 @@ class TaskFilter(FilterSet):
                               required=False,
                               widget=MDSelect(url='/processos/organ_filter_select2_autocomplete', ),
                               queryset=filter_valid_choice_form(Organ.objects.none()),)
-    team = ModelChoiceFilter(
-        queryset=filter_valid_choice_form(Team.objects.filter(is_active=True)),
-        label="Equipe")
+    team = ModelChoiceFilter(label="Equipe",
+                             required=False,
+                             widget=MDSelect(url='/teams/filter_autocomplete_select2/', ),
+                             queryset=filter_valid_choice_form(Team.objects.none()),)
     folder_number = NumberFilter(label=u"Nº da pasta")
     folder_legacy_code = CharFilter(label=u"Nº da pasta de origem")
     law_suit_number = CharFilter(label=u"Nº do processo")

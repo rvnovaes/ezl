@@ -2443,7 +2443,6 @@ oauth2_login = OAuth2LoginView.adapter_view(CustomGoogleOAuth2Adapter)
 oauth2_callback = OAuth2CallbackView.adapter_view(CustomGoogleOAuth2Adapter)
 
 
-
 class StateAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         if not self.request.user.is_authenticated:
@@ -2461,3 +2460,15 @@ class CustomMessagesView(View):
             finish_date__gte=timezone.now())
         return JsonResponse(
             CustomMessageSerializer(messages, many=True).data, safe=False)
+
+
+class TeamFilterSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = filter_valid_choice_form(Team.objects.filter(office=get_office_session(self.request)))
+        if self.q:
+            filters = Q(name__unaccent__icontains=self.q)
+            qs = qs.filter(filters)
+        return qs.order_by('name')
+
+    def get_result_label(self, result):
+        return "{}".format(result.__str__())
