@@ -816,11 +816,15 @@ class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
 
 
 class CourtDistrictSelect2Autocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        qs = filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)).annotate(
+    @property
+    def base_queryset(self):
+        return filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)).annotate(
             court_district_str=Concat(
                 'name', V(' ('), 'state__initials', V(')'),
                 output_field=CharField()))
+    
+    def get_queryset(self):
+        qs = self.base_queryset
         states = self.forwarded.get('state', None)
         if states:
             qs = qs.filter(state__in=states)
@@ -831,6 +835,15 @@ class CourtDistrictSelect2Autocomplete(autocomplete.Select2QuerySetView):
 
     def get_result_label(self, result):
         return "{}".format(result.__str__())
+
+
+class CourtDistrictFilterSelect2Autocomplete(CourtDistrictSelect2Autocomplete):
+    @property
+    def base_queryset(self):
+        return filter_valid_choice_form(CourtDistrict.objects.all()).annotate(
+            court_district_str=Concat(
+                'name', V(' ('), 'state__initials', V(')'),
+                output_field=CharField()))
 
 
 class FolderAutocomplete(TypeaHeadGenericSearch):
@@ -1062,10 +1075,15 @@ class TypeaHeadCourtDistrictComplementSearch(TypeaHeadGenericSearch):
 
 
 class CourtDistrictComplementSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    @property
+    def base_queryset(self):
+        return filter_valid_choice_form(CourtDistrictComplement.objects.filter(
+            is_active=True,
+            office=get_office_session(self.request)))
+
     def get_queryset(self):
         court_district = self.forwarded.get('court_district', None)
-        qs = filter_valid_choice_form(CourtDistrictComplement.objects.filter(
-            is_active=True, office=get_office_session(self.request)))
+        qs = self.base_queryset
         if court_district:
             qs = qs.filter(court_district_id=court_district)
         if self.q:
@@ -1086,6 +1104,13 @@ class CourtDistrictComplementSelect2Autocomplete(autocomplete.Select2QuerySetVie
                                     'text': result.court_district.name}
             } for result in context['object_list']
         ]
+
+
+class CourtDistrictComplementFilterSelect2Autocomplete(CourtDistrictComplementSelect2Autocomplete):
+    @property
+    def base_queryset(self):
+        return filter_valid_choice_form(CourtDistrictComplement.objects.filter(
+            office=get_office_session(self.request)))
 
 
 class LawSuitCreateTaskBulkCreate(View):

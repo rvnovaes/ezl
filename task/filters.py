@@ -6,7 +6,7 @@ from dal import autocomplete
 from django.db.models import Q
 from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
-from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
+from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget, MDSelect
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ, CourtDistrictComplement
 from task.models import TypeTask, Task, Filter, TaskStatus
@@ -42,6 +42,7 @@ class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
 
         return qs
 
+
 class TaskApiFilter(FilterSet):
     is_hearing = filters.BooleanFilter(name='type_task__type_task_main__is_hearing')
     office_id = MultiValueCharFilter(name='office_id', lookup_expr='in')
@@ -62,18 +63,14 @@ class TaskFilter(FilterSet):
         label="UF",
         widget=autocomplete.ModelSelect2Multiple(url='state-autocomplete'))
     court_district = ModelMultipleChoiceFilter(
-        queryset=filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)),
+        queryset=filter_valid_choice_form(CourtDistrict.objects.all()),
         label='Comarca',
-        widget=autocomplete.ModelSelect2Multiple(url='courtdistrict_select2', forward=['state']))
-    court_district_complement = CharFilter(
-        label="Complemento de Comarca",
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=CourtDistrictComplement,
-            field_related='name',
-            forward='court_district',
-            name='court_district_complement',
-            url='/processos/typeahead/search/complemento',))
+        widget=autocomplete.ModelSelect2Multiple(url='courtdistrict_filter_select2', forward=['state']))
+    court_district_complement = ModelChoiceFilter(label='Complemento de Comarca',
+                                                  required=False,
+                                                  widget=MDSelect(url='/processos/complement_filter_select2',
+                                                                  forward=['court_district']),
+                                                  queryset=CourtDistrictComplement.objects.none())
     task_status = MultipleChoiceFilter(
         label="Status",
         required=False,
