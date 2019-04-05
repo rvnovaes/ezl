@@ -386,6 +386,13 @@ class Task(Audit, LegacyCode, OfficeMixin):
         max_digits=9,
         decimal_places=2,
         default=Decimal('0.00'))
+    amount_delegated = models.DecimalField(
+        null=False,
+        blank=False,
+        verbose_name='Valor delegado',
+        max_digits=9,
+        decimal_places=2,
+        default=Decimal('0.00'))
     amount_to_receive = models.DecimalField(
         null=False,
         blank=False,

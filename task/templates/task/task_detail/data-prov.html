@@ -109,7 +109,13 @@
             <tr>
                 <th>Valor</th>
                 <td>
-                    {{ form.instance.amount }} {% if not form.instance.parent and form.instance|show_edit_amount %} <button class="btn btn-link" type="button" id="task-edit-amount"><i class="fa fa-edit"> </i> Editar</button> {% endif %}
+                    {{ form.instance.amount }}
+                </td>
+            </tr>
+            <tr>
+                <th>Valor Delegado</th>
+                <td>
+                    <span id="amount-delegated">{{ form.instance.amount_delegated }}</span> {% if form.instance|show_edit_amount %} <button class="btn btn-link" type="button" id="task-edit-amount"><i class="fa fa-edit"> </i> Editar</button> {% endif %}
                 </td>
             </tr>
         {% endif %}
@@ -121,7 +127,7 @@
                 {% for checkin in checkins%} 
                     {% if form.instance.person_company_representative == checkin.create_user.person%}                
                         <img src="{% static 'skeleton/images/marker-blue-32x32.png'%}"></img><strong>{{checkin.create_user.username}}</strong> Iniciou o atendimento em: {{ checkin.date|localtime }}
-                    {% else %} 
+                    {% else %}
                         <img src="{% static 'skeleton/images/marker-red-32x32.png'%}"></img><strong>{{checkin.create_user.username}}</strong> Iniciou o atendimento em: {{ checkin.date|localtime }}
                     {% endif %}
                     ({{ checkin.position }})
@@ -170,11 +176,12 @@
                         <script type="text/javascript">
                             $(document).ready(function() {
                                 async function showModalEditValue (){
+                                    let elAmountDelegated = $('#amount-delegated');
                                     const {value: value} = await swal({
                                       title: 'Informe o valor da ordem de serviço',
                                       input: 'text',
                                       width: '30%', 
-                                      inputValue: '{{form.instance.amount}}',
+                                      inputValue: elAmountDelegated.html(),
                                       inputClass: 'form-control money',
                                       showCancelButton: true,                                      
                                       confirmButtonText: 'Salvar',
@@ -193,7 +200,7 @@
                                     });
 
                                     if (value) {
-                                        let amount = $('.money').maskMoney('unmasked')[0]
+                                        let amount_delegated = $('.money').maskMoney('unmasked')[0];
                                         swal({
                                             title: 'Aguarde', 
                                             onOpen: ()=>{
@@ -203,21 +210,22 @@
                                         $.ajax({
                                             type: 'POST',
                                             url: '/providencias/task/update/amount',
-                                            data: {task_id: '{{form.instance.pk}}', amount: amount},
+                                            data: {task_id: '{{form.instance.pk}}', amount_delegated: amount_delegated},
                                             success: function (response) {
-                                                location.reload();
+                                                elAmountDelegated.html(value)
+                                                swal.close();
                                             },
                                             beforeSend: function (xhr, settings) {
                                                 xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
                                             },
                                             dataType: 'json'
-                                        });                                         
+                                        });
                                     }
-                                };
+                                }
 
                                 $('#task-edit-amount').on('click', function(event) {                                    
                                     showModalEditValue();
-                                    $('.money').maskMoney({'prefix': 'R$ ', 'decimal': ',', 'thousands': '.', 'allowZero': true})
+                                    $('.money').maskMoney({'prefix': 'R$ ', 'decimal': ',', 'thousands': '.', 'allowZero': true});
                                 })
                             })
                         </script>
