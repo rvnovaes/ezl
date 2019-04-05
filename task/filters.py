@@ -91,11 +91,11 @@ class TaskFilter(FilterSet):
     court = ModelChoiceFilter(label="Órgão",
                               required=False,
                               widget=MDSelect(url='/processos/organ_filter_select2_autocomplete', ),
-                              queryset=filter_valid_choice_form(Organ.objects.none()),)
+                              queryset=Organ.objects.none(),)
     team = ModelChoiceFilter(label="Equipe",
                              required=False,
                              widget=MDSelect(url='/teams/filter_autocomplete_select2/', ),
-                             queryset=filter_valid_choice_form(Team.objects.none()),)
+                             queryset=Team.objects.all(),)
     folder_number = NumberFilter(label=u"Nº da pasta")
     folder_legacy_code = CharFilter(label=u"Nº da pasta de origem")
     law_suit_number = CharFilter(label=u"Nº do processo")
@@ -105,7 +105,7 @@ class TaskFilter(FilterSet):
     client = ModelMultipleChoiceFilter(
         queryset=Person.objects.filter(is_active=True, is_customer=True),
         label='Cliente',
-        widget=autocomplete.ModelSelect2Multiple(url='get_client_2'))
+        widget=autocomplete.ModelSelect2Multiple(url='client_filter_select2'))
     office_executed_by = CharFilter(
         label='Escritório contratado',
         required=False,

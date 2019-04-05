@@ -1599,8 +1599,12 @@ class ClientAutocomplete(TypeaHeadGenericSearch):
 
 
 class ClientSelect2Autocomplete(autocomplete.Select2QuerySetView):
+    @property
+    def base_queryset(self):
+        return Person.objects.all().filter(offices=get_office_session(self.request), is_customer=True, is_active=True)
+
     def get_queryset(self):
-        qs = Person.objects.all().filter(offices=get_office_session(self.request), is_customer=True, is_active=True)
+        qs = self.base_queryset
 
         if self.q:
             qs = qs.filter(legal_name__unaccent__icontains=self.q)
@@ -1608,6 +1612,12 @@ class ClientSelect2Autocomplete(autocomplete.Select2QuerySetView):
 
     def get_result_label(self, result):
         return result.legal_name
+
+
+class ClientFilterSelect2Autocomplete(ClientSelect2Autocomplete):
+    @property
+    def base_queryset(self):
+        return Person.objects.all().filter(offices=get_office_session(self.request), is_customer=True)
 
 
 class PersonCompanyRepresentativeSelect2Autocomplete(autocomplete.Select2QuerySetView):

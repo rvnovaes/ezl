@@ -1196,7 +1196,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
     table_class = DashboardStatusTable
 
     def query_builder(self):
-        query_set = {}
+        query_set = self.model.objects.none()
         person_dynamic_query = Q()
         person = Person.objects.get(auth_user=self.request.user)
         office_session = get_office_session(self.request)
