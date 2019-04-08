@@ -33,6 +33,7 @@ from core.views import AuditFormMixin, MultiDeleteViewMixin, SingleTableViewMixi
 from core.xlsx import XLSXWriter
 from lawsuit.forms import LawSuitForm
 from lawsuit.models import Movement, LawSuit, Folder, TypeMovement
+from task.delegate import DelegateTask
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter, \
     TaskCheckinReportFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
@@ -48,11 +49,10 @@ from task.rules import RuleViewTask
 from task.workflow import CorrespondentsTable, CorrespondentsTablePostPaid
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
-from financial.utils import recalculate_values
 from financial.serializers import ServicePriceTableSerializer
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
-    has_task_parent, set_instance_values, get_status_to_filter, get_default_customer
+    has_task_parent, get_delegate_amounts, get_status_to_filter, get_default_customer, recalculate_amounts
 from decimal import Decimal
 from guardian.core import ObjectPermissionChecker
 from functools import reduce
@@ -337,30 +337,11 @@ class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         try:
             task = Task.objects.get(pk=kwargs.get('pk'))
-            amount = request.POST.get('amount').replace('R$', '') if request.POST.get('amount') else '0.00'
-            amount_to_pay = request.POST.get('amount_to_pay').replace('R$', '') \
-                if request.POST.get('amount_to_pay') else '0.00'
-            amount_to_receive = request.POST.get('amount_to_receive').replace('R$', '') \
-                if request.POST.get('amount_to_receive') else '0.00'
-            note = request.POST.get('note', '')
             form = TaskDetailForm(request.POST, instance=task)
             if form.is_valid():
                 form.instance.task_status = TaskStatus.OPEN
-                form.instance.amount = Decimal(amount)
-                form.instance.amount_to_pay = Decimal(amount_to_pay)
-                form.instance.amount_to_receive = Decimal(amount_to_receive)
-                get_task_attachment(self, form)
-                form.instance.delegation_date = timezone.now()
-                if not form.instance.person_distributed_by:
-                    form.instance.person_distributed_by = request.user.person
-                servicepricetable = ServicePriceTable.objects.get(
-                    pk=request.POST.get('servicepricetable_id'))
-                if servicepricetable:
-                    form.instance.amount_to_pay, form.instance.amount_to_receive = set_instance_values(
-                        form.instance, servicepricetable)
-                    delegate_child_task(form.instance,
-                                        servicepricetable.office_correspondent, servicepricetable.type_task)
-                    form.instance.person_executed_by = None
+                form = DelegateTask(self.request, form).delegate()
+
                 form.save()
                 return JsonResponse({'status': 'ok'})
             return JsonResponse({'status': 'error', 'errors': form})
@@ -461,9 +442,9 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         context['filter'] = self.task_filter
         try:
             if self.request.GET['group_by_tasks'] == OFFICE:
-                office_list, total, total_to_pay = self.get_os_grouped_by_office()
+                office_list, total, total_to_receive = self.get_os_grouped_by_office()
             else:
-                office_list, total, total_to_pay = self.get_os_grouped_by_client()
+                office_list, total, total_to_receive = self.get_os_grouped_by_client()
         except:
             office_list, total, total_to_pay = self.get_os_grouped_by_office()
         context['offices_report'] = office_list
@@ -497,7 +478,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map = {}
         tasks = self.get_queryset()
         total = 0
-        total_to_pay = 0
+        total_to_receive = 0
         for task in tasks:
             correspondent = self._get_related_office(task)
             if correspondent not in offices_map:
@@ -510,36 +491,36 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         offices_map_total = {}
         for office, clients in offices_map.items():
             office_total = 0
-            office_total_to_pay = 0
+            office_total_to_receive = 0
             for client, tasks in clients.items():
-                client_total = sum(map(lambda x: x.amount, tasks))
-                client_total_to_pay = sum(map(lambda x: x.amount_to_pay, tasks))
+                client_total = sum(map(lambda x: x.amount_to_receive, tasks))
+                client_total_to_receive = sum(map(lambda x: x.amount_to_receive, tasks))
                 office_total = office_total + client_total
-                office_total_to_pay += client_total_to_pay
+                office_total_to_receive += client_total_to_receive
                 offices.append({
                     'office_name': office.name,
                     'client_name': client.name,
                     'client_refunds': client.refunds_correspondent_service,
                     'tasks': tasks,
                     "client_total": client_total,
-                    "client_total_to_pay": client_total_to_pay,
+                    "client_total_to_receive": client_total_to_receive,
                     "office_total": 0,
                 })
-            offices_map_total[office.name] = {'total': office_total, 'total_to_pay': office_total_to_pay}
+            offices_map_total[office.name] = {'total': office_total, 'total_to_receive': office_total_to_receive}
             total = total + office_total
-            total_to_pay += office_total_to_pay
+            total_to_receive += office_total_to_receive
 
         for item in offices:
             item['office_total'] = offices_map_total[item['office_name']]
 
-        return offices, total, total_to_pay
+        return offices, total, total_to_receive
 
     def get_os_grouped_by_client(self):
         clients = []
         clients_map = {}
         tasks = self.get_queryset()
         total = 0
-        total_to_pay = 0
+        total_to_receive = 0
         for task in tasks:
             client = self._get_related_client(task)
             if client not in clients_map:
@@ -552,29 +533,29 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
         clients_map_total = {}
         for client, offices in clients_map.items():
             client_total = 0
-            client_total_to_pay = 0
+            client_total_to_receive = 0
             for office, tasks in offices.items():
-                office_total = sum(map(lambda x: x.amount, tasks))
-                office_total_to_pay = sum(map(lambda x: x.amount_to_pay, tasks))
+                office_total = sum(map(lambda x: x.amount_to_receive, tasks))
+                office_total_to_receive = sum(map(lambda x: x.amount_to_receive, tasks))
                 client_total = client_total + office_total
-                client_total_to_pay += office_total_to_pay
+                client_total_to_receive += office_total_to_receive
                 # necessário manter a mesma estrutura do get_os_grouped_by_office para não mexer no template.
                 clients.append({
                     'office_name': client.name,
                     'client_name': office.name,
                     'tasks': tasks,
                     "client_total": office_total,
-                    "client_total_to_pay": office_total_to_pay,
+                    "client_total_to_receive": office_total_to_receive,
                     "office_total": 0,
                 })
-            clients_map_total[client.name] = {'total': client_total, 'total_to_pay': client_total_to_pay}
+            clients_map_total[client.name] = {'total': client_total, 'total_to_receive': client_total_to_receive}
             total = total + client_total
-            total_to_pay += client_total_to_pay
+            total_to_receive += client_total_to_receive
 
         for item in clients:
             item['office_total'] = clients_map_total[item['office_name']]
 
-        return clients, total, total_to_pay
+        return clients, total, total_to_receive
 
     def _get_related_client(self, task):
         return task.client
@@ -662,7 +643,7 @@ class ToReceiveTaskReportView(TaskReportBase):
 
             if query or finished_query or parent_finished_query:
                 query.add(Q(finished_query), Q.AND).add(Q(parent_finished_query), Q.AND)
-                queryset = queryset.filter(query).annotate(fee=F('amount') - F('amount_to_pay'))
+                queryset = queryset.filter(query).annotate(fee=F('amount') - F('amount_to_receive'))
             else:
                 queryset = Task.objects.none()
         else:
@@ -970,28 +951,7 @@ class TaskDetailView(SuccessMessageMixin, CustomLoginRequiredView, UpdateView):
         if form.instance.task_status == TaskStatus.REFUSED and not form.instance.person_distributed_by:
             form.instance.person_distributed_by = self.request.user.person
         if form.instance.task_status == TaskStatus.OPEN:
-            form.instance.delegation_date = timezone.now()
-            if not form.instance.person_distributed_by:
-                form.instance.person_distributed_by = self.request.user.person
-            default_amount = Decimal('0.00') if not form.instance.amount else form.instance.amount
-            form.instance.amount = (form.cleaned_data['amount'] if form.cleaned_data['amount'] else default_amount)
-            servicepricetable_id = (
-                self.request.POST['servicepricetable_id']
-                if self.request.POST['servicepricetable_id'] else None)
-            servicepricetable = ServicePriceTable.objects.filter(
-                id=servicepricetable_id).select_related('policy_price').first()
-            get_task_attachment(self, form)
-            if servicepricetable:
-                form.instance.price_category = servicepricetable.policy_price.category
-                form.instance.rate_type_receive = servicepricetable.rate_type_receive
-                form.instance.rate_type_pay = servicepricetable.rate_type_pay
-                form.instance.amount_to_pay, form.instance.amount_to_receive = set_instance_values(form.instance,
-                                                                                                   servicepricetable)
-
-                delegate_child_task(form.instance,
-                                    servicepricetable.office_correspondent,
-                                    servicepricetable.type_task)
-                form.instance.person_executed_by = None
+            form = DelegateTask(self.request, form).delegate()
 
         feedback_rating = form.cleaned_data.get('feedback_rating')
         feedback_comment = form.cleaned_data.get('feedback_comment')
@@ -2128,6 +2088,7 @@ class BatchChangeTasksView(CustomPermissionRequiredMixin, DashboardSearchView):
         context['office'] = get_office_session(self.request)
         return context
 
+
 class BatchCheapestCorrespondent(CustomLoginRequiredView, View):
     def get(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.GET.get('task_id'))
@@ -2180,30 +2141,36 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.POST.get('task_id'))
-        current_amount = task.amount
-        task.amount = request.POST.get('amount')
-        task.amount_to_pay, task.amount_to_receive = recalculate_values(
+        child_task = task.get_child
+        current_amount = task.amount_delegated
+        new_amount = request.POST.get('amount_delegated')
+        child_task.amount = task.amount_delegated = Decimal(new_amount)
+        amount_to_pay, amount_to_receive = recalculate_amounts(
             current_amount,
             task.amount_to_pay,
-            task.amount_to_receive,
-            task.amount,
+            child_task.amount_to_receive,
+            new_amount,
             task.rate_type_pay,
             task.rate_type_receive
         )
+        task.amount_to_pay = amount_to_pay
+        child_task.amount_to_receive = amount_to_receive
+
         pre_save.disconnect(signals.change_status, sender=Task)
         pre_save.disconnect(signals.pre_save_task, sender=Task)
         post_save.disconnect(signals.post_save_task, sender=Task)
+
         task.save()
-        child_task = task.get_child
-        if child_task:
-            child_task.amount = task.amount
-            child_task.amount_to_pay = task.amount_to_pay
-            child_task.amount_to_receive = task.amount_to_receive
-            child_task.save()
+        child_task.save()
+
         pre_save.connect(signals.change_status, sender=Task)
         pre_save.connect(signals.pre_save_task, sender=Task)
         post_save.connect(signals.post_save_task, sender=Task)
-        return JsonResponse({'message': 'Registro atualizado com sucesso'})
+        data = {
+            'amount_delegated': new_amount,
+            'message': 'Registro atualizado com sucesso'
+        }
+        return JsonResponse(data, status=200)
 
 
 @login_required
