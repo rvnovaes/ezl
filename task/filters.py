@@ -106,22 +106,15 @@ class TaskFilter(FilterSet):
         queryset=Person.objects.filter(is_customer=True),
         label='Cliente',
         widget=autocomplete.ModelSelect2Multiple(url='client_filter_select2'))
-    office_executed_by = CharFilter(
+    office_executed_by = ModelChoiceFilter(
         label='Escritório contratado',
         required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Office,
-            field_related='legal_name',
-            name='office_executed_by',
-            url='/office_correspondent_form'))
-    person_executed_by = CharFilter(
+        widget=MDSelect(url='/office_correspondent_form', ),
+        queryset=Office.objects.all())
+    person_executed_by = ModelChoiceFilter(
         label="Correspondente",
         required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Person,
-            field_related='legal_name',
-            name='person_executed_by',
-            url='/correspondent_form'))
+        widget=MDSelect(url='/correspondent_form', ),)
     person_asked_by = ModelChoiceFilter(
         label="Solicitante",
         required=False,
@@ -132,14 +125,10 @@ class TaskFilter(FilterSet):
         required=False,
         widget=MDSelect(url='/origin_requester_form'),
         queryset=Office.objects.all())
-    person_distributed_by = CharFilter(
+    person_distributed_by = ModelChoiceFilter(
         label="Contratante",
         required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Person,
-            field_related='legal_name',
-            name='person_distributed_by',
-            url='/service_form'))
+        widget=MDSelect(url='/service_form', ), )
     final_deadline_date_in = MDDateTimeRangeFilter(
         name='final_deadline_date_in', label='Prazo entre:')
     requested_in = MDDateTimeRangeFilter(
@@ -197,8 +186,11 @@ class TaskFilter(FilterSet):
                 custom_settings.task_status_show.values_list(
                     'status_to_show', flat=True).order_by('status_to_show'))
             self.filters['task_status'].extra['choices'] = self.set_task_status_choices(task_status_choices)
-        self.filters['person_asked_by'].queryset = Person.objects.requesters(office_id=office_session.id)
-        self.filters['origin_office_asked_by'].queryset = office_session.offices.all()
+        self.filters['person_asked_by'].queryset = Person.objects.requesters().filter(offices=office_session)
+        self.filters['person_executed_by'].queryset = Person.objects.correspondents(office_id=office_session.id)
+        self.filters['person_distributed_by'].queryset = Person.objects.services().filter(offices=office_session)
+        self.filters['office_executed_by'].queryset = \
+            self.filters['origin_office_asked_by'].queryset = office_session.offices.all()
 
     class Meta:
         model = DashboardViewModel
