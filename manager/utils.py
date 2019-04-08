@@ -59,6 +59,7 @@ def get_template_value_value(office, template_key):
     manager = GetTemplateValue(office, template_key)
     return manager.value
 
+
 def exist_template_value(office, template_key):
     from manager.template_values import GetTemplateValue
     return GetTemplateValue(office, template_key).instance_values.exists()
