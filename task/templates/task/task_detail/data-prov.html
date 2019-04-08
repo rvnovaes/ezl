@@ -115,7 +115,15 @@
             <tr>
                 <th>Valor Delegado</th>
                 <td>
-                    <span id="amount-delegated">{{ form.instance.amount_delegated }}</span> {% if form.instance|show_edit_amount %} <button class="btn btn-link" type="button" id="task-edit-amount"><i class="fa fa-edit"> </i> Editar</button> {% endif %}
+                    <span id="amount-delegated">
+                        {{ form.instance.amount_delegated }}
+                    </span> {% if form.instance|show_edit_amount %}
+                    <button class="btn btn-link" type="button" id="task-edit-amount">
+                        <i class="fa fa-edit"> </i> Editar
+                    </button> {% else %}
+                    <a class="btn btn-link ezl-tooltip" title="Só é permitido ao contratante alterar o valor de delegação da OS quando o tipo de preço for diferente de 'Rede'">
+                        <i class="mdi mdi-information"></i>
+                    </a>{% endif %}
                 </td>
             </tr>
         {% endif %}
