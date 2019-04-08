@@ -70,14 +70,14 @@ class TaskFilter(FilterSet):
                                                   required=False,
                                                   widget=MDSelect(url='/processos/complement_filter_select2',
                                                                   forward=['court_district']),
-                                                  queryset=CourtDistrictComplement.objects.none())
+                                                  queryset=CourtDistrictComplement.objects.all())
     task_status = MultipleChoiceFilter(
         label="Status",
         required=False,
         choices=[(task_status.name, task_status.value)
                  for task_status in TaskStatus])
     type_task = ModelMultipleChoiceFilter(
-        queryset=TypeTask.objects.none(),
+        queryset=TypeTask.objects.all(),
         label='Tipo de Serviço',
         widget=autocomplete.ModelSelect2Multiple(url='type-task-filter-autocomplete'))
     type_task_main = ModelMultipleChoiceFilter(
@@ -87,11 +87,11 @@ class TaskFilter(FilterSet):
     cost_center = ModelChoiceFilter(label="Setor",
                                     required=False,
                                     widget=MDSelect(url='/financeiro/centros-de-custos/filter_autocomplete',),
-                                    queryset=filter_valid_choice_form(CostCenter.objects.none()),)
+                                    queryset=filter_valid_choice_form(CostCenter.objects.all()),)
     court = ModelChoiceFilter(label="Órgão",
                               required=False,
                               widget=MDSelect(url='/processos/organ_filter_select2_autocomplete', ),
-                              queryset=Organ.objects.none(),)
+                              queryset=Organ.objects.all(),)
     team = ModelChoiceFilter(label="Equipe",
                              required=False,
                              widget=MDSelect(url='/teams/filter_autocomplete_select2/', ),
@@ -103,7 +103,7 @@ class TaskFilter(FilterSet):
     task_legacy_code = CharFilter(label=u"Nº da OS de origem")
     task_origin_code = NumberFilter(label=u"Nº da OS de origem")
     client = ModelMultipleChoiceFilter(
-        queryset=Person.objects.filter(is_active=True, is_customer=True),
+        queryset=Person.objects.filter(is_customer=True),
         label='Cliente',
         widget=autocomplete.ModelSelect2Multiple(url='client_filter_select2'))
     office_executed_by = CharFilter(
@@ -122,22 +122,16 @@ class TaskFilter(FilterSet):
             field_related='legal_name',
             name='person_executed_by',
             url='/correspondent_form'))
-    person_asked_by = CharFilter(
+    person_asked_by = ModelChoiceFilter(
         label="Solicitante",
         required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Person,
-            field_related='legal_name',
-            name='person_asked_by',
-            url='/requester_form'))
-    origin_office_asked_by = CharFilter(
+        widget=MDSelect(url='/requester_form', ),
+        queryset=Person.objects.requesters().none())
+    origin_office_asked_by = ModelChoiceFilter(
         label="Solicitante de origem",
         required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Office,
-            field_related='legal_name',
-            name='origin_office_asked_by',
-            url='/origin_requester_form'))    
+        widget=MDSelect(url='/origin_requester_form'),
+        queryset=Office.objects.all())
     person_distributed_by = CharFilter(
         label="Contratante",
         required=False,
@@ -203,6 +197,8 @@ class TaskFilter(FilterSet):
                 custom_settings.task_status_show.values_list(
                     'status_to_show', flat=True).order_by('status_to_show'))
             self.filters['task_status'].extra['choices'] = self.set_task_status_choices(task_status_choices)
+        self.filters['person_asked_by'].queryset = Person.objects.requesters(office_id=office_session.id)
+        self.filters['origin_office_asked_by'].queryset = office_session.offices.all()
 
     class Meta:
         model = DashboardViewModel

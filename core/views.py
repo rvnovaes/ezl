@@ -1670,32 +1670,25 @@ class OfficeCorrespondentAutocomplete(TypeaHeadGenericSearch):
         return list(data)
 
 
-class RequesterAutocomplete(TypeaHeadGenericSearch):
-    @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params,
-                 *args, **kwargs):
-        data = []
-        for requester in Person.objects.active().requesters().filter(
-                Q(legal_name__unaccent__icontains=q), Q(offices=office)):
-            data.append({
-                'id': requester.id,
-                'data-value-txt': requester.__str__()
-            })
-        return list(data)
+class RequesterAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return Person.objects.none()
+        qs = Person.objects.requesters().filter(offices=get_office_session(self.request))
+        if self.q:
+            qs = qs.filter(legal_name__unaccent__icontains=self.q)
+        return qs
 
 
-class OriginRequesterAutocomplete(TypeaHeadGenericSearch):
-    @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params,
-                 *args, **kwargs):
-        data = []
-        for office_correspondent in office.offices.filter(
-                Q(legal_name__unaccent__icontains=q)):
-            data.append({
-                'id': office_correspondent.id,
-                'data-value-txt': office_correspondent.__str__()
-            })
-        return list(data)
+class OriginRequesterAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return Office.objects.none()
+        office = get_office_session(self.request)
+        qs = office.offices.all()
+        if self.q:
+            qs = qs.filter(legal_name__unaccent__icontains=self.q)
+        return qs
 
 
 class ServiceAutocomplete(TypeaHeadGenericSearch):
