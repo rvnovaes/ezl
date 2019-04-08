@@ -28,6 +28,7 @@ ERROR_PROCESS
 from core.views import remove_invalid_registry, TypeaHeadGenericSearch
 from core.utils import get_office_session
 from .utils import clearCache
+from dal import autocomplete
 
 
 class CostCenterListView(CustomLoginRequiredView, SingleTableViewMixin):
@@ -97,6 +98,20 @@ class CostCenterAutocomplete(TypeaHeadGenericSearch):
                                                      Q(office=office)):
             data.append({'id': cost_center.id, 'data-value-txt': cost_center.__str__()})
         return list(data)
+
+
+class CostCenterFilterAutocompleteSelect2(autocomplete.Select2QuerySetView):
+    @property
+    def base_queryset(self):
+        return CostCenter.objects.filter(office=get_office_session(self.request))
+
+    def get_queryset(self):
+        if not self.request.user.is_authenticated():
+            return CostCenter.objects.none()
+        qs = self.base_queryset
+        if self.q:
+            qs = qs.filter(name__unaccent__icontains=self.q)
+        return qs
 
 
 class ServicePriceTableListView(CustomLoginRequiredView, SingleTableViewMixin):

@@ -6,7 +6,7 @@ from dal import autocomplete
 from django.db.models import Q
 from core.models import Person, State, Office, Team
 from core.utils import filter_valid_choice_form
-from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget
+from core.widgets import MDDateTimeRangeFilter, TypeaHeadForeignKeyWidget, MDSelect
 from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ, CourtDistrictComplement
 from task.models import TypeTask, Task, Filter, TaskStatus
@@ -42,6 +42,7 @@ class MultiValueCharFilter(filters.BaseCSVFilter, filters.CharFilter):
 
         return qs
 
+
 class TaskApiFilter(FilterSet):
     is_hearing = filters.BooleanFilter(name='type_task__type_task_main__is_hearing')
     office_id = MultiValueCharFilter(name='office_id', lookup_expr='in')
@@ -62,42 +63,39 @@ class TaskFilter(FilterSet):
         label="UF",
         widget=autocomplete.ModelSelect2Multiple(url='state-autocomplete'))
     court_district = ModelMultipleChoiceFilter(
-        queryset=filter_valid_choice_form(CourtDistrict.objects.filter(is_active=True)),
+        queryset=filter_valid_choice_form(CourtDistrict.objects.all()),
         label='Comarca',
-        widget=autocomplete.ModelSelect2Multiple(url='courtdistrict_select2', forward=['state']))
-    court_district_complement = CharFilter(
-        label="Complemento de Comarca",
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=CourtDistrictComplement,
-            field_related='name',
-            forward='court_district',
-            name='court_district_complement',
-            url='/processos/typeahead/search/complemento',))
+        widget=autocomplete.ModelSelect2Multiple(url='courtdistrict_filter_select2', forward=['state']))
+    court_district_complement = ModelChoiceFilter(label='Complemento de Comarca',
+                                                  required=False,
+                                                  widget=MDSelect(url='/processos/complement_filter_select2',
+                                                                  forward=['court_district']),
+                                                  queryset=CourtDistrictComplement.objects.all())
     task_status = MultipleChoiceFilter(
         label="Status",
         required=False,
         choices=[(task_status.name, task_status.value)
                  for task_status in TaskStatus])
     type_task = ModelMultipleChoiceFilter(
-        queryset=TypeTask.objects.filter(is_active=True),
+        queryset=TypeTask.objects.all(),
         label='Tipo de Serviço',
-        widget=autocomplete.ModelSelect2Multiple(url='type-task-autocomplete'))
+        widget=autocomplete.ModelSelect2Multiple(url='type-task-filter-autocomplete'))
     type_task_main = ModelMultipleChoiceFilter(
         queryset=TypeTaskMain.objects.all(),
         label='Tipo de Serviço Principal',
         widget=autocomplete.ModelSelect2Multiple(url='type-task-main-autocomplete'))    
-    cost_center = ModelChoiceFilter(
-        queryset=filter_valid_choice_form(
-            CostCenter.objects.filter(is_active=True)),
-        label="Setor")
-    court = ModelChoiceFilter(
-        queryset=filter_valid_choice_form(
-            Organ.objects.filter(is_active=True)),
-        label="Órgão")
-    team = ModelChoiceFilter(
-        queryset=filter_valid_choice_form(Team.objects.filter(is_active=True)),
-        label="Equipe")
+    cost_center = ModelChoiceFilter(label="Setor",
+                                    required=False,
+                                    widget=MDSelect(url='/financeiro/centros-de-custos/filter_autocomplete',),
+                                    queryset=filter_valid_choice_form(CostCenter.objects.all()),)
+    court = ModelChoiceFilter(label="Órgão",
+                              required=False,
+                              widget=MDSelect(url='/processos/organ_filter_select2_autocomplete', ),
+                              queryset=Organ.objects.all(),)
+    team = ModelChoiceFilter(label="Equipe",
+                             required=False,
+                             widget=MDSelect(url='/teams/filter_autocomplete_select2/', ),
+                             queryset=Team.objects.all(),)
     folder_number = NumberFilter(label=u"Nº da pasta")
     folder_legacy_code = CharFilter(label=u"Nº da pasta de origem")
     law_suit_number = CharFilter(label=u"Nº do processo")
@@ -105,49 +103,32 @@ class TaskFilter(FilterSet):
     task_legacy_code = CharFilter(label=u"Nº da OS de origem")
     task_origin_code = NumberFilter(label=u"Nº da OS de origem")
     client = ModelMultipleChoiceFilter(
-        queryset=Person.objects.filter(is_active=True, is_customer=True),
+        queryset=Person.objects.filter(is_customer=True),
         label='Cliente',
-        widget=autocomplete.ModelSelect2Multiple(url='get_client_2'))
-    office_executed_by = CharFilter(
+        widget=autocomplete.ModelSelect2Multiple(url='client_filter_select2'))
+    office_executed_by = ModelChoiceFilter(
         label='Escritório contratado',
         required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Office,
-            field_related='legal_name',
-            name='office_executed_by',
-            url='/office_correspondent_form'))
-    person_executed_by = CharFilter(
+        widget=MDSelect(url='/office_correspondent_form', ),
+        queryset=Office.objects.all())
+    person_executed_by = ModelChoiceFilter(
         label="Correspondente",
         required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Person,
-            field_related='legal_name',
-            name='person_executed_by',
-            url='/correspondent_form'))
-    person_asked_by = CharFilter(
+        widget=MDSelect(url='/correspondent_form', ),)
+    person_asked_by = ModelChoiceFilter(
         label="Solicitante",
         required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Person,
-            field_related='legal_name',
-            name='person_asked_by',
-            url='/requester_form'))
-    origin_office_asked_by = CharFilter(
+        widget=MDSelect(url='/requester_form', ),
+        queryset=Person.objects.requesters().none())
+    origin_office_asked_by = ModelChoiceFilter(
         label="Solicitante de origem",
         required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Office,
-            field_related='legal_name',
-            name='origin_office_asked_by',
-            url='/origin_requester_form'))    
-    person_distributed_by = CharFilter(
+        widget=MDSelect(url='/origin_requester_form'),
+        queryset=Office.objects.all())
+    person_distributed_by = ModelChoiceFilter(
         label="Contratante",
         required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Person,
-            field_related='legal_name',
-            name='person_distributed_by',
-            url='/service_form'))
+        widget=MDSelect(url='/service_form', ), )
     final_deadline_date_in = MDDateTimeRangeFilter(
         name='final_deadline_date_in', label='Prazo entre:')
     requested_in = MDDateTimeRangeFilter(
@@ -205,6 +186,11 @@ class TaskFilter(FilterSet):
                 custom_settings.task_status_show.values_list(
                     'status_to_show', flat=True).order_by('status_to_show'))
             self.filters['task_status'].extra['choices'] = self.set_task_status_choices(task_status_choices)
+        self.filters['person_asked_by'].queryset = Person.objects.requesters().filter(offices=office_session)
+        self.filters['person_executed_by'].queryset = Person.objects.correspondents(office_id=office_session.id)
+        self.filters['person_distributed_by'].queryset = Person.objects.services().filter(offices=office_session)
+        self.filters['office_executed_by'].queryset = \
+            self.filters['origin_office_asked_by'].queryset = office_session.offices.all()
 
     class Meta:
         model = DashboardViewModel

@@ -1196,7 +1196,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
     table_class = DashboardStatusTable
 
     def query_builder(self):
-        query_set = {}
+        query_set = self.model.objects.none()
         person_dynamic_query = Q()
         person = Person.objects.get(auth_user=self.request.user)
         office_session = get_office_session(self.request)
@@ -2229,13 +2229,23 @@ def ajax_bulk_create_update_status(request):
 
 
 class TypeTaskAutocomplete(autocomplete.Select2QuerySetView):
+    @property
+    def base_queryset(self):
+        return TypeTask.objects.filter(is_active=True, office=get_office_session(self.request))
+
     def get_queryset(self):
         if not self.request.user.is_authenticated():
             return TypeTask.objects.none()
-        qs = TypeTask.objects.filter(is_active=True, office=get_office_session(self.request))
+        qs = self.base_queryset
         if self.q:
             qs = qs.filter(name__unaccent__icontains=self.q)
         return qs
+
+
+class TypeTaskFilterAutocomplete(TypeTaskAutocomplete):
+    @property
+    def base_queryset(self):
+        return TypeTask.objects.filter(office=get_office_session(self.request))
 
 
 class TypeTaskMainAutocomplete(autocomplete.Select2QuerySetView):
