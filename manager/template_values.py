@@ -94,6 +94,12 @@ class GetTemplateValue(GenericTemplateValues):
         values = self.dispatch()
         return values.get('value')
 
+    @value.setter
+    def value(self, value):
+        template_value = self.instance_values.first()
+        template_value.value['value'] = value
+        template_value.save()
+
     @property
     def default_value(self):
         template_obj = self.get_template_value_obj.template

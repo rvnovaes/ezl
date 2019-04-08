@@ -71,6 +71,7 @@ try:
     aws_s3_file_overwrite = config['aws'].getboolean('aws_s3_file_overwrite')
     aws_storage_bucket_name = config['aws']['aws_storage_bucket_name']
     aws_storage_bucket_url = config['aws']['aws_storage_bucket_url']
+    aws_default_acl = config['aws']['aws_default_acl']
 
     rest_page_size = config['rest_framework']['page_size']
     rest_access_token_expire = config['rest_framework']['access_token_expire']
@@ -343,6 +344,7 @@ AWS_QUERYSTRING_AUTH = aws_querystring_auth
 AWS_S3_FILE_OVERWRITE = aws_s3_file_overwrite
 AWS_STORAGE_BUCKET_NAME = aws_storage_bucket_name
 AWS_STORAGE_BUCKET_URL = aws_storage_bucket_url
+AWS_DEFAULT_ACL = aws_default_acl
 
 LOGIN_REDIRECT_URL = reverse_lazy('inicial')
 
