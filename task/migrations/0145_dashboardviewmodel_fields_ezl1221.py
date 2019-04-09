@@ -10,7 +10,7 @@ from task.queries import get_dashboard_view_model_sql
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0143_fix_task_hash'),
+        ('task', '0144_auto_20190402_1046'),
     ]
 
     operations = []
