@@ -1504,14 +1504,12 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return super().get(request)
 
     def _export_result(self, request):
+        from task.queries import get_filter_tasks
         self.object_list = self.get_queryset()
-        data = self.get_queryset().annotate(
-            origin_code=Coalesce(Cast('parent__task_number', TextField()), Cast('legacy_code', TextField()))
-        ).values(
-            'task_status', 'task_number', 'final_deadline_date', 'type_task__name', 'law_suit_number', 'client',
-            'opposing_party', 'origin_code', 'court_district__name', 'description', 'state__initials',
-            'court_division__name', 'requested_date'
-        )
+        tasks = list(self.object_list.values_list('id', flat=True))
+        data = {}
+        if tasks:
+            data = get_filter_tasks(tasks)
         report = ExportFilterTask(data)
         output = report.get_report()
         filename = 'resultados_da_pesquisa.xlsx'
