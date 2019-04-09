@@ -34,7 +34,7 @@ class PersonManagerQuerySet(QuerySet):
     def correspondents(self, office_id=False):
         if office_id:
             return self.filter(
-                auth_user__groups__name__startswith='{}-{}'.format(self.model.CORRESPONDENT_GROUP, str(office_id))
+                auth_user__groups__name='{}-{}'.format(self.model.CORRESPONDENT_GROUP, str(office_id))
             ).order_by('name', 'auth_user').distinct('name', 'auth_user')
 
         return self.filter(auth_user__groups__name__startswith='{}-'.format(self.model.CORRESPONDENT_GROUP)).order_by(
@@ -43,7 +43,7 @@ class PersonManagerQuerySet(QuerySet):
     def requesters(self, office_id=False):
         if office_id:
             return self.filter(
-                auth_user__groups__name__startswith='{}-{}'.format(self.model.REQUESTER_GROUP, str(office_id))
+                auth_user__groups__name='{}-{}'.format(self.model.REQUESTER_GROUP, str(office_id))
             ).order_by('name', 'auth_user').distinct('name', 'auth_user')
 
         return self.filter(
@@ -53,7 +53,7 @@ class PersonManagerQuerySet(QuerySet):
     def finances(self, office_id=False):
         if office_id:
             return self.filter(
-                auth_user__groups__name__startswith='{}-{}'.format(self.model.FINANCE_GROUP, str(office_id))
+                auth_user__groups__name='{}-{}'.format(self.model.FINANCE_GROUP, str(office_id))
             ).order_by('name', 'auth_user').distinct('name', 'auth_user')
 
         return self.filter(
@@ -63,7 +63,7 @@ class PersonManagerQuerySet(QuerySet):
     def services(self, office_id=False):
         if office_id:
             return self.filter(
-                auth_user__groups__name__startswith='{}-{}'.format(self.model.SERVICE_GROUP, str(office_id))
+                auth_user__groups__name='{}-{}'.format(self.model.SERVICE_GROUP, str(office_id))
             ).order_by('name', 'auth_user').distinct('name', 'auth_user')
 
         return self.filter(

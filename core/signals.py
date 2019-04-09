@@ -9,7 +9,7 @@ from task.mail import SendMail
 from task.utils import create_default_type_tasks
 from django.template.loader import render_to_string
 from core.permissions import create_permission
-from core.utils import update_office_custom_settings
+from core.utils import create_office_custom_settings
 from guardian.shortcuts import get_groups_with_perms
 from core.utils import create_office_template_value, add_create_user_to_admin_group
 from manager.utils import get_template_by_key, create_template_value, exist_template_value, update_template_value
@@ -173,16 +173,16 @@ def office_post_save(sender, instance, created, **kwargs):
         create_office_setting_email_notification(instance)
         add_create_user_to_admin_group(instance)
 
-    # TODO: Retirar metodo a seguir depois de eliminar a relacao entre CustomSettings e TaskWorkflow e
-    #  TaskStatusToShow
-    CustomSettings.objects.update_or_create(
-        office=instance,
-        create_user_id=instance.create_user_id,
-        is_active=True,
-        defaults={
-            'alter_user_id': instance.create_user.id
-        }
-    )
+        # TODO: Retirar metodo a seguir depois de eliminar a relacao entre CustomSettings e TaskWorkflow e
+        #  TaskStatusToShow
+        CustomSettings.objects.update_or_create(
+            office=instance,
+            create_user_id=instance.create_user_id,
+            is_active=True,
+            defaults={
+                'alter_user_id': instance.create_user.id
+            }
+        )
 
 
 @receiver(post_delete, sender=Office)
@@ -193,4 +193,5 @@ def office_post_delete(sender, instance, **kwargs):
 
 @receiver(post_save, sender=CustomSettings)
 def custom_settings_post_save(sender, instance, created, **kwargs):
-    update_office_custom_settings(instance.office)
+    if created:
+        create_office_custom_settings(instance.office)
