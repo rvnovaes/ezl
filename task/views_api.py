@@ -75,6 +75,15 @@ class TaskViewSet(OfficeMixinViewSet, ApplicationView):
         return queryset
 
 
+@permission_classes((TokenHasReadWriteScope, ))
+class TaskDashboardEZLViewSet(TaskViewSet):
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(parent__isnull=True,
+                         price_category__in=['PUBLIC', 'NETWORK'])
+
+
 @api_view(['GET'])
 @permission_classes((TokenHasReadWriteScope, ))
 def list_audience_totals(request):

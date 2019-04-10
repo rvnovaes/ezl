@@ -75,6 +75,7 @@ class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):
 
 class CompanySerializer(serializers.ModelSerializer):
     show_administrative_menus = serializers.SerializerMethodField()
+
     class Meta:
         model = Company
         fields = ('id', 'name', 'logo', 'show_administrative_menus')

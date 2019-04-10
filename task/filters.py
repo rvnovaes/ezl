@@ -52,8 +52,8 @@ class TaskApiFilter(FilterSet):
 
     class Meta:
         model = Task
-        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date', 
-        'task_status', 'person_executed_by_id']
+        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date',
+                  'task_status', 'person_executed_by_id']
 
 
 class TaskFilter(FilterSet):
