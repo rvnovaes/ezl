@@ -292,20 +292,26 @@ class TypeTask(Audit, LegacyCode, OfficeMixin):
         return self.name
 
 
-class Task(Audit, LegacyCode, OfficeMixin):
+class TaskBase(Audit, LegacyCode, OfficeMixin):
     task_hash = models.UUIDField(default=uuid.uuid4, editable=False)
-    TASK_NUMBER_SEQUENCE = 'task_task_task_number'
-
+    amount = models.DecimalField(
+        null=False,
+        blank=False,
+        verbose_name='Valor',
+        max_digits=9,
+        decimal_places=2,
+        default=Decimal('0.00'))
+    # Responsável por armanezar a categoria do preço. Recebe o valor do campo PolicyPrice.category, ao ser delegado
+    price_category = models.CharField(verbose_name='Categoria do preço', max_length=255,
+                                      choices=CategoryPrice.choices(), null=True, blank=True)
     parent = models.ForeignKey(
         'self',
         null=True,
         blank=True,
         on_delete=models.PROTECT,
         related_name='child')
-
     task_number = models.PositiveIntegerField(
         verbose_name='Número da Providência', unique=False)
-
     movement = models.ForeignKey(
         Movement,
         on_delete=models.PROTECT,
@@ -370,22 +376,51 @@ class Task(Audit, LegacyCode, OfficeMixin):
 
     description = models.TextField(
         null=True, blank=True, verbose_name=u'Descrição do serviço')
-
     task_status = models.CharField(
         null=False,
         verbose_name='Status da OS',
         max_length=30,
         choices=((x.value, x.name.title()) for x in TaskStatus),
         default=TaskStatus.REQUESTED)
+    person_company_representative = models.ForeignKey(
+        Person,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        verbose_name='Preposto', related_name='%(class)s_to_person_representative')
+
+    __previous_status = None  # atributo transient
+
+    objects = OfficeManager()
+
+    class Meta:
+        abstract = True
+
+    # TODO fazer composição para buscar no endereço completo
+    # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de
+    # variável nula / Martins
+    @property
+    def address(self):
+        address = ''
+        organ = self.movement.law_suit.organ
+        if organ:
+            address = organ.address_set.first()
+        return address
+
+    @property
+    def court(self):
+        return self.movement.law_suit.organ
+
+    @property
+    def status(self):
+        return TaskStatus(self.task_status)
+
+
+class Task(TaskBase):
+    TASK_NUMBER_SEQUENCE = 'task_task_task_number'
+
     survey_result = JSONField(
         verbose_name=u'Respotas do Formulário', blank=True, null=True)
-    amount = models.DecimalField(
-        null=False,
-        blank=False,
-        verbose_name='Valor',
-        max_digits=9,
-        decimal_places=2,
-        default=Decimal('0.00'))
     amount_delegated = models.DecimalField(
         null=False,
         blank=False,
@@ -411,9 +446,6 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                          choices=RateType.choices(), default=RateType.PERCENT)
     rate_type_pay = models.CharField(verbose_name='Tipo de taxa a pagar', max_length=10,
                                      choices=RateType.choices(), default=RateType.PERCENT)
-    # Responsável por armanezar a categoria do preço. Recebe o valor do campo PolicyPrice.category, ao ser delegado
-    price_category = models.CharField(verbose_name='Categoria do preço', max_length=255,
-                                      choices=CategoryPrice.choices(), null=True, blank=True)
     chat = models.ForeignKey(
         Chat,
         verbose_name='Chat',
@@ -434,12 +466,6 @@ class Task(Audit, LegacyCode, OfficeMixin):
         blank=False,
         max_length=255,
         verbose_name='Local de cumprimento')
-    person_company_representative = models.ForeignKey(
-        Person,
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True,
-        verbose_name='Preposto', related_name='tasks_to_person_representative')
     charge = models.ForeignKey(Charge, on_delete=models.PROTECT, blank=True, null=True)
 
     """
@@ -470,11 +496,8 @@ class Task(Audit, LegacyCode, OfficeMixin):
                                                  'legacy_code', 'system_prefix', 'is_active', 'charge',
                                                  'price_category', 'rate_type_pay', 'rate_type_receive'])
 
-    __previous_status = None  # atributo transient
     __notes = None  # atributo transient
     _mail_attrs = None  # atributo transiente
-
-    objects = OfficeManager()
 
     class Meta:
         db_table = 'task'
@@ -483,10 +506,6 @@ class Task(Audit, LegacyCode, OfficeMixin):
         verbose_name_plural = 'Providências'
         permissions = [(i.name, i.value) for i in Permissions]
         unique_together = ('task_number', 'office')
-
-    @property
-    def status(self):
-        return TaskStatus(self.task_status)
 
     @property
     def client(self):
@@ -515,21 +534,6 @@ class Task(Audit, LegacyCode, OfficeMixin):
     @property
     def city(self):
         return self.movement.law_suit.city
-
-    @property
-    def court(self):
-        return self.movement.law_suit.organ
-
-    # TODO fazer composição para buscar no endereço completo
-    # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de
-    # variável nula / Martins
-    @property
-    def address(self):
-        address = ''
-        organ = self.movement.law_suit.organ
-        if organ:
-            address = organ.address_set.first()
-        return address
 
     def get_absolute_url(self):
         return reverse("task_detail", kwargs={"pk": self.id})
@@ -841,106 +845,25 @@ class TaskGeolocation(Audit):
         return "{},{}".format(self.latitude, self.longitude)
 
 
-class DashboardViewModel(Audit, OfficeMixin):
-    parent = models.ForeignKey(
-        'self',
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT,
-        related_name='child')
-    legacy_code = models.CharField(
-        max_length=255, blank=True, null=True, verbose_name='Código legado')
-    task_number = models.PositiveIntegerField(
-        default=0, verbose_name='Número da Providência')
-
-    movement = models.ForeignKey(
-        Movement,
-        on_delete=models.PROTECT,
-        blank=False,
-        null=False,
-        verbose_name='Movimentação')
+class TaskFilterViewModel(TaskBase):
+    asked_by_legal_name = models.TextField(
+        verbose_name='Nome', blank=True, null=True, max_length=255)
+    client = models.CharField(
+        null=True, verbose_name='Cliente', max_length=255)
     court_district = models.ForeignKey(
         CourtDistrict,
         on_delete=models.PROTECT,
         verbose_name='Comarca')
+    court_district_name = models.TextField(
+        verbose_name='Nome da comarca', null=True, blank=True, max_length=255)
     court_division = models.ForeignKey(
         CourtDivision,
         on_delete=models.PROTECT,
         verbose_name='Vara')
-    state = models.ForeignKey(
-        State,
-        on_delete=models.PROTECT,
-        verbose_name='UF')
-    person_asked_by = models.ForeignKey(
-        Person,
-        on_delete=models.PROTECT,
-        blank=False,
-        null=True,
-        related_name='%(class)s_asked_by',
-        verbose_name='Solicitante')
-    person_company_representative = models.ForeignKey(
-        Person,
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True,
-        related_name='%(class)s_company_representative',
-        verbose_name='Preposto')
-    person_executed_by = models.ForeignKey(
-        Person,
-        on_delete=models.PROTECT,
-        blank=False,
-        null=True,
-        related_name='%(class)s_executed_by',
-        verbose_name='Correspondente')
-    person_distributed_by = models.ForeignKey(
-        Person,
-        on_delete=models.PROTECT,
-        blank=False,
-        null=True,
-        verbose_name='Service')
-    type_task = models.ForeignKey(
-        TypeTask,
-        on_delete=models.PROTECT,
-        blank=False,
-        null=False,
-        verbose_name='Tipo de Serviço')
-    requested_date = models.DateTimeField(
-        null=True, verbose_name='Data de Solicitação')
-    acceptance_service_date = models.DateTimeField(
-        null=True, verbose_name='Data de Aceitação pelo Contratante')
-    refused_service_date = models.DateTimeField(
-        null=True, verbose_name='Data de Recusa pelo Contratante')
-    delegation_date = models.DateTimeField(
-        default=timezone.now, verbose_name='Data de Delegação')
-    acceptance_date = models.DateTimeField(
-        null=True, verbose_name='Data de Aceitação')
-    final_deadline_date = models.DateTimeField(null=True, verbose_name='Prazo')
-    execution_date = models.DateTimeField(
-        null=True, verbose_name='Data de Cumprimento')
-
-    return_date = models.DateTimeField(
-        null=True, verbose_name='Data de Retorno')
-    refused_date = models.DateTimeField(
-        null=True, verbose_name='Data de Recusa')
-
-    blocked_payment_date = models.DateTimeField(
-        null=True, verbose_name='Data da Glosa')
-    finished_date = models.DateTimeField(
-        null=True, verbose_name='Data de Finalização')
-
-    description = models.TextField(
-        null=True, blank=True, verbose_name=u'Descrição do serviço')
-
-    task_status = models.CharField(
-        null=False,
-        verbose_name=u'',
-        max_length=30,
-        choices=((x.value, x.name.title()) for x in TaskStatus),
-        default=TaskStatus.OPEN)
-    client = models.CharField(
-        null=True, verbose_name='Cliente', max_length=255)
-    type_service = models.CharField(
-        null=True, verbose_name='Serviço', max_length=255)
+    court_division_name = models.TextField(
+        verbose_name='Nome da vara', null=True, blank=True, max_length=255)
+    executed_by_legal_name = models.TextField(
+        verbose_name='Nome', blank=True, null=True, max_length=255)
     law_suit_number = models.CharField(
         max_length=255,
         blank=True,
@@ -948,50 +871,29 @@ class DashboardViewModel(Audit, OfficeMixin):
         verbose_name='Número do Processo')
     opposing_party = models.TextField(
         blank=True, null=True, verbose_name='Parte adversa')
+    office_legal_name = models.TextField(
+        blank=True, null=True, verbose_name='Escritório/Empresa')
+    origin_code = models.TextField(
+        verbose_name='Nome', blank=True, null=True, max_length=255)
     parent_task_number = models.PositiveIntegerField(
         default=0, verbose_name='OS Original')
-
-    __previous_status = None  # atributo transient
-    __notes = None  # atributo transient
+    state = models.ForeignKey(
+        State,
+        on_delete=models.PROTECT,
+        verbose_name='UF')
+    state_initials = models.TextField(
+        verbose_name='Sigla UF', max_length=10)
+    type_task_name = models.TextField(
+        verbose_name='Nome Tipo de Serviço', max_length=255)
 
     class Meta:
-        db_table = 'dashboard_view'
+        db_table = 'task_filter_view'
         managed = False
-        verbose_name = 'Providência'
-        verbose_name_plural = 'Providências'
-
-    @property
-    def status(self):
-        return TaskStatus(self.task_status)
+        verbose_name = 'Filtro de providência'
+        verbose_name_plural = 'Filtros de providência'
 
     def __str__(self):
-        return self.type_task.name
-
-    def executed_by(self):
-        task_child = Task(self.id).get_child
-        if task_child:
-            return str(task_child.office)
-        return str(self.person_executed_by)
-
-    def asked_by(self):
-        if self.parent:
-            return str(self.parent.office)
-        return str(self.person_asked_by)
-
-    @property
-    def court(self):
-        return self.movement.law_suit.organ
-
-    # TODO fazer composição para buscar no endereço completo
-    # TODO Modifiquei pois quando não há orgão cadastrado em lawsuit lança erro de
-    # variável nula / Martins
-    @property
-    def address(self):
-        address = ''
-        organ = self.movement.law_suit.organ
-        if organ:
-            address = organ.address_set.first()
-        return address
+        return self.type_task_name
 
     @property
     def cost_center(self):
@@ -1002,13 +904,6 @@ class DashboardViewModel(Audit, OfficeMixin):
     def folder_number(self):
         folder = Folder.objects.get(folders__law_suits__task__exact=self)
         return folder.folder_number
-
-    @property
-    def origin_code(self):
-        if self.parent_task_number:
-            return self.parent_task_number
-        else:
-            return self.legacy_code
 
 
 class Filter(Audit):

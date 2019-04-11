@@ -1,4 +1,4 @@
-from .models import TypeTask, Task, Ecm, TypeTaskMain
+from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskFilterViewModel
 from rest_framework import serializers
 from core.models import Person, Office
 from core.serializers import OfficeDefault, CreateUserDefault, CreateUserSerializerMixin, OfficeSerializerMixin
@@ -101,6 +101,17 @@ class TaskCreateSerializer(TaskSerializer):
         model = Task
         fields = ('final_deadline_date', 'performance_place', 'movement', 'type_task', 'description', 'task_status',
                   'legacy_code', 'requested_date', 'create_user', 'office', 'task_hash')
+
+
+class TaskDashboardSerializer(serializers.ModelSerializer):
+    external_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TaskFilterViewModel
+        exclude = ('alter_date', 'system_prefix', 'task_hash')
+
+    def get_external_url(self, obj):
+        return 'providencias/external-task-detail/' + obj.task_hash.hex
 
 
 class EcmTaskSerializer(serializers.ModelSerializer,
