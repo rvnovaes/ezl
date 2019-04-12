@@ -35,17 +35,8 @@ class Migration(migrations.Migration):
             task.create_user_id as create_user_id,
             task.delegation_date as delegation_date,
             task.description as description,
-            COALESCE(task_person_executed_by.legal_name, (
-                select sub2_office.legal_name 
-                    from task as sub1_task
-                    inner join core_office as sub2_office on sub2_office.id = sub1_task.office_id 
-                    where sub1_task.id = (
-                        select MAX(sub4_task.id) as child_id 
-                            from task as sub3_task 
-                            inner join task as sub4_task on sub4_task.parent_id = sub3_task.id
-                            where sub3_task.id = task.id and not sub3_task.task_status in ('Recusada pelo Service', 'Recusada')
-                        )
-            )) AS executed_by_legal_name,
+            COALESCE(task.person_executed_by_id, child_office.office_child_id) AS executed_by_id,
+            COALESCE(task_person_executed_by.legal_name, child_office.legal_name) AS executed_by_legal_name,
             task.execution_date as execution_date,
             task.final_deadline_date as final_deadline_date,
             task.finished_date as finished_date,
@@ -83,7 +74,7 @@ class Migration(migrations.Migration):
                                 (
                                     (
                                         (task
-                                    	 join core_office as task_office on task_office.id = task.office_id
+                                         JOIN core_office as task_office on task_office.id = task.office_id
                                          JOIN movement ON (
                                             (task.movement_id = movement.id)
                                         ))
@@ -112,6 +103,18 @@ class Migration(migrations.Migration):
                 task.parent_id = task_parent.id)
             LEFT JOIN core_office AS parent_office ON (task_parent.office_id = parent_office.id)
             LEFT JOIN person as task_person_executed_by ON (task.person_executed_by_id = task_person_executed_by.id)
+            LEFT JOIN (select sub3_task.id as sub_parent_id, MAX(sub4_task.id) as child_id 
+                        from task as sub3_task 
+                        inner join task as sub4_task on sub4_task.parent_id = sub3_task.id
+                        where not sub3_task.task_status in ('Recusada pelo Service', 'Recusada')
+                        group by sub3_task.id
+                        ) as child_task on child_task.sub_parent_id = task.id
+            LEFT JOIN(  
+                select sub1_task.id as sub1_task_id, sub2_office.id as office_child_id, sub2_office.legal_name 
+                    from task as sub1_task
+                    inner join core_office as sub2_office on sub2_office.id = sub1_task.office_id 
+                                            
+            ) as child_office on child_office.sub1_task_id = child_task.child_id
         )
     """
 

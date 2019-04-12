@@ -81,8 +81,9 @@ class TaskDashboardEZLViewSet(OfficeMixinViewSet, ApplicationView):
     default_ordering = ('-final_deadline_date',)
 
     def get_queryset(self):
-        queryset = TaskFilterViewModel.objects.filter(parent__isnull=True,
-                                                      price_category__in=['PUBLIC', 'NETWORK'])
+        queryset = TaskFilterViewModel.objects.filter(
+            Q(parent__isnull=True),
+            Q(office__customsettings__show_task_in_admin_dash=True))
         params = self.request.query_params
         return filter_api_queryset_by_params(queryset, params)
 

@@ -862,6 +862,7 @@ class TaskFilterViewModel(TaskBase):
         verbose_name='Vara')
     court_division_name = models.TextField(
         verbose_name='Nome da vara', null=True, blank=True, max_length=255)
+    executed_by_id = models.PositiveIntegerField()
     executed_by_legal_name = models.TextField(
         verbose_name='Nome', blank=True, null=True, max_length=255)
     law_suit_number = models.CharField(

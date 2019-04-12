@@ -49,11 +49,12 @@ class TaskApiFilter(FilterSet):
     person_executed_by_id = MultiValueCharFilter(name='person_executed_by_id', lookup_expr='in')
     final_deadline_date = DatetimeFromToRangeFilter()
     task_status = MultiValueCharFilter(name='task_status', lookup_expr='in')
+    parent_id = filters.NumberFilter(name='parent_id')
 
     class Meta:
         model = Task
         fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date',
-                  'task_status', 'person_executed_by_id']
+                  'task_status', 'person_executed_by_id', 'parent_id']
 
 
 class TaskDashboardApiFilter(TaskApiFilter):
