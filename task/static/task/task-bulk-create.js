@@ -404,8 +404,8 @@ class TaskBulkCreate {
                     if (courtDistrict && courtDistrict.id !== parseInt(this.courtDistrict)){
                         this.courtDistrictComplement = this.nullData;
                     }
-                    if (this.lawSuitNumberData.courtDistrict.id &&
-                            this.lawSuitNumberData.courtDistrict.id !== parseInt(this.courtDistrict)){
+                    if (this.lawSuitNumberData.court_district.id &&
+                            this.lawSuitNumberData.court_district.id !== parseInt(this.courtDistrict)){
                         this.folderNumber = this.nullData;
                         this.enableOnChange = false;
                         this.lawSuitNumber = this.nullData;
