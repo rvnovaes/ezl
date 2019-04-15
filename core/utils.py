@@ -210,10 +210,17 @@ def validate_xlsx_header(xls_file, headers):
     return header_is_valid
 
 
+def clear_history_amount(history):
+    if getattr(history, 'amount'):
+        history.amount = Decimal("{:0.2f}".format(float(history.amount)))
+    if getattr(history, 'amount_delegated'):
+        history.amount_delegated = Decimal("{:0.2f}".format(float(history.amount_delegated)))
+    return history
+
+
 def field_has_changed(history, field_to_check):
     if history.prev_record:
-        if getattr(history, 'amount'):
-            history.amount = Decimal("{:0.2f}".format(float(history.amount)))
+        history = clear_history_amount(history)
         delta = history.diff_against(history.prev_record)
         for change in delta.changes:
             if change.field == field_to_check:
@@ -224,8 +231,7 @@ def field_has_changed(history, field_to_check):
 def get_history_changes(history):
     changes = {}
     if history.prev_record:
-        if getattr(history, 'amount'):
-            history.amount = Decimal("{:0.2f}".format(float(history.amount)))
+        history = clear_history_amount(history)
         delta = history.diff_against(history.prev_record)
         for change in delta.changes:
             changes[change.field] = change

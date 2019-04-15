@@ -237,7 +237,8 @@ def ecm_task_post_save(sender, instance, created, **kwargs):
         return
 
     # Copia o Ecm para o sistema de origem
-    if instance.ecm.legacy_code is None and instance.task.legacy_code:
+    # filtra pelo id do office == 1 para exportar apenas ecm do mta
+    if instance.ecm.legacy_code is None and instance.task.legacy_code and instance.task.office.id == 1:
         export_ecm.delay(instance.ecm.id, instance.task.id)
 
     # Copia o EcmTask para todos os pais e filhos recursivamente
@@ -459,10 +460,15 @@ def post_create_historical_record_callback(sender, **kwargs):
         """.format(task_number, msg)
     if field_has_changed(history_instance, 'amount'):
         change = get_history_changes(history_instance).get('amount')
-        if float(change.old) != float(change.new):
-            msg += "Valor alterado de {} para {}".format(
-                format_currency(change.old, 'R$', locale='pt_BR'),
-                format_currency(change.new, 'R$', locale='pt_BR'))
+        msg += "Valor alterado de {} para {}".format(
+            format_currency(change.old, 'R$', locale='pt_BR'),
+            format_currency(change.new, 'R$', locale='pt_BR'))
+    if field_has_changed(history_instance, 'amount_delegated'):
+        change = get_history_changes(history_instance).get('amount_delegated')
+        msg += "Valor de delegação alterado de {} para {}".format(
+            format_currency(change.old, 'R$', locale='pt_BR'),
+            format_currency(change.new, 'R$', locale='pt_BR'))
+
     history_instance.history_notes = msg
     history_instance.save()
     if instance.legacy_code:

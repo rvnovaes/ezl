@@ -77,6 +77,31 @@ PARAMETERS = {
                 }
             },
         },
+        "list_default": {
+            "type": "array",
+            "format": "table",
+            "title": "Lista de opções disponíveis",
+            "uniqueItems": True,
+            "items": {
+                "type": "object",
+                "title": "Opção",
+                "properties": {
+                    "value": {
+                        "title": "Valor",
+                        "type": "string",
+                    },
+                    "text": {
+                        "title": "Texto",
+                        "type": "string",
+                    },
+                    "is_default": {
+                        "title": "Valor padrão",
+                        "type": "boolean",
+                        "format": "checkbox",
+                    }
+                }
+            },
+        },
     },
 }
 

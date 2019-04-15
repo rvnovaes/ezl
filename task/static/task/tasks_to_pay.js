@@ -7,16 +7,15 @@ class ReportToPay {
 		this.elBtnBilling = $('#btn-billing');		
 		this.elCheckAllItems = $('#checkAll');
 	    this.count = 0;
-	    this.totalToReceive=0;
+	    this.totalToPay=0;
 	    this.total=0;
 	    this.currentOffice = null;
 	    this.currentClient = null;	
 	    this.tasksToPay = [];
 	    this.allTaskIds = [] ;  
 	    this.htmlTable = ``;
-	    this.elInputClient = $('[name=client]');
-	    this.elFinishedDate0 = $("#finished_in_0");
-	    this.elFinishedDate1 = $("#finished_in_1");
+	    this.elFinishedDate0 = $('#finished_in_0');
+	    this.elFinishedDate1 = $('#finished_in_1');
 	    this.unsetOnClickDownloadXls();
 	    this.startOnClickDownloadXls();
 	}	
@@ -41,11 +40,11 @@ class ReportToPay {
 
 	formatLocalDateTime(strDate) {
 	    let date = new Date(strDate);
-	    return `${date.toLocaleString("pt-BR")}`;
+	    return `${date.toLocaleString('pt-BR')}`;
 	}
 
 	get formData() {
-		return $("form").serializeArray();
+		return $('form').serializeArray();
 	}
 
 	get query() {
@@ -66,7 +65,7 @@ class ReportToPay {
 	}
 
 	unsetOnClickDownloadXls() {
-		this.btnDownloadXlsx.prop("onclick", null).off("click");
+		this.btnDownloadXlsx.prop('onclick', null).off('click');
 	}
 
 	startOnClickDownloadXls() {
@@ -103,13 +102,13 @@ class ReportToPay {
 
 	startOnClickBtnBilling() {
 		this.elBtnBilling.on('click', ()=>{
-            if (this.tasksToPay.length == 0){
+            if (this.tasksToPay.length === 0){
                 swal({
-                    title: "Importante",
-                    text: "Você deve selecionar pelo menos uma OS para ser faturada.",
-                    type: "warning",
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "Ok"
+                    title: 'Importante',
+                    text: 'Você deve selecionar pelo menos uma OS para ser faturada.',
+                    type: 'warning',
+                    confirmButtonColor: '#DD6B55',
+                    confirmButtonText: 'Ok'
                 });
                 return false;
             } else {        	
@@ -132,7 +131,7 @@ class ReportToPay {
                 location.reload();
             },
             beforeSend: function (xhr, settings) {
-                xhr.setRequestHeader("X-CSRFToken", $('input[name=csrfmiddlewaretoken]').val());
+                xhr.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
             },
             dataType: 'json'
         });				
@@ -140,7 +139,7 @@ class ReportToPay {
 
 	async search() {
 		const response = await this.getData().then((data)=>{
-			 return this.data = data
+			 return this.data = data;
 		});
 		return response;
 	}
@@ -226,13 +225,13 @@ class ReportToPay {
 	                <td>${task.lawsuit_number}</td>
 	                <td>${task.cost_center}</td>
 	                <td>${task.court_district}</td>
-	                <td>${task.opposing_party}</td>
+	                <td>${this.setDefaultOfNull(task.opposing_party)}</td>
 	                <td>${this.setDefaultOfNull(task.task_legacy_code)}</td>
 	                <td>${this.getBillingDate(task.billing_date)}</td>
 	                <td>${task.charge_id}</td>
-	                <td class="text-center">${this.formatMoney(task.amount)}</td>
+	                <td class="text-center">${this.formatMoney(task.amount_delegated)}</td>
 	                <td class="text-center">${this.formatMoney(task.fee)}</td>
-	                <td class="text-center">${this.formatMoney(task.amount_to_receive)}</td>
+	                <td class="text-center">${this.formatMoney(task.amount_to_pay)}</td>
 	            </tr>`;
 	}
 
@@ -240,7 +239,7 @@ class ReportToPay {
 	    return `
 	        <tr class="total-container">
 	            <th colspan="14" class="text-right" >Total Geral (R$)</th>
-	            <th colspan="2" class="text-right">${this.formatMoney(this.totalToReceive.toFixed(2))}</th>
+	            <th colspan="2" class="text-right">${this.formatMoney(this.totalToPay.toFixed(2))}</th>
 	        </tr>`;
 		};   	
 
@@ -283,8 +282,8 @@ class ReportToPay {
 		// Implementado nas classes que herdam
 	}
 
-	computeTotalToReceive(task){
-		this.totalToReceive += parseFloat(task.amount_to_receive)
+	computeTotalToPay(task){
+		this.totalToPay += parseFloat(task.amount_to_pay)
 	}
 
 	async makeReport(data) {
@@ -322,7 +321,7 @@ class ReportToPay {
 		this.elTableFoot.empty();
 		this.elBtnBilling.empty();
 	    this.count = 0;
-	    this.totalToReceive=0;
+	    this.totalToPay=0;
 	    this.currentOffice = null;
 	    this.currentClient = null;	
 	    this.tasksToPay = [];
@@ -345,8 +344,8 @@ class ReportToPayGroupByOffice extends ReportToPay {
 		super();
 		this.currentOffice;
 		this.currentClient;
-		this.totalToReceiveByOffice = {};
-		this.totalToReceiveClientByOffice = {};
+		this.totalToPayByOffice = {};
+		this.totalToPayClientByOffice = {};
 	}
 
 	getTrOffice(officeId, officeName){
@@ -399,29 +398,29 @@ class ReportToPayGroupByOffice extends ReportToPay {
 	}
 
 	async replaceTotalByOffice(){
-		Object.keys(this.totalToReceiveByOffice).forEach((key)=>{
-			this.htmlTable = this.htmlTable.replace(`|officePay=${key}|`, `${this.formatMoney(this.totalToReceiveByOffice[key].toFixed(2))}`)
+		Object.keys(this.totalToPayByOffice).forEach((key)=>{
+			this.htmlTable = this.htmlTable.replace(`|officePay=${key}|`, `${this.formatMoney(this.totalToPayByOffice[key].toFixed(2))}`)
 		});
 	}
 
 	async replaceTotalClientByOffice(){
-		Object.keys(this.totalToReceiveClientByOffice).forEach((key)=>{
-			this.htmlTable = this.htmlTable.replace(`|clientPay=${key}|`, `${this.formatMoney(this.totalToReceiveClientByOffice[key].toFixed(2))}`)
+		Object.keys(this.totalToPayClientByOffice).forEach((key)=>{
+			this.htmlTable = this.htmlTable.replace(`|clientPay=${key}|`, `${this.formatMoney(this.totalToPayClientByOffice[key].toFixed(2))}`)
 		});
 	}	
 
 	computeTotalOffice(task){
-		this.addAmount(this.totalToReceiveByOffice, task.office_id, task.amount_to_receive);
+		this.addAmount(this.totalToPayByOffice, task.office_id, task.amount_to_pay);
 	}
 
 	computeTotalClientByOffice(task){
-		this.addAmount(this.totalToReceiveClientByOffice, `${task.office_id}-${task.client_id}`, task.amount_to_receive)
+		this.addAmount(this.totalToPayClientByOffice, `${task.office_id}-${task.client_id}`, task.amount_to_pay)
 	}
 
 	async computeTotals(task){
 		this.computeTotalOffice(task);
 		this.computeTotalClientByOffice(task);
-		this.computeTotalToReceive(task);
+		this.computeTotalToPay(task);
 	}
 
 	async makeReport(data) {
@@ -448,8 +447,8 @@ class ReportToPayGroupByClient extends ReportToPay {
 		super();
 		this.currentOffice;
 		this.currentClient;
-		this.totalToReceiveByClient = {};
-		this.totalToReceiveOfficeByClient = {};
+		this.totalToPayByClient = {};
+		this.totalToPayOfficeByClient = {};
 	}
 
 	getTrClient(clientId, clientName, clientRefunds){
@@ -506,30 +505,30 @@ class ReportToPayGroupByClient extends ReportToPay {
 	}
 
 	async replaceTotalByClient(){
-		Object.keys(this.totalToReceiveByClient).forEach((key)=>{
-			this.htmlTable = this.htmlTable.replace(`|clientPay=${key}|`, `${this.formatMoney(this.totalToReceiveByClient[key].toFixed(2))}`)
+		Object.keys(this.totalToPayByClient).forEach((key)=>{
+			this.htmlTable = this.htmlTable.replace(`|clientPay=${key}|`, `${this.formatMoney(this.totalToPayByClient[key].toFixed(2))}`)
 		});
 	}
 
 
 	async replaceTotalOfficeByClient(){
-		Object.keys(this.totalToReceiveOfficeByClient).forEach((key)=>{
-			this.htmlTable = this.htmlTable.replace(`|officePay=${key}|`, `${this.formatMoney(this.totalToReceiveOfficeByClient[key].toFixed(2))}`)
+		Object.keys(this.totalToPayOfficeByClient).forEach((key)=>{
+			this.htmlTable = this.htmlTable.replace(`|officePay=${key}|`, `${this.formatMoney(this.totalToPayOfficeByClient[key].toFixed(2))}`)
 		});
 	}
 
 	computeTotalClient(task){
-		this.addAmount(this.totalToReceiveByClient, task.client_id, task.amount_to_receive);
+		this.addAmount(this.totalToPayByClient, task.client_id, task.amount_to_pay);
 	}
 
 	computeTotalOfficeByClient(task){
-		this.addAmount(this.totalToReceiveOfficeByClient, `${task.client_id}-${task.office_id}`, task.amount_to_receive);
+		this.addAmount(this.totalToPayOfficeByClient, `${task.client_id}-${task.office_id}`, task.amount_to_pay);
 	}
 
 	async computeTotals(task){
 		this.computeTotalClient(task);
 		this.computeTotalOfficeByClient(task);
-		this.computeTotalToReceive(task);
+		this.computeTotalToPay(task);
 	}
 
 	async makeReport(data) {
