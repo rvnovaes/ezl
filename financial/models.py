@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Q
 from core.models import Audit, LegacyCode, OfficeMixin, OfficeManager, Office, OfficeNetwork
 from decimal import Decimal
-from task.metrics import get_office_correspondent_metrics
+from task.metrics import get_office_finished_by_rate, get_office_rating, get_office_returned_os_rate
 from djmoney.models.fields import MoneyField
 from enum import Enum
 from .enums import CategoryPrice, BillingMoment, RateType
@@ -152,11 +152,15 @@ class ServicePriceTable(Audit, LegacyCode, OfficeMixin):
 
     @property
     def office_rating(self):
-        return get_office_correspondent_metrics(self.office_correspondent)['rating']
+        return get_office_rating(self.office_correspondent)
 
     @property
     def office_return_rating(self):
-        return get_office_correspondent_metrics(self.office_correspondent)['returned_os_rate']
+        return get_office_returned_os_rate(self.office_correspondent)
+
+    @property
+    def finished_by_rate(self):
+        return get_office_finished_by_rate(self.office_correspondent, self.state, self.court_district)
 
     def __str__(self):
         return self.office.legal_name if self.office else ""
