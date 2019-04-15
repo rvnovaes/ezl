@@ -404,14 +404,17 @@ class TaskBulkCreate {
                     if (courtDistrict && courtDistrict.id !== parseInt(this.courtDistrict)){
                         this.courtDistrictComplement = this.nullData;
                     }
-                    this.folderNumber = this.nullData;
-                    this.enableOnChange = false;
-                    this.lawSuitNumber = this.nullData;                    
-                    this.enableOnChange = true;
+                    if (this.lawSuitNumberData.courtDistrict.id &&
+                            this.lawSuitNumberData.courtDistrict.id !== parseInt(this.courtDistrict)){
+                        this.folderNumber = this.nullData;
+                        this.enableOnChange = false;
+                        this.lawSuitNumber = this.nullData;
+                        this.enableOnChange = true;
+                    }
                 } else {
                     this.enableOnChange = false;
-                    this.lawSuitNumber = this.nullData
-                    this.folderNumber = this.nullData
+                    this.lawSuitNumber = this.nullData;
+                    this.folderNumber = this.nullData;
                     this.enableOnChange = true;
                 }
 
@@ -448,7 +451,7 @@ class TaskBulkCreate {
                         this.personCustomer = personCustomer;
                     }
                     let folder = this.lawSuitNumberData.folder;
-                    if (folder && !folder.isDefault) {
+                    if (folder) {
                         this.folderNumber = folder;
                         this.elBtnAddFolder.attr('disabled', true);
                     }
@@ -464,7 +467,7 @@ class TaskBulkCreate {
                     if (city && city.id) {
                         this.city = city;
                     }
-                    this.enableOnChange = true
+                    this.enableOnChange = true;
                 } else {
                     this.courtDistrict = this.nullData;
                     this.city = this.nullData;
@@ -488,7 +491,7 @@ class TaskBulkCreate {
 	    this.elFolderNumber.on('change',()=>{
 	        if (this.enableOnChange) {
                 let personCustomer = this.elFolderNumber.select2('data')[0].person_customer;
-                if (personCustomer) {
+                if (personCustomer && parseInt(personCustomer.id) !== parseInt(this.personCustomer)) {
                     this.personCustomer = personCustomer;
                 }
             }
@@ -498,8 +501,8 @@ class TaskBulkCreate {
 	onChangePersonCustomer(){
 	    this.elInputPersonCustomer.on('change',()=> {            
 	        if(this.enableOnChange){
-	            let personCustomer = this.elFolderNumber.select2('data')[0].id;
-                if (personCustomer && personCustomer.id !== parseInt(this.personCustomer)){
+	            let folderNumber = this.elFolderNumber.select2('data')[0];
+                if (folderNumber && parseInt(folderNumber.id) !== parseInt(this.folderNumber)){
                     this.folderNumber = this.nullData;
                 }
                 this.lawSuitNumber = this.nullData;
