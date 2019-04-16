@@ -98,14 +98,6 @@ class LawSuitForm(BaseForm):
         super(LawSuitForm, self).__init__(*args, **kwargs)
         self.fields['office'] = get_office_field(self.request)
 
-        def get_option(o):
-            return '{}/{}'.format(o.court_district.name, o.legal_name)
-
-        choices = [(organ.pk, get_option(organ))
-                   for organ in Organ.objects.filter(
-                       office=get_office_session(self.request))]
-        self.fields['organ'].choices = choices
-
     class Meta:
         model = LawSuit
         fields = [
@@ -134,15 +126,10 @@ class LawSuitForm(BaseForm):
                                                        widget=MDSelect(url='/processos/complemento_select2',
                                                                        forward=['court_district']),
                                                        queryset=CourtDistrictComplement.objects.all())
-    # organ = forms.ModelChoiceField(label='Órgão',
-    #                                required=False,
-    #                                widget=MDSelect(url='/processos/organ_filter_select2_autocomplete',
-    #                                                forward=['court_district']),
-    #                                queryset=Organ.objects.all())
-    organ = forms.ModelChoiceFilter(label="Órgão",
-                              required=False,
-                              widget=MDSelect(url='/processos/organ_filter_select2_autocomplete', ),
-                              queryset=Organ.objects.all(), )
+    organ = forms.ModelChoiceField(label="Órgão",
+                                   required=False,
+                                   widget=MDSelect(url='/processos/organ_autocomplete', ),
+                                   queryset=Organ.objects.all(), )
     instance = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
             Instance.objects.filter(is_active=True)).order_by('name'),
