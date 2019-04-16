@@ -797,6 +797,14 @@ class OrganSelect2Autocomplete(autocomplete.Select2QuerySetSequenceView):
     def get_result_label(self, result):
         return "{}".format(result.__str__())
 
+    def get_results(self, context):
+        return [
+            {
+                'id': result.pk,
+                'text': self.get_result_label(result),
+            } for result in context['object_list']
+        ]
+
 
 class OrganFilterSelect2Autocomplete(OrganSelect2Autocomplete):
     @property
