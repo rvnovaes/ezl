@@ -38,7 +38,7 @@ from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFIC
     TaskCheckinReportFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
     ImportTaskListForm, TaskBulkCreateForm, TaskChangeAskedBy
-from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
+from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, TaskFilterViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain, TaskSurveyAnswer
 from .report import TaskToPayXlsx, ExportFilterTask
 from task.queries import *
@@ -1147,7 +1147,7 @@ def delete_external_ecm(request, task_hash, pk):
 
 
 class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
-    model = DashboardViewModel
+    model = TaskFilterViewModel
     filter_class = TaskFilter
     template_name = 'task/task_filter.html'
     context_object_name = 'task_filter'
@@ -1171,7 +1171,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
-                query_set = DashboardViewModel.objects.filter(q, office=get_office_session(self.request))
+                query_set = TaskFilterViewModel.objects.filter(q, office=get_office_session(self.request))
             else:
                 task_dynamic_query = Q()
                 client_query = Q()
@@ -1208,21 +1208,17 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         ), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__court_district__state__in=data[
-                            'state']), Q.AND)
+                        Q(state__in=data['state']), Q.AND)
                 if data['court_district']:
                     if self.request.GET.get('court_district_option') == 'EXCEPT':
                         task_dynamic_query.add(
-                            ~Q(movement__law_suit__court_district__in=data[
-                                'court_district']), Q.AND)
+                            ~Q(court_district__in=data['court_district']), Q.AND)
                     else:
                         task_dynamic_query.add(
-                            Q(movement__law_suit__court_district__in=data[
-                                'court_district']), Q.AND)
+                            Q(court_district__in=data['court_district']), Q.AND)
                 if data['court_district_complement']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__court_district_complement=data[
-                            'court_district_complement']), Q.AND)
+                        Q(court_district_complement=data['court_district_complement']), Q.AND)
                 if data.get('task_status'):
                     status = [
                         getattr(TaskStatus, s) for s in data['task_status']
@@ -1258,7 +1254,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                                 'client']), Q.AND)
                 if data['law_suit_number']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__law_suit_number__unaccent__icontains=data[
+                        Q(law_suit_number__unaccent__icontains=data[
                             'law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(
@@ -1411,7 +1407,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
                 office_id = (get_office_session(self.request).id
                              if get_office_session(self.request) else 0)
-                query_set = DashboardViewModel.objects.filter(
+                query_set = TaskFilterViewModel.objects.filter(
                     office_id=office_id).filter(person_dynamic_query)
 
             try:
@@ -1445,7 +1441,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return task_list
 
     def get_context_data(self, **kwargs):
-        context = super(DashboardSearchView, self).get_context_data()
+        context = super().get_context_data()
         context[self.context_filter_name] = self.filter
         table = self.table_class(self.object_list)
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)

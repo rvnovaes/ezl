@@ -1,6 +1,6 @@
 import django_tables2 as tables
 from core.tables import CheckBoxMaterial
-from .models import TypeTask, DashboardViewModel, Filter, Task
+from .models import TypeTask, TaskFilterViewModel, Filter, Task
 
 
 class TaskTable(tables.Table):
@@ -74,21 +74,20 @@ class DashboardStatusTable(tables.Table):
     origin_code = tables.Column(order_by=('parent_task_number', 'legacy_code'))
     status = tables.TemplateColumn(
         template_name="task/task_status_column.html", orderable=False)
-    executed_by = tables.Column(accessor='executed_by',
-                                verbose_name='Correspondente',
-                                orderable=False)
-    asked_by = tables.Column(accessor='asked_by',
-                             verbose_name='Solicitante',
-                             orderable=False)
-
+    executed_by_legal_name = tables.Column(accessor='executed_by_legal_name',
+                                           verbose_name='Correspondente',
+                                           orderable=True)
+    asked_by_legal_name = tables.Column(accessor='asked_by_legal_name',
+                                        verbose_name='Solicitante',
+                                        orderable=True)
 
     class Meta:
-        model = DashboardViewModel
+        model = TaskFilterViewModel
         fields = [
             'status', 'task_number', 'final_deadline_date', 'type_task',
             'law_suit_number', 'client', 'opposing_party', 'origin_code',
-            'description', 'asked_by', 'state', 'court_district',
-            'court_division', 'executed_by'
+            'description', 'asked_by_legal_name', 'state', 'court_district',
+            'court_division', 'executed_by_legal_name'
         ]
         empty_text = "Não existem providências a serem exibidas"
         row_attrs = {

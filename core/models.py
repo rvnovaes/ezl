@@ -904,6 +904,7 @@ class CustomSettings(Audit):
     default_customer = models.ForeignKey(Person, verbose_name='Cliente padrão',
                                          blank=True, null=True,
                                          limit_choices_to={"is_customer": True})
+    show_task_in_admin_dash = models.BooleanField(default=True, verbose_name='Mostrar as OSs deste escritório no Dash')
 
     class Meta:
         verbose_name = 'Configurações por escritório'
