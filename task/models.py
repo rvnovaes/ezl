@@ -415,6 +415,15 @@ class TaskBase(Audit, LegacyCode, OfficeMixin):
     def status(self):
         return TaskStatus(self.task_status)
 
+    @property
+    def get_child(self):
+        if self.child.exists() and self.child.latest('pk').task_status not in [
+            TaskStatus.REFUSED.__str__(),
+            TaskStatus.REFUSED_SERVICE.__str__()
+        ]:
+            return self.child.latest('pk')
+        return None
+
 
 class Task(TaskBase):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
@@ -620,15 +629,6 @@ class Task(TaskBase):
             return res
         self.on_change_person_company_representative()
         return super().save(*args, **kwargs)
-
-    @property
-    def get_child(self):
-        if self.child.exists() and self.child.latest('pk').task_status not in [
-            TaskStatus.REFUSED.__str__(),
-            TaskStatus.REFUSED_SERVICE.__str__()
-        ]:
-            return self.child.latest('pk')
-        return None
 
     @transaction.atomic
     def get_task_number(self):

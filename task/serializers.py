@@ -105,6 +105,7 @@ class TaskCreateSerializer(TaskSerializer):
 
 class TaskDashboardSerializer(serializers.ModelSerializer):
     external_url = serializers.SerializerMethodField()
+    have_child = serializers.SerializerMethodField()
 
     class Meta:
         model = TaskFilterViewModel
@@ -112,6 +113,9 @@ class TaskDashboardSerializer(serializers.ModelSerializer):
 
     def get_external_url(self, obj):
         return 'providencias/external-task-detail/' + obj.task_hash.hex
+
+    def get_have_child(self, obj):
+        return obj.get_child != None
 
 
 class EcmTaskSerializer(serializers.ModelSerializer,
