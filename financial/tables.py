@@ -56,13 +56,15 @@ class ServicePriceTableTaskTable(tables.Table):
     value = tables.Column(orderable=False, verbose_name='Valor*')
     office_rating = tables.Column(orderable=False, verbose_name='Avaliação*')
     office_return_rating = tables.Column(orderable=False, verbose_name='OS Retornadas')
+    finished_by_rate = tables.Column(orderable=False, verbose_name='OS Finalizadas')
 
     class Meta:
         sequence = ('office_correspondent', 'type_task', 'office_network', 'state', 'court_district',
-                    'court_district_complement', 'city', 'client', 'value', 'office_rating', 'office_return_rating')
+                    'court_district_complement', 'city', 'client', 'value', 'office_rating',
+                    'finished_by_rate', 'office_return_rating')
         model = ServicePriceTable
         fields = ('office_correspondent', 'type_task', 'office_network', 'court_district', 'state', 'client', 'value',
-                  'court_district_complement', 'office_rating', 'office_return_rating', 'city')
+                  'court_district_complement', 'office_rating', 'finished_by_rate', 'office_return_rating', 'city')
         attrs = {"class": "table stable-striped table-bordered correspondents-table", "id": "correspondents-table"}
         empty_text = "Não existe tabela de preços cadastrada para o tipo de serviço selecionado."
         order_by = ("value", "office_rating", "office_return_rating", "office_correspondent__legal_name")

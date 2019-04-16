@@ -105,6 +105,7 @@ class TaskServicePriceTable {
                 price.client ? price.client.legal_name : '-',
                 parseFloat(price.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
                 price.office_rating,
+                price.finished_by_rate,
                 price.office_return_rating
               ]
             ).node().id = price.id;
@@ -161,7 +162,7 @@ class TaskServicePriceTable {
         resolve(this.elPriceTable = $(this.idPriceTableElement).DataTable(
           {
             paging: false,
-            order: [[8, 'asc'], [9, 'desc'], [10, 'asc'], [0, 'asc']],
+            order: [[8, 'asc'], [9, 'desc'], [11, 'asc'], [0, 'asc']],
             dom: 'frti',
             buttons: [],
             destroy: true,

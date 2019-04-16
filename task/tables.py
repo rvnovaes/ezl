@@ -81,7 +81,6 @@ class DashboardStatusTable(tables.Table):
                              verbose_name='Solicitante',
                              orderable=False)
 
-
     class Meta:
         model = DashboardViewModel
         fields = [
