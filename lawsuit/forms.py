@@ -134,15 +134,15 @@ class LawSuitForm(BaseForm):
                                                        widget=MDSelect(url='/processos/complemento_select2',
                                                                        forward=['court_district']),
                                                        queryset=CourtDistrictComplement.objects.all())
-    organ = forms.CharField(
-        label='Órgão',
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Organ,
-            field_related='legal_name',
-            name='organ',
-            url='/processos/organ_autocomplete'))
-
+    # organ = forms.ModelChoiceField(label='Órgão',
+    #                                required=False,
+    #                                widget=MDSelect(url='/processos/organ_filter_select2_autocomplete',
+    #                                                forward=['court_district']),
+    #                                queryset=Organ.objects.all())
+    organ = forms.ModelChoiceFilter(label="Órgão",
+                              required=False,
+                              widget=MDSelect(url='/processos/organ_filter_select2_autocomplete', ),
+                              queryset=Organ.objects.all(), )
     instance = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
             Instance.objects.filter(is_active=True)).order_by('name'),

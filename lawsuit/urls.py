@@ -167,7 +167,7 @@ urlpatterns = [
         login_required(views.OrganDeleteView.as_view()),
         name='organ_delete'),
     url(r'organ_autocomplete$',
-        login_required(views.OrganAutocompleteView.as_view()),
+        login_required(views.OrganSelect2Autocomplete.as_view()),
         name='organ_autocomplete'),
     url(r'organ_filter_select2_autocomplete$',
         login_required(views.OrganFilterSelect2Autocomplete.as_view()),
