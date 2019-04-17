@@ -22,7 +22,7 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 from django.forms import MultipleChoiceField
 from .mail import TaskCompanyRepresentativeChangeMail
 from simple_history.models import HistoricalRecords
-from core.models import BaseHistoricalModel
+from core.models import BaseHistoricalModel, NotesMixin
 import inspect
 from financial.enums import CategoryPrice, RateType
 
@@ -785,11 +785,9 @@ class Ecm(Audit, LegacyCode):
         return self.local_file_path
 
 
-class TaskHistory(AuditCreate):
+class TaskHistory(AuditCreate, NotesMixin):
     task = models.ForeignKey(
         Task, on_delete=models.CASCADE, blank=False, null=False)
-    notes = models.TextField(
-        null=True, blank=True, verbose_name=u'Observações')
     status = models.CharField(max_length=30, choices=TaskStatus.choices())
 
     class Meta:
