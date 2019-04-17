@@ -420,6 +420,7 @@ class FolderLawsuitUpdateView(SuccessMessageMixin, GenericFormOneToMany,
             raise Http404("Registro não foi encontrado")
         return obj
 
+
 class LawSuitListView(CustomLoginRequiredView, SingleTableViewMixin):
     model = LawSuit
     table_class = LawSuitTable
