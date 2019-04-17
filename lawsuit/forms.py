@@ -96,14 +96,19 @@ class FolderForm(BaseForm):
 class LawSuitForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super(LawSuitForm, self).__init__(*args, **kwargs)
+        office_session = get_office_session(self.request)
         self.fields['office'] = get_office_field(self.request)
+        self.fields['instance'].queryset = self.fields['instance'].queryset.filter(
+            office=office_session)
+        self.fields['court_division'].queryset = self.fields['court_division'].queryset.filter(
+            office=office_session)
 
         def get_option(o):
             return '{}/{}'.format(o.court_district.name, o.legal_name)
 
         choices = [(organ.pk, get_option(organ))
                    for organ in Organ.objects.filter(
-                       office=get_office_session(self.request))]
+                       office=office_session)]
         self.fields['organ'].choices = choices
 
     class Meta:
