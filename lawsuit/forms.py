@@ -101,9 +101,9 @@ class LawSuitForm(BaseForm):
     class Meta:
         model = LawSuit
         fields = [
-            'office', 'type_lawsuit', 'law_suit_number', 'court_district', 'city', 'court_district_complement', 'organ',
-            'instance', 'court_division', 'person_lawyer', 'opposing_party', 'is_current_instance', 'is_active',
-            'legacy_code'
+            'office', 'type_lawsuit', 'law_suit_number', 'court_district', 'city', 'court_district_complement',
+            'organ', 'instance', 'court_division', 'person_lawyer', 'opposing_party', 'is_current_instance',
+            'is_active', 'legacy_code'
         ]
 
     person_lawyer = forms.ModelChoiceField(
