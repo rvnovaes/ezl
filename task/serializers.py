@@ -1,4 +1,4 @@
-from .models import TypeTask, Task, Ecm, TypeTaskMain
+from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskFilterViewModel
 from rest_framework import serializers
 from core.models import Person, Office
 from core.serializers import OfficeDefault, CreateUserDefault, CreateUserSerializerMixin, OfficeSerializerMixin
@@ -47,6 +47,7 @@ class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, Off
     state = serializers.SerializerMethodField()
     court_district_name = serializers.SerializerMethodField()
     external_url = serializers.SerializerMethodField()
+    default_user = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
@@ -71,6 +72,10 @@ class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, Off
     
     def get_court_district_name(self, obj): 
         return obj.court_district.name if obj.court_district else ''
+
+    def get_default_user(self, obj):
+        default_user = obj.office.get_template_value(TemplateKeys.DEFAULT_USER.name)
+        return default_user.id if default_user else None
 
     def validate_person_asked_by(self, value):
         if not value:
@@ -101,6 +106,26 @@ class TaskCreateSerializer(TaskSerializer):
         model = Task
         fields = ('final_deadline_date', 'performance_place', 'movement', 'type_task', 'description', 'task_status',
                   'legacy_code', 'requested_date', 'create_user', 'office', 'task_hash')
+
+
+class TaskDashboardSerializer(serializers.ModelSerializer):
+    external_url = serializers.SerializerMethodField()
+    have_child = serializers.SerializerMethodField()
+    default_user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TaskFilterViewModel
+        exclude = ('alter_date', 'system_prefix', 'task_hash')
+
+    def get_external_url(self, obj):
+        return 'providencias/external-task-detail/' + obj.task_hash.hex
+
+    def get_have_child(self, obj):
+        return obj.get_child != None
+
+    def get_default_user(self, obj):
+        default_user = obj.office.get_template_value(TemplateKeys.DEFAULT_USER.name)
+        return default_user.id if default_user else None
 
 
 class EcmTaskSerializer(serializers.ModelSerializer,
