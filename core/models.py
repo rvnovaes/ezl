@@ -537,6 +537,15 @@ class Office(AbstractPerson):
         template_obj = self.get_template_value_obj(TemplateKeys.DUPLICATE_PROCESS.name)
         update_template_value(template_obj, str(value))
 
+    @property
+    def related_offices(self):
+        from django.db.models import Q
+        qs = self._meta.model.objects.filter(Q(
+            Q(id__in=self.to_offices.values_list('from_office', flat=True)) |
+            Q(id__in=self.from_offices.values_list('to_office', flat=True)))
+        )
+        return qs
+
 
 class OfficeMixin(models.Model):
     office = models.ForeignKey(

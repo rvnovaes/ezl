@@ -45,7 +45,7 @@ from core.signals import create_person
 from core.tables import PersonTable, UserTable, AddressTable, AddressOfficeTable, OfficeTable, InviteTable, \
     InviteOfficeTable, OfficeMembershipTable, ContactMechanismTable, ContactMechanismOfficeTable, TeamTable
 from core.utils import login_log, logout_log, get_office_session, get_domain, filter_valid_choice_form, \
-    check_cpf_cnpj_exist, get_office_by_id, get_invalid_data, set_user_default_office, get_office_relations_qs
+    check_cpf_cnpj_exist, get_office_by_id, get_invalid_data, set_user_default_office
 from core.view_validators import create_person_office_relation, person_exists
 from core.mail import send_mail_sign_up
 from financial.models import ServicePriceTable
@@ -1658,7 +1658,7 @@ class OfficeCorrespondentAutocomplete(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated:
             return Office.objects.none()
         office = get_office_session(self.request)
-        qs = get_office_relations_qs(office)
+        qs = office.related_offices
         if self.q:
             qs = qs.filter(legal_name__unaccent__icontains=self.q)
         return qs
@@ -1679,7 +1679,7 @@ class OriginRequesterAutocomplete(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated:
             return Office.objects.none()
         office = get_office_session(self.request)
-        qs = get_office_relations_qs(office)
+        qs = office.related_offices
         if self.q:
             qs = qs.filter(legal_name__unaccent__icontains=self.q)
         return qs
