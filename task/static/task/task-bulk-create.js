@@ -31,6 +31,13 @@ class TaskBulkCreate {
         this.onDocumentReady();
 	}
 
+	static setDefaultOfNull(value){
+	    if (!value) {
+	        return null;
+	    }
+	    return value;
+	}
+
 	static removeErrorClass(field=null){
 	    if (!field){
 	        $('.error').each(function () {
@@ -288,7 +295,7 @@ class TaskBulkCreate {
 	    const {value: formValues} = await swal({
             title: 'Cadastro de Processo',
             html: html_fields,
-            width: '30%',
+            width: '70%',
             focusConfirm: false,
             showCancelButton: true,
             showLoaderOnConfirm: true,
@@ -315,12 +322,12 @@ class TaskBulkCreate {
                     'law_suit_number': formValues.lawsuitNumber,
                     'person_customer': document.getElementById('id_person_customer').value,
                     'folder_id': document.getElementById('id_folder_number').value,
-                    'organ_id': document.getElementById('id_organ').value,
-                    'instance_id': document.getElementById('id_instance').value,
-                    'court_division_id': document.getElementById('id_court_division').value,
-                    'person_lawyer_id': document.getElementById('id_person_lawyer').value,
-                    'opposing_party': document.getElementById('id_opposing_party').value,
-                    'notes': document.getElementById('id_notes').value
+                    'organ_id': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_organ').value),
+                    'instance_id': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_instance').value),
+                    'court_division_id': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_court_division').value),
+                    'person_lawyer_id': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_person_lawyer').value),
+                    'opposing_party': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_opposing_party').value),
+                    'notes': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_notes').value)
                 };
             $.ajax({
                 type: 'POST',

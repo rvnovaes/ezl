@@ -1153,20 +1153,19 @@ class LawSuitCreateTaskBulkCreate(View):
             errors.append('Este escritório não possui pasta padrão configurado')
         status = 200
         if not errors:
-            instance = LawSuit.objects.create(**{
-                'create_user': self.request.user,
-                'law_suit_number': self.request.POST.get('law_suit_number'),
-                'type_lawsuit': self.request.POST.get('type_lawsuit'),
-                'organ_id': self.request.POST.get('organ_id'),
-                'instance_id': self.request.POST.get('instance_id'),
-                'court_division_id': self.request.POST.get('court_division_id'),
-                'person_lawyer_id': self.request.POST.get('person_lawyer_id'),
-                'opposing_party': self.request.POST.get('opposing_party'),
-                'notes': self.request.POST.get('notes'),
-                'office': office_session,
-                'folder': folder,
-                'is_active': True
-            })
+            create_dict = {'create_user': self.request.user,
+                           'law_suit_number': self.request.POST.get('law_suit_number'),
+                           'type_lawsuit': self.request.POST.get('type_lawsuit'),
+                           'office': office_session,
+                           'folder': folder, 'is_active': True,
+                           'organ_id': self.request.POST.get('organ_id', None) or None,
+                           'instance_id': self.request.POST.get('instance_id', None) or None,
+                           'court_division_id': self.request.POST.get('court_division_id', None) or None,
+                           'person_lawyer_id': self.request.POST.get('person_lawyer_id', None) or None,
+                           'opposing_party': self.request.POST.get('opposing_party', None) or None,
+                           'notes': self.request.POST.get('notes', None) or None,
+                           }
+            instance = LawSuit.objects.create(**create_dict)
             data = {'id': instance.id, 'text': instance.__str__(),
                     'folder': {'id': instance.folder_id, 'text': instance.folder.__str__()}}
         else:

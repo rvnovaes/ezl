@@ -220,15 +220,15 @@
             $("#btn_add_person_customer").on('click', function () {
                 task.newPersonCustomer('{{ csrf_token }}');
             });
-            var fields_lawsuit = [];
-            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.type_lawsuit label_class='control-label ezl-required pull-left'  %}');
-            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.law_suit_number label_class='control-label ezl-required pull-left' %}');
-            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.organ label_class='control-label pull-left' %}');
-            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.instance label_class='control-label pull-left' %}');
-            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.court_division label_class='control-label pull-left' %}');
-            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.person_lawyer label_class='control-label pull-left' %}');
-            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.opposing_party label_class='control-label pull-left' %}');
-            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.notes label_class='control-label pull-left' %}');
+            let fields_lawsuit = [];
+            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.type_lawsuit form_group_class='form-group col-md-6' label_class='control-label ezl-required pull-left'  %}');
+            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.law_suit_number form_group_class='form-group col-md-6' label_class='control-label ezl-required pull-left' %}');
+            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.organ form_group_class='form-group col-md-6' label_class='control-label pull-left' %}');
+            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.instance form_group_class='form-group col-md-6' label_class='control-label pull-left' %}');
+            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.court_division form_group_class='form-group col-md-6' label_class='control-label pull-left' %}');
+            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.person_lawyer form_group_class='form-group col-md-6' label_class='control-label pull-left' %}');
+            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.opposing_party form_group_class='form-group col-md-6' label_class='control-label pull-left' %}');
+            fields_lawsuit.push('{% bootstrap_field_oneline lawsuit_form.notes form_group_class='form-group col-md-6' label_class='control-label pull-left' %}');
             $("#btn_add_lawsuit").on('click', function () {
                 task.newLawSuit('{{ csrf_token }}', fields_lawsuit);
             });
@@ -273,6 +273,12 @@
     }
     .error {
         border-color: red !important;
+    }
+    span.select2-selection {
+        text-align: left;
+    }
+    span.select2-selection__placeholder {
+        font-size: 14px !important;
     }
     </style>
 {% endblock %}
