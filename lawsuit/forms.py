@@ -103,20 +103,12 @@ class LawSuitForm(BaseForm):
         self.fields['court_division'].queryset = self.fields['court_division'].queryset.filter(
             office=office_session)
 
-        def get_option(o):
-            return '{}/{}'.format(o.court_district.name, o.legal_name)
-
-        choices = [(organ.pk, get_option(organ))
-                   for organ in Organ.objects.filter(
-                       office=office_session)]
-        self.fields['organ'].choices = choices
-
     class Meta:
         model = LawSuit
         fields = [
-            'office', 'type_lawsuit', 'law_suit_number', 'court_district', 'city', 'court_district_complement', 'organ',
-            'instance', 'court_division', 'person_lawyer', 'opposing_party', 'is_current_instance', 'is_active',
-            'legacy_code', 'notes'
+            'office', 'type_lawsuit', 'law_suit_number', 'court_district', 'city', 'court_district_complement',
+            'organ', 'instance', 'court_division', 'person_lawyer', 'opposing_party', 'is_current_instance',
+            'is_active', 'legacy_code', 'notes'
         ]
 
     person_lawyer = forms.ModelChoiceField(
@@ -139,15 +131,10 @@ class LawSuitForm(BaseForm):
                                                        widget=MDSelect(url='/processos/complemento_select2',
                                                                        forward=['court_district']),
                                                        queryset=CourtDistrictComplement.objects.all())
-    organ = forms.CharField(
-        label='Órgão',
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Organ,
-            field_related='legal_name',
-            name='organ',
-            url='/processos/organ_autocomplete'))
-
+    organ = forms.ModelChoiceField(label="Órgão",
+                                   required=False,
+                                   widget=MDSelect(url='/processos/organ_autocomplete', ),
+                                   queryset=Organ.objects.all(), )
     instance = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
             Instance.objects.filter(is_active=True)).order_by('name'),

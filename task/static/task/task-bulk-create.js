@@ -314,7 +314,13 @@ class TaskBulkCreate {
             let data = {'type_lawsuit': formValues.typeLawsuit,
                     'law_suit_number': formValues.lawsuitNumber,
                     'person_customer': document.getElementById('id_person_customer').value,
-                    'folder_id': document.getElementById('id_folder_number').value
+                    'folder_id': document.getElementById('id_folder_number').value,
+                    'organ_id': document.getElementById('id_organ').value,
+                    'instance_id': document.getElementById('id_instance').value,
+                    'court_division_id': document.getElementById('id_court_division').value,
+                    'person_lawyer_id': document.getElementById('id_person_lawyer').value,
+                    'opposing_party': document.getElementById('id_opposing_party').value,
+                    'notes': document.getElementById('id_notes').value
                 };
             $.ajax({
                 type: 'POST',

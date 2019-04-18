@@ -157,7 +157,7 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         office = get_office_session(self.request)
         context['min_hour_os'] = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
         context['default_customer'] = None
-        context['lawsuit_form'] = LawSuitForm()
+        context['lawsuit_form'] = LawSuitForm(request=self.request)
 
         default_customer = get_default_customer(office)
         if default_customer:
