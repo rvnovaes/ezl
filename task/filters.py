@@ -12,7 +12,7 @@ from lawsuit.models import CourtDistrict, Organ, CourtDistrictComplement
 from task.models import TypeTask, Task, Filter, TaskStatus
 from task.widgets import ApiDatetimeRangeField
 from .models import DashboardViewModel, TypeTaskMain
-from core.utils import get_office_session
+from core.utils import get_office_session, get_office_relations_qs
 from task.utils import get_status_to_filter
 
 from django_filters import rest_framework as filters
@@ -52,8 +52,8 @@ class TaskApiFilter(FilterSet):
 
     class Meta:
         model = Task
-        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date', 
-        'task_status', 'person_executed_by_id']
+        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date',
+                  'task_status', 'person_executed_by_id']
 
 
 class TaskFilter(FilterSet):
@@ -190,7 +190,7 @@ class TaskFilter(FilterSet):
         self.filters['person_executed_by'].queryset = Person.objects.correspondents(office_id=office_session.id)
         self.filters['person_distributed_by'].queryset = Person.objects.services().filter(offices=office_session)
         self.filters['office_executed_by'].queryset = \
-            self.filters['origin_office_asked_by'].queryset = office_session.offices.all()
+            self.filters['origin_office_asked_by'].queryset = get_office_relations_qs(office_session)
 
     class Meta:
         model = DashboardViewModel

@@ -508,3 +508,14 @@ def create_office_custom_settings(office):
     create_work_alone_status_to_show(office, i_work_alone)
     create_work_alone_workflows(office, i_work_alone)
     create_use_etl_status_to_show(office, use_etl)
+
+
+def get_office_relations_qs(office):
+    from django.db.models import Q
+    from core.models import Office
+
+    qs = Office.objects.filter(Q(
+        Q(id__in=office.to_offices.values_list('from_office', flat=True)) |
+        Q(id__in=office.from_offices.values_list('to_office', flat=True)))
+    )
+    return qs
