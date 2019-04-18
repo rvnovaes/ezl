@@ -551,6 +551,14 @@ class OfficeMixin(models.Model):
         abstract = True
 
 
+class NotesMixin(models.Model):
+    notes = models.TextField(
+        null=True, blank=True, verbose_name=u'Observações')
+
+    class Meta:
+        abstract = True
+
+
 class OfficeOffices(Audit):
     from_office = models.ForeignKey(Office, on_delete=models.CASCADE, related_name='from_offices',
                                     verbose_name='Escritório de Origem')
@@ -694,7 +702,7 @@ class InviteOffice(Audit, OfficeMixin):
         verbose_name_plural = 'Convites para escritórios'
 
 
-class Address(Audit):
+class Address(Audit, NotesMixin):
     address_type = models.ForeignKey(
         AddressType,
         on_delete=models.PROTECT,
@@ -707,7 +715,6 @@ class Address(Audit):
         max_length=255, blank=True, verbose_name='Complemento')
     city_region = models.CharField(max_length=255, verbose_name='Bairro')
     zip_code = models.CharField(max_length=255, verbose_name='CEP')
-    notes = models.TextField(blank=True, verbose_name='Observação')
     home_address = models.BooleanField(default=False, blank=True)
     business_address = models.BooleanField(default=False, blank=True)
     city = models.ForeignKey(
