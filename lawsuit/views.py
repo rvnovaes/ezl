@@ -777,32 +777,17 @@ class OrganListView(SuccessMessageMixin, SingleTableViewMixin):
     table_class = OrganTable
 
 
-class OrganAutocompleteView(TypeaHeadGenericSearch):
-    @staticmethod
-    def get_data(module, model, field, q, office, forward_params, extra_params,
-                 *args, **kwargs):
-        data = []
-        court_district = extra_params.get('court_district')
-        if court_district:
-            for organ in Organ.objects.filter(
-                    legal_name__unaccent__icontains=q,
-                    court_district_id=court_district,
-                    is_active=True,
-                    office=office):
-                data.append({
-                    'id': organ.id,
-                    'data-value-txt': organ.legal_name
-                })
-        return list(data)
-
-
-class OrganFilterSelect2Autocomplete(autocomplete.Select2QuerySetView):
+class OrganSelect2Autocomplete(autocomplete.Select2QuerySetSequenceView):
     @property
     def base_queryset(self):
-        return filter_valid_choice_form(Organ.objects.filter(office=get_office_session(self.request)))
+        return filter_valid_choice_form(Organ.objects.filter(office=get_office_session(self.request),
+                                                             is_active=True))
 
     def get_queryset(self):
+        court_district = self.forwarded.get('court_district', None)
         qs = self.base_queryset
+        if court_district:
+            qs = qs.filter(court_district_id=court_district)
         if self.q:
             filters = Q(Q(legal_name__unaccent__icontains=self.q)
                         | Q(name__unaccent__icontains=self.q))
@@ -811,6 +796,20 @@ class OrganFilterSelect2Autocomplete(autocomplete.Select2QuerySetView):
 
     def get_result_label(self, result):
         return "{}".format(result.__str__())
+
+    def get_results(self, context):
+        return [
+            {
+                'id': result.pk,
+                'text': self.get_result_label(result),
+            } for result in context['object_list']
+        ]
+
+
+class OrganFilterSelect2Autocomplete(OrganSelect2Autocomplete):
+    @property
+    def base_queryset(self):
+        return filter_valid_choice_form(Organ.objects.filter(office=get_office_session(self.request)))
 
 
 class CourtDistrictAutocomplete(TypeaHeadGenericSearch):
