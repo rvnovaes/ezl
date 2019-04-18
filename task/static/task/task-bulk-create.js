@@ -290,6 +290,13 @@ class TaskBulkCreate {
     }
 
 	async newLawSuit (csrfToken, fields) {
+	    this.clearFormErrors();
+	    this.validatePersonCustomer();
+	    if (this.formErrors.length > 0) {
+	        let htmlErrors = this.getErrors();
+	        TaskBulkCreate.swalError(htmlErrors);
+            return false;
+        }
 	    var html_fields = '';
         fields.forEach(function(field){html_fields += field + '\n'});
 	    const {value: formValues} = await swal({
@@ -642,12 +649,7 @@ class TaskBulkCreate {
             return false;
         }
         let htmlErrors = this.getErrors();
-        swal({
-            title: 'Campos obrigatórios não preenchidos',
-            width: '45%',
-            html: htmlErrors,
-            type: 'error'
-        });
+        TaskBulkCreate.swalError(htmlErrors);
         return this.formErrors.length;
     }
 
@@ -708,6 +710,15 @@ class TaskBulkCreate {
             onOpen: () => {
                 swal.showLoading();
             }
+        });
+    }
+
+    static swalError(html){
+	    swal({
+            title: 'Campos obrigatórios não preenchidos',
+            width: '45%',
+            html: html,
+            type: 'error'
         });
     }
 
