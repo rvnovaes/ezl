@@ -31,6 +31,13 @@ class TaskBulkCreate {
         this.onDocumentReady();
 	}
 
+	static setDefaultOfNull(value){
+	    if (!value) {
+	        return null;
+	    }
+	    return value;
+	}
+
 	static removeErrorClass(field=null){
 	    if (!field){
 	        $('.error').each(function () {
@@ -283,12 +290,19 @@ class TaskBulkCreate {
     }
 
 	async newLawSuit (csrfToken, fields) {
+	    this.clearFormErrors();
+	    this.validatePersonCustomer();
+	    if (this.formErrors.length > 0) {
+	        let htmlErrors = this.getErrors();
+	        TaskBulkCreate.swalError(htmlErrors);
+            return false;
+        }
 	    var html_fields = '';
         fields.forEach(function(field){html_fields += field + '\n'});
 	    const {value: formValues} = await swal({
             title: 'Cadastro de Processo',
             html: html_fields,
-            width: '30%',
+            width: '70%',
             focusConfirm: false,
             showCancelButton: true,
             showLoaderOnConfirm: true,
@@ -314,7 +328,13 @@ class TaskBulkCreate {
             let data = {'type_lawsuit': formValues.typeLawsuit,
                     'law_suit_number': formValues.lawsuitNumber,
                     'person_customer': document.getElementById('id_person_customer').value,
-                    'folder_id': document.getElementById('id_folder_number').value
+                    'folder_id': document.getElementById('id_folder_number').value,
+                    'organ_id': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_organ').value),
+                    'instance_id': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_instance').value),
+                    'court_division_id': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_court_division').value),
+                    'person_lawyer_id': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_person_lawyer').value),
+                    'opposing_party': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_opposing_party').value),
+                    'notes': TaskBulkCreate.setDefaultOfNull(document.getElementById('id_notes').value)
                 };
             $.ajax({
                 type: 'POST',
@@ -629,12 +649,7 @@ class TaskBulkCreate {
             return false;
         }
         let htmlErrors = this.getErrors();
-        swal({
-            title: 'Campos obrigatórios não preenchidos',
-            width: '45%',
-            html: htmlErrors,
-            type: 'error'
-        });
+        TaskBulkCreate.swalError(htmlErrors);
         return this.formErrors.length;
     }
 
@@ -695,6 +710,15 @@ class TaskBulkCreate {
             onOpen: () => {
                 swal.showLoading();
             }
+        });
+    }
+
+    static swalError(html){
+	    swal({
+            title: 'Campos obrigatórios não preenchidos',
+            width: '45%',
+            html: html,
+            type: 'error'
         });
     }
 

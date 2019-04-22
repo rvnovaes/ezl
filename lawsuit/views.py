@@ -1146,23 +1146,26 @@ class LawSuitCreateTaskBulkCreate(View):
 
     def post(self, *args, **kwargs):
         errors = []
-        create_user = self.request.user
         office_session = get_office_session(self.request)
-        folder_id = self.request.POST['folder_id']
+        folder_id = self.request.POST.get('folder_id')
         folder = self.get_folder(office_session, folder_id)
         if not folder:
             errors.append('Este escritório não possui pasta padrão configurado')
-        law_suit_number = self.request.POST['law_suit_number']
-        type_lawsuit = self.request.POST['type_lawsuit']
-
         status = 200
         if not errors:
-            instance = LawSuit.objects.create(create_user=create_user,
-                                              office=office_session,
-                                              folder=folder,
-                                              law_suit_number=law_suit_number,
-                                              type_lawsuit=type_lawsuit,
-                                              is_active=True)
+            create_dict = {'create_user': self.request.user,
+                           'law_suit_number': self.request.POST.get('law_suit_number'),
+                           'type_lawsuit': self.request.POST.get('type_lawsuit'),
+                           'office': office_session,
+                           'folder': folder, 'is_active': True,
+                           'organ_id': self.request.POST.get('organ_id', None) or None,
+                           'instance_id': self.request.POST.get('instance_id', None) or None,
+                           'court_division_id': self.request.POST.get('court_division_id', None) or None,
+                           'person_lawyer_id': self.request.POST.get('person_lawyer_id', None) or None,
+                           'opposing_party': self.request.POST.get('opposing_party', None) or None,
+                           'notes': self.request.POST.get('notes', None) or None,
+                           }
+            instance = LawSuit.objects.create(**create_dict)
             data = {'id': instance.id, 'text': instance.__str__(),
                     'folder': {'id': instance.folder_id, 'text': instance.folder.__str__()}}
         else:
