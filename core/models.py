@@ -294,7 +294,6 @@ class AbstractPerson(Audit, LegacyCode):
 
     def get_emails(self):
         emails = self.contact_mechanism_by_type('e-mail', formated=False)
-        emails = self.contact_mechanism_by_type('email', formated=False)
         emails = set(emails)
         if (self.auth_user and self.auth_user.email
                 and self.auth_user.email.strip()):
