@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0137_auto_20190326_1755'),
-        ('task', '0143_fix_task_hash'),
+        ('task', '0145_dashboardviewmodel_fields_ezl1221'),
     ]
 
     operations = [
