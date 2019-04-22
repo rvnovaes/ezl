@@ -209,9 +209,9 @@ class MDSelect(ModelSelect2):
             )
         }
         js = ('autocomplete_light/jquery.init.js',
-              'autocomplete_light/autocomplete.init.js',
               'autocomplete_light/vendor/select2/dist/js/select2.full.js',
               'autocomplete_light/vendor/select2/dist/js/i18n/pt-BR.js',
+              'autocomplete_light/autocomplete.init.js',
               'autocomplete_light/select2.js',
               )
 

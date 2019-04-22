@@ -66,8 +66,9 @@ class BaseModelForm(FileFormMixin, forms.ModelForm):
         if get_office_session(self.request) and self.request.method == 'GET':
             for field in self.fields:
                 if hasattr(self.fields[field], 'queryset'):
-                    if issubclass(self.fields[field].queryset.model,
-                                  OfficeMixin):
+                    subclass_office = issubclass(self.fields[field].queryset.model,
+                                                 OfficeMixin)
+                    if subclass_office:
                         try:
                             self.fields[field].queryset = self.fields[
                                 field].queryset.filter(
@@ -75,7 +76,8 @@ class BaseModelForm(FileFormMixin, forms.ModelForm):
                                         request=self.request))
                         except:
                             pass
-                    if hasattr(self.fields[field].queryset.model, 'offices'):
+                    if hasattr(self.fields[field].queryset.model, 'offices') \
+                            and not subclass_office:
                         try:
                             self.fields[field].queryset = self.fields[
                                 field].queryset.filter(

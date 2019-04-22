@@ -5,6 +5,7 @@ from core.serializers import CreateUserSerializerMixin, OfficeSerializerMixin, O
 from lawsuit.serializers import CourtDistrictSerializer, CourtDistrictComplementSerializer
 from task.serializers import TypeTaskSerializer
 
+
 class PolicyPriceSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin): 
     class Meta: 
         model = PolicyPrice
@@ -22,6 +23,7 @@ class ServicePriceTableSerializer(serializers.ModelSerializer, CreateUserSeriali
     city = serializers.SerializerMethodField()
     client = PersonSerializer(many=False, read_only=True)
     office_rating = serializers.SerializerMethodField()
+    finished_by_rate = serializers.SerializerMethodField()
     office_return_rating = serializers.SerializerMethodField()
 
     class Meta:
@@ -39,6 +41,9 @@ class ServicePriceTableSerializer(serializers.ModelSerializer, CreateUserSeriali
 
     def get_office_rating(self, obj):
         return obj.office_rating
+
+    def get_finished_by_rate(self, obj):
+        return obj.finished_by_rate
 
     def get_office_return_rating(self, obj):
         return obj.office_return_rating

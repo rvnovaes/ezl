@@ -210,10 +210,17 @@ def validate_xlsx_header(xls_file, headers):
     return header_is_valid
 
 
+def clear_history_amount(history):
+    if getattr(history, 'amount'):
+        history.amount = Decimal("{:0.2f}".format(float(history.amount)))
+    if getattr(history, 'amount_delegated'):
+        history.amount_delegated = Decimal("{:0.2f}".format(float(history.amount_delegated)))
+    return history
+
+
 def field_has_changed(history, field_to_check):
     if history.prev_record:
-        if getattr(history, 'amount'):
-            history.amount = Decimal("{:0.2f}".format(float(history.amount)))
+        history = clear_history_amount(history)
         delta = history.diff_against(history.prev_record)
         for change in delta.changes:
             if change.field == field_to_check:
@@ -224,8 +231,7 @@ def field_has_changed(history, field_to_check):
 def get_history_changes(history):
     changes = {}
     if history.prev_record:
-        if getattr(history, 'amount'):
-            history.amount = Decimal("{:0.2f}".format(float(history.amount)))
+        history = clear_history_amount(history)
         delta = history.diff_against(history.prev_record)
         for change in delta.changes:
             changes[change.field] = change
@@ -342,7 +348,7 @@ def create_office_template_value(office):
     from manager.models import Template
     from manager.utils import create_template_value
     for template in Template.objects.filter(is_active=True):
-        create_template_value(template, office, template.default_value)
+        create_template_value(template, office, str(template.default_value))
 
 
 def add_create_user_to_admin_group(office):
@@ -382,15 +388,11 @@ def post_create_new_user(request_invite, office_name, user, office_cpf_cnpj=None
         return 'office_instance'
 
 
-def update_office_custom_settings(office):
-    from task.models import TaskShowStatus, TaskStatus, EmailTemplate, TaskWorkflow
-    from manager.models import TemplateKeys
-    from django.contrib.auth.models import Group
+def create_work_alone_status_to_show(office, work_alone):
+    from task.models import TaskShowStatus, TaskStatus, EmailTemplate
     instance = office.customsettings
-    i_work_alone = instance.office.i_work_alone
-    use_etl = instance.office.use_etl
-    if i_work_alone:
-        status_to_show = [
+    work_alone_status_dict = {
+        True: [
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.OPEN,
                            send_mail_template=EmailTemplate.objects.filter(
@@ -407,9 +409,8 @@ def update_office_custom_settings(office):
                            status_to_show=TaskStatus.FINISHED,
                            send_mail_template=EmailTemplate.objects.filter(
                                template_id='d-7af22ba0396943729cdcb87e2e9f787c').first(), mail_recipients=['NONE']),
-        ]
-    else:
-        status_to_show = [
+        ],
+        False: [
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.REQUESTED, mail_recipients=['NONE']),
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
@@ -443,17 +444,22 @@ def update_office_custom_settings(office):
             TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
                            status_to_show=TaskStatus.BLOCKEDPAYMENT, mail_recipients=['NONE']),
         ]
-        if use_etl:
-            status_to_show.append(TaskShowStatus(custtom_settings_id=instance.id, create_user=instance.create_user,
-                                                 status_to_show=TaskStatus.ERROR), )
-    instance.task_status_show.all().delete()
-    instance.task_workflows.all().delete()
+    }
+    instance.task_status_show.exclude(custtom_settings_id=instance.id,
+                                      status_to_show=TaskStatus.ERROR).delete()
+    instance.task_status_show.bulk_create(work_alone_status_dict.get(work_alone))
 
-    instance.task_status_show.bulk_create(status_to_show)
-    if i_work_alone:
-        instance.office.use_etl = False
-        instance.office.use_service = False
-        default_user = instance.office.get_template_value(TemplateKeys.DEFAULT_USER.name)
+
+def create_work_alone_workflows(office, work_alone):
+    from manager.enums import TemplateKeys
+    from django.contrib.auth.models import Group
+    from task.models import TaskWorkflow, TaskStatus
+    instance = office.customsettings
+    task_workflows = []
+    if work_alone:
+        office.use_etl = False
+        office.use_service = False
+        default_user = office.get_template_value(TemplateKeys.DEFAULT_USER.name)
         if not default_user:
             admin_person = office.persons.filter(auth_user__isnull=False,
                                                  auth_user__is_superuser=False,
@@ -462,8 +468,8 @@ def update_office_custom_settings(office):
             default_user = getattr(admin_person, 'auth_user', None)
         default_user.groups.add(
             Group.objects.filter(
-                name='Correspondente-{}'.format(instance.office.pk)).first())
-        task_workflows = [
+                name='Correspondente-{}'.format(office.pk)).first())
+        task_workflows.extend([
             TaskWorkflow(
                 custtom_settings_id=instance.id,
                 create_user=instance.create_user,
@@ -476,5 +482,29 @@ def update_office_custom_settings(office):
                 task_from=TaskStatus.ACCEPTED_SERVICE,
                 task_to=TaskStatus.OPEN,
                 responsible_user=default_user),
-        ]
-        instance.task_workflows.bulk_create(task_workflows)
+        ])
+    instance.task_workflows.all().delete()
+    instance.task_workflows.bulk_create(task_workflows)
+
+
+def create_use_etl_status_to_show(office, use_etl):
+    from task.models import TaskShowStatus, TaskStatus
+    instance = office.customsettings
+    if use_etl:
+        status_to_show, nil = TaskShowStatus.objects.get_or_create(custtom_settings_id=instance.id,
+                                                                   status_to_show=TaskStatus.ERROR,
+                                                                   defaults={'create_user': instance.create_user})
+    else:
+        TaskShowStatus.objects.filter(custtom_settings_id=instance.id,
+                                      status_to_show=TaskStatus.ERROR).delete()
+
+
+def create_office_custom_settings(office):
+
+    instance = office.customsettings
+    i_work_alone = instance.office.i_work_alone
+    use_etl = instance.office.use_etl
+
+    create_work_alone_status_to_show(office, i_work_alone)
+    create_work_alone_workflows(office, i_work_alone)
+    create_use_etl_status_to_show(office, use_etl)

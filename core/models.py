@@ -294,7 +294,6 @@ class AbstractPerson(Audit, LegacyCode):
 
     def get_emails(self):
         emails = self.contact_mechanism_by_type('e-mail', formated=False)
-        emails = self.contact_mechanism_by_type('email', formated=False)
         emails = set(emails)
         if (self.auth_user and self.auth_user.email
                 and self.auth_user.email.strip()):
@@ -525,6 +524,27 @@ class Office(AbstractPerson):
         template_obj = self.get_template_value_obj(TemplateKeys.USE_SERVICE.name)
         update_template_value(template_obj, new_value)
 
+    @property
+    def duplicate_process(self):
+        from manager.enums import TemplateKeys
+        return self.get_template_value(TemplateKeys.DUPLICATE_PROCESS.name)
+
+    @duplicate_process.setter
+    def duplicate_process(self, value):
+        from manager.enums import TemplateKeys
+        from manager.utils import update_template_value
+        template_obj = self.get_template_value_obj(TemplateKeys.DUPLICATE_PROCESS.name)
+        update_template_value(template_obj, str(value))
+
+    @property
+    def related_offices(self):
+        from django.db.models import Q
+        qs = self._meta.model.objects.filter(Q(
+            Q(id__in=self.to_offices.values_list('from_office', flat=True)) |
+            Q(id__in=self.from_offices.values_list('to_office', flat=True)))
+        )
+        return qs
+
 
 class OfficeMixin(models.Model):
     office = models.ForeignKey(
@@ -534,6 +554,14 @@ class OfficeMixin(models.Model):
         null=False,
         related_name='%(class)s_office',
         verbose_name='Escritório')
+
+    class Meta:
+        abstract = True
+
+
+class NotesMixin(models.Model):
+    notes = models.TextField(
+        null=True, blank=True, verbose_name=u'Observações')
 
     class Meta:
         abstract = True
@@ -682,7 +710,7 @@ class InviteOffice(Audit, OfficeMixin):
         verbose_name_plural = 'Convites para escritórios'
 
 
-class Address(Audit):
+class Address(Audit, NotesMixin):
     address_type = models.ForeignKey(
         AddressType,
         on_delete=models.PROTECT,
@@ -695,7 +723,6 @@ class Address(Audit):
         max_length=255, blank=True, verbose_name='Complemento')
     city_region = models.CharField(max_length=255, verbose_name='Bairro')
     zip_code = models.CharField(max_length=255, verbose_name='CEP')
-    notes = models.TextField(blank=True, verbose_name='Observação')
     home_address = models.BooleanField(default=False, blank=True)
     business_address = models.BooleanField(default=False, blank=True)
     city = models.ForeignKey(

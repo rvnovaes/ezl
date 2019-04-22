@@ -246,12 +246,17 @@ class TaskReturnMailTemplate(object):
 
 
 class TaskMail(object):
-    def __init__(self, email, task, template_id, by_person=None):
-        logger.error('PASSEI AQUI PARA A OS {}-{}'.format(task.pk, task.office))
+    def __init__(self,
+                 email,
+                 task,
+                 template_id,
+                 by_person=None,
+                 task_number=''):
         self.sg = sendgrid.SendGridAPIClient(
             apikey=settings.EMAIL_HOST_PASSWORD
         )
         self.by_person = by_person
+        self.task_number = task_number
         self.task = task
         self.email = [{"email": email_address} for email_address in list(set(email))]
         self.template_id = template_id

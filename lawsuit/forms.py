@@ -96,22 +96,19 @@ class FolderForm(BaseForm):
 class LawSuitForm(BaseForm):
     def __init__(self, *args, **kwargs):
         super(LawSuitForm, self).__init__(*args, **kwargs)
+        office_session = get_office_session(self.request)
         self.fields['office'] = get_office_field(self.request)
-
-        def get_option(o):
-            return '{}/{}'.format(o.court_district.name, o.legal_name)
-
-        choices = [(organ.pk, get_option(organ))
-                   for organ in Organ.objects.filter(
-                       office=get_office_session(self.request))]
-        self.fields['organ'].choices = choices
+        self.fields['instance'].queryset = self.fields['instance'].queryset.filter(
+            office=office_session)
+        self.fields['court_division'].queryset = self.fields['court_division'].queryset.filter(
+            office=office_session)
 
     class Meta:
         model = LawSuit
         fields = [
-            'office', 'type_lawsuit', 'law_suit_number', 'court_district', 'city', 'court_district_complement', 'organ',
-            'instance', 'court_division', 'person_lawyer', 'opposing_party', 'is_current_instance', 'is_active',
-            'legacy_code'
+            'office', 'type_lawsuit', 'law_suit_number', 'court_district', 'city', 'court_district_complement',
+            'organ', 'instance', 'court_division', 'person_lawyer', 'opposing_party', 'is_current_instance',
+            'is_active', 'legacy_code', 'notes'
         ]
 
     person_lawyer = forms.ModelChoiceField(
@@ -134,15 +131,10 @@ class LawSuitForm(BaseForm):
                                                        widget=MDSelect(url='/processos/complemento_select2',
                                                                        forward=['court_district']),
                                                        queryset=CourtDistrictComplement.objects.all())
-    organ = forms.CharField(
-        label='Órgão',
-        required=False,
-        widget=TypeaHeadForeignKeyWidget(
-            model=Organ,
-            field_related='legal_name',
-            name='organ',
-            url='/processos/organ_autocomplete'))
-
+    organ = forms.ModelChoiceField(label="Órgão",
+                                   required=False,
+                                   widget=MDSelect(url='/processos/organ_autocomplete', ),
+                                   queryset=Organ.objects.all(), )
     instance = forms.ModelChoiceField(
         queryset=filter_valid_choice_form(
             Instance.objects.filter(is_active=True)).order_by('name'),
@@ -156,6 +148,7 @@ class LawSuitForm(BaseForm):
     opposing_party = forms.CharField(required=False)
     law_suit_number = forms.CharField(max_length=255, required=True)
     is_current_instance = CustomBooleanField(initial=False, required=False)
+    notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 2,}))
 
 
 class CourtDivisionForm(BaseForm):

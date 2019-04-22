@@ -12,8 +12,8 @@ from django.urls.base import reverse
 from django.utils import timezone
 from sequences import get_next_value
 from core.models import Person, Audit, AuditCreate, LegacyCode, OfficeMixin, OfficeManager, Office, CustomSettings, \
-    EmailTemplate
-from lawsuit.models import Movement, Folder
+    EmailTemplate, State
+from lawsuit.models import Movement, Folder, CourtDistrict, CourtDivision
 from chat.models import Chat
 from billing.models import Charge
 from decimal import Decimal
@@ -22,7 +22,7 @@ from django.contrib.postgres.fields import JSONField, ArrayField
 from django.forms import MultipleChoiceField
 from .mail import TaskCompanyRepresentativeChangeMail
 from simple_history.models import HistoricalRecords
-from core.models import BaseHistoricalModel
+from core.models import BaseHistoricalModel, NotesMixin
 import inspect
 from financial.enums import CategoryPrice, RateType
 
@@ -383,6 +383,13 @@ class Task(Audit, LegacyCode, OfficeMixin):
         null=False,
         blank=False,
         verbose_name='Valor',
+        max_digits=9,
+        decimal_places=2,
+        default=Decimal('0.00'))
+    amount_delegated = models.DecimalField(
+        null=False,
+        blank=False,
+        verbose_name='Valor delegado',
         max_digits=9,
         decimal_places=2,
         default=Decimal('0.00'))
@@ -778,11 +785,9 @@ class Ecm(Audit, LegacyCode):
         return self.local_file_path
 
 
-class TaskHistory(AuditCreate):
+class TaskHistory(AuditCreate, NotesMixin):
     task = models.ForeignKey(
         Task, on_delete=models.CASCADE, blank=False, null=False)
-    notes = models.TextField(
-        null=True, blank=True, verbose_name=u'Observações')
     status = models.CharField(max_length=30, choices=TaskStatus.choices())
 
     class Meta:
@@ -852,6 +857,18 @@ class DashboardViewModel(Audit, OfficeMixin):
         blank=False,
         null=False,
         verbose_name='Movimentação')
+    court_district = models.ForeignKey(
+        CourtDistrict,
+        on_delete=models.PROTECT,
+        verbose_name='Comarca')
+    court_division = models.ForeignKey(
+        CourtDivision,
+        on_delete=models.PROTECT,
+        verbose_name='Vara')
+    state = models.ForeignKey(
+        State,
+        on_delete=models.PROTECT,
+        verbose_name='UF')
     person_asked_by = models.ForeignKey(
         Person,
         on_delete=models.PROTECT,
@@ -927,6 +944,8 @@ class DashboardViewModel(Audit, OfficeMixin):
         blank=True,
         null=True,
         verbose_name='Número do Processo')
+    opposing_party = models.TextField(
+        blank=True, null=True, verbose_name='Parte adversa')
     parent_task_number = models.PositiveIntegerField(
         default=0, verbose_name='OS Original')
 
@@ -946,9 +965,16 @@ class DashboardViewModel(Audit, OfficeMixin):
     def __str__(self):
         return self.type_task.name
 
-    @property
-    def court_district(self):
-        return self.movement.law_suit.court_district
+    def executed_by(self):
+        task_child = Task(self.id).get_child
+        if task_child:
+            return str(task_child.office)
+        return str(self.person_executed_by)
+
+    def asked_by(self):
+        if self.parent:
+            return str(self.parent.office)
+        return str(self.person_asked_by)
 
     @property
     def court(self):
@@ -964,10 +990,6 @@ class DashboardViewModel(Audit, OfficeMixin):
         if organ:
             address = organ.address_set.first()
         return address
-
-    @property
-    def opposing_party(self):
-        return self.movement.law_suit.opposing_party
 
     @property
     def cost_center(self):
