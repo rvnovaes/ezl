@@ -52,8 +52,8 @@ class TaskApiFilter(FilterSet):
 
     class Meta:
         model = Task
-        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date', 
-        'task_status', 'person_executed_by_id']
+        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date',
+                  'task_status', 'person_executed_by_id']
 
 
 class TaskFilter(FilterSet):
@@ -190,7 +190,7 @@ class TaskFilter(FilterSet):
         self.filters['person_executed_by'].queryset = Person.objects.correspondents(office_id=office_session.id)
         self.filters['person_distributed_by'].queryset = Person.objects.services().filter(offices=office_session)
         self.filters['office_executed_by'].queryset = \
-            self.filters['origin_office_asked_by'].queryset = office_session.offices.all()
+            self.filters['origin_office_asked_by'].queryset = office_session.related_offices
 
     class Meta:
         model = DashboardViewModel
