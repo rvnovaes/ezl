@@ -136,7 +136,7 @@ def create_or_update_chat(sender, instance, created, **kwargs):
         exc_type, exc_value, exc_traceback = sys.exc_info()
         logger.error('ERRO AO CHAMAR O METODO create_or_update_chat')
         logger.error(traceback.print_exception(exc_type, exc_value, exc_traceback,
-                              limit=2, file=sys.stdout))
+                                               limit=2, file=sys.stdout))
 
 
 def set_status_by_workflow(instance, custom_settings):
@@ -211,7 +211,7 @@ def workflow_send_mail(instance, by_person):
 
     if mail_list and status_to_show:
         for mail in mail_list:
-            recipients = mail.get('recipients', '')
+            recipients = mail.get('recipient', '')
             task_number = mail.get('task_number', '')
             email = TaskMail(recipients,
                              instance,
@@ -484,10 +484,11 @@ def post_create_historical_record_callback(sender, **kwargs):
     history_instance.save()
     try:
         if history_instance.history_office == instance.office:
-            by_person = "pelo(a) contratante {}".format(str(instance.history_user.person).title())
+            by_person = "pelo(a) contratante {}".format(str(history_instance.history_user.person).title())
         else:
             by_person = "pelo(a) escritório {}".format(str(history_instance.history_office).title())
-        workflow_send_mail(instance, by_person)
+        if not getattr(instance, '_skip_mail', False):
+            workflow_send_mail(instance, by_person)
     except:
         pass
     if instance.legacy_code:
