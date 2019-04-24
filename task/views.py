@@ -175,51 +175,56 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
             return self.form_invalid(form)
 
     def form_valid(self, form):
-        validation_data = {
-            'create_user': self.request.user,
-            'office': form.instance.office,
-            'movement_id': self.request.POST['movement'],
-            'law_suit_number': self.request.POST['task_law_suit_number'],
-            'folder_number': self.request.POST['folder_number'],
-            'person_customer_id': self.request.POST['person_customer']
-        }
-        form.instance.create_user = validation_data['create_user']
-        form.instance.create_date = timezone.now()
-        form.instance.is_active = True
+        try:
+            validation_data = {
+                'create_user': self.request.user,
+                'office': form.instance.office,
+                'movement_id': self.request.POST['movement'],
+                'law_suit_number': self.request.POST['task_law_suit_number'],
+                'folder_number': self.request.POST['folder_number'],
+                'person_customer_id': self.request.POST['person_customer']
+            }
+            form.instance.create_user = validation_data['create_user']
+            form.instance.create_date = timezone.now()
+            form.instance.is_active = True
 
-        self.get_folder(validation_data)
-        self.get_law_suit(validation_data)
-        if self.request.POST.get('court_district', None) \
-                and self.law_suit.court_district_id != int(self.request.POST['court_district']):
-            self.law_suit.court_district_id = int(self.request.POST['court_district'])
-            self.law_suit.save()
-        if self.request.POST.get('court_district_complement', None) and \
-                self.law_suit.court_district_complement_id != int(self.request.POST['court_district_complement']):
-            self.law_suit.court_district_complement_id = int(self.request.POST['court_district_complement'])
-            self.law_suit.save()
-        if self.request.POST.get('city', None) and self.law_suit.city_id != int(self.request.POST['city']):
-            self.law_suit.city_id = int(self.request.POST['city'])
-            self.law_suit.save()
-        self.get_movement(validation_data)
+            self.get_folder(validation_data)
+            self.get_law_suit(validation_data)
+            if self.request.POST.get('court_district', None) \
+                    and self.law_suit.court_district_id != int(self.request.POST['court_district']):
+                self.law_suit.court_district_id = int(self.request.POST['court_district'])
+                self.law_suit.save()
+            if self.request.POST.get('court_district_complement', None) and \
+                    self.law_suit.court_district_complement_id != int(self.request.POST['court_district_complement']):
+                self.law_suit.court_district_complement_id = int(self.request.POST['court_district_complement'])
+                self.law_suit.save()
+            if self.request.POST.get('city', None) and self.law_suit.city_id != int(self.request.POST['city']):
+                self.law_suit.city_id = int(self.request.POST['city'])
+                self.law_suit.save()
+            self.get_movement(validation_data)
 
-        form.instance.movement = self.movement
-        form.instance.__server = get_domain(self.request)
-        task = form.save()
+            form.instance.movement = self.movement
+            form.instance.__server = get_domain(self.request)
+            task = form.save()
 
-        documents = form.cleaned_data['documents'] if form.fields.get('documents') else []
-        if documents:
-            for document in documents:
-                file_name = document.name.replace(' ', '_')
-                task.ecm_set.create(
-                    path=document,
-                    exhibition_name=file_name,
-                    create_user=task.create_user)
+            documents = form.cleaned_data['documents'] if form.fields.get('documents') else []
+            if documents:
+                for document in documents:
+                    file_name = document.name.replace(' ', '_')
+                    task.ecm_set.create(
+                        path=document,
+                        exhibition_name=file_name,
+                        create_user=task.create_user)
 
-        form.delete_temporary_files()
+            form.delete_temporary_files()
 
-        status = 201
-        ret = {'status': 'Ok', 'task_id': task.id, 'task_number': task.task_number}
-        return JsonResponse(ret, status=status)
+            status = 201
+            ret = {'status': 'Ok', 'task_id': task.id, 'task_number': task.task_number}
+            return JsonResponse(ret, status=status)
+        except Exception as e:
+            status = 500
+            ret = {'status': 'error', 'error': e.messages}
+            return JsonResponse(ret, status=status)
 
     def form_invalid(self, form):
         status = 500
