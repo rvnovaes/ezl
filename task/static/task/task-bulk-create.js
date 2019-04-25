@@ -424,8 +424,8 @@ class TaskBulkCreate {
                     if (courtDistrict && courtDistrict.id !== parseInt(this.courtDistrict)){
                         this.courtDistrictComplement = this.nullData;
                     }
-                    if (this.lawSuitNumberData.court_district.id &&
-                            this.lawSuitNumberData.court_district.id !== parseInt(this.courtDistrict)){
+                    if ((this.lawSuitNumberData.court_district) && (this.lawSuitNumberData.court_district.id &&
+                            this.lawSuitNumberData.court_district.id !== parseInt(this.courtDistrict))){
                         this.folderNumber = this.nullData;
                         this.enableOnChange = false;
                         this.lawSuitNumber = this.nullData;
@@ -609,7 +609,12 @@ class TaskBulkCreate {
             },
             error: (request, status, error)=>{
                 swal.close();
-                showToast('error', 'Atenção', error, 0, false);
+                let errorMessage = `${error}<br /><ul>`;
+                request.responseJSON.error.forEach((e) => {
+                    errorMessage += `<li>${e}</li>`;
+                });
+                errorMessage += '</ul>';
+                showToast('error', 'Atenção', errorMessage, 0, false);
             },
             beforeSend: (xhr, settings)=>{
                 xhr.setRequestHeader('X-CSRFToken', data.csrfmiddlewaretoken);

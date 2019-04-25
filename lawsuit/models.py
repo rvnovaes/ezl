@@ -346,7 +346,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin, NotesMixin):
                 'law_suit_number': ['Favor verificar o número do processo'],
                 'instance': ['Favor verificar a instância do processo']
             }
-        if filter_dict:
+        if filter_dict and self.law_suit_number != 'Processo avulso':
             if LawSuit.objects.exclude(
                     pk=self.pk
             ).filter(**filter_dict):
