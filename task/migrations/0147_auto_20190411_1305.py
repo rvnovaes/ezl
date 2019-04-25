@@ -11,7 +11,7 @@ import task.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('task', '0145_dashboardviewmodel_fields_ezl1221'),
+        ('task', '0146_auto_20190404_1123'),
     ]
 
     operations = [
