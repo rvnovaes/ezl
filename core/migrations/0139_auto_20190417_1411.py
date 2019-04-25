@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0137_auto_20190326_1755'),
+        ('core', '0138_customsettings_show_task_in_admin_dash'),
     ]
 
     operations = [
