@@ -14,7 +14,7 @@ def updte_contact_mechanism(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0138_auto_20190417_1411'),
+        ('core', '0139_auto_20190417_1411'),
     ]
 
     operations = [

@@ -11,7 +11,7 @@ from financial.models import CostCenter
 from lawsuit.models import CourtDistrict, Organ, CourtDistrictComplement
 from task.models import TypeTask, Task, Filter, TaskStatus
 from task.widgets import ApiDatetimeRangeField
-from .models import DashboardViewModel, TypeTaskMain
+from .models import TaskFilterViewModel, TypeTaskMain
 from core.utils import get_office_session
 from task.utils import get_status_to_filter
 
@@ -49,9 +49,18 @@ class TaskApiFilter(FilterSet):
     person_executed_by_id = MultiValueCharFilter(name='person_executed_by_id', lookup_expr='in')
     final_deadline_date = DatetimeFromToRangeFilter()
     task_status = MultiValueCharFilter(name='task_status', lookup_expr='in')
+    parent_id = filters.NumberFilter(name='parent_id')
 
     class Meta:
         model = Task
+        fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date',
+                  'task_status', 'person_executed_by_id', 'parent_id']
+
+
+class TaskDashboardApiFilter(TaskApiFilter):
+
+    class Meta:
+        model = TaskFilterViewModel
         fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date',
                   'task_status', 'person_executed_by_id']
 
@@ -193,7 +202,7 @@ class TaskFilter(FilterSet):
             self.filters['origin_office_asked_by'].queryset = office_session.related_offices
 
     class Meta:
-        model = DashboardViewModel
+        model = TaskFilterViewModel
         fields = []
         order_by = ['final_deadline_date']
 

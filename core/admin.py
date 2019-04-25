@@ -28,7 +28,7 @@ class TaskShowStatusInline(admin.TabularInline):
 class CustomSettingsAdmin(admin.ModelAdmin):
     list_display = ('office',)
     search_fields = ['office__legal_name', 'office__name']
-    fields = ['office', 'create_user', 'alter_user']
+    fields = ['office', 'create_user', 'alter_user', 'show_task_in_admin_dash']
     inlines = [TaskShowStatusInline, TaskWorkflowInline]
 
     def save_form(self, request, form, change):
