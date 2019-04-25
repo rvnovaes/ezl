@@ -86,7 +86,7 @@ class ContactMechanismETL(GenericETL):
                            SELECT DISTINCT
                              '' AS unit,
                              ADV_EMAIL.Codigo AS legacy_code,
-                             'email'          AS contact_mechanism_type,
+                             'e-mail'          AS contact_mechanism_type,
                              ADV_EMAIL.E_mail AS description
                            FROM Jurid_Advogado AS ADV_EMAIL
                            WHERE ADV_EMAIL.Status = 'Ativo'
@@ -107,7 +107,7 @@ class ContactMechanismETL(GenericETL):
                            SELECT DISTINCT
                            '' AS unit,
                              CORSER_EMAIL.CS_Advogado AS legacy_code,
-                             'email'                  AS contact_mechanism_type,
+                             'e-mail'                  AS contact_mechanism_type,
                              CORSER_EMAIL.CS_Email    AS description
                            FROM Jurid_Corresp_Servico CORSER_EMAIL
                            WHERE LOWER(CORSER_EMAIL.CS_Email) LIKE '%@mtostes.com.br'  
@@ -167,10 +167,10 @@ class ContactMechanismETL(GenericETL):
                     else:
                         contact_mechanism_type, created = ContactMechanismType.objects.get_or_create(
                             defaults={
-                                'name': 'email',
+                                'name': 'e-mail',
                                 'create_user': user
                             },
-                            name__unaccent__iexact='email')
+                            name__unaccent__iexact='e-mail')
                         if contact_mechanism_type:
                             for description in row['description'].split(';'):
                                 if '@mtostes.com.br' in description.lower():

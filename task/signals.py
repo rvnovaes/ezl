@@ -136,7 +136,7 @@ def create_or_update_chat(sender, instance, created, **kwargs):
         exc_type, exc_value, exc_traceback = sys.exc_info()
         logger.error('ERRO AO CHAMAR O METODO create_or_update_chat')
         logger.error(traceback.print_exception(exc_type, exc_value, exc_traceback,
-                              limit=2, file=sys.stdout))
+                                               limit=2, file=sys.stdout))
 
 
 def set_status_by_workflow(instance, custom_settings):
@@ -161,54 +161,65 @@ def workflow_task(sender, instance, created, **kwargs):
         exc_type, exc_value, exc_traceback = sys.exc_info()
         logger.error('ERRO AO CHAMAR O METODO workflow_task')
         logger.error(traceback.print_exception(exc_type, exc_value, exc_traceback,
-                              limit=2, file=sys.stdout))
+                                               limit=2, file=sys.stdout))
 
 
-def workflow_send_mail(sender, instance, created, **kwargs):
-    try:
-        manager = ListTemplateValues(instance.office)
-        custom_settings = CustomSettings.objects.filter(
-            office=instance.office).first()
-        if custom_settings:
-            status_to_show = custom_settings.task_status_show.filter(
-                status_to_show=instance.task_status).first()
-            if status_to_show and status_to_show.send_mail_template:
-                email = None
-                if instance.office.i_work_alone:
-                    email = TaskMail([manager.get_value_by_key(TemplateKeys.EMAIL_NOTIFICATION.name)],
-                                     instance,
-                                     status_to_show.send_mail_template.template_id)
-                else:
-                    if instance.__previous_status != instance.task_status:
-                        persons_to_receive = []
-                        mail_list = []
-                        person_recipient_list = status_to_show.mail_recipients
-                        by_person = None
-                        for person in person_recipient_list:
-                            attrs = person.lower().split('__')
-                            obj = instance
-                            for attr in attrs:
-                                obj = getattr(obj, attr, None)
-                                if not obj:
-                                    break
-                                if len(attrs) > 1:
-                                    by_person = str(instance.office).title()
-                            if obj:
-                                persons_to_receive.append(obj)
-                        for person in persons_to_receive:
-                            mails = person.emails.split(' | ')
-                            for mail in mails:
-                                if mail != '':
-                                    mail_list.append(mail)
-                        email = TaskMail(mail_list,
-                                         instance,
-                                         status_to_show.send_mail_template.template_id,
-                                         by_person)
-                        instance.__previous_status = TaskStatus(instance.task_status)
-                if email:
-                    email.send_mail()
-    except:
-        pass
+def get_task_number(task, recipient_str_list):
+    task_number = task.task_number
+    if recipient_str_list.__len__() > 1:
+        related_task = getattr(task, recipient_str_list[0], None)
+        if related_task:
+            task_number = related_task.task_number
+    return task_number
+
+
+def get_mail_recipients_from_status_to_show(task, status_to_show):
+    mail_list = []
+    person_recipient_list = status_to_show.mail_recipients
+    for person in person_recipient_list:
+        recipient_str_list = person.lower().split('__')
+        obj = task
+        task_number = get_task_number(task, recipient_str_list)
+        for recipient_str in recipient_str_list:
+            obj = getattr(obj, recipient_str, None)
+            if not obj:
+                break
+        if obj:
+            mail_list.append({
+                'recipient': list(filter(None, obj.emails.split(' | '))),
+                'task_number': task_number
+            })
+
+    return mail_list
+
+
+def workflow_send_mail(instance, by_person):
+    custom_settings = instance.office.customsettings
+    mail_list = []
+    status_to_show = None
+    if custom_settings:
+        status_to_show = custom_settings.task_status_show.filter(
+            status_to_show=instance.task_status).first()
+        if status_to_show and status_to_show.send_mail_template:
+            if instance.office.i_work_alone:
+                mail_list = {
+                    'recipient': list(instance.office.get_template_value(TemplateKeys.EMAIL_NOTIFICATION.name)),
+                    'task_number': instance.task_number
+                }
+            else:
+                mail_list = get_mail_recipients_from_status_to_show(instance, status_to_show)
+
+    if mail_list and status_to_show:
+        for mail in mail_list:
+            recipients = mail.get('recipient', '')
+            task_number = mail.get('task_number', '')
+            email = TaskMail(recipients,
+                             instance,
+                             status_to_show.send_mail_template.template_id,
+                             by_person,
+                             task_number)
+            if email:
+                email.send_mail()
 
 
 @receiver(post_save, sender=Task)
@@ -222,7 +233,7 @@ def post_save_task(sender, instance, created, **kwargs):
     try:
         ezl_export_task_to_advwin(sender, instance, **kwargs)
         workflow_task(sender, instance, created, **kwargs)
-        workflow_send_mail(sender, instance, created, **kwargs)
+        instance.__previous_status = TaskStatus(instance.task_status)
         create_or_update_chat(sender, instance, created, **kwargs)
         create_company_chat(sender, instance, created, **kwargs)
     except Exception as e:
@@ -471,5 +482,14 @@ def post_create_historical_record_callback(sender, **kwargs):
 
     history_instance.history_notes = msg
     history_instance.save()
+    try:
+        if history_instance.history_office == instance.office:
+            by_person = "pelo(a) contratante {}".format(str(history_instance.history_user.person).title())
+        else:
+            by_person = "pelo(a) escritório {}".format(str(history_instance.history_office).title())
+        if not getattr(instance, '_skip_mail', False):
+            workflow_send_mail(instance, by_person)
+    except:
+        pass
     if instance.legacy_code:
         export_task_history.delay(history_instance.pk)

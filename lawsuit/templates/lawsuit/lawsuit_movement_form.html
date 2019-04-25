@@ -2,13 +2,13 @@
 
 {% block extra_scripts %} 
     <script>
-        $(document).ready(function(){
-        	typeaheadAditionalParams.court_district = $('#court_district').attr('data-value')
-			$('#court_district').on('change', function(){
-				typeaheadAditionalParams.court_district = $(this).attr('data-value')				
-				$('#organ').val(null)
-				$('#organ').attr('data-value', "")
-			})			        	
-        })
+        {#$(document).ready(function(){#}
+        {#	typeaheadAditionalParams.court_district = $('#court_district').attr('data-value')#}
+		{#	$('#court_district').on('change', function(){#}
+		{#		typeaheadAditionalParams.court_district = $(this).attr('data-value')				#}
+		{#		$('#organ').val(null)#}
+		{#		$('#organ').attr('data-value', "")#}
+		{#	})			        	#}
+        {#})#}
     </script>
 {% endblock %}
