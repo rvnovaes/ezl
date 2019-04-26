@@ -17,8 +17,8 @@ class OfficeMixinViewSet(viewsets.ModelViewSet):
         if invalid_registry:
             self.queryset = self.queryset.exclude(id=invalid_registry)
         if self.request.auth.application.office:
-            return self.queryset.filter(office=self.request.auth.application.office, is_active=True)    
-        return super().get_queryset()        
+            return self.queryset.filter(office=self.request.auth.application.office)
+        return super().get_queryset()
 
 
 class ApplicationView(object):

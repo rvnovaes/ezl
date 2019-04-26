@@ -1,7 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 from pycpfcnpj import cpfcnpj
-from .models import Person, Office, Company, Address, ContactMechanism, CustomMessage
+from .models import Person, Office, Company, Address, ContactMechanism, CustomMessage, Audit
 from .view_validators import create_person_office_relation, person_exists
 from .messages import person_cpf_cnpj_already_exists, invalid_field
 from .utils import get_office_session, get_office_api
@@ -44,6 +44,11 @@ class CreateUserSerializerMixin(serializers.Serializer):
 
 class OfficeSerializerMixin(serializers.Serializer):
     office = serializers.HiddenField(default=OfficeDefault())
+
+
+class AuditSerializerMixin(serializers.Serializer):
+    is_active = serializers.BooleanField(default=True)
+    legacy_code = serializers.CharField(required=False, default='')
 
 
 class PersonSerializer(serializers.ModelSerializer, CreateUserSerializerMixin):

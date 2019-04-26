@@ -49,7 +49,7 @@ from task.rules import RuleViewTask
 from task.workflow import CorrespondentsTable, CorrespondentsTablePostPaid
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
-from financial.serializers import ServicePriceTableSerializer
+from financial.serializers import ServicePriceDelegationTableSerializer
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
     has_task_parent, get_delegate_amounts, get_status_to_filter, get_default_customer, recalculate_amounts
@@ -2263,7 +2263,7 @@ class ServicePriceTableOfTaskView(CustomLoginRequiredView, View):
             price_table = CorrespondentsTablePostPaid(task, task.office)
         else:
             price_table = CorrespondentsTable(task, task.office)
-        data = ServicePriceTableSerializer(price_table.correspondents_qs, many=True).data
+        data = ServicePriceDelegationTableSerializer(price_table.correspondents_qs, many=True).data
         return JsonResponse(data, safe=False)
 
 
@@ -2274,5 +2274,5 @@ class ServicePriceTableCheapestOfTaskView(CustomLoginRequiredView, View):
             price_table = CorrespondentsTablePostPaid(task, task.office)
         else:
             price_table = CorrespondentsTable(task, task.office)
-        data = ServicePriceTableSerializer(price_table.get_cheapest_correspondent()).data
+        data = ServicePriceDelegationTableSerializer(price_table.get_cheapest_correspondent()).data
         return JsonResponse(data)

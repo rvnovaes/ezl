@@ -4,6 +4,7 @@ from .models import Chat, UnreadMessage
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import StandardResultsSetPagination
 
+
 class ChatViewSet(viewsets.ModelViewSet):
     queryset = Chat.objects.all()
     serializer_class = ChatSerializer
