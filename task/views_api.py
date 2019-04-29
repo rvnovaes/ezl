@@ -36,13 +36,18 @@ class TypeTaskViewSet(OfficeMixinViewSet):
 
 
 @permission_classes((TokenHasReadWriteScope, ))
-class EcmTaskViewSet(viewsets.ModelViewSet, ApplicationView):
+class EcmTaskViewSet(mixins.CreateModelMixin,
+                     mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin,
+                     viewsets.GenericViewSet,
+                     ApplicationView):
     queryset = Ecm.objects.all()
     serializer_class = EcmTaskSerializer
 
     def get_queryset(self, *args, **kwargs):
         office = self.request.auth.application.office
-        return self.queryset.filter(Q(tasks__office=office.id) | Q(task__office_id=office.id))
+        return self.queryset.filter(Q(tasks__office=office.id) | Q(task__office_id=office.id)).distinct()
 
 
 @permission_classes((TokenHasReadWriteScope, ))

@@ -104,7 +104,13 @@ class EcmTaskSerializer(serializers.ModelSerializer,
                         CreateUserSerializerMixin):
     class Meta:
         model = Ecm
-        exclude = ('create_date', 'alter_date', 'system_prefix', 'is_active')
+        exclude = ('create_date', 'alter_date', 'alter_user', 'is_active', 'updated', 'ecm_related')
+
+    def validate_task(self, obj):
+        office = self.context['request'].auth.application.office
+        if obj.office != office:
+            raise serializers.ValidationError("A OS indicada não pertence ao escritório da sessão")
+        return obj
 
 
 class OfficeToPaySerializer(serializers.ModelSerializer):
