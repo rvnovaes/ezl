@@ -148,7 +148,9 @@ class LawSuitForm(BaseForm):
     opposing_party = forms.CharField(required=False)
     law_suit_number = forms.CharField(max_length=255, required=True)
     is_current_instance = CustomBooleanField(initial=False, required=False)
-    notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 2,}))
+    notes = forms.CharField(required=False,
+                            label='Observações',
+                            widget=forms.Textarea(attrs={'rows': 2,}))
 
 
 class CourtDivisionForm(BaseForm):
