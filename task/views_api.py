@@ -83,11 +83,18 @@ class TaskDashboardEZLViewSet(OfficeMixinViewSet, ApplicationView):
     default_ordering = ('-final_deadline_date',)
 
     def get_queryset(self):
-        queryset = TaskFilterViewModel.objects.filter(
-            Q(parent__isnull=True),
-            Q(office__customsettings__show_task_in_admin_dash=True))
-        params = self.request.query_params
-        return filter_api_queryset_by_params(queryset, params)
+        queryset = TaskFilterViewModel.objects.all()
+        if not self.request.query_params.get('parent_id'):
+            queryset = TaskFilterViewModel.objects.filter(
+                Q(parent__isnull=True),
+                Q(office__customsettings__show_task_in_admin_dash=True))
+
+            params = self.request.query_params
+            queryset = filter_api_queryset_by_params(queryset, params)
+        return queryset
+
+    def filter_queryset(self, queryset):
+        return super().filter_queryset(queryset)
 
 
 @api_view(['GET'])

@@ -62,7 +62,7 @@ class TaskDashboardApiFilter(TaskApiFilter):
     class Meta:
         model = TaskFilterViewModel
         fields = ['legacy_code', 'task_number', 'is_hearing', 'office_id', 'final_deadline_date',
-                  'task_status', 'person_executed_by_id']
+                  'task_status', 'person_executed_by_id', 'parent_id']
 
 
 class TaskFilter(FilterSet):
