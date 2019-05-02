@@ -585,7 +585,7 @@ class ImportLawSuit(ImportTask):
             # Validacao de court_division
             court_division = row.get('lawsuit_court_division', '')
             if court_division:
-                court_division = self._get_court_division(**{'name__unaccent__iexact': court_division}).first()
+                court_division = self._get_court_division(**{'name__unaccent__iexact': court_division})
                 if not court_division:
                     key = 'lawsuit_court_division'
                     row.get('warnings', []).append(incorrect_natural_key(COLUMN_NAME_DICT[key]['verbose_name'],
