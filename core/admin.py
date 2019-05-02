@@ -15,18 +15,20 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 class TaskWorkflowInline(admin.TabularInline):
     model = TaskWorkflow
     fields = ('create_user', 'task_from', 'task_to', 'responsible_user')
+    extra = 0
 
 
 class TaskShowStatusInline(admin.TabularInline):
     model = TaskShowStatus
     fields = ('create_user', 'status_to_show', 'send_mail_template', 'mail_recipients')
+    extra = 0
 
 
 @admin.register(CustomSettings)
 class CustomSettingsAdmin(admin.ModelAdmin):
     list_display = ('office',)
     search_fields = ['office__legal_name', 'office__name']
-    fields = ['office', 'create_user', 'alter_user']
+    fields = ['office', 'create_user', 'alter_user', 'show_task_in_admin_dash']
     inlines = [TaskShowStatusInline, TaskWorkflowInline]
 
     def save_form(self, request, form, change):

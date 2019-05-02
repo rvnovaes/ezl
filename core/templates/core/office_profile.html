@@ -45,7 +45,7 @@
                             {% endif %}
                         {%endfor%}                        				
                         {% for contact in office.contactmechanism_set.all %}
-                            {% if contact.contact_mechanism_type.name == 'E-mail' or contact.contact_mechanism_type.name == 'email'%}                                              
+                            {% if contact.contact_mechanism_type.name == 'E-mail' %}
                                 <span><i class="fa fa-envelope-o" aria-hidden="true"></i> <a href="{{contact}}">{{contact}}</a></span>
                             {%endif%}
                         {%endfor%}                                          				    				

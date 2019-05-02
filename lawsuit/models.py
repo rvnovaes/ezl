@@ -1,6 +1,6 @@
 from django.db import models
 from enum import Enum
-from core.models import Audit, Person, State, LegacyCode, OfficeMixin, OfficeManager, City
+from core.models import Audit, Person, State, LegacyCode, OfficeMixin, OfficeManager, City, NotesMixin
 from sequences import get_next_value
 from django.db import transaction
 from django.core.validators import ValidationError
@@ -215,7 +215,7 @@ class Organ(Person, OfficeMixin):
         return self.legal_name
 
 
-class LawSuit(Audit, LegacyCode, OfficeMixin):
+class LawSuit(Audit, LegacyCode, OfficeMixin, NotesMixin):
     person_lawyer = models.ForeignKey(
         Person,
         on_delete=models.PROTECT,
@@ -346,7 +346,7 @@ class LawSuit(Audit, LegacyCode, OfficeMixin):
                 'law_suit_number': ['Favor verificar o número do processo'],
                 'instance': ['Favor verificar a instância do processo']
             }
-        if filter_dict:
+        if filter_dict and self.law_suit_number != 'Processo avulso':
             if LawSuit.objects.exclude(
                     pk=self.pk
             ).filter(**filter_dict):

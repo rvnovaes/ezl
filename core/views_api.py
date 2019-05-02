@@ -4,6 +4,7 @@ from core.serializers import PersonSerializer, CompanySerializer, OfficeSerializ
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
 from rest_framework.response import Response
 from rest_framework.decorators import permission_classes, api_view
+from rest_framework.filters import OrderingFilter
 from core.views import remove_invalid_registry
 from django.contrib.auth.models import Group
 
@@ -16,8 +17,8 @@ class OfficeMixinViewSet(viewsets.ModelViewSet):
         if invalid_registry:
             self.queryset = self.queryset.exclude(id=invalid_registry)
         if self.request.auth.application.office:
-            return self.queryset.filter(office=self.request.auth.application.office, is_active=True)    
-        return super().get_queryset()        
+            return self.queryset.filter(office=self.request.auth.application.office)
+        return super().get_queryset()
 
 
 class ApplicationView(object):
@@ -59,6 +60,7 @@ class CorrespondentViewSet(PersonViewSet):
 
 class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CompanySerializer
+    filter_backends = (OrderingFilter, )
 
     def get_queryset(self):
         return Company.objects.filter(users__user=self.request.user)

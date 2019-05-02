@@ -247,7 +247,7 @@ class InternalChatOffices(View):
                         'office_pk': task_child.office.pk,
                         'name': task_child.office.legal_name
                     })
-        if not all([task.parent, task.get_child]):
+        if not any([task.parent, task.get_child]):
             data.append({
                 'chat': task.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task.office.pk,

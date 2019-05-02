@@ -1,17 +1,18 @@
-from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskStatus
+from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskStatus, TaskFilterViewModel
 from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
-    TypeTaskMainSerializer, CustomResultsSetPagination
-from .filters import TaskApiFilter, TypeTaskMainFilter
+    TypeTaskMainSerializer, CustomResultsSetPagination, TaskDashboardSerializer
+from .filters import TaskApiFilter, TypeTaskMainFilter, TaskDashboardApiFilter
+from .utils import filter_api_queryset_by_params
 from rest_framework import viewsets, mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
-from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasScope, TokenHasReadWriteScope
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
-from lawsuit.models import Folder, Movement
+from lawsuit.models import Folder
 from django.utils import timezone
 from django.db.models import Q
 from core.views_api import OfficeMixinViewSet
@@ -36,16 +37,17 @@ class TypeTaskViewSet(OfficeMixinViewSet):
 
 @permission_classes((TokenHasReadWriteScope, ))
 class EcmTaskViewSet(mixins.CreateModelMixin,
+                     mixins.ListModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.DestroyModelMixin,
-                     mixins.ListModelMixin,
-                     viewsets.GenericViewSet):
+                     viewsets.GenericViewSet,
+                     ApplicationView):
     queryset = Ecm.objects.all()
     serializer_class = EcmTaskSerializer
 
     def get_queryset(self, *args, **kwargs):
         office = self.request.auth.application.office
-        return self.queryset.filter(Q(tasks__office=office.id) | Q(task__office_id=office.id))
+        return self.queryset.filter(Q(tasks__office=office.id) | Q(task__office_id=office.id)).distinct()
 
 
 @permission_classes((TokenHasReadWriteScope, ))
@@ -63,16 +65,36 @@ class TaskViewSet(OfficeMixinViewSet, ApplicationView):
         return TaskSerializer
 
     def get_queryset(self):
-        queryset = Task.objects.all()
+        self.queryset = Task.objects.all()
+        queryset = super().get_queryset()
         params = self.request.query_params
-        if params.getlist('office_id[]'):
-            queryset = queryset.filter(office_id__in=params.getlist('office_id[]'))
-        if params.getlist('person_executed_by_id[]'):
-            queryset = queryset.filter(person_executed_by_id__in=params.getlist('person_executed_by_id[]'))
-        if params.getlist('task_status[]'):
-            status_to_filter = params.getlist('task_status[]')
-            queryset = queryset.filter(task_status__in=[getattr(TaskStatus, status) for status in status_to_filter])            
+        return filter_api_queryset_by_params(queryset, params)
+
+
+@permission_classes((TokenHasReadWriteScope, ))
+class TaskDashboardEZLViewSet(OfficeMixinViewSet, ApplicationView):
+    serializer_class = TaskDashboardSerializer
+    filter_backends = (DjangoFilterBackend, OrderingFilter,)
+    filter_class = TaskDashboardApiFilter
+    pagination_class = CustomResultsSetPagination
+    ordering_fields = ('id', 'create_date', 'final_deadline_date', 'office_name', 'task_number', 'type_task_name',
+                       'amount', 'lawsuit_number', 'state_initials', 'court_district_name', 'task_status',
+                       'asked_by_legal_name', 'executed_by_legal_name', 'task_hash')
+    default_ordering = ('-final_deadline_date',)
+
+    def get_queryset(self):
+        queryset = TaskFilterViewModel.objects.all()
+        if not self.request.query_params.get('parent_id'):
+            queryset = TaskFilterViewModel.objects.filter(
+                Q(parent__isnull=True),
+                Q(office__customsettings__show_task_in_admin_dash=True))
+
+            params = self.request.query_params
+            queryset = filter_api_queryset_by_params(queryset, params)
         return queryset
+
+    def filter_queryset(self, queryset):
+        return super().filter_queryset(queryset)
 
 
 @api_view(['GET'])
