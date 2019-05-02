@@ -231,7 +231,7 @@ def post_save_task(sender, instance, created, **kwargs):
     seguintes.
     """
     try:
-        ezl_export_task_to_advwin(sender, instance, **kwargs)
+        transaction.on_commit(lambda: ezl_export_task_to_advwin(sender, instance, **kwargs))
         workflow_task(sender, instance, created, **kwargs)
         instance.__previous_status = TaskStatus(instance.task_status)
         create_or_update_chat(sender, instance, created, **kwargs)

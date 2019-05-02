@@ -495,7 +495,7 @@ def export_task(self, task_id, task=None, execute=True):
         advwin_advogado = None
         if task.get_child:
             delegated_office = task.get_child.office
-            delegated_to = delegated_office.legal_name
+            delegated_to = delegated_office.legal_name or ''
             office_office_relation = task.office.from_offices.filter(to_office=delegated_office).first()
             if office_office_relation and office_office_relation.person_reference:
                 advwin_advogado = office_office_relation.person_reference.legacy_code
@@ -508,7 +508,7 @@ def export_task(self, task_id, task=None, execute=True):
                         break
         else:
             advwin_advogado = task.person_executed_by.legacy_code if task.person_executed_by else None
-            delegated_to = task.person_executed_by.auth_user.username if task.person_executed_by else None
+            delegated_to = task.person_executed_by.auth_user.username if task.person_executed_by else ''
 
         values = {
             'SubStatus': 30,
@@ -516,7 +516,8 @@ def export_task(self, task_id, task=None, execute=True):
             'Advogado_or': task.person_distributed_by.legacy_code if task.person_distributed_by else None,
             'prazo_lido': 0,
             'Data_delegacao': task.delegation_date,
-            'Obs': get_task_observation(task, 'Ordem de Serviço delegada para:' + delegated_to + ' por ', 'delegation_date'),
+            'Obs': get_task_observation(task, 'Ordem de Serviço delegada para: {} por '.format(delegated_to),
+                                        'delegation_date'),
         }
     elif task.task_status == TaskStatus.ACCEPTED.value:
         values = {
