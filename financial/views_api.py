@@ -1,5 +1,5 @@
-from .models import ServicePriceTable, CostCenter
-from .serializers import ServicePriceTableSerializer, CostCenterSerializer
+from .models import ServicePriceTable, CostCenter, PolicyPrice
+from .serializers import ServicePriceTableSerializer, CostCenterSerializer, PolicyPriceSerializer
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 from rest_framework.decorators import permission_classes
 from core.views_api import OfficeMixinViewSet
@@ -17,7 +17,16 @@ class ServicePriceTableViewSet(OfficeMixinViewSet):
 @permission_classes((TokenHasReadWriteScope,))
 class CostCenterViewSet(OfficeMixinViewSet):
     """
-    Permite a manutenção do cadastro de Tabela de preços de serviços
+    Permite a manutenção do cadastro de Centros de custo
     """
     queryset = CostCenter.objects.all()
     serializer_class = CostCenterSerializer
+
+
+@permission_classes((TokenHasReadWriteScope,))
+class PolicyPriceViewSet(OfficeMixinViewSet):
+    """
+    Permite a manutenção do cadastro de Tipos de preços
+    """
+    queryset = PolicyPrice.objects.all()
+    serializer_class = PolicyPriceSerializer

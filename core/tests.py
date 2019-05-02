@@ -122,18 +122,6 @@ class UserTest(TestCase):
             password=123456)
         self.assertTrue(c_isnt, User)
 
-    # def test_valid_UserCreateForm(self):
-    #     data = {'first_name': 'Random',
-    #             'last_name': 'RandomLast',
-    #             'username': 'random',
-    #             'email': 'random@random.com',
-    #             'password1': 'a1b2c3d4f5',
-    #             'password2': 'a1b2c3d4f5'
-    #             }
-
-    #     form = UserCreateForm(data=data)
-    #     self.assertTrue(form.is_valid(), form.errors)
-
     def test_invalid_senha_curta_UserCreateForm(self):
         data = {
             'first_name': 'Random',

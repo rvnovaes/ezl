@@ -19,7 +19,7 @@ from core.views import (AuditFormMixin, MultiDeleteViewMixin,
 from task.models import Task
 from task.workflow import CorrespondentsTable
 from .forms import CostCenterForm, ServicePriceTableForm, ImportServicePriceTableForm, PolicyPriceForm
-from .serializers import ServicePriceTableSerializer
+from .serializers import ServicePriceDelegationTableSerializer
 from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, PolicyPrice
 from .tables import CostCenterTable, ServicePriceTableTable, PolicyPriceTable
 from .tasks import import_xls_service_price_table, IMPORTED_IMPORT_SERVICE_PRICE_TABLE, \
@@ -321,7 +321,7 @@ def ajax_get_log_import_service_price_table_data_table(request):
 class ServicePriceTableDetailView(CustomLoginRequiredView, View):
     def get(self, request, pk, *args, **kwargs):
         instance = ServicePriceTable.objects.get(pk=pk)
-        return JsonResponse(ServicePriceTableSerializer(instance=instance).data)
+        return JsonResponse(ServicePriceDelegationTableSerializer(instance=instance).data)
 
 
 class PolicyPriceView(CustomLoginRequiredView, SingleTableViewMixin):

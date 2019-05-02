@@ -1658,7 +1658,7 @@ class OfficeCorrespondentAutocomplete(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated:
             return Office.objects.none()
         office = get_office_session(self.request)
-        qs = office.offices.all()
+        qs = office.related_offices
         if self.q:
             qs = qs.filter(legal_name__unaccent__icontains=self.q)
         return qs
@@ -1679,7 +1679,7 @@ class OriginRequesterAutocomplete(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated:
             return Office.objects.none()
         office = get_office_session(self.request)
-        qs = office.offices.all()
+        qs = office.related_offices
         if self.q:
             qs = qs.filter(legal_name__unaccent__icontains=self.q)
         return qs

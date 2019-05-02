@@ -1,7 +1,8 @@
-from .models import TypeTask, Task, Ecm, TypeTaskMain
+from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskFilterViewModel
 from rest_framework import serializers
 from core.models import Person, Office
-from core.serializers import OfficeDefault, CreateUserDefault, CreateUserSerializerMixin, OfficeSerializerMixin
+from core.serializers import OfficeDefault, CreateUserDefault, CreateUserSerializerMixin, OfficeSerializerMixin, \
+    AuditSerializerMixin
 from rest_framework.compat import unicode_to_repr
 from rest_framework.pagination import PageNumberPagination
 from task.utils import validate_final_deadline_date
@@ -37,49 +38,25 @@ class TypeTaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin,
         fields = ('id', 'name', 'type_task_main', 'legacy_code', 'create_user', 'office')
 
 
-class TaskSerializer(serializers.ModelSerializer, CreateUserSerializerMixin, OfficeSerializerMixin):
+class TaskSerializer(serializers.ModelSerializer, AuditSerializerMixin, CreateUserSerializerMixin,
+                     OfficeSerializerMixin):
 
-    person_asked_by = serializers.HiddenField(default=PersonAskedByDefault())   
-    office_name = serializers.SerializerMethodField()
-    executed_by_name = serializers.SerializerMethodField()
-    type_task_name = serializers.SerializerMethodField()
-    law_suit_number = serializers.SerializerMethodField()
-    state = serializers.SerializerMethodField()
-    court_district_name = serializers.SerializerMethodField()
     external_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        exclude = ('alter_date', 'system_prefix', 'survey_result', 'chat', 'company_chat', 'task_hash')
+        exclude = ('alter_date', 'alter_user', 'create_date', 'survey_result', 'chat', 'company_chat',
+                   'price_category', 'executed_by_checkin', 'company_representative_checkin', 'amount_delegated',
+                   'amount_to_receive', 'amount_to_pay', 'rate_type_receive', 'rate_type_pay', 'charge')
     
-    def get_office_name(self, obj):
-        return obj.office.legal_name
-
-    def get_executed_by_name(self, obj):
-        if obj.get_child: 
-            return obj.get_child.office.legal_name            
-        return obj.person_executed_by.legal_name if obj.person_executed_by else ''
-
-    def get_type_task_name(self, obj):
-        return obj.type_task.name
-
-    def get_law_suit_number(self, obj): 
-        return obj.lawsuit_number or ''
-
-    def get_state(self, obj):
-        return obj.court_district.state.initials if obj.court_district else ''
-    
-    def get_court_district_name(self, obj): 
-        return obj.court_district.name if obj.court_district else ''
+    def get_external_url(self, obj):
+        return 'providencias/external-task-detail/' + obj.task_hash.hex
 
     def validate_person_asked_by(self, value):
         if not value:
             raise serializers.ValidationError("O escritório da sessão não possui um usuário padrão. "
                                               "Entre em contato com o suporte")
         return value
-
-    def get_external_url(self, obj):
-        return 'providencias/external-task-detail/' + obj.task_hash.hex
 
     def validate_legacy_code(self, value):
         office = self.fields['office'].get_default()
@@ -99,15 +76,41 @@ class TaskCreateSerializer(TaskSerializer):
 
     class Meta:
         model = Task
-        fields = ('final_deadline_date', 'performance_place', 'movement', 'type_task', 'description', 'task_status',
-                  'legacy_code', 'requested_date', 'create_user', 'office', 'task_hash')
+        fields = ('id', 'final_deadline_date', 'performance_place', 'movement', 'type_task', 'description',
+                  'task_status', 'legacy_code', 'requested_date', 'create_user', 'office', 'task_hash')
+
+
+class TaskDashboardSerializer(serializers.ModelSerializer):
+    external_url = serializers.SerializerMethodField()
+    have_child = serializers.SerializerMethodField()
+    default_user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TaskFilterViewModel
+        exclude = ('alter_date', 'system_prefix', 'task_hash')
+
+    def get_external_url(self, obj):
+        return 'providencias/external-task-detail/' + obj.task_hash.hex
+
+    def get_have_child(self, obj):
+        return obj.get_child != None
+
+    def get_default_user(self, obj):
+        default_user = obj.office.get_template_value(TemplateKeys.DEFAULT_USER.name)
+        return default_user.id if default_user else None
 
 
 class EcmTaskSerializer(serializers.ModelSerializer,
                         CreateUserSerializerMixin):
     class Meta:
         model = Ecm
-        exclude = ('create_date', 'alter_date', 'system_prefix', 'is_active')
+        exclude = ('create_date', 'alter_date', 'alter_user', 'is_active', 'updated', 'ecm_related')
+
+    def validate_task(self, obj):
+        office = self.context['request'].auth.application.office
+        if obj.office != office:
+            raise serializers.ValidationError("A OS indicada não pertence ao escritório da sessão")
+        return obj
 
 
 class OfficeToPaySerializer(serializers.ModelSerializer):

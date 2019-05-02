@@ -294,7 +294,6 @@ class AbstractPerson(Audit, LegacyCode):
 
     def get_emails(self):
         emails = self.contact_mechanism_by_type('e-mail', formated=False)
-        emails = self.contact_mechanism_by_type('email', formated=False)
         emails = set(emails)
         if (self.auth_user and self.auth_user.email
                 and self.auth_user.email.strip()):
@@ -536,6 +535,15 @@ class Office(AbstractPerson):
         from manager.utils import update_template_value
         template_obj = self.get_template_value_obj(TemplateKeys.DUPLICATE_PROCESS.name)
         update_template_value(template_obj, str(value))
+
+    @property
+    def related_offices(self):
+        from django.db.models import Q
+        qs = self._meta.model.objects.filter(Q(
+            Q(id__in=self.to_offices.values_list('from_office', flat=True)) |
+            Q(id__in=self.from_offices.values_list('to_office', flat=True)))
+        )
+        return qs
 
 
 class OfficeMixin(models.Model):
@@ -911,6 +919,7 @@ class CustomSettings(Audit):
     default_customer = models.ForeignKey(Person, verbose_name='Cliente padrão',
                                          blank=True, null=True,
                                          limit_choices_to={"is_customer": True})
+    show_task_in_admin_dash = models.BooleanField(default=True, verbose_name='Mostrar as OSs deste escritório no Dash')
 
     class Meta:
         verbose_name = 'Configurações por escritório'

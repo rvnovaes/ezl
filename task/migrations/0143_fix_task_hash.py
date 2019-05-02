@@ -20,6 +20,7 @@ def fix_task_hash(apps, schema_editor):
             task.save()
             LOGGER.info('AJUSTADO task_hash da OS {} para {}'.format(task.task_number, task.task_hash))
 
+
 class Migration(migrations.Migration):
 
     dependencies = [

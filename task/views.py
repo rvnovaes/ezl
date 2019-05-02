@@ -38,7 +38,7 @@ from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFIC
     TaskCheckinReportFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
     ImportTaskListForm, TaskBulkCreateForm, TaskChangeAskedBy
-from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, DashboardViewModel, Filter, TaskFeedback, \
+from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, TaskFilterViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain, TaskSurveyAnswer
 from .report import TaskToPayXlsx, ExportFilterTask
 from task.queries import *
@@ -49,7 +49,7 @@ from task.rules import RuleViewTask
 from task.workflow import CorrespondentsTable, CorrespondentsTablePostPaid
 from task.serializers import TaskCheckinSerializer
 from financial.models import ServicePriceTable
-from financial.serializers import ServicePriceTableSerializer
+from financial.serializers import ServicePriceDelegationTableSerializer
 from core.utils import get_office_session, get_domain
 from task.utils import get_task_attachment, get_dashboard_tasks, get_task_ecms, delegate_child_task, get_last_parent, \
     has_task_parent, get_delegate_amounts, get_status_to_filter, get_default_customer, recalculate_amounts
@@ -157,7 +157,7 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
         office = get_office_session(self.request)
         context['min_hour_os'] = get_template_value_value(office, TemplateKeys.MIN_HOUR_OS.name)
         context['default_customer'] = None
-        context['lawsuit_form'] = LawSuitForm()
+        context['lawsuit_form'] = LawSuitForm(request=self.request)
 
         default_customer = get_default_customer(office)
         if default_customer:
@@ -175,51 +175,56 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
             return self.form_invalid(form)
 
     def form_valid(self, form):
-        validation_data = {
-            'create_user': self.request.user,
-            'office': form.instance.office,
-            'movement_id': self.request.POST['movement'],
-            'law_suit_number': self.request.POST['task_law_suit_number'],
-            'folder_number': self.request.POST['folder_number'],
-            'person_customer_id': self.request.POST['person_customer']
-        }
-        form.instance.create_user = validation_data['create_user']
-        form.instance.create_date = timezone.now()
-        form.instance.is_active = True
+        try:
+            validation_data = {
+                'create_user': self.request.user,
+                'office': form.instance.office,
+                'movement_id': self.request.POST['movement'],
+                'law_suit_number': self.request.POST['task_law_suit_number'],
+                'folder_number': self.request.POST['folder_number'],
+                'person_customer_id': self.request.POST['person_customer']
+            }
+            form.instance.create_user = validation_data['create_user']
+            form.instance.create_date = timezone.now()
+            form.instance.is_active = True
 
-        self.get_folder(validation_data)
-        self.get_law_suit(validation_data)
-        if self.request.POST.get('court_district', None) \
-                and self.law_suit.court_district_id != int(self.request.POST['court_district']):
-            self.law_suit.court_district_id = int(self.request.POST['court_district'])
-            self.law_suit.save()
-        if self.request.POST.get('court_district_complement', None) and \
-                self.law_suit.court_district_complement_id != int(self.request.POST['court_district_complement']):
-            self.law_suit.court_district_complement_id = int(self.request.POST['court_district_complement'])
-            self.law_suit.save()
-        if self.request.POST.get('city', None) and self.law_suit.city_id != int(self.request.POST['city']):
-            self.law_suit.city_id = int(self.request.POST['city'])
-            self.law_suit.save()
-        self.get_movement(validation_data)
+            self.get_folder(validation_data)
+            self.get_law_suit(validation_data)
+            if self.request.POST.get('court_district', None) \
+                    and self.law_suit.court_district_id != int(self.request.POST['court_district']):
+                self.law_suit.court_district_id = int(self.request.POST['court_district'])
+                self.law_suit.save()
+            if self.request.POST.get('court_district_complement', None) and \
+                    self.law_suit.court_district_complement_id != int(self.request.POST['court_district_complement']):
+                self.law_suit.court_district_complement_id = int(self.request.POST['court_district_complement'])
+                self.law_suit.save()
+            if self.request.POST.get('city', None) and self.law_suit.city_id != int(self.request.POST['city']):
+                self.law_suit.city_id = int(self.request.POST['city'])
+                self.law_suit.save()
+            self.get_movement(validation_data)
 
-        form.instance.movement = self.movement
-        form.instance.__server = get_domain(self.request)
-        task = form.save()
+            form.instance.movement = self.movement
+            form.instance.__server = get_domain(self.request)
+            task = form.save()
 
-        documents = form.cleaned_data['documents'] if form.fields.get('documents') else []
-        if documents:
-            for document in documents:
-                file_name = document.name.replace(' ', '_')
-                task.ecm_set.create(
-                    path=document,
-                    exhibition_name=file_name,
-                    create_user=task.create_user)
+            documents = form.cleaned_data['documents'] if form.fields.get('documents') else []
+            if documents:
+                for document in documents:
+                    file_name = document.name.replace(' ', '_')
+                    task.ecm_set.create(
+                        path=document,
+                        exhibition_name=file_name,
+                        create_user=task.create_user)
 
-        form.delete_temporary_files()
+            form.delete_temporary_files()
 
-        status = 201
-        ret = {'status': 'Ok', 'task_id': task.id, 'task_number': task.task_number}
-        return JsonResponse(ret, status=status)
+            status = 201
+            ret = {'status': 'Ok', 'task_id': task.id, 'task_number': task.task_number}
+            return JsonResponse(ret, status=status)
+        except Exception as e:
+            status = 500
+            ret = {'status': 'error', 'error': e.messages}
+            return JsonResponse(ret, status=status)
 
     def form_invalid(self, form):
         status = 500
@@ -1147,7 +1152,7 @@ def delete_external_ecm(request, task_hash, pk):
 
 
 class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
-    model = DashboardViewModel
+    model = TaskFilterViewModel
     filter_class = TaskFilter
     template_name = 'task/task_filter.html'
     context_object_name = 'task_filter'
@@ -1171,7 +1176,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
             if data['custom_filter']:
                 q = pickle.loads(data['custom_filter'].query)
-                query_set = DashboardViewModel.objects.filter(q, office=get_office_session(self.request))
+                query_set = TaskFilterViewModel.objects.filter(q, office=get_office_session(self.request))
             else:
                 task_dynamic_query = Q()
                 client_query = Q()
@@ -1208,21 +1213,17 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                         ), Q.AND)
                 if data['state']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__court_district__state__in=data[
-                            'state']), Q.AND)
+                        Q(state__in=data['state']), Q.AND)
                 if data['court_district']:
                     if self.request.GET.get('court_district_option') == 'EXCEPT':
                         task_dynamic_query.add(
-                            ~Q(movement__law_suit__court_district__in=data[
-                                'court_district']), Q.AND)
+                            ~Q(court_district__in=data['court_district']), Q.AND)
                     else:
                         task_dynamic_query.add(
-                            Q(movement__law_suit__court_district__in=data[
-                                'court_district']), Q.AND)
+                            Q(court_district__in=data['court_district']), Q.AND)
                 if data['court_district_complement']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__court_district_complement=data[
-                            'court_district_complement']), Q.AND)
+                        Q(court_district_complement=data['court_district_complement']), Q.AND)
                 if data.get('task_status'):
                     status = [
                         getattr(TaskStatus, s) for s in data['task_status']
@@ -1258,7 +1259,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                                 'client']), Q.AND)
                 if data['law_suit_number']:
                     task_dynamic_query.add(
-                        Q(movement__law_suit__law_suit_number__unaccent__icontains=data[
+                        Q(law_suit_number__unaccent__icontains=data[
                             'law_suit_number']), Q.AND)
                 if data['task_number']:
                     task_dynamic_query.add(
@@ -1411,7 +1412,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
 
                 office_id = (get_office_session(self.request).id
                              if get_office_session(self.request) else 0)
-                query_set = DashboardViewModel.objects.filter(
+                query_set = TaskFilterViewModel.objects.filter(
                     office_id=office_id).filter(person_dynamic_query)
 
             try:
@@ -1445,7 +1446,7 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
         return task_list
 
     def get_context_data(self, **kwargs):
-        context = super(DashboardSearchView, self).get_context_data()
+        context = super().get_context_data()
         context[self.context_filter_name] = self.filter
         table = self.table_class(self.object_list)
         RequestConfig(self.request, paginate={'per_page': 10}).configure(table)
@@ -2262,7 +2263,7 @@ class ServicePriceTableOfTaskView(CustomLoginRequiredView, View):
             price_table = CorrespondentsTablePostPaid(task, task.office)
         else:
             price_table = CorrespondentsTable(task, task.office)
-        data = ServicePriceTableSerializer(price_table.correspondents_qs, many=True).data
+        data = ServicePriceDelegationTableSerializer(price_table.correspondents_qs, many=True).data
         return JsonResponse(data, safe=False)
 
 
@@ -2273,5 +2274,5 @@ class ServicePriceTableCheapestOfTaskView(CustomLoginRequiredView, View):
             price_table = CorrespondentsTablePostPaid(task, task.office)
         else:
             price_table = CorrespondentsTable(task, task.office)
-        data = ServicePriceTableSerializer(price_table.get_cheapest_correspondent()).data
+        data = ServicePriceDelegationTableSerializer(price_table.get_cheapest_correspondent()).data
         return JsonResponse(data)
