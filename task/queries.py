@@ -28,7 +28,7 @@ def get_tasks_to_pay(task_ids, order):
             parent.amount,
             parent.amount_delegated,
             parent.amount_to_pay,
-            (parent.amount_to_receive - parent.amount) as fee,
+            (parent.amount_to_pay - parent.amount_delegated) as fee,
             client.refunds_correspondent_service as client_refunds,
             COALESCE(cost_center."name",  '') as cost_center,
             COALESCE(billing_charge.charge_id, '') as charge_id
