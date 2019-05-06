@@ -1,6 +1,7 @@
+from decimal import Decimal
 from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskStatus, TaskFilterViewModel
 from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
-    TypeTaskMainSerializer, CustomResultsSetPagination, TaskDashboardSerializer
+    TypeTaskMainSerializer, CustomResultsSetPagination, TaskDashboardSerializer, TaskToPayDashboardSerializer
 from .filters import TaskApiFilter, TypeTaskMainFilter, TaskDashboardApiFilter
 from .utils import filter_api_queryset_by_params
 from rest_framework import viewsets, mixins
@@ -118,3 +119,25 @@ def list_audience_totals(request):
         audience['total_audience_this_week'] = audiences_this_week.count()
         audience['agreement_this_month'] = agreement_this_month.count()
     return Response(audience)
+
+
+@permission_classes((TokenHasReadWriteScope, ))
+class TaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
+    serializer_class = TaskToPayDashboardSerializer
+    pagination_class = CustomResultsSetPagination
+
+    def get_queryset(self):
+        queryset = Task.objects \
+            .select_related('office') \
+            .select_related('type_task') \
+            .select_related('movement__type_movement') \
+            .select_related('movement__folder') \
+            .select_related('movement__folder__person_customer') \
+            .select_related('movement__law_suit__court_district') \
+            .select_related('parent__type_task') \
+            .filter(task_status=TaskStatus.FINISHED, parent__isnull=True, amount_to_pay__gt=Decimal('0.00')) \
+            .order_by('office_id', '-finished_date')
+        return queryset
+
+    def filter_queryset(self, queryset):
+        return super().filter_queryset(queryset)

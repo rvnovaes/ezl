@@ -125,6 +125,17 @@ class TaskToPaySerializer(serializers.ModelSerializer):
         fields = ('pk', 'amount', 'parent')
 
 
+class TaskToPayDashboardSerializer(serializers.ModelSerializer):
+    have_child = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Task
+        exclude = ('alter_date', 'system_prefix', 'task_hash')
+
+    def get_have_child(self, obj):
+        return obj.get_child != None
+
+
 class TaskCheckinSerializer(serializers.ModelSerializer):
     date_executed_by_checkin = serializers.SerializerMethodField()
     task_company_representative = serializers.SerializerMethodField()
