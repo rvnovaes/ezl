@@ -127,13 +127,57 @@ class TaskToPaySerializer(serializers.ModelSerializer):
 
 class TaskToPayDashboardSerializer(serializers.ModelSerializer):
     have_child = serializers.SerializerMethodField()
+    office_legal_name = serializers.SerializerMethodField()
+    executed_by_legal_name = serializers.SerializerMethodField()
+    type_task_name = serializers.SerializerMethodField()
+    fee = serializers.SerializerMethodField()
+    fee_child = serializers.SerializerMethodField()
+    default_user = serializers.SerializerMethodField()
+    law_suit_number = serializers.SerializerMethodField()
+    cost_center_name = serializers.SerializerMethodField()
+    court_district_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        exclude = ('alter_date', 'system_prefix', 'task_hash')
+        fields = ('id', 'have_child', 'office_legal_name', 'executed_by_legal_name', 'type_task_name',
+                  'task_number', 'finished_date', 'amount_delegated', 'amount_to_pay', 'amount', 'amount_to_receive',
+                  'court_district_name', 'cost_center_name', 'fee', 'fee_child', 'default_user', 'law_suit_number',
+                  'task_hash')
 
     def get_have_child(self, obj):
         return obj.get_child != None
+
+    def get_office_legal_name(self, obj):
+        return obj.office.legal_name
+
+    def get_executed_by_legal_name(self, obj):
+        return obj.get_child.office.legal_name if obj.get_child else obj.person_executed_by.legal_name
+
+    def get_type_task_name(self, obj):
+        return obj.type_task.name
+
+    def get_fee(self, obj):
+        return obj.amount_to_pay - obj.amount_delegated
+
+    def get_fee_child(self, obj):
+        return obj.amount_to_receive - obj.amount
+
+    def get_default_user(self, obj):
+        default_user = obj.office.get_template_value(TemplateKeys.DEFAULT_USER.name)
+        return default_user.id if default_user else None
+
+    def get_law_suit_number(self, obj):
+        return obj.movement.law_suit.law_suit_number
+
+    def get_cost_center_name(self, obj):
+        if obj.movement.folder.cost_center:
+            return obj.movement.folder.cost_center.name
+        return ''
+
+    def get_court_district_name(self, obj):
+        if obj.movement.law_suit.court_district:
+            return obj.movement.law_suit.court_district.name
+        return ''
 
 
 class TaskCheckinSerializer(serializers.ModelSerializer):
@@ -178,3 +222,9 @@ class TaskCheckinSerializer(serializers.ModelSerializer):
 
 class CustomResultsSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
+
+
+class LargeResultsSetPagination(PageNumberPagination):
+    page_size = 100
+    page_size_query_param = 'page_size'
+    max_page_size = 1000

@@ -1,7 +1,8 @@
 from decimal import Decimal
 from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskStatus, TaskFilterViewModel
 from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
-    TypeTaskMainSerializer, CustomResultsSetPagination, TaskDashboardSerializer, TaskToPayDashboardSerializer
+    TypeTaskMainSerializer, CustomResultsSetPagination, TaskDashboardSerializer, TaskToPayDashboardSerializer, \
+    LargeResultsSetPagination
 from .filters import TaskApiFilter, TypeTaskMainFilter, TaskDashboardApiFilter
 from .utils import filter_api_queryset_by_params
 from rest_framework import viewsets, mixins
@@ -94,9 +95,6 @@ class TaskDashboardEZLViewSet(OfficeMixinViewSet, ApplicationView):
             queryset = filter_api_queryset_by_params(queryset, params)
         return queryset
 
-    def filter_queryset(self, queryset):
-        return super().filter_queryset(queryset)
-
 
 @api_view(['GET'])
 @permission_classes((TokenHasReadWriteScope, ))
@@ -124,7 +122,9 @@ def list_audience_totals(request):
 @permission_classes((TokenHasReadWriteScope, ))
 class TaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
     serializer_class = TaskToPayDashboardSerializer
-    pagination_class = CustomResultsSetPagination
+    pagination_class = LargeResultsSetPagination
+    filter_backends = (DjangoFilterBackend, OrderingFilter,)
+    filter_class = TaskApiFilter
 
     def get_queryset(self):
         queryset = Task.objects \
@@ -133,10 +133,44 @@ class TaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
             .select_related('movement__type_movement') \
             .select_related('movement__folder') \
             .select_related('movement__folder__person_customer') \
+            .select_related('movement__folder__cost_center') \
+            .select_related('movement__law_suit') \
             .select_related('movement__law_suit__court_district') \
             .select_related('parent__type_task') \
-            .filter(task_status=TaskStatus.FINISHED, parent__isnull=True, amount_to_pay__gt=Decimal('0.00')) \
+            .filter(task_status=TaskStatus.FINISHED,
+                    parent__isnull=True,
+                    amount_to_pay__gt=Decimal('0.00')) \
             .order_by('office_id', '-finished_date')
+        params = self.request.query_params
+        queryset = filter_api_queryset_by_params(queryset, params)
+        return queryset
+
+
+@permission_classes((TokenHasReadWriteScope, ))
+class ChildTaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
+    serializer_class = TaskToPayDashboardSerializer
+    pagination_class = CustomResultsSetPagination
+
+    def get_queryset(self):
+        queryset = Task.objects.none()
+        parent_id = self.request.query_params.get('parent_id')
+        if parent_id:
+            id_list = []
+            task = Task.objects.get(pk=parent_id)
+            while task.get_child:
+                id_list.append(task.get_child.id)
+                task = task.get_child
+
+            queryset = Task.objects \
+                .select_related('office') \
+                .select_related('type_task') \
+                .select_related('movement__type_movement') \
+                .select_related('movement__folder') \
+                .select_related('movement__folder__person_customer') \
+                .select_related('movement__law_suit__court_district') \
+                .select_related('parent__type_task') \
+                .filter(id__in=id_list) \
+                .order_by('office_id', 'finished_date')
         return queryset
 
     def filter_queryset(self, queryset):
