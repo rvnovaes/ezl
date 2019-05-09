@@ -1905,11 +1905,17 @@ class ExternalTaskView(UpdateView):
         request.user = manager.get_value_by_key(TemplateKeys.DEFAULT_USER.name)
         set_office_session(request)
         ecms = Ecm.objects.filter(task_id=self.object.id)
-        task_history = TaskHistory.objects.filter(
-            task_id=self.object.id).order_by('-create_date')
+        task_history = self.object.history.all()
         survey_data = (self.object.type_task.survey.data
                        if self.object.type_task.survey else None)
         self.execution_date = timezone.now()
+        # monta lista de surveys a serem respondidos pela OS
+        pending_surveys = self.object.have_pending_surveys
+        pending_list = []
+        if pending_surveys.get('survey_company_representative'):
+            pending_list.append('Preposto')
+        if pending_surveys.get('survey_executed_by'):
+            pending_list.append('Correspondente')
         return render(
             request, self.template_name, {
                 'object': self.object,
@@ -1921,7 +1927,9 @@ class ExternalTaskView(UpdateView):
                 'task_history': task_history,
                 'survey_data': survey_data,
                 'custom_settings': custom_settings,
-                'i_work_alone': self.object.office.i_work_alone
+                'i_work_alone': self.object.office.i_work_alone,
+                'pending_surveys': {'status': True if pending_list else False,
+                                    'pending_list': pending_list}
             })
 
     def post(self, request, task_hash, *args, **kwargs):
