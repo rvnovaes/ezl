@@ -143,13 +143,17 @@ class TaskBulkCreateView(AuditFormMixin, CreateView):
                                                                                     'name': 'OS Avulsa',
                                                                                     'create_user': validation_data.get(
                                                                                         'create_user')})
-            movement, created = Movement.objects.get_or_create(folder=self.folder,
-                                                               law_suit=self.law_suit,
-                                                               type_movement=default_type_movement,
-                                                               office=validation_data.get('office'),
-                                                               defaults={'create_user': validation_data.get(
-                                                                   'create_user'),
-                                                                   'is_active': True})
+            movement_filter = {
+                'folder': self.folder,
+                'law_suit': self.law_suit,
+                'type_movement': default_type_movement,
+                'office': validation_data.get('office'),
+            }
+            movement = Movement.objects.filter(**movement_filter).first()
+            if not movement:
+                movement_filter['create_user'] = validation_data.get('create_user')
+                movement_filter['is_active'] = True
+                movement = Movement.objects.create(**movement_filter)
         self.movement = movement
 
     def get_context_data(self, **kwargs):
