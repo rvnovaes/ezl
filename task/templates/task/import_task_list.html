@@ -96,7 +96,12 @@
                                                     var result_warning_obj = result.warnings[j];
                                                     var wanings_desc = '';
                                                     for (var i = 0; i < result_warning_obj.warnings.length; i++) {
-                                                        wanings_desc += $.trim(result_warning_obj.warnings[i].join('<br />')) + '<br />';
+                                                        if (result_warning_obj.warnings[i].constructor === Array){
+                                                            description_item = result_warning_obj.warnings[i].join('<br />')
+                                                        } else {
+                                                            description_item = result_warning_obj.warnings[i]
+                                                        }
+                                                        wanings_desc += $.trim(description_item) + '<br />';
                                                     }
                                                     log_table_tbody.append('<tr> ' +
                                                         '<td>' + result_warning_obj.line + '</td>' +
