@@ -1112,7 +1112,14 @@ class OfficeCreateView(AuditFormMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.create_user = self.request.user
-        form.instance.save()
+        try:
+            form.instance.save()
+        except IntegrityError as e:
+            error_msg = 'Já existe um escritório com o CPF/CNPJ informado.'
+            messages.add_message(self.request, messages.ERROR,
+                                 error_msg)
+            form.add_error('cpf_cnpj', ValidationError(error_msg))
+            return self.form_invalid(form)
         return super().form_valid(form)
 
     def get_success_url(self):
