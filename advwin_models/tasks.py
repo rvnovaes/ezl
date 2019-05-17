@@ -568,7 +568,7 @@ def export_task(self, task_id, task=None, execute=True):
             'Ag_StatusExecucao': 'Em Execucao',
             'Data_confirmacao': timezone.localtime(task.finished_date),
             'Data_Fech': timezone.localtime(task.finished_date),
-            'valor_agenda': task.amount,
+            'valor_agenda': task.amount_delegated,
             'substatus_prazo': 3,
             'Obs': get_task_observation(task, 'Diligência devidamente cumprida por',
                                         'finished_date')
