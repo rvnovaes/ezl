@@ -136,13 +136,14 @@ class TaskToPayDashboardSerializer(serializers.ModelSerializer):
     law_suit_number = serializers.SerializerMethodField()
     cost_center_name = serializers.SerializerMethodField()
     court_district_name = serializers.SerializerMethodField()
+    external_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        fields = ('id', 'have_child', 'office_legal_name', 'executed_by_legal_name', 'type_task_name',
+        fields = ('id', 'have_child', 'office_id', 'office_legal_name', 'executed_by_legal_name', 'type_task_name',
                   'task_number', 'finished_date', 'amount_delegated', 'amount_to_pay', 'amount', 'amount_to_receive',
                   'court_district_name', 'cost_center_name', 'fee', 'fee_child', 'default_user', 'law_suit_number',
-                  'task_hash')
+                  'task_hash', 'external_url')
 
     def get_have_child(self, obj):
         return obj.get_child != None
@@ -178,6 +179,9 @@ class TaskToPayDashboardSerializer(serializers.ModelSerializer):
         if obj.movement.law_suit.court_district:
             return obj.movement.law_suit.court_district.name
         return ''
+
+    def get_external_url(self, obj):
+        return 'providencias/external-task-detail/' + obj.task_hash.hex
 
 
 class TaskCheckinSerializer(serializers.ModelSerializer):
@@ -222,8 +226,9 @@ class TaskCheckinSerializer(serializers.ModelSerializer):
 
 class TotalToPayByOfficeSerializer(serializers.Serializer):
     office_id = serializers.IntegerField()
-    office__legal_name = serializers.CharField(max_length=255)
+    office_legal_name = serializers.CharField(max_length=255, source='office__legal_name')
     total_to_pay = serializers.DecimalField(max_digits=9, decimal_places=2)
+    total_delegated = serializers.DecimalField(max_digits=9, decimal_places=2)
 
 
 class CustomResultsSetPagination(PageNumberPagination):

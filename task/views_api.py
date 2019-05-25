@@ -137,13 +137,13 @@ class TotalToPayByOfficeViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
 
         return queryset.order_by('office__legal_name')\
             .values('office_id', 'office__legal_name')\
-            .annotate(total_to_pay=Sum('amount_to_pay'))
+            .annotate(total_to_pay=Sum('amount_to_pay'), total_delegated=Sum('amount_delegated'))
 
 
 @permission_classes((TokenHasReadWriteScope, ))
 class TaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
     serializer_class = TaskToPayDashboardSerializer
-    pagination_class = LargeResultsSetPagination
+    pagination_class = CustomResultsSetPagination
     filter_backends = (DjangoFilterBackend, OrderingFilter,)
     filter_class = TaskApiFilter
 
