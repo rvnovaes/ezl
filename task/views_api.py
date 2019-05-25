@@ -2,7 +2,7 @@ from decimal import Decimal
 from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskStatus, TaskFilterViewModel
 from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
     TypeTaskMainSerializer, CustomResultsSetPagination, TaskDashboardSerializer, TaskToPayDashboardSerializer, \
-    LargeResultsSetPagination
+    LargeResultsSetPagination, TotalToPayByOfficeSerializer
 from .filters import TaskApiFilter, TypeTaskMainFilter, TaskDashboardApiFilter
 from .utils import filter_api_queryset_by_params
 from rest_framework import viewsets, mixins
@@ -16,7 +16,7 @@ from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
 from lawsuit.models import Folder
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, Sum
 from core.views_api import OfficeMixinViewSet
 
 
@@ -117,6 +117,27 @@ def list_audience_totals(request):
         audience['total_audience_this_week'] = audiences_this_week.count()
         audience['agreement_this_month'] = agreement_this_month.count()
     return Response(audience)
+
+
+@permission_classes((TokenHasReadWriteScope, ))
+class TotalToPayByOfficeViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
+    serializer_class = TotalToPayByOfficeSerializer
+    pagination_class = LargeResultsSetPagination
+    filter_backends = (DjangoFilterBackend, OrderingFilter,)
+    filter_class = TaskApiFilter
+
+    def get_queryset(self):
+        queryset = Task.objects\
+            .select_related('office')\
+            .filter(task_status=TaskStatus.FINISHED,
+                    parent__isnull=True,
+                    amount_to_pay__gt=Decimal('0.00'))
+        params = self.request.query_params
+        queryset = filter_api_queryset_by_params(queryset, params)
+
+        return queryset.order_by('office__legal_name')\
+            .values('office_id', 'office__legal_name')\
+            .annotate(total_to_pay=Sum('amount_to_pay'))
 
 
 @permission_classes((TokenHasReadWriteScope, ))

@@ -220,6 +220,12 @@ class TaskCheckinSerializer(serializers.ModelSerializer):
         return obj.type_task.name
 
 
+class TotalToPayByOfficeSerializer(serializers.Serializer):
+    office_id = serializers.IntegerField()
+    office__legal_name = serializers.CharField(max_length=255)
+    total_to_pay = serializers.DecimalField(max_digits=9, decimal_places=2)
+
+
 class CustomResultsSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
 
