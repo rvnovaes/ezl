@@ -235,13 +235,16 @@ def get_status_to_filter(option):
 
 
 def set_performance_place(movement):
-    list_places = [movement.law_suit.court_district.state.initials,
-                   movement.law_suit.court_district.name]
+    list_places = []
+    if movement.law_suit.court_district:
+        list_places = [movement.law_suit.court_district.state.initials,
+                       movement.law_suit.court_district.name]
     if movement.law_suit.court_district_complement:
         list_places.append(movement.law_suit.court_district_complement.name)
     elif movement.law_suit.city:
         list_places.append(movement.law_suit.city.name)
-    performance_place = ' - '.join(list_places)
+        
+    performance_place = ' - '.join(list_places) if list_places else 'Não definido'
 
     return performance_place
 
