@@ -2157,14 +2157,17 @@ class TaskUpdateAmountView(CustomLoginRequiredView, View):
         current_amount = task.amount_delegated
         new_amount = request.POST.get('amount_delegated')
         child_task.amount = task.amount_delegated = Decimal(new_amount)
-        amount_to_pay, amount_to_receive = recalculate_amounts(
-            current_amount,
-            task.amount_to_pay,
-            child_task.amount_to_receive,
-            new_amount,
-            task.rate_type_pay,
-            task.rate_type_receive
-        )
+        if current_amount == task.amount_to_pay:
+            amount_to_pay = amount_to_receive = new_amount
+        else:
+            amount_to_pay, amount_to_receive = recalculate_amounts(
+                current_amount,
+                task.amount_to_pay,
+                child_task.amount_to_receive,
+                new_amount,
+                task.rate_type_pay,
+                task.rate_type_receive
+            )
         task.amount_to_pay = amount_to_pay
         child_task.amount_to_receive = amount_to_receive
 
