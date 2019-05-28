@@ -408,6 +408,7 @@ class TaskBulkCreate {
             if(this.enableOnChange) {
                 if (this.city) {
                     this.courtDistrict = this.nullData;
+                    this.courtDistrictComplement = this.nullData;
                 }
                 this.elCourtDistrict.attr('disabled', !(!this.city));
                 this.elCourtDistrictComplemt.attr('disabled', !(!this.city));
@@ -467,23 +468,28 @@ class TaskBulkCreate {
                 if (this.lawSuitNumber) {
                     this.enableOnChange = false;
                     let personCustomer = this.lawSuitNumberData.person_customer;
+                    this.personCustomer = this.nullData;
                     if (personCustomer && personCustomer.id) {
                         this.personCustomer = personCustomer;
                     }
                     let folder = this.lawSuitNumberData.folder;
+                    this.folder = this.nullData;
                     if (folder) {
                         this.folderNumber = folder;
                         this.elBtnAddFolder.attr('disabled', true);
                     }
                     let courtDistrict = this.lawSuitNumberData.court_district;
+                    this.courtDistrict = this.nullData;
                     if (courtDistrict && courtDistrict.id) {
                         this.courtDistrict = courtDistrict;
                     }
                     let courtDistrictComplement = this.lawSuitNumberData.court_district_complement;
+                    this.courtDistrictComplement = this.nullData;
                     if (courtDistrictComplement && courtDistrictComplement.id) {
                         this.courtDistrictComplement = courtDistrictComplement;
                     }
                     let city = this.lawSuitNumberData.city;
+                    this.city = this.nullData;
                     if (city && city.id) {
                         this.city = city;
                     }

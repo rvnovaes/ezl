@@ -203,6 +203,14 @@
                                 <th colspan="14" class="text-right" >Total Geral (R$)</th>
                                 <th colspan="2" class="text-right">{{total}}</th>
                             </tr>
+                            <tr>
+                                <td colspan="9">&nbsp;</td>
+                                <td colspan="7" class="text-right">
+                                    <div class="alert alert-warning">
+                                        A nota fiscal do cliente deverá ser emitida no valor de: R$ {{ total }} + reembolsos
+                                    </div>
+                                </td>
+                            </tr>
                         {% endif %}
 
                     </tbody>

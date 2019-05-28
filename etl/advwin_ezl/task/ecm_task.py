@@ -58,10 +58,14 @@ class EcmEtl(GenericETL):
             TaskStatus.BLOCKEDPAYMENT, TaskStatus.REFUSED_SERVICE
         ]
         legacy_code_list = list(
-            Task.objects.filter(legacy_code__isnull=False).exclude(
-                legacy_code='REGISTRO-INVÁLIDO').exclude(
-                    task_status__in=status_list).values_list(
-                        'legacy_code', flat=True))
+            Task.objects.filter(
+                legacy_code__isnull=False,
+                office_id=self.default_office.id
+            ).exclude(
+                legacy_code='REGISTRO-INVÁLIDO'
+            ).exclude(
+                    task_status__in=status_list
+            ).values_list('legacy_code', flat=True))
         legacy_code_list = list(self.list_chunks(legacy_code_list, 10))
         legacy_code_list_str = ''.join(
             map(lambda x: ' A.Ident IN (' + ', '.join(x) + ') OR',

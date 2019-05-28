@@ -93,7 +93,7 @@ class TaskDashboardEZLViewSet(OfficeMixinViewSet, ApplicationView):
 
             params = self.request.query_params
             queryset = filter_api_queryset_by_params(queryset, params)
-        return queryset
+        return queryset.distinct()
 
 
 @api_view(['GET'])

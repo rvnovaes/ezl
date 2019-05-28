@@ -25,7 +25,7 @@ class DelegateTask(object):
 
     def _update_amount_delegated(self):
         default_amount = self.form.instance.amount or Decimal('0.00')
-        self.form.instance.amount_delegated = self.form.cleaned_data.get('amount') or default_amount
+        self.form.instance.amount_delegated = self.form.cleaned_data.get('amount', default_amount)
 
     def _update_instance_price_fields(self):
         self.form.instance.price_category = self.service_price_table.policy_price.category
