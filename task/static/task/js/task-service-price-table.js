@@ -38,7 +38,7 @@ class TaskServicePriceTable {
   }
 
   set priceReadOnly(value) {
-    if (value){
+    if (value === 'DEFAULT'){
       this.elPriceDefined.prop('disabled', false).focus();
     }else{
       this.elPriceDefined.prop('disabled', false).focus().prop('disabled',true);
@@ -72,7 +72,7 @@ class TaskServicePriceTable {
     });
   }
 
-  
+
   initOnClickRowEvent() {
     return new Promise((resolve) => {
       let self = this;
@@ -82,7 +82,7 @@ class TaskServicePriceTable {
         self.priceDefined = self.priceSelected.value;
         $(row.node()).siblings().removeClass('row-selected');
         $(row.node()).addClass('row-selected');
-        self.priceReadOnly = $(row.node()).find('td:nth-child(3)').find('input').val();
+        self.priceReadOnly = $(row.node()).find('td:nth-child(1)').find('input').val();
         resolve(true);
       });
     });
@@ -101,14 +101,16 @@ class TaskServicePriceTable {
   populateTable() {
     return new Promise((resolve) => {
       this.requestPayload()
+
         .then(prices => {
           this.prices = prices;
           for (let price of prices) {
+              console.log(price);
             this.elPriceTable.row.add(
               [
-                `<a href="/office_profile/${price.office_correspondent.id}" target="_blank" class="price-table-link-to-office">${price.office_correspondent.legal_name}</a>`,
+                `<a href="/office_profile/${price.office_correspondent.id}" target="_blank" class="price-table-link-to-office">${price.office_correspondent.legal_name}</a>` + '<input type="hidden" value="'+price.policy_price.category+'">',
                 price.type_task ? price.type_task.name : '-',
-                price.office_network ? price.office_network : '-<input type="hidden" value="'+price.policy_price.category+'">',
+                price.office_network ? price.office_network : '-',
                 price.state || '-',
                 price.court_district ? price.court_district.name : '-',
                 price.court_district_complement ? price.court_district_complement.name : '-',
