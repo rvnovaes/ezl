@@ -33,6 +33,19 @@ class TaskServicePriceTable {
     this.elPriceDefined.focus();
   }
 
+  get priceReadOnly() {
+    return this.elPriceDefined.maskMoney('unmasked')[0];
+  }
+
+  set priceReadOnly(value) {
+    if (value){
+      this.elPriceDefined.prop('disabled', false).focus();
+    }else{
+      this.elPriceDefined.prop('disabled', false).focus().prop('disabled',true);
+    }
+
+  }
+
   getPriceObject(priceTableId) {
     return this.prices
       .filter(price => price.id == priceTableId)
@@ -59,10 +72,7 @@ class TaskServicePriceTable {
     });
   }
 
-  unBindBtnAction() {
-    this.elBtnAction.unbind();
-  }
-
+  
   initOnClickRowEvent() {
     return new Promise((resolve) => {
       let self = this;
@@ -72,6 +82,7 @@ class TaskServicePriceTable {
         self.priceDefined = self.priceSelected.value;
         $(row.node()).siblings().removeClass('row-selected');
         $(row.node()).addClass('row-selected');
+        self.priceReadOnly = $(row.node()).find('td:nth-child(3)').find('input').val();
         resolve(true);
       });
     });
@@ -97,7 +108,7 @@ class TaskServicePriceTable {
               [
                 `<a href="/office_profile/${price.office_correspondent.id}" target="_blank" class="price-table-link-to-office">${price.office_correspondent.legal_name}</a>`,
                 price.type_task ? price.type_task.name : '-',
-                price.office_network ? price.office_network : '-',
+                price.office_network ? price.office_network : '-<input type="hidden" value="'+price.policy_price.category+'">',
                 price.state || '-',
                 price.court_district ? price.court_district.name : '-',
                 price.court_district_complement ? price.court_district_complement.name : '-',
