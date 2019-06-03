@@ -33,6 +33,19 @@ class TaskServicePriceTable {
     this.elPriceDefined.focus();
   }
 
+  get priceReadOnly() {
+    return this.elPriceDefined.maskMoney('unmasked')[0];
+  }
+
+  set priceReadOnly(value) {
+    if (value === 'DEFAULT'){
+      this.elPriceDefined.prop('disabled', false).focus();
+    }else{
+      this.elPriceDefined.prop('disabled', false).focus().prop('disabled',true);
+    }
+
+  }
+
   getPriceObject(priceTableId) {
     return this.prices
       .filter(price => price.id == priceTableId)
@@ -59,9 +72,6 @@ class TaskServicePriceTable {
     });
   }
 
-  unBindBtnAction() {
-    this.elBtnAction.unbind();
-  }
 
   initOnClickRowEvent() {
     return new Promise((resolve) => {
@@ -72,6 +82,7 @@ class TaskServicePriceTable {
         self.priceDefined = self.priceSelected.value;
         $(row.node()).siblings().removeClass('row-selected');
         $(row.node()).addClass('row-selected');
+        self.priceReadOnly = $(row.node()).find('td:nth-child(1)').find('input').val();
         resolve(true);
       });
     });
@@ -90,12 +101,14 @@ class TaskServicePriceTable {
   populateTable() {
     return new Promise((resolve) => {
       this.requestPayload()
+
         .then(prices => {
           this.prices = prices;
           for (let price of prices) {
+              console.log(price);
             this.elPriceTable.row.add(
               [
-                `<a href="/office_profile/${price.office_correspondent.id}" target="_blank" class="price-table-link-to-office">${price.office_correspondent.legal_name}</a>`,
+                `<a href="/office_profile/${price.office_correspondent.id}" target="_blank" class="price-table-link-to-office">${price.office_correspondent.legal_name}</a>` + '<input type="hidden" value="'+price.policy_price.category+'">',
                 price.type_task ? price.type_task.name : '-',
                 price.office_network ? price.office_network : '-',
                 price.state || '-',

@@ -90,6 +90,8 @@ except KeyError as e:
     print(e)
     sys.exit(0)
 
+ENVIRONMENT = environment
+
 REVIEW = get_rev() # Revisao atual do repositorio
 
 MUST_LOGIN = True

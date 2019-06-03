@@ -96,9 +96,9 @@ class TaskToPayXlsx(DefaultXlsFile):
                             self.base_cell_format.cell_format)
             worksheet.write(row_num, 11, format_boolean(item.get('billing_date')), self.base_cell_format.cell_format)
             worksheet.write(row_num, 12, item.get('charge_id'), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 13, item.get('amount'), self.money_format.cell_format)
+            worksheet.write(row_num, 13, item.get('amount_delegated'), self.money_format.cell_format)
             worksheet.write(row_num, 14, item.get('fee'), self.money_format.cell_format)
-            worksheet.write(row_num, 15, item.get('amount_to_receive'), self.money_format.cell_format)
+            worksheet.write(row_num, 15, item.get('amount_to_pay'), self.money_format.cell_format)
         self.workbook.close()
         self.output.seek(0)
         return self.output
