@@ -8,6 +8,9 @@ class PersonManager(Manager):
     def active(self, *ar, **kw):
         return self.get_queryset().active(*ar, **kw)
 
+    def physical(self, *ar, **kw):
+        return self.get_queryset().active(*ar, **kw)
+
     def correspondents(self, *ar, **kw):
         return self.get_queryset().correspondents(*ar, **kw)
 
@@ -30,6 +33,9 @@ class PersonManager(Manager):
 class PersonManagerQuerySet(QuerySet):
     def active(self):
         return self.filter(is_active=True)
+
+    def physical_person(self):
+        return self.filter(legal_type='F')
 
     def correspondents(self, office_id=False):
         if office_id:
@@ -73,6 +79,7 @@ class PersonManagerQuerySet(QuerySet):
     def active_offices(self):
         return self.filter(
             officemembership__is_active=True).order_by('legal_name')
+
 
     def inactive_offices(self):
         return self.filter(
