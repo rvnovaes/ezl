@@ -9,7 +9,7 @@ from core.utils import filter_valid_choice_form, get_office_field, get_office_se
 from core.widgets import MDDateTimepicker, MDSelect
 from core.forms import BaseForm, XlsxFileField
 from lawsuit.models import CourtDistrict, CourtDistrictComplement, City, Movement, LawSuit, Folder
-from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer
+from task.models import Task, TypeTask, Filter, TaskStatus, TypeTaskMain, TaskSurveyAnswer, TaskBase
 from task.resources import COLUMN_NAME_DICT
 from task.utils import validate_final_deadline_date
 from task.widgets import code_mirror_schema
@@ -208,7 +208,7 @@ class TaskDetailForm(ModelForm):
         required=False,
         widget=forms.Textarea(attrs={"rows": 2}))
 
-    def clean_amount(self):        
+    def clean_amount(self):
         amount = (self.cleaned_data['amount']
                   if self.cleaned_data['amount'] else str(0))
         amount = amount.replace('.', '')
@@ -254,6 +254,15 @@ class TaskChangeAskedBy(BaseForm):
         super().__init__(*args, **kwargs)
         self.fields['person_asked_by'].required = True
 
+class TaskChangeRepresentativeBy(BaseForm):
+    class Meta:
+        model = Task
+        fields = ['person_company_representative']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['person_company_representative'].required = True
+#
 
 class TypeTaskMainForm(forms.ModelForm):
     characteristics = JSONFieldMixin(
