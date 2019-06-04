@@ -34,6 +34,7 @@ def get_office_correspondent(row, xls_file):
     # escritorio correspondente
     office_correspondent = False
     if row[ColumnIndex.correspondent.value].value:
+        print(row[ColumnIndex.correspondent.value].value)
         office_name = remove_special_char(str(row[ColumnIndex.correspondent.value].value).strip())
         office_correspondent = Office.objects.filter(legal_name__unaccent__iexact=office_name).first()
         if not office_correspondent:                        
@@ -230,6 +231,7 @@ def import_xls_service_price_table(self, file_id):
             cache.set(worksheet_in_process_key, sheet.title, timeout=None)
             cache.set(imported_worksheet_key, False, timeout=None)            
             for row in sheet.iter_rows(min_row=2):
+                print(row)
                 row += ({'errors': False}, )
                 policy_price = get_policy_price(row, xls_file, office_session)
                 if policy_price and policy_price.category in [CategoryPrice.NETWORK.name, CategoryPrice.PUBLIC.name]:
