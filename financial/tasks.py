@@ -6,7 +6,7 @@ from enum import Enum
 from celery import shared_task, current_task, chain
 from openpyxl import load_workbook
 from .models import ServicePriceTable, ImportServicePriceTable, PolicyPrice, CategoryPrice
-from core.models import Office, State, City
+from core.models import Office, State, City, AdminSettings
 from task.models import TypeTask
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from .utils import remove_special_char
@@ -28,13 +28,16 @@ class ColumnIndex(Enum):
     court_district_complement = 6
     city = 7
     value = 8
+    rate_type_pay = 9
+    value_to_pay = 10
+    rate_type_receive = 11
+    value_to_receive = 12
 
 
 def get_office_correspondent(row, xls_file):
     # escritorio correspondente
     office_correspondent = False
     if row[ColumnIndex.correspondent.value].value:
-        print(row[ColumnIndex.correspondent.value].value)
         office_name = remove_special_char(str(row[ColumnIndex.correspondent.value].value).strip())
         office_correspondent = Office.objects.filter(legal_name__unaccent__iexact=office_name).first()
         if not office_correspondent:                        
@@ -162,6 +165,61 @@ def get_service_value(row, xls_file, office_correspondent, policy_price, court_d
     finally:
         return value
 
+def get_value_to_pay(row, xls_file, office_correspondent, policy_price, court_district, state, client, value_to_pay):
+    try:
+        if type(row[ColumnIndex.value_to_pay.value].value) == str:
+            value_to_pay = Decimal(row[ColumnIndex.value_to_pay.value].value.replace('R$\xa0', '').replace(',', '.'))
+        else:
+            value_to_pay = row[ColumnIndex.value_to_pay.value].value
+
+    except:
+        xls_file.log = xls_file.log + (
+            'Valor a pagar {} inválido.'.format(
+                row[ColumnIndex.value_to_pay.value].value, office_correspondent, policy_price, court_district, state,
+                client)) + ";"
+        row[len(row) - 1]['errors'] = True
+    finally:
+        return value_to_pay
+
+def get_rate_type_pay(row, xls_file):
+    # Tipo de taxa do correspondente
+    rate_type = False
+    if row[ColumnIndex.rate_type_pay.value].value:
+        rate_type = remove_special_char(str(row[ColumnIndex.rate_type_pay.value].value).strip())
+        if not rate_type and not rate_type == "PERCENT" and not rate_type == "VALUE":
+            xls_file.log = xls_file.log + ('O campo Tipo de taxa do correspondente (%s) deve ser preenchido com PERCENT ou VALUE' % (rate_type)) + ";"
+            row[len(row) - 1]['errors'] = True
+
+    return rate_type
+
+def get_rate_type_receive(row, xls_file):
+    # Tipo de taxa do solicitante
+    rate_type = False
+    if row[ColumnIndex.rate_type_receive.value].value:
+        rate_type = remove_special_char(str(row[ColumnIndex.rate_type_receive.value].value).strip())
+        if not rate_type and not rate_type == "PERCENT" and not rate_type == "VALUE":
+            xls_file.log = xls_file.log + ('O campo Tipo de taxa do solicitante (%s) deve ser preenchido com PERCENT ou VALUE' % (rate_type)) + ";"
+            row[len(row) - 1]['errors'] = True
+
+    return rate_type
+
+def get_value_to_receive(row, xls_file, office_correspondent, policy_price, court_district, state, client, value_to_receive):
+    try:
+        if type(row[ColumnIndex.value_to_receive.value].value) == str:
+            value_to_receive = Decimal(
+                row[ColumnIndex.value_to_receive.value].value.replace('R$\xa0', '').replace(',', '.'))
+        else:
+            value_to_receive = row[ColumnIndex.value_to_receive.value].value
+
+    except:
+        xls_file.log = xls_file.log + (
+            'Valor a receber {} inválido.'.format(
+                row[ColumnIndex.value_to_receive.value].value, office_correspondent, policy_price, court_district, state,
+                client)) + ";"
+        row[len(row) - 1]['errors'] = True
+    finally:
+        return value_to_receive
+
 
 def row_is_valid(office_correspondent, policy_price, type_task, row_errors):
     return all([office_correspondent, policy_price, type_task, not row_errors])
@@ -169,7 +227,8 @@ def row_is_valid(office_correspondent, policy_price, type_task, row_errors):
 
 def update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent, policy_price,
                                          office_network, type_task, court_district, court_district_complement, state,
-                                         city, client, value):
+                                         city, client, value, value_to_pay, value_to_receive, rate_type_pay, rate_type_receive):
+
     service_price_table = ServicePriceTable.objects.filter(
         office=office_session,
         office_correspondent=office_correspondent.pk,
@@ -194,14 +253,42 @@ def update_or_create_service_price_table(xls_file, office_session, user_session,
             client=client if client else None,
             state=state if state else None,
             value=value,
-            create_user=user_session
+            create_user=user_session,
+            value_to_pay=value_to_pay,
+            value_to_receive=value_to_receive,
+            rate_type_pay=rate_type_pay,
+            rate_type_receive=rate_type_receive
         )
     else:                        
         if Decimal(value) != service_price_table.value:
             xls_file.log = xls_file.log + ("Tabela de preço do escritório {}, serviço {} teve seu valor atualizado de "
                                            "{} para {}".format(office_correspondent, type_task,
                                                                service_price_table.value, value)) + ";"
+        if Decimal(value_to_pay) != service_price_table.value_to_pay:
+            xls_file.log = xls_file.log + ("Tabela de preço do escritório {}, serviço {} teve seu valor a pagar atualizado de "
+                                           "{} para {}".format(office_correspondent, type_task,
+                                                               service_price_table.value_to_pay, value_to_pay)) + ";"
+
+        if Decimal(value_to_receive) != service_price_table.value_to_receive:
+            xls_file.log = xls_file.log + ("Tabela de preço do escritório {}, serviço {} teve seu valor a pagar atualizado de "
+                                           "{} para {}".format(office_correspondent, type_task,
+                                                               service_price_table.value_to_receive, value_to_receive)) + ";"
+
+        if rate_type_receive != service_price_table.rate_type_receive:
+            xls_file.log = xls_file.log + ("Tabela de preço do escritório {}, serviço {} teve sua taxa de comissão do correspondente alterada de "
+                                           "{} para {}".format(office_correspondent, type_task,
+                                                               service_price_table.rate_type_receive, rate_type_receive)) + ";"
+
+        if rate_type_pay != service_price_table.rate_type_pay:
+            xls_file.log = xls_file.log + ("Tabela de preço do escritório {}, serviço {} teve sua taxa de comissão do solicitante alterada de "
+                                           "{} para {}".format(office_correspondent, type_task,
+                                                               service_price_table.rate_type_pay, rate_type_pay)) + ";"
+
         service_price_table.value = value
+        service_price_table.value_to_pay = value_to_pay
+        service_price_table.value_to_receive = value_to_receive
+        service_price_table.rate_type_pay = rate_type_pay
+        service_price_table.rate_type_receive = rate_type_receive
         service_price_table.is_active = True
         service_price_table.save()
 
@@ -222,8 +309,17 @@ def import_xls_service_price_table(self, file_id):
         cache.set(error_process_key, False, timeout=None)
         user_session = User.objects.get(pk=xls_file.create_user.pk)
         office_session = Office.objects.get(pk=xls_file.office.pk)       
-        wb = load_workbook(xls_file.file_xls.file, data_only=True) 
+        wb = load_workbook(xls_file.file_xls.file, data_only=True)
         i = 0
+        save = True
+        value_to_pay = None
+        value_to_receive = None
+        for a in AdminSettings.objects.all():
+            value_to_pay = a.rate_commission_requestor
+            value_to_receive = a.rate_commission_correspondent
+        rate_type_pay = 'PERCENT'
+        rate_type_receive = 'PERCENT'
+
         for sheet in wb.worksheets:
             total = sheet.max_row
             i = 0
@@ -231,7 +327,6 @@ def import_xls_service_price_table(self, file_id):
             cache.set(worksheet_in_process_key, sheet.title, timeout=None)
             cache.set(imported_worksheet_key, False, timeout=None)            
             for row in sheet.iter_rows(min_row=2):
-                print(row)
                 row += ({'errors': False}, )
                 policy_price = get_policy_price(row, xls_file, office_session)
                 if policy_price and policy_price.category in [CategoryPrice.NETWORK.name, CategoryPrice.PUBLIC.name]:
@@ -250,9 +345,49 @@ def import_xls_service_price_table(self, file_id):
                 if row_is_valid(office_correspondent, policy_price, type_task, row[len(row) - 1]['errors']):
                     value = get_service_value(row, xls_file, office_correspondent, policy_price, court_district,
                                               state, client)
-                    update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent,
-                                                         policy_price, office_network, type_task, court_district,
-                                                         court_district_complement, state, city, client, value)
+                    # as colunas rate_type_pay, value_to_pay, rate_type_receive e value_to_receive soh sao importadas
+                    # se o usuario for is_staff ou is_superuser, por isso, ignora essas colunas se nao existirem na
+                    # planilha
+                    if sheet.max_column > ColumnIndex.value.value:
+                        rate_type_pay = get_rate_type_pay(row, xls_file)
+                        rate_type_receive = get_rate_type_receive(row, xls_file)
+                        value_to_pay = get_value_to_pay(row, xls_file, office_correspondent, policy_price, court_district,
+                                                  state, client, value_to_pay)
+                        value_to_receive = get_value_to_receive(row, xls_file, office_correspondent, policy_price, court_district,
+                                              state, client, value_to_pay)
+                    if rate_type_pay == "PERCENT":
+                        value_to_pay = abs((value * value_to_pay) - value)
+
+
+                    elif rate_type_pay == "VALUE":
+                        value_to_pay = abs(value - value_to_pay)
+                    else:
+                        xls_file.log = xls_file.log + (
+                                    'O campo Tipo de taxa do solicitante (%s) deve ser preenchido com PERCENT ou VALUE' % (
+                                rate_type_pay)) + ";"
+                        row[len(row) - 1]['errors'] = True
+                        save = False
+
+                    if rate_type_receive == "PERCENT":
+                        value_to_receive = abs((value * value_to_receive) + value)
+
+                    elif rate_type_receive == "VALUE":
+                        value_to_receive = abs(value + value_to_receive)
+                    else:
+                        xls_file.log = xls_file.log + (
+                                    'O campo Tipo de taxa do correspondente (%s) deve ser preenchido com PERCENT ou VALUE' % (
+                                rate_type_receive)) + ";"
+                        row[len(row) - 1]['errors'] = True
+                        save = False
+
+                    if save:
+                        update_or_create_service_price_table(xls_file, office_session, user_session, office_correspondent,
+                                                             policy_price, office_network, type_task, court_district,
+                                                             court_district_complement, state, city, client, value,
+                                                             value_to_pay, value_to_receive, rate_type_pay,
+                                                             rate_type_receive)
+
+
                 i = i + 1
                 process_percent = int(100 * float(i) / float(total))
                 cache.set(percent_imported_cache_key, process_percent, timeout=None)

@@ -1,0 +1,42 @@
+{% extends 'admin/change_form.html'%}
+{% load core_filters %}
+
+
+{% block after_field_sets %}
+    {% admin_settings as adm %}
+<fieldset class="module aligned ">
+    <div class="form-row field-create_user">
+            <label class="required" for="id_value_to_pay_0">Usar valor padrão de comissão:</label>
+            <input type="checkbox" name="rate_commission" id="rate_commission">
+
+    </div>
+    <div class="form-row field-create_user">
+            <label class="required" for="id_value_to_pay_0">Percentual da comissão do Solicitante:</label>
+            <input type="number" name="rate_commission_requestor" value="{{ adm.requestor }}" id="rate_commission_requestor">
+    </div>
+    <div class="form-row field-create_user">
+            <label class="required" for="id_value_to_pay_0">Percentual da comissão do Correnpondente:</label>
+            <input type="number" name="rate_commission_correspondent" value="{{ adm.correspondent }}" id="rate_commission_correspondent">
+    </div>
+</fieldset>
+    <script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function(){
+            $('#rate_commission').on('click',  function () {
+                $('#rate_commission_requestor').val({{ adm.requestor }});
+                $('#rate_commission_correspondent').val({{ adm.correspondent }});
+                if ($(this).prop('checked') == true){
+                    $('#rate_commission_requestor').prop('readonly', true);
+                    $('#rate_commission_correspondent').prop('readonly', true);
+                } else {
+                    console.log('falso');
+                    $('#rate_commission_requestor').prop('readonly', false);
+                    $('#rate_commission_correspondent').prop('readonly', false);
+                }
+            })
+        })
+    </script>
+{% endblock %}
