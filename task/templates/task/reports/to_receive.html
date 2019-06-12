@@ -200,14 +200,15 @@
                         {% endfor %}
                         {% if total %}
                             <tr class="total-container">
-                                <th colspan="14" class="text-right" >Total Geral (R$)</th>
+                                <th colspan="13" class="text-right" >Total Geral (R$):</th>
+                                <th colspan="1" class="text-right" >{{amount_total}}</th>
                                 <th colspan="2" class="text-right">{{total}}</th>
                             </tr>
                             <tr>
                                 <td colspan="9">&nbsp;</td>
                                 <td colspan="7" class="text-right">
                                     <div class="alert alert-warning">
-                                        A nota fiscal do cliente deverá ser emitida no valor de: R$ {{ total }} + reembolsos
+                                        A nota fiscal do cliente deverá ser emitida no valor de: R$ {{ amount_total }} + reembolsos
                                     </div>
                                 </td>
                             </tr>
