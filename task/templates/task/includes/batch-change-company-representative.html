@@ -36,7 +36,6 @@
                             <tr class="{% cycle "odd" "even" %}" data-id="{{row.attrs.pk}}">
                                 <td><input type="checkbox" class="checkbox-assign" name="checkbox-assign" id="{{row.attrs.pk}}"/></td>
                                 {% for column, cell in row.items %}
-                                    {{ column }}
                                     <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                                 {% endfor %}
                             </tr>
