@@ -86,12 +86,13 @@ class DashboardStatusTable(tables.Table):
                                         verbose_name='Solicitante',
                                         orderable=True)
 
+
     class Meta:
         model = TaskFilterViewModel
         fields = [
             'status', 'task_number', 'final_deadline_date', 'type_task',
             'law_suit_number', 'client', 'opposing_party', 'origin_code',
-            'description', 'asked_by_legal_name', 'state', 'court_district',
+            'description', 'asked_by_legal_name', 'person_company_representative', 'state', 'court_district',
             'court_division', 'executed_by_legal_name'
         ]
         empty_text = "Não existem providências a serem exibidas"
