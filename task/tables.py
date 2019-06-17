@@ -77,7 +77,12 @@ class DashboardStatusTable(tables.Table):
     executed_by_legal_name = tables.Column(accessor='executed_by_legal_name',
                                            verbose_name='Correspondente',
                                            orderable=True)
-    asked_by_legal_name = tables.Column(accessor='asked_by_legal_name',
+    # perguntar pro tiago: onde carrega asked_by_legal_name
+    # asked_by_legal_name = tables.Column(accessor='asked_by_legal_name',
+    #                                     verbose_name='Solicitante',
+    #                                     orderable=True)
+
+    asked_by_legal_name = tables.Column(accessor='person_asked_by',
                                         verbose_name='Solicitante',
                                         orderable=True)
 
