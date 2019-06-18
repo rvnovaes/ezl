@@ -25,11 +25,18 @@ class TaskShowStatusInline(admin.TabularInline):
 
 @admin.register(AdminSettings)
 class AdmAdminSettings(admin.ModelAdmin):
-    def has_delete_permission(self, request, obj=None):
-        return False
+    model = AdminSettings
+    fields = ('rate_commission_requestor', 'rate_commission_correspondent')
 
-    def has_add_permission(self, request):
-        return False
+    def has_delete_permission(self, request, obj=None):
+        return True
+
+    # def has_add_permission(self, request):
+    #     return True
+
+    def save_form(self, request, form, change):
+        return super().save_form(request, form, change)
+
 
 @admin.register(CustomSettings)
 class CustomSettingsAdmin(admin.ModelAdmin):

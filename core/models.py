@@ -129,8 +129,11 @@ class LegacyCode(models.Model):
         unique_together = (('legacy_code', 'system_prefix'), )
 
 class AdminSettings(models.Model):
-    rate_commission_requestor = models.FloatField(default=0.025)
-    rate_commission_correspondent = models.FloatField(default=0.1)
+    rate_commission_requestor = models.FloatField(default=0.025, verbose_name='Taxa de comissão do solicitante')
+    rate_commission_correspondent = models.FloatField(default=0.1, verbose_name='Taxa de comissão do correspondente')
+
+    def __str__(self):
+        return 'Solicitante={0}, Correspondente={1}'.format(self.rate_commission_requestor, self.rate_commission_correspondent)
 
 
 class Audit(AuditCreate, AuditAlter):
