@@ -9,7 +9,7 @@ import tempfile
 
 USER = 'ezl'
 REPO_PATH = "/home/{user}/ezl-{env}/"
-REPO_URL = "ssh://bitbucket.org/mttechlegal/ezl"
+REPO_URL = "ssh://bitbucket.org/ezlteam/ezl"
 env.roledefs = {
     'production': {
         'hosts': ['{}@189.43.93.151'.format(USER)],
@@ -84,11 +84,11 @@ def mount_ecm_dir():
 
 def update_repo(revision="default"):
     if not exists(get_repo_path()):
-        run("hg clone {} {}".format(REPO_URL, get_repo_path()))
+        run("git clone {} {}".format(REPO_URL, get_repo_path()))
 
     with cd(get_repo_path()):
-        run("hg pull -u")
-        run("hg update {} -C".format(revision))
+        run("git pull")
+        run("git checkout {} -f".format(revision))
 
 
 def rsync_repo(revision=None):
@@ -96,7 +96,7 @@ def rsync_repo(revision=None):
     local("cp -r ../. {}".format(tmp_dir))
     rsync_project(local_dir="{}/.".format(tmp_dir),
                   remote_dir=get_repo_path(),
-                  exclude=['.hg', 'staticfiles', 'media', 'pyc', '.orig', '__pycache__'])
+                  exclude=['.git', 'staticfiles', 'media', 'pyc', '.orig', '__pycache__'])
     local("rm -rf {}".format(tmp_dir))
 
 
