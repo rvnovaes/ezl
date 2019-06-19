@@ -76,8 +76,11 @@ set_env_teste:
 shell:
 	docker-compose run web bash
 
-stop:
+stop_web:
 	docker-compose stop web nginx
+
+stop:
+	docker-compose stop
 
 test:
 	docker-compose run web python manage.py test --parallel --keepdb
