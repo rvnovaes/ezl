@@ -44,6 +44,15 @@ class CombinedFormBase(forms.Form):
 
 
 class BillingDetailsForm(BaseModelForm):
+    PHONE_CHOICES= (
+        ("RES", "Residencial"),
+        ("COM", "Comercial"),
+    )
+    phone_type = forms.ChoiceField(choices=PHONE_CHOICES, label="Tipo de telefone")
+    # # card_name = forms.CharField(
+    # #     label=u'Nome completo')
+
+    password = forms.CharField(label="Senha", required=False)
 
     class Meta:
         fields = ['card_name', 'email', 'cpf_cnpj', 'birth_date', 'phone_number']
@@ -51,7 +60,8 @@ class BillingDetailsForm(BaseModelForm):
         model = BillingDetails
         widgets = {
             'birth_date': forms.DateInput(attrs={'type': 'date'}),
-            'card_name': forms.TextInput(attrs={'style': 'text-transform:uppercase'})
+            'card_name': forms.TextInput(attrs={'style': 'text-transform:uppercase'}),
+            'password': forms.PasswordInput(attrs={"type": "password"}),
         }
 
 

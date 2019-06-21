@@ -215,28 +215,30 @@ class BillingDetail {
 
 	onClickTr(){
 		let self = this;
-		$(`#billing-details-table tr td`).on('click', function(event){
+		$( document ).ready(function(){
 			if (!$(this).hasClass('selection')) {
 				self.showForm();
-				let id = $(event.currentTarget).parent().attr('id');
-				$.ajax({
-					url: `/billing/get_billing_detail/${id}/`,
-					method: 'GET',
-					success: (response)=>{
-						self.form.attr('action', `/billing/update_billing_detail/${response.id}/`);
-						Object.keys(response.billing_address).forEach((key)=>{
-						    if (key === 'city') {
-								self.city = {text: response.billing_address['city_name'],
-                                    id: response.billing_address[key]};
-							} else {
-						        self.form.find(`[name=${key}]`).val(response.billing_address[key])
-                            }
-                        });
-						Object.keys(response).forEach((key)=>{
-							self.form.find(`[name=${key}]`).val(response[key])
-						});
-					}
-				});
+				let id = $("#billing_detail_id").val();
+				if(id) {
+					$.ajax({
+						url: `/billing/get_billing_detail/${id}/`,
+						method: 'GET',
+						success: (response)=>{
+							self.form.attr('action', `/billing/update_billing_detail/${response.id}/`);
+							Object.keys(response.billing_address).forEach((key)=>{
+								if (key === 'city') {
+									self.city = {text: response.billing_address['city_name'],
+										id: response.billing_address[key]};
+								} else {
+									self.form.find(`[name=${key}]`).val(response.billing_address[key])
+								}
+							});
+							Object.keys(response).forEach((key)=>{
+								self.form.find(`[name=${key}]`).val(response[key])
+							});
+						}
+					});
+				}
 			}
 		});
 	}
