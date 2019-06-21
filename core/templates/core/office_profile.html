@@ -553,9 +553,9 @@
                                         <div class="col-md-12">
                                             <div class="address">
                                                 <div id="endereco">
-                                                    <div class="modal-content">
+                                                    <div>
                                                       <form enctype="multipart/form-data"  method="POST" action="{% url 'create_billing_detail' %}" autocomplete="off" id="form-billing-detail">{% csrf_token %}
-                                                        <div class="modal-body">
+                                                        <div>
                                                           <fieldset>
                                                               <div class="row">
                                                                  <div class="col-xs-6">
@@ -623,17 +623,20 @@
                                                               </div>
                                                               <div class="row">
                                                                 <div class="col col-xs-6">
-                                                                  {% bootstrap_field form_billing_details.person_type %}
+                                                                  {% bootstrap_field form_billing_details.type_response %}
                                                                 </div>
                                                                 <div class="col col-xs-6">
                                                                   {% bootstrap_field form_billing_details.password %}
                                                                 </div>
                                                               </div>
-                                                              <button type="button" class="btn btn-danger" id="btn-yapay-billing-detail">Cadastrar Yapay</button>
+
+                                                              <button type="button" class="btn btn-warning" id="btn-yapay-billing-detail">Cadastrar Yapay</button>
+
                                                               {% for row in table_billing_details.page.object_list|default:table_billing_details.rows %}
                                                                     <input type="hidden" id="billing_detail_id" name="billing_detail_id" value="{{ row.attrs.pk }}">
                                                               {% endfor %}
                                                           </fieldset>
+                                                        <br>
                                                         </div>
                                                         <div class="modal-footer">
                                                           <button type="submit" class="btn btn-success" id="btn-save-billing-detail">Salvar</button>

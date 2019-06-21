@@ -23,7 +23,8 @@ class BillingDetail {
         this.onCheckItem();
         this.onClickTr();
         this.onChangeZipcode();
-        this.onDocumentReady()
+        this.onDocumentReady();
+        this.createBillingAccountYapay()
     }
 
     static setSelect2(text, value, element) {
@@ -269,6 +270,20 @@ class BillingDetail {
 				    this._elBtnAddBillingDetail.prop('disabled', false);
                 }
 			}
+		});
+	}
+
+	createBillingAccountYapay(){
+    	$('#btn-yapay-billing-detail').on('click', function(){
+    		let formData = $('#form-billing-detail').serializeArray();
+    		let city_split = $("#id_city option:selected").html().split("-");
+    		let city_name = $.trim(city_split[0]);
+			let city_uf = city_split[1];
+    		formData.push(
+    			{name: "city_name", value: city_name },
+    			{name: "city_uf", value: city_uf }
+    			);
+    		console.log(formData);
 		});
 	}
 
