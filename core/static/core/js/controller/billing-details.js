@@ -278,7 +278,7 @@ class BillingDetail {
     		let formData = $('#form-billing-detail').serializeArray();
     		let city_split = $("#id_city option:selected").html().split("-");
     		let city_name = $.trim(city_split[0]);
-			let city_uf = city_split[1];
+			let city_uf = $.trim(city_split[1]);
     		formData.push(
     			{name: "city_name", value: city_name },
     			{name: "city_uf", value: city_uf }
