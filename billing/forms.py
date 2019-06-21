@@ -48,20 +48,24 @@ class BillingDetailsForm(BaseModelForm):
         ("RES", "Residencial"),
         ("COM", "Comercial"),
     )
-    phone_type = forms.ChoiceField(choices=PHONE_CHOICES, label="Tipo de telefone")
-    # # card_name = forms.CharField(
-    # #     label=u'Nome completo')
 
-    password = forms.CharField(label="Senha", required=False)
+    PERSON_CHOICES = (
+        ("P", "O pessoal"),
+        ("C", "O comercial"),
+    )
+    phone_type = forms.ChoiceField(choices=PHONE_CHOICES, label="Tipo de telefone")
+    person_type = forms.ChoiceField(choices=PERSON_CHOICES, label="Tipo de pessoa")
+
+    password = forms.CharField(label="Senha", max_length=32, widget=forms.PasswordInput, required=False)
 
     class Meta:
-        fields = ['card_name', 'email', 'cpf_cnpj', 'birth_date', 'phone_number']
+        fields = ['full_name', 'card_name', 'email', 'cpf', 'cpf_cnpj', 'birth_date', 'phone_number']
         exclude = ['documents']
         model = BillingDetails
         widgets = {
             'birth_date': forms.DateInput(attrs={'type': 'date'}),
             'card_name': forms.TextInput(attrs={'style': 'text-transform:uppercase'}),
-            'password': forms.PasswordInput(attrs={"type": "password"}),
+            'full_name': forms.TextInput(attrs={'style': 'text-transform:uppercase'}),
         }
 
 

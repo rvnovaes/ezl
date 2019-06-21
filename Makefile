@@ -26,6 +26,9 @@ local_sqlserver:
 logs:
 	docker-compose logs --follow
 
+migrating:
+    docker-compose run web python manage.py makemigrations
+
 migrate:
 	docker-compose run web python manage.py migrate --noinput
 

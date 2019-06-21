@@ -85,11 +85,11 @@ class ChargeItem(Audit):
 
 
 class BillingDetails(Audit, OfficeMixin):
-    # full_name = models.CharField(
-    #     verbose_name='Nome completo',
-    #     max_length=255,
-    #     blank=True, null=True
-    # )
+    full_name = models.CharField(
+        verbose_name='Nome completo',
+        max_length=255,
+        blank=True, null=True
+    )
     card_name = models.CharField(
         verbose_name='Nome no cartão',
         max_length=255,
@@ -102,11 +102,11 @@ class BillingDetails(Audit, OfficeMixin):
         max_length=255,
         verbose_name='CPF/CNPJ'
     )
-    # cpf = models.CharField(
-    #     max_length=255,
-    #     verbose_name='CPF',
-    #     blank=True, null=True
-    # )
+    cpf = models.CharField(
+        max_length=255,
+        verbose_name='CPF',
+        blank=True, null=True
+    )
     birth_date = models.DateField(verbose_name='Data de nascimento')
     phone_number = models.CharField(
         verbose_name='Telefone',

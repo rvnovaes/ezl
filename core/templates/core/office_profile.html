@@ -559,10 +559,10 @@
                                                           <fieldset>
                                                               <div class="row">
                                                                  <div class="col-xs-6">
-                                                                    {% bootstrap_field form_billing_details.card_name label_class='ezl-required' %}
+                                                                    {% bootstrap_field form_billing_details.full_name label_class='ezl-required' %}
                                                                  </div>
                                                                  <div class="col-xs-6">
-                                                                    {% bootstrap_field form_billing_details.cpf_cnpj label_class='ezl-required' %}
+                                                                    {% bootstrap_field form_billing_details.cpf label_class='ezl-required' %}
                                                                  </div>
                                                               </div>
                                                               <div class="row">
@@ -605,10 +605,26 @@
                                                               </div>
                                                               <div class="p-20 row">
                                                                   <div class="col-sm-6">
+                                                                      <h3 class="m-t-0">Dados do cartão</h3>
+                                                                  </div>
+                                                              </div>
+                                                              <div class="row">
+                                                                 <div class="col-xs-6">
+                                                                    {% bootstrap_field form_billing_details.card_name label_class='ezl-required' %}
+                                                                 </div>
+                                                                 <div class="col-xs-6">
+                                                                    {% bootstrap_field form_billing_details.cpf_cnpj label_class='ezl-required' %}
+                                                                 </div>
+                                                              </div>
+                                                              <div class="p-20 row">
+                                                                  <div class="col-sm-6">
                                                                        <h3 class="m-t-0">Conta Yapay</h3>
                                                                   </div>
                                                               </div>
                                                               <div class="row">
+                                                                <div class="col col-xs-6">
+                                                                  {% bootstrap_field form_billing_details.person_type %}
+                                                                </div>
                                                                 <div class="col col-xs-6">
                                                                   {% bootstrap_field form_billing_details.password %}
                                                                 </div>
