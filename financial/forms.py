@@ -1,5 +1,5 @@
 from django import forms
-from core.models import Person, State, City
+from core.models import Person, State, City, AdminSettings
 from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field, get_office_session
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from task.models import TypeTask
@@ -82,14 +82,16 @@ class ServicePriceTableForm(BaseModelForm):
                             # O valor pode ser 0.00 porque os correspondentes internos não cobram para fazer serviço
                             widget=forms.TextInput(attrs={'mask': 'money'}))
 
-    value_to_receive = forms.CharField(widget=forms.HiddenInput())
-    value_to_pay = forms.CharField(widget=forms.HiddenInput())
+    value_to_receive = forms.CharField(label="Valor a receber")
+    value_to_pay = forms.CharField(label="Valor a pagar")
+
+    rate_commission_requestor = forms.FloatField(label="Taxa de comissão do solicitante")
 
     class Meta:
         model = ServicePriceTable
         fields = ('office', 'policy_price', 'office_correspondent', 'office_network', 'client', 'type_task', 'state',
-                  'court_district', 'court_district_complement', 'city', 'value', 'is_active', 'value_to_receive',
-                  'value_to_pay')
+                  'court_district', 'court_district_complement', 'city', 'value', 'rate_type_receive', 'rate_commission_requestor', 'value_to_receive',
+                  'rate_type_pay', 'value_to_pay',  'is_active',)
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
