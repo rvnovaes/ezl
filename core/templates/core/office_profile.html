@@ -623,7 +623,7 @@
                                                               </div>
                                                               <div class="row">
                                                                 <div class="col col-xs-6">
-                                                                  {% bootstrap_field form_billing_details.type_response %}
+                                                                  {% bootstrap_field form_billing_details.type_person %}
                                                                 </div>
                                                                 <div class="col col-xs-6">
                                                                   {% bootstrap_field form_billing_details.password %}
@@ -635,6 +635,9 @@
                                                               {% for row in table_billing_details.page.object_list|default:table_billing_details.rows %}
                                                                     <input type="hidden" id="billing_detail_id" name="billing_detail_id" value="{{ row.attrs.pk }}">
                                                               {% endfor %}
+
+                                                              <input type="hidden" id="legal_name" name="legal_name" value="{{ office }}">
+                                                              <input type="hidden" id="legal_cnpj" name="legal_cnpj" value="{{ office.cnpj }}">
                                                           </fieldset>
                                                         <br>
                                                         </div>

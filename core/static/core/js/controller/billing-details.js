@@ -284,6 +284,12 @@ class BillingDetail {
     			{name: "city_uf", value: city_uf }
     			);
     		console.log(formData);
+    		// $.ajax({
+			// 	url: ,
+			// 	method: 'GET',
+			// 	success: (response)=>{
+			// 	}
+    		// });
 		});
 	}
 
