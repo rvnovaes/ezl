@@ -45,8 +45,8 @@ class CombinedFormBase(forms.Form):
 
 class BillingDetailsForm(BaseModelForm):
     PHONE_CHOICES= (
-        ("RES", "Residencial"),
-        ("COM", "Comercial"),
+        ("h", "Residencial"),
+        ("w", "Comercial"),
     )
 
     PERSON_CHOICES = (
@@ -54,7 +54,7 @@ class BillingDetailsForm(BaseModelForm):
         ("j", "O comercial"),
     )
 
-    phone_type = forms.ChoiceField(choices=PHONE_CHOICES, label="Tipo de telefone")
+    type_contact = forms.ChoiceField(choices=PHONE_CHOICES, label="Tipo de telefone")
     type_response = forms.ChoiceField(choices=PERSON_CHOICES, label="Tipo de pessoa")
 
     password = forms.CharField(label="Senha", max_length=32, widget=forms.PasswordInput, required=False)

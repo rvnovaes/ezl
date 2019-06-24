@@ -93,6 +93,7 @@ class BillingDetails(Audit, OfficeMixin):
     card_name = models.CharField(
         verbose_name='Nome no cartão',
         max_length=255,
+        blank=True, null=True
     )
     email = models.EmailField(
         verbose_name='E-mail',
@@ -100,7 +101,8 @@ class BillingDetails(Audit, OfficeMixin):
     )
     cpf_cnpj = models.CharField(
         max_length=255,
-        verbose_name='CPF/CNPJ'
+        verbose_name='CPF/CNPJ',
+        blank=True, null=True
     )
     cpf = models.CharField(
         max_length=255,
