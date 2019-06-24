@@ -275,18 +275,61 @@ class BillingDetail {
 
 	createBillingAccountYapay(){
     	$('#btn-yapay-billing-detail').on('click', function(){
-    		let formData = $('#form-billing-detail').serializeArray();
+			let data = [];
+			let account_type = "1";
+			let trade_name = $("#trade_name").val();
+			let company_name = $("#legal_name").val();
+			let cnpj = $("#legal_cnpj").val();
+			let email = $("#id_email").val();
+			let name = $("#id_full_name").val();
+			let cpf = $("#id_cpf").val();
+			let type_contact = $("#id_type_contact").val();
+			let number_contact = $("#id_phone_number").val().replace("(","").replace(")","").replace("-","").replace(" ", "");
+			let contacts = [
+				{name: "type_contact", value: type_contact},
+				{name: "number_contact", value: number_contact}
+			];
+		    let street = $("#id_street").val();
+		    let number = $("#id_number").val();
+		    let type_address = "b";
+		    let neighborhood = $("#id_city_region").val();
+		    let completion = $("#id_complement").val();
+		    let postal_code = $("#id_zip_code").val().replace("-","");
     		let city_split = $("#id_city option:selected").html().split("-");
     		let city_name = $.trim(city_split[0]);
 			let city_uf = $.trim(city_split[1]);
-    		formData.push(
-    			{name: "city_name", value: city_name },
-    			{name: "city_uf", value: city_uf }
-    			);
-    		console.log(formData);
+			let password = $("#id_password").val();
+    		data.push(
+    			{name: "account_type", value: account_type },
+    			{name: "trade_name", value: trade_name },
+				{name: "company_name", value: company_name },
+				{name: "cnpj", value: cnpj },
+				{name: "email", value: email },
+				{name: "name", value: name },
+				{name: "cpf", value: cpf },
+				{name: "contacts", value: contacts },
+				{name: "street", value: street },
+				{name: "number", value: number },
+				{name: "type_address", value: type_address },
+				{name: "neighborhood", value: neighborhood },
+				{name: "completion", value: completion },
+				{name: "postal_code", value: postal_code },
+    			{name: "city", value: city_name },
+    			{name: "state", value: city_uf },
+				{name: "password", value: password }
+			);
     		// $.ajax({
 			// 	url: ,
 			// 	method: 'GET',
+			//  dataType: 'json',
+			//  beforeSend: function(xhr) {
+			//         xhr.setRequestHeader("Authorization", "Basic "
+			//             + btoa(username + ":" + password));
+			//     },
+			// headers: {
+			// 	"Authorization": "Basic " + btoa(USERNAME + ":" + PASSWORD)
+			//   },
+			//  data: data,
 			// 	success: (response)=>{
 			// 	}
     		// });
