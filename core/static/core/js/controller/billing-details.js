@@ -285,13 +285,9 @@ class BillingDetail {
 			let cpf = $("#id_cpf").val();
 			let type_contact = $("#id_type_contact").val();
 			let number_contact = $("#id_phone_number").val().replace("(","").replace(")","").replace("-","").replace(" ", "");
-			let contacts = [
-				{name: "type_contact", value: type_contact},
-				{name: "number_contact", value: number_contact}
-			];
 		    let street = $("#id_street").val();
 		    let number = $("#id_number").val();
-		    let type_address = "b";
+		    let type_address = "B";
 		    let neighborhood = $("#id_city_region").val();
 		    let completion = $("#id_complement").val();
 		    let postal_code = $("#id_zip_code").val().replace("-","");
@@ -299,40 +295,48 @@ class BillingDetail {
     		let city_name = $.trim(city_split[0]);
 			let city_uf = $.trim(city_split[1]);
 			let password = $("#id_password").val();
-    		data.push(
-    			{name: "account_type", value: account_type },
-    			{name: "trade_name", value: trade_name },
-				{name: "company_name", value: company_name },
-				{name: "cnpj", value: cnpj },
-				{name: "email", value: email },
-				{name: "name", value: name },
-				{name: "cpf", value: cpf },
-				{name: "contacts", value: contacts },
-				{name: "street", value: street },
-				{name: "number", value: number },
-				{name: "type_address", value: type_address },
-				{name: "neighborhood", value: neighborhood },
-				{name: "completion", value: completion },
-				{name: "postal_code", value: postal_code },
-    			{name: "city", value: city_name },
-    			{name: "state", value: city_uf },
-				{name: "password", value: password }
-			);
-    		// $.ajax({
-			// 	url: ,
-			// 	method: 'GET',
-			//  dataType: 'json',
-			//  beforeSend: function(xhr) {
-			//         xhr.setRequestHeader("Authorization", "Basic "
-			//             + btoa(username + ":" + password));
-			//     },
-			// headers: {
-			// 	"Authorization": "Basic " + btoa(USERNAME + ":" + PASSWORD)
-			//   },
-			//  data: data,
-			// 	success: (response)=>{
-			// 	}
-    		// });
+
+			let payload = {
+				"account_type": account_type,
+				"trade_name": trade_name,
+				"company_name": company_name,
+				"cnpj": cnpj,
+				"email": email,
+				"name": name,
+				"cpf": cpf,
+				"contacts": [
+				{
+					"type_contact":type_contact,
+					"number_contact": number_contact
+				}],
+				"street": street,
+				"number": number,
+				"type_address": type_address,
+				"neighborhood": neighborhood,
+				"completion": completion,
+				"postal_code": postal_code,
+				"city": city_name,
+				"state": city_uf,
+				"password": password
+			};
+    		$.ajax({
+				url: "http://142.93.204.204:8010/api/clientes/",
+				method: 'POST',
+				dataType : "json",
+    			contentType: "application/json; charset=utf-8",
+				headers: {
+					"Authorization": "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluaXN0cmF0aXZvQGV6cGF5LmNvbSIsImV4cCI6MTU2MTQwMTk1MiwiZW1haWwiOiJhZG1pbmlzdHJhdGl2b0BlenBheS5jb20ifQ.fjTd2zV7c-RsDtcH9D_0yxW6UCpYVIAK_dc6g1stPu8"
+				},
+				data: JSON.stringify(payload),
+				success: (response)=> {
+					showToast('success', `Cliente cadastrado na Yapay com sucesso`, '', 3000, true);
+				},
+				error: (response)=> {
+					if(response.status == 400){
+						showToast('error', `Não foi possível realizar o cadastro `, '', 3000, true);
+					}
+				}
+    		});
 		});
 	}
 

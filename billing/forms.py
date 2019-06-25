@@ -45,9 +45,9 @@ class CombinedFormBase(forms.Form):
 
 class BillingDetailsForm(BaseModelForm):
     PHONE_CHOICES= (
-        ("w", "Comercial"),
-        ("m", "Mobile"),
-        ("h", "Residencial"),
+        ("W", "Comercial"),
+        ("M", "Mobile"),
+        ("H", "Residencial"),
     )
 
     PERSON_CHOICES = (
@@ -67,7 +67,8 @@ class BillingDetailsForm(BaseModelForm):
         widgets = {
             'birth_date': forms.DateInput(attrs={'type': 'date'}),
             'card_name': forms.TextInput(attrs={'style': 'text-transform:uppercase'}),
-            'full_name': forms.TextInput(attrs={'style': 'text-transform:uppercase'}),
+            'full_name': forms.TextInput(attrs={'style': 'text-transform:uppercase', 'required': 'true'}),
+            'cpf': forms.TextInput(attrs={'required': 'true'}),
         }
 
 
