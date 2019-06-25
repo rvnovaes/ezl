@@ -160,7 +160,7 @@ class TaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
             .select_related('parent__type_task') \
             .filter(task_status=TaskStatus.FINISHED,
                     parent__isnull=True,
-                    amount_to_pay__gt=Decimal('0.00')) \
+                    amount_to_pay__gte=Decimal('0.00')) \
             .order_by('office_id', '-finished_date')
         params = self.request.query_params
         queryset = filter_api_queryset_by_params(queryset, params)
