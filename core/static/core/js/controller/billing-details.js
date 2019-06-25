@@ -275,7 +275,6 @@ class BillingDetail {
 
 	createBillingAccountYapay(){
     	$('#btn-yapay-billing-detail').on('click', function(){
-			let data = [];
 			let account_type = "1";
 			let trade_name = $("#trade_name").val();
 			let company_name = $("#legal_name").val();
@@ -319,24 +318,33 @@ class BillingDetail {
 				"state": city_uf,
 				"password": password
 			};
-    		$.ajax({
-				url: "http://142.93.204.204:8010/api/clientes/",
-				method: 'POST',
-				dataType : "json",
-    			contentType: "application/json; charset=utf-8",
-				headers: {
-					"Authorization": "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluaXN0cmF0aXZvQGV6cGF5LmNvbSIsImV4cCI6MTU2MTQwMTk1MiwiZW1haWwiOiJhZG1pbmlzdHJhdGl2b0BlenBheS5jb20ifQ.fjTd2zV7c-RsDtcH9D_0yxW6UCpYVIAK_dc6g1stPu8"
-				},
-				data: JSON.stringify(payload),
-				success: (response)=> {
-					showToast('success', `Cliente cadastrado na Yapay com sucesso`, '', 3000, true);
-				},
-				error: (response)=> {
-					if(response.status == 400){
-						showToast('error', `Não foi possível realizar o cadastro `, '', 3000, true);
+			if(password.length < 4){
+				showToast('error', `Campo senha deve ter no mínimo 4 dígitos `, '', 3000, true);
+			}else {
+				$.ajax({
+					url: "http://142.93.204.204:8010/api/clientes/",
+					method: 'POST',
+					dataType: "json",
+					contentType: "application/json; charset=utf-8",
+					headers: {
+						"Authorization": "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluaXN0cmF0aXZvQGV6cGF5LmNvbSIsImV4cCI6MTU2MTQwMTk1MiwiZW1haWwiOiJhZG1pbmlzdHJhdGl2b0BlenBheS5jb20ifQ.fjTd2zV7c-RsDtcH9D_0yxW6UCpYVIAK_dc6g1stPu8"
+					},
+					data: JSON.stringify(payload),
+					success: (response) => {
+						showToast('success', `Cliente cadastrado na Yapay com sucesso`, '', 3000, true);
+					},
+					error: (response) => {
+						let errors = response.responseJSON;
+						let msgerrors = [];
+						for(i = 0; i< errors.length; i++){
+							msgerrors.push(errors[i].validation_errors[i].message_complete);
+						}
+						if (response.status == 400) {
+							showToast('error', `Não foi possível realizar o cadastro - ${ msgerrors }`, '', 6000, true);
+						}
 					}
-				}
-    		});
+				});
+			}
 		});
 	}
 
