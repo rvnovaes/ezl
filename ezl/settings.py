@@ -312,8 +312,8 @@ USE_L10N = use_l10n
 USE_TZ = use_tz
 
 # configuração de formatação de moeda para o campo de Money da biblioteca django-money
-_FORMATTER.add_sign_definition(language_code, moneyed.BRL, prefix='R$')
-_FORMATTER.add_sign_definition(DEFAULT, moneyed.BRL, prefix='R$')
+_FORMATTER.add_sign_definition(language_code, moneyed.BRL)
+_FORMATTER.add_sign_definition(DEFAULT, moneyed.BRL)
 _FORMATTER.add_formatting_definition(
     language_code,
     group_size=3,

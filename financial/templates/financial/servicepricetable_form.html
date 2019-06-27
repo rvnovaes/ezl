@@ -6,7 +6,7 @@
     <script type="text/javascript">
     $(document).ready(function(){
         servicePriceTable = new ServicePriceTable('{{office_session.pk}}', {{ policy_prices_categories|safe }});
-        servicePriceTable.checkValue();
+        servicePriceTable.checkValues();
     });
     </script>
 {% endblock %}
