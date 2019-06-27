@@ -3,7 +3,7 @@ import configparser
 import os
 import sys
 import logging
-import hglib
+import subprocess
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ENV = os.environ.get('ENV')
@@ -33,10 +33,10 @@ def get_parser():
 
 
 def get_rev():
+    # pega nr da revisao do commit para adicionar nos javascripts para nao ter que dar crtl + f5
     rev = ''
     try:
-        client = hglib.open('.')
-        rev = client.parents()[0][0]
+        rev = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode("utf-8").rstrip()
     except:
         pass
     return rev
