@@ -468,7 +468,6 @@ class TaskBulkCreate {
                 if (this.lawSuitNumber) {
                     this.enableOnChange = false;
                     let personCustomer = this.lawSuitNumberData.person_customer;
-                    this.personCustomer = this.nullData;
                     if (personCustomer && personCustomer.id) {
                         this.personCustomer = personCustomer;
                     }
