@@ -128,6 +128,7 @@ class LegacyCode(models.Model):
         abstract = True
         unique_together = (('legacy_code', 'system_prefix'), )
 
+
 class AdminSettings(models.Model):
     rate_commission_requestor = models.FloatField(default=0.025, verbose_name='Taxa de comissão do solicitante')
     rate_commission_correspondent = models.FloatField(default=0.1, verbose_name='Taxa de comissão do correspondente')
