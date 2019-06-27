@@ -165,6 +165,7 @@ def get_service_value(row, xls_file, office_correspondent, policy_price, court_d
     finally:
         return value
 
+
 def get_value_to_pay(row, xls_file, office_correspondent, policy_price, court_district, state, client, value_to_pay):
     try:
         if type(row[ColumnIndex.value_to_pay.value].value) == str:
@@ -181,6 +182,7 @@ def get_value_to_pay(row, xls_file, office_correspondent, policy_price, court_di
     finally:
         return value_to_pay
 
+
 def get_rate_type_pay(row, xls_file):
     # Tipo de taxa do correspondente
     rate_type = False
@@ -192,6 +194,7 @@ def get_rate_type_pay(row, xls_file):
 
     return rate_type
 
+
 def get_rate_type_receive(row, xls_file):
     # Tipo de taxa do solicitante
     rate_type = False
@@ -202,6 +205,7 @@ def get_rate_type_receive(row, xls_file):
             row[len(row) - 1]['errors'] = True
 
     return rate_type
+
 
 def get_value_to_receive(row, xls_file, office_correspondent, policy_price, court_district, state, client, value_to_receive):
     try:
@@ -293,10 +297,10 @@ def update_or_create_service_price_table(xls_file, office_session, user_session,
         service_price_table.save()
 
 
-@shared_task(bind=True)
-def import_xls_service_price_table(self, file_id):
+# @shared_task(bind=True)
+def import_xls_service_price_table(file_id):
     try:
-        self.update_state(state="PROGRESS")
+        # self.update_state(state="PROGRESS")
         xls_file = ImportServicePriceTable.objects.get(pk=file_id)
         xls_file.log = " "
         # chaves para acessar dados em cache
@@ -348,17 +352,15 @@ def import_xls_service_price_table(self, file_id):
                     # as colunas rate_type_pay, value_to_pay, rate_type_receive e value_to_receive soh sao importadas
                     # se o usuario for is_staff ou is_superuser, por isso, ignora essas colunas se nao existirem na
                     # planilha
-                    if sheet.max_column > ColumnIndex.value.value:
-                        rate_type_pay = get_rate_type_pay(row, xls_file)
-                        rate_type_receive = get_rate_type_receive(row, xls_file)
-                        value_to_pay = get_value_to_pay(row, xls_file, office_correspondent, policy_price, court_district,
-                                                  state, client, value_to_pay)
-                        value_to_receive = get_value_to_receive(row, xls_file, office_correspondent, policy_price, court_district,
+                    rate_type_pay = get_rate_type_pay(row, xls_file)
+                    rate_type_receive = get_rate_type_receive(row, xls_file)
+                    value_to_pay = get_value_to_pay(row, xls_file, office_correspondent, policy_price, court_district,
                                               state, client, value_to_pay)
+                    value_to_receive = get_value_to_receive(row, xls_file, office_correspondent, policy_price, court_district,
+                                          state, client, value_to_pay)
+
                     if rate_type_pay == "PERCENT":
                         value_to_pay = abs((value * value_to_pay) - value)
-
-
                     elif rate_type_pay == "VALUE":
                         value_to_pay = abs(value - value_to_pay)
                     else:
@@ -370,7 +372,6 @@ def import_xls_service_price_table(self, file_id):
 
                     if rate_type_receive == "PERCENT":
                         value_to_receive = abs((value * value_to_receive) + value)
-
                     elif rate_type_receive == "VALUE":
                         value_to_receive = abs(value + value_to_receive)
                     else:

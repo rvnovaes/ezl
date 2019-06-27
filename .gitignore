@@ -1,21 +1,20 @@
-syntax: glob
-
 .coverage
 .cache
 *.pyc
 *.orig
 local_settings.py
-venv/**
-staticfiles/**
-luigi_targets/*
+venv/
+staticfiles/
+luigi_targets/
 celerybeat*
 
 config/general.ini
-etl/advwin_ezl/tmp/**
-validators/.pytest_cache/*
+etl/advwin_ezl/tmp/
+validators/.pytest_cache/
 syntax: regexp
-^.idea/
+.idea/
 docker-compose.override.yml
-media/*
-.vscode/*
+media/
+.vscode/
 celeryd.pid
+
