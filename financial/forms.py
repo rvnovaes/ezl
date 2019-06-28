@@ -1,13 +1,14 @@
 from django import forms
-from core.models import Person, State, City
-from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field, get_office_session
+from core.models import Person, State, City, AdminSettings
+from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field, \
+    get_office_session, get_admin_setting
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from task.models import TypeTask
 from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, PolicyPrice, CategoryPrice, BillingMoment
 from decimal import Decimal
 from core.forms import BaseModelForm, XlsxFileField
 from core.widgets import TypeaHeadForeignKeyWidget
-from financial.utils import recalculate_values
+from financial.enums import RateType
 
 
 class CostCenterForm(BaseModelForm):
@@ -82,14 +83,44 @@ class ServicePriceTableForm(BaseModelForm):
                             # O valor pode ser 0.00 porque os correspondentes internos não cobram para fazer serviço
                             widget=forms.TextInput(attrs={'mask': 'money'}))
 
-    value_to_receive = forms.CharField(widget=forms.HiddenInput())
-    value_to_pay = forms.CharField(widget=forms.HiddenInput())
+    rate_type_receive = forms.ChoiceField(
+        label='Tipo de taxa de comissão do solicitante',
+        choices=[(x.name, x.value) for x in RateType],
+        required=True,
+    )
+
+    rate_commission_requestor = forms.FloatField(
+        label='Taxa de comissão do solicitante',
+        localize=True,
+        required=True,
+    )
+
+    value_to_receive = forms.CharField(
+        label='Valor a receber',
+        localize=True,
+        required=True)
+
+    rate_type_pay = forms.ChoiceField(
+        label='Tipo de taxa de comissão do correspondente',
+        choices=[(x.name, x.value) for x in RateType],
+        required=True,
+    )
+    rate_commission_correspondent = forms.FloatField(
+        label='Taxa de comissão do correspondente',
+        localize=True,
+        required=True,
+    )
+    value_to_pay = forms.FloatField(
+        label='Valor a pagar',
+        localize=True,
+        required=True)
 
     class Meta:
         model = ServicePriceTable
         fields = ('office', 'policy_price', 'office_correspondent', 'office_network', 'client', 'type_task', 'state',
-                  'court_district', 'court_district_complement', 'city', 'value', 'is_active', 'value_to_receive',
-                  'value_to_pay')
+                  'court_district', 'court_district_complement', 'city', 'value', 'rate_type_receive',
+                  'rate_commission_requestor', 'value_to_receive', 'rate_type_pay', 'rate_commission_correspondent',
+                  'value_to_pay', 'is_active')
 
     def clean_value(self):
         value = self.cleaned_data['value'] if self.cleaned_data['value'] != '' else '0,00'
@@ -97,24 +128,8 @@ class ServicePriceTableForm(BaseModelForm):
         value = value.replace(',', '.')
         return Decimal(value)
 
-    def clean_values(self):
-        if 'value' in self.changed_data and self.instance.id:
-            instance = self.instance
-            old_value = instance.value
-            value_to_pay = instance.value_to_pay
-            value_to_receive = instance.value_to_receive
-            new_value = self.cleaned_data['value']
-            rate_type_pay = instance.rate_type_pay
-            rate_type_receive = instance.rate_type_receive
-            self.cleaned_data['value_to_pay'], self.cleaned_data['value_to_receive'] = recalculate_values(
-                old_value, value_to_pay, value_to_receive, new_value, rate_type_pay, rate_type_receive
-            )
-        else:
-            self.cleaned_data['value_to_pay'] = self.cleaned_data['value_to_receive'] = self.cleaned_data['value']
-
     def clean(self):
         cleaned_data = super().clean()
-        self.clean_values()
         if not cleaned_data["court_district"] and cleaned_data["court_district_complement"]:
             cleaned_data["court_district"] = self.cleaned_data["court_district_complement"].court_district
         if not cleaned_data["state"] and cleaned_data['court_district']:
@@ -141,11 +156,21 @@ class ServicePriceTableForm(BaseModelForm):
         self.fields['office_network'].queryset = self.fields['office_network'].queryset.filter(members=office_session)
         self.fields['office_network'].required = True
 
+        # quando o initial depende de um campo do banco de dados nao pode ser passado diretamente na criacao
+        # do campo no form pq a migration que cria o model ainda nao foi rodada e o model nao existe ainda
+        # por isso foi feita no __init__ do form
+        self.fields['rate_commission_requestor'].initial = get_admin_setting(AdminSettings,
+                                                                                 'rate_commission_requestor')
+        self.fields['rate_commission_correspondent'].initial = get_admin_setting(AdminSettings,
+                                                                                 'rate_commission_correspondent')
+
 
 class ImportServicePriceTableForm(forms.ModelForm):
     file_xls = XlsxFileField(label='Arquivo', required=True,
                              headers_to_check=['Correspondente/Rede', 'Tipo de preço', 'Serviço', 'Cliente', 'UF',
-                                               'Comarca', 'Complemento de comarca', 'Cidade', 'Valor'])
+                                               'Comarca', 'Complemento de comarca', 'Cidade', 'Valor',
+                                               'Tipo de taxa do solicitante', 'Taxa do solicitante',
+                                               'Tipo de taxa do correspondente', 'Taxa do correspondente'])
 
     class Meta:
         model = ImportServicePriceTable

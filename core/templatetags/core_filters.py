@@ -1,6 +1,6 @@
 from django import template
 from django.conf import settings
-from core.models import Office
+from core.models import AdminSettings
 from django.contrib.auth.models import Group 
 from bootstrap3.templatetags.bootstrap3 import bootstrap_field
 from django.utils.safestring import mark_safe
@@ -130,6 +130,18 @@ def get_requesters(persons, office):
 @register.filter
 def format_plan_month_value(month_value):
     pass
+
+
+@register.simple_tag
+def admin_settings(*args, **kwargs):
+    options = AdminSettings.objects.all()
+    for o in options:
+        context = {
+            'requestor': str(float(o.rate_commission_requestor) * 100).replace(',', '.'),
+            'correspondent' : str(float(o.rate_commission_correspondent) * 100).replace(',','.')
+        }
+
+    return context
 
 
 @register.simple_tag

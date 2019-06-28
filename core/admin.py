@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate
+from core.models import AddressType, ContactMechanismType, ContactMechanism, Team, ControlFirstAccessUser, EmailTemplate, AdminSettings
 #Todo: Remover office
 from core.models import Office, Invite, InviteOffice, OfficeRelGroup, CustomSettings, Company, CompanyUser, City, \
     State, Country, AreaOfExpertise, OfficeNetwork, OfficeOffices, CustomMessage
@@ -22,6 +22,20 @@ class TaskShowStatusInline(admin.TabularInline):
     model = TaskShowStatus
     fields = ('create_user', 'status_to_show', 'send_mail_template', 'mail_recipients')
     extra = 0
+
+@admin.register(AdminSettings)
+class AdmAdminSettings(admin.ModelAdmin):
+    model = AdminSettings
+    fields = ('rate_commission_requestor', 'rate_commission_correspondent')
+
+    def has_delete_permission(self, request, obj=None):
+        return True
+
+    # def has_add_permission(self, request):
+    #     return True
+
+    def save_form(self, request, form, change):
+        return super().save_form(request, form, change)
 
 
 @admin.register(CustomSettings)
