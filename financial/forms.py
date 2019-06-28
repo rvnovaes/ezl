@@ -88,12 +88,11 @@ class ServicePriceTableForm(BaseModelForm):
         required=True,
     )
 
-    admin_settings = AdminSettings.objects.filter(pk=1).first()
     rate_commission_requestor = forms.FloatField(
         label='Taxa de comissão do solicitante',
         localize=True,
         required=True,
-        initial=admin_settings.rate_commission_requestor,
+        initial=AdminSettings.get_admin_setting('rate_commission_requestor'),
     )
 
     value_to_receive = forms.CharField(
@@ -109,7 +108,9 @@ class ServicePriceTableForm(BaseModelForm):
     rate_commission_correspondent = forms.FloatField(
         label='Taxa de comissão do correspondente',
         localize=True,
-        required=True)
+        required=True,
+        initial = AdminSettings.get_admin_setting('rate_commission_correspondent'),
+    )
     value_to_pay = forms.FloatField(
         label='Valor a pagar',
         localize=True,

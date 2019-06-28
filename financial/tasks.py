@@ -48,7 +48,7 @@ def get_office_correspondent(row, xls_file, office_session):
             xls_file.log = xls_file.log + ('Escritório correspondente %s não encontrado' % office_name) + ";"
             row[len(row) - 1]['errors'] = True
         elif not office_correspondent_linked:
-            xls_file.log = xls_file.log + ('Escritório correspondente %s não encontrado' % office_name) + ";"
+            xls_file.log = xls_file.log + ('Escritório correspondente %s não vinculado ao escritório da sessão' % office_name) + ";"
             row[len(row) - 1]['errors'] = True
     return office_correspondent
 
@@ -371,7 +371,7 @@ def import_xls_service_price_table(self, file_id):
                         value_to_receive = value + rate_to_receive
                     else:
                         xls_file.log = xls_file.log + (
-                                    'O campo Tipo de taxa do correspondente (%s) deve ser preenchido com PERCENT ou VALUE' % (
+                                    "O campo 'tipo de taxa do correspondente' (%s) deve ser preenchido com PERCENT ou VALUE" % (
                                 rate_type_receive)) + ";"
                         row[len(row) - 1]['errors'] = True
                         save = False
@@ -398,7 +398,6 @@ def import_xls_service_price_table(self, file_id):
     finally:        
         xls_file.end = timezone.now()
         xls_file.save()
-        # iasmini
         delete_imported_xls_service_price_table.apply_async(([xls_file.pk]), countdown=60)
 
 
