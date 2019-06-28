@@ -250,7 +250,6 @@ class BillingDetail {
 				method: 'GET',
 				url: `https://viacep.com.br/ws/${this.zipcode}/json/unicode/`,
 				success: (response)=>{
-					debugger;
 				    this.setCityByZipCode(`${response.localidade}|${response.uf}`);
 					this.street = response.logradouro;
 					this.cityRegion = response.bairro;
@@ -319,32 +318,37 @@ class BillingDetail {
 				"state": city_uf,
 				"password": password
 			};
-			if(password.length < 4){
-				showToast('error', `Campo senha deve ter no mínimo 4 dígitos `, '', 3000, true);
-			}else {
-				$.ajax({
-					url: "http://142.93.204.204:8010/api/clientes/",
-					method: 'POST',
-					dataType: "json",
-					contentType: "application/json; charset=utf-8",
-					headers: {
-						"Authorization": "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluaXN0cmF0aXZvQGV6cGF5LmNvbSIsImV4cCI6MTU2MTY2MTYyMiwiZW1haWwiOiJhZG1pbmlzdHJhdGl2b0BlenBheS5jb20ifQ.WwreazU4PtVfg-b79H2i0YcTOF9UEjJcdzbPDkHQNJk"
-					},
-					data: JSON.stringify(payload),
-					success: (response) => {
-						showToast('success', `Cliente cadastrado na Yapay com sucesso`, '', 3000, true);
-					},
-					error: (response) => {
-						let errors = response.responseJSON;
-						let msgerrors = [];
-						for(i = 0; i< errors.length; i++){
-							msgerrors.push(errors[i].validation_errors[i].message_complete);
+			if(cnpj=="None"){
+				showToast('error', `Campo cnpj do escritório não pode ser em branco `, '', 4000, true);
+			}
+			else{
+				if(password.length < 4){
+					showToast('error', `Campo senha deve ter no mínimo 4 dígitos `, '', 4000, true);
+				}else {
+					$.ajax({
+						url: "http://142.93.204.204:8010/api/clientes/",
+						method: 'POST',
+						dataType: "json",
+						contentType: "application/json; charset=utf-8",
+						headers: {
+							"Authorization": "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluaXN0cmF0aXZvQGV6cGF5LmNvbSIsImV4cCI6MTU2MTY2MTYyMiwiZW1haWwiOiJhZG1pbmlzdHJhdGl2b0BlenBheS5jb20ifQ.WwreazU4PtVfg-b79H2i0YcTOF9UEjJcdzbPDkHQNJk"
+						},
+						data: JSON.stringify(payload),
+						success: (response) => {
+							showToast('success', `Cliente cadastrado na Yapay com sucesso`, '', 4000, true);
+						},
+						error: (response) => {
+							let errors = response.responseJSON;
+							let msgerrors = [];
+							for(i = 0; i< errors.length; i++){
+								msgerrors.push(errors[i].validation_errors[i].message_complete);
+							}
+							if (response.status == 400) {
+								showToast('error', `Não foi possível realizar o cadastro - ${ msgerrors }`, '', 6000, true);
+							}
 						}
-						if (response.status == 400) {
-							showToast('error', `Não foi possível realizar o cadastro - ${ msgerrors }`, '', 6000, true);
-						}
-					}
-				});
+					});
+				}
 			}
 		});
 	}
