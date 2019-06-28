@@ -136,13 +136,6 @@ class AdminSettings(models.Model):
     def __str__(self):
         return 'Solicitante={0}, Correspondente={1}'.format(self.rate_commission_requestor, self.rate_commission_correspondent)
 
-    def get_admin_setting(setting_name):
-        # busca o valor da configuracao do sistema de um campo específico passado como parametro
-        admin_settings = AdminSettings.objects.first()
-        setting_content = getattr(admin_settings, setting_name)
-
-        return setting_content
-
 class Audit(AuditCreate, AuditAlter):
     is_active = models.BooleanField(
         null=False, default=True, verbose_name='Ativo')

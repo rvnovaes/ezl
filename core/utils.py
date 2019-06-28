@@ -58,6 +58,14 @@ def filter_valid_choice_form(queryset):
     except:
         return queryset
 
+def get_admin_setting(model, setting_name):
+    # busca o valor da configuracao do sistema de um campo específico passado como parametro
+    # obs.: o model deve ser passado como parametro pq o django nao permite importar model nesse arquivo utils
+    admin_settings = model.objects.first()
+    if admin_settings:
+        setting_content = getattr(admin_settings, setting_name)
+
+    return setting_content
 
 def login_log(f):
     """

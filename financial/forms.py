@@ -1,6 +1,7 @@
 from django import forms
 from core.models import Person, State, City, AdminSettings
-from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field, get_office_session
+from core.utils import filter_valid_choice_form, get_office_field, get_office_related_office_field, \
+    get_office_session, get_admin_setting
 from lawsuit.models import CourtDistrict, CourtDistrictComplement
 from task.models import TypeTask
 from .models import CostCenter, ServicePriceTable, ImportServicePriceTable, PolicyPrice, CategoryPrice, BillingMoment
@@ -92,7 +93,6 @@ class ServicePriceTableForm(BaseModelForm):
         label='Taxa de comissão do solicitante',
         localize=True,
         required=True,
-        initial=AdminSettings.get_admin_setting('rate_commission_requestor'),
     )
 
     value_to_receive = forms.CharField(
@@ -109,7 +109,6 @@ class ServicePriceTableForm(BaseModelForm):
         label='Taxa de comissão do correspondente',
         localize=True,
         required=True,
-        initial = AdminSettings.get_admin_setting('rate_commission_correspondent'),
     )
     value_to_pay = forms.FloatField(
         label='Valor a pagar',
@@ -156,6 +155,14 @@ class ServicePriceTableForm(BaseModelForm):
             office=office_session.id).order_by('name'))
         self.fields['office_network'].queryset = self.fields['office_network'].queryset.filter(members=office_session)
         self.fields['office_network'].required = True
+
+        # quando o initial depende de um campo do banco de dados nao pode ser passado diretamente na criacao
+        # do campo no form pq a migration que cria o model ainda nao foi rodada e o model nao existe ainda
+        # por isso foi feita no __init__ do form
+        self.fields['rate_commission_requestor'].initial = get_admin_setting(AdminSettings,
+                                                                                 'rate_commission_requestor')
+        self.fields['rate_commission_correspondent'].initial = get_admin_setting(AdminSettings,
+                                                                                 'rate_commission_correspondent')
 
 
 class ImportServicePriceTableForm(forms.ModelForm):

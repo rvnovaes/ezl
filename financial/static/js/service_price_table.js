@@ -19,7 +19,6 @@ class ServicePriceTable {
         this.onChangeOfficeCorrespondent();
         this.onSaveSubmit();
         this.onChangePolicyPrice();
-        this.calculateComissionValues();
     }
 
     static showSwal(type, title, html){
@@ -311,9 +310,9 @@ class ServicePriceTable {
         }
 
         if (this.rateTypeReceive === 'PERCENT'){
-            this.taskValueToReceive = taskValue - taskValue * rateCommissionRequestor;
+            this.taskValueToReceive = taskValue + taskValue * rateCommissionRequestor;
         } else {
-            this.taskValueToReceive = taskValue - rateCommissionRequestor;
+            this.taskValueToReceive = taskValue + rateCommissionRequestor;
         }
     }
 
