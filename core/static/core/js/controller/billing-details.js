@@ -338,10 +338,19 @@ class BillingDetail {
 							showToast('success', `Cliente cadastrado na Yapay com sucesso`, '', 4000, true);
 						},
 						error: (response) => {
+							// Errors recebe o response de errors retornado pelo EZPAY
+							// Errors Validation_errors, retorna informações retornadas pela Yapay, ex: CPF já cadastrado
+							// Error recebe o retorno da validação de campos pelo EZPAY
 							let errors = response.responseJSON;
 							let msgerrors = [];
 							for(i = 0; i< errors.length; i++){
-								msgerrors.push(errors[i].validation_errors[i].message_complete);
+								if(errors[i].validation_errors){
+									msgerrors.push(errors[i].validation_errors[i].message_complete);
+								}else{
+									for(var field in errors[i]){
+										msgerrors.push(field + " " + errors[i][field]);
+									}
+								}
 							}
 							if (response.status == 400) {
 								showToast('error', `Não foi possível realizar o cadastro - ${ msgerrors }`, '', 6000, true);
