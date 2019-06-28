@@ -2,7 +2,7 @@ import datetime
 import os
 import sys
 import tempfile
-import hglib
+
 
 # Todas as variáveis de configuração devem ser criadas nos arquivos da pasta ezl/config
 from config.config import get_parser, get_rev
