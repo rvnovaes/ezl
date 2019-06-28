@@ -224,7 +224,7 @@ class ServicePriceTableDeleteView(AuditFormMixin, MultiDeleteViewMixin):
 @login_required
 def import_service_price_table(request):   
     context = {}
-    if request.method == 'POST':                             
+    if request.method == 'POST':
         form = ImportServicePriceTableForm(request.POST, request.FILES)        
         if form.is_valid():
             file_xls = form.save(commit=False)
@@ -232,7 +232,7 @@ def import_service_price_table(request):
             file_xls.create_user = request.user 
             file_xls.start = timezone.now()               
             file_xls.save()
-            
+
             import_xls_service_price_table.delay(file_xls.pk)
             context['show_modal_progress'] = True
             context['file_xls'] = file_xls
