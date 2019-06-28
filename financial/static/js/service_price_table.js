@@ -308,12 +308,14 @@ class ServicePriceTable {
         } else {
             this.taskValueToPay = taskValue - rateCommissionCorrespondent;
         }
+        this.taskValueToPay = parseFloat(this.taskValueToPay).toFixed(2);
 
         if (this.rateTypeReceive === 'PERCENT'){
             this.taskValueToReceive = taskValue + taskValue * rateCommissionRequestor;
         } else {
             this.taskValueToReceive = taskValue + rateCommissionRequestor;
         }
+        this.taskValueToReceive = parseFloat(this.taskValueToReceive).toFixed(2);
     }
 
     validatePolicyPrice(showAlert) {
