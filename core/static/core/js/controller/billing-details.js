@@ -250,6 +250,7 @@ class BillingDetail {
 				method: 'GET',
 				url: `https://viacep.com.br/ws/${this.zipcode}/json/unicode/`,
 				success: (response)=>{
+					debugger;
 				    this.setCityByZipCode(`${response.localidade}|${response.uf}`);
 					this.street = response.logradouro;
 					this.cityRegion = response.bairro;
@@ -327,7 +328,7 @@ class BillingDetail {
 					dataType: "json",
 					contentType: "application/json; charset=utf-8",
 					headers: {
-						"Authorization": "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluaXN0cmF0aXZvQGV6cGF5LmNvbSIsImV4cCI6MTU2MTQwMTk1MiwiZW1haWwiOiJhZG1pbmlzdHJhdGl2b0BlenBheS5jb20ifQ.fjTd2zV7c-RsDtcH9D_0yxW6UCpYVIAK_dc6g1stPu8"
+						"Authorization": "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluaXN0cmF0aXZvQGV6cGF5LmNvbSIsImV4cCI6MTU2MTY2MTYyMiwiZW1haWwiOiJhZG1pbmlzdHJhdGl2b0BlenBheS5jb20ifQ.WwreazU4PtVfg-b79H2i0YcTOF9UEjJcdzbPDkHQNJk"
 					},
 					data: JSON.stringify(payload),
 					success: (response) => {
