@@ -2,7 +2,7 @@ from decimal import Decimal
 from .models import TypeTask, Task, Ecm, TypeTaskMain, TaskStatus, TaskFilterViewModel
 from .serializers import TypeTaskSerializer, TaskSerializer, TaskCreateSerializer, EcmTaskSerializer, \
     TypeTaskMainSerializer, CustomResultsSetPagination, TaskDashboardSerializer, TaskToPayDashboardSerializer, \
-    LargeResultsSetPagination, TotalToPayByOfficeSerializer
+    LargeResultsSetPagination, TotalToPayByOfficeSerializer, AmountByCorrespondentSerializer
 from .filters import TaskApiFilter, TypeTaskMainFilter, TaskDashboardApiFilter
 from .utils import filter_api_queryset_by_params
 from rest_framework import viewsets, mixins
@@ -16,7 +16,7 @@ from rest_framework.decorators import permission_classes
 from core.views_api import ApplicationView
 from lawsuit.models import Folder
 from django.utils import timezone
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from core.views_api import OfficeMixinViewSet
 
 
@@ -165,6 +165,62 @@ class TaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
         params = self.request.query_params
         queryset = filter_api_queryset_by_params(queryset, params)
         return queryset
+
+
+@permission_classes((TokenHasReadWriteScope, ))
+class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
+    serializer_class = AmountByCorrespondentSerializer
+    pagination_class = CustomResultsSetPagination
+
+    def get_queryset(self):
+        office_id = self.request.query_params.get('office_id')
+        finished_date_0 = self.request.query_params.get('finished_date_0')
+        finished_date_1 = self.request.query_params.get('finished_date_1')
+        sql = '''
+            select
+            off_sol.id,
+            off_sol.legal_name as "sol_legal_name",
+            p.id as id_correspondent,
+            p.legal_name as "cor_legal_name",
+            sum(t.amount_delegated) as "amount_delegated",
+            sum(t.amount_to_pay) as "amount_to_pay"
+            from task as t
+            inner join person as p on
+            t.person_executed_by_id = p.id
+            inner join core_office as off_sol on
+            t.office_id = off_sol.id
+            where 
+            t.finished_date between '{finished_date_0} 00:00:00' and '{finished_date_1} 23:59:59' and t.office_id = '{office_id}'
+            and t.person_executed_by_id is not null
+            and t.parent_id is null
+            group by off_sol.id, p.id, "sol_legal_name", "cor_legal_name"
+            union
+            select 
+            off_sol.id,
+            off_sol.legal_name as "sol_legal_name",
+            off_cor.id as id_correspondent,
+            off_cor.legal_name as "cor_legal_name",
+            sum(t.amount_delegated) as "amount_delegated",
+            sum(t.amount_to_pay) as "amount_to_pay"
+            from task as t
+            inner join task as child on
+            child.parent_id = t.id
+            inner join core_office as off_cor on
+            child.office_id = off_cor.id
+            inner join core_office as off_sol on
+            t.office_id = off_sol.id
+            where 
+            t.finished_date between '{finished_date_0} 00:00:00' and '{finished_date_1} 23:59:59' and t.office_id = '{office_id}'
+            and t.person_executed_by_id is null
+            and t.parent_id is null
+            group by off_sol.id, off_cor.id, "sol_legal_name", "cor_legal_name"
+            order by "sol_legal_name", "cor_legal_name"
+        '''.format(finished_date_0=finished_date_0, finished_date_1=finished_date_1, office_id=office_id)
+        queryset = Task.objects.raw(sql)
+        return list(queryset)
+
+    def filter_queryset(self, queryset):
+        return super().filter_queryset(queryset)
 
 
 @permission_classes((TokenHasReadWriteScope, ))

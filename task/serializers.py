@@ -125,6 +125,14 @@ class TaskToPaySerializer(serializers.ModelSerializer):
         fields = ('pk', 'amount', 'parent')
 
 
+class AmountByCorrespondentSerializer(serializers.Serializer):
+    id_correspondent = serializers.IntegerField()
+    sol_legal_name = serializers.CharField()
+    cor_legal_name = serializers.CharField()
+    amount_delegated = serializers.IntegerField()
+    amount_to_pay = serializers.IntegerField()
+
+
 class TaskToPayDashboardSerializer(serializers.ModelSerializer):
     have_child = serializers.SerializerMethodField()
     office_legal_name = serializers.SerializerMethodField()
