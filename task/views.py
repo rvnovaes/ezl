@@ -784,6 +784,7 @@ class ToPayTaskReportView(View):
             .select_related('movement__folder') \
             .select_related('movement__folder__person_customer') \
             .select_related('movement__law_suit__court_district') \
+            .select_related('movement__law_suit__court_district__state') \
             .select_related('parent__type_task') \
             .filter(parent__office=office, parent__task_status=TaskStatus.FINISHED, parent__isnull=False)
         queryset = self.filter_queryset(queryset)

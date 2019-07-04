@@ -53,13 +53,14 @@ class TaskToPayXlsx(DefaultXlsFile):
         self.data = data
         self.columns = [
                     {'label': 'OS', 'size': 10},
-                    {'label': 'Escritório', 'size': 40}, 
+                    {'label': 'Escritórioaaaa', 'size': 40},
                     {'label': 'Finalização', 'size': 15}, 
                     {'label': 'Serviço', 'size': 50}, 
                     {'label': 'Processo', 'size': 30}, 
                     {'label': 'Centro de custo', 'size': 30},
                     {'label': 'Comarca', 'size': 20},
-                    {'label': 'Cliente', 'size': 45}, 
+                    {'label': 'UF', 'size': 5},
+                    {'label': 'Cliente', 'size': 45},
                     {'label': 'Reembolsa valor', 'size': 20}, 
                     {'label': 'Parte adversa', 'size': 50}, 
                     {'label': 'OS original', 'size': 15},
@@ -89,16 +90,17 @@ class TaskToPayXlsx(DefaultXlsFile):
             worksheet.write(row_num, 4, item.get('lawsuit_number'), self.base_cell_format.cell_format)
             worksheet.write(row_num, 5, item.get('cost_center'), self.base_cell_format.cell_format)
             worksheet.write(row_num, 6, item.get('court_district'), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 7, item.get('client_name'), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 8, format_boolean(item.get('client_refunds')), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 9, item.get('opposing_party'), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 10, item.get('task_legacy_code', item.get('parent_task_number')),
+            worksheet.write(row_num, 7, item.get('uf'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 8, item.get('client_name'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 9, format_boolean(item.get('client_refunds')), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 10, item.get('opposing_party'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 11, item.get('task_legacy_code', item.get('parent_task_number')),
                             self.base_cell_format.cell_format)
-            worksheet.write(row_num, 11, format_boolean(item.get('billing_date')), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 12, item.get('charge_id'), self.base_cell_format.cell_format)
-            worksheet.write(row_num, 13, item.get('amount_delegated'), self.money_format.cell_format)
-            worksheet.write(row_num, 14, item.get('fee'), self.money_format.cell_format)
-            worksheet.write(row_num, 15, item.get('amount_to_pay'), self.money_format.cell_format)
+            worksheet.write(row_num, 12, format_boolean(item.get('billing_date')), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 13, item.get('charge_id'), self.base_cell_format.cell_format)
+            worksheet.write(row_num, 14, item.get('amount_delegated'), self.money_format.cell_format)
+            worksheet.write(row_num, 15, item.get('fee'), self.money_format.cell_format)
+            worksheet.write(row_num, 16, item.get('amount_to_pay'), self.money_format.cell_format)
         self.workbook.close()
         self.output.seek(0)
         return self.output
