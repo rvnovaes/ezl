@@ -94,8 +94,10 @@ class BillingDetailBaseView(object):
 
     def create_update_billing_detail(self, billing_detail, form):
         billing_detail.card_name = form.cleaned_data['card_name']
+        billing_detail.full_name = form.cleaned_data['full_name']
         billing_detail.email = form.cleaned_data['email']
         billing_detail.cpf_cnpj = form.cleaned_data['cpf_cnpj']
+        billing_detail.cpf = form.cleaned_data['cpf']
         billing_detail.birth_date = form.cleaned_data['birth_date']
         billing_detail.phone_number = form.cleaned_data['phone_number']
         billing_detail.billing_address = self.address
