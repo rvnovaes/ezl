@@ -29,6 +29,9 @@ logs:
 migrate:
 	docker-compose run web python manage.py migrate --noinput
 
+migrations:
+	docker-compose run web python manage.py makemigrations --noinput
+
 load_fixtures0:
 	docker-compose run web python manage.py loaddata auth_user office country state court_district
 	docker-compose run web python manage.py ezl_create_groups_and_permissions
