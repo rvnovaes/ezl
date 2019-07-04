@@ -466,7 +466,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
             if self.request.GET['group_by_tasks'] == OFFICE:
                 office_list, total, total_to_receive, amount_total = self.get_os_grouped_by_office()
             else:
-                office_list, total, total_to_receive = self.get_os_grouped_by_client()
+                office_list, total, total_to_receive, amount_total = self.get_os_grouped_by_client()
         except:
             office_list, total, total_to_pay, amount_total = self.get_os_grouped_by_office()
         context['offices_report'] = office_list

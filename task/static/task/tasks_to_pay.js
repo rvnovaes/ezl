@@ -239,7 +239,7 @@ class ReportToPay {
     getTrfoot() {
         return `
 	        <tr class="total-container">
-	            <th colspan="14" class="text-right" >Total Geral (R$)</th>
+	            <th colspan="15" class="text-right" >Total Geral (R$)</th>
 	            <th colspan="2" class="text-right">${this.formatMoney(this.totalToPay.toFixed(2))}</th>
 	        </tr>`;
     };

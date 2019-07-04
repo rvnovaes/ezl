@@ -88,6 +88,7 @@
                             <th>Serviço</th>
                             <th>Processo</th>
                             <th>Comarca</th>
+                            <th>UF</th>
                             <th>Cliente</th>
                             <th>Centro de Custo</th>
                             <th>Parte Adversa</th>
@@ -109,6 +110,7 @@
                                     <td>{{ task.type_task }}</td>
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.court_district|default_if_none:"" }}</td>
+                                    <td>{{ task.court_district.state.initials|default_if_none:"" }}</td>
                                     <td>{{ task.client }}</td>
                                     <td>{{ task.movement.folder.cost_center|default_if_none:"" }}</td>
                                     <td>{{ task.opposing_party|default_if_none:"" }}</td>
@@ -139,6 +141,7 @@
                             <th>Processo</th>
                             <th>Centro de Custo</th>
                             <th>Comarca</th>
+                            <th>UF</th>
                             <th>Parte Adversa</th>
                             <th>OS Original</th>
                             <th>Recebida</th>
@@ -152,7 +155,7 @@
                         {% for office in offices_report %}
                             {% ifchanged office.office_name %}
                                 <tr>
-                                    <th colspan="14">{{ office.office_name }}</th>
+                                    <th colspan="15">{{ office.office_name }}</th>
                                     <th></th>
                                     <th class="text-center">{{office.office_total.total_to_pay}}</th>
                                 </tr>
@@ -161,7 +164,8 @@
                             {% ifchanged office.client_name or office.office_name %}
                                 <tr>
                                     <th></th>
-                                    <th colspan="14">{{ office.client_name }}</th>
+                                    {# 15 = nr de colunas do relatorio #}
+                                    <th colspan="15">{{ office.client_name }}</th>
                                     <th class="text-center">{{office.client_total_to_pay}}</th>
                                 </tr>
                             {% endifchanged %}
@@ -180,6 +184,7 @@
                                     <td>{{ task.lawsuit_number }}</td>
                                     <td>{{ task.movement.folder.cost_center|default_if_none:"" }}</td>
                                     <td>{{ task.court_district|default_if_none:"" }}</td>
+                                    <td>{{ task.court_district.state.initials|default_if_none:"" }}</td>
                                     <td>{{ task.opposing_party|default_if_none:"" }}</td>
                                     {% if task.parent %}
                                         <td>{{ task.parent.task_number }}</td>
