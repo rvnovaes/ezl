@@ -190,7 +190,8 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
             inner join core_office as off_sol on
             t.office_id = off_sol.id
             where 
-            t.finished_date between '{finished_date_0} 00:00:00' and '{finished_date_1} 23:59:59' and t.office_id = '{office_id}'
+            t.finished_date between '{finished_date_0} 00:00:00' and '{finished_date_1} 23:59:59'\
+            and t.office_id = '{office_id}' and t.task_status='{task_status}'
             and t.person_executed_by_id is not null
             and t.parent_id is null
             group by off_sol.id, p.id, "sol_legal_name", "cor_legal_name"
@@ -210,12 +211,14 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
             inner join core_office as off_sol on
             t.office_id = off_sol.id
             where 
-            t.finished_date between '{finished_date_0} 00:00:00' and '{finished_date_1} 23:59:59' and t.office_id = '{office_id}'
+            t.finished_date between '{finished_date_0} 00:00:00' and '{finished_date_1} 23:59:59'\
+            and t.office_id = '{office_id}' and t.task_status='{task_status}'
             and t.person_executed_by_id is null
             and t.parent_id is null
             group by off_sol.id, off_cor.id, "sol_legal_name", "cor_legal_name"
             order by "sol_legal_name", "cor_legal_name"
-        '''.format(finished_date_0=finished_date_0, finished_date_1=finished_date_1, office_id=office_id)
+        '''.format(finished_date_0=finished_date_0, finished_date_1=finished_date_1,
+                   office_id=office_id, task_status=TaskStatus.FINISHED)
         queryset = Task.objects.raw(sql)
         return list(queryset)
 
