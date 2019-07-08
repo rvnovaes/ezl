@@ -291,4 +291,5 @@ def filter_api_queryset_by_params(queryset, params):
     if params.getlist('task_status[]'):
         status_to_filter = params.getlist('task_status[]')
         queryset = queryset.filter(task_status__in=[getattr(TaskStatus, status) for status in status_to_filter])
+
     return queryset

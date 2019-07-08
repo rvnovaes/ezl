@@ -178,6 +178,7 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
         finished_date_1 = self.request.query_params.get('finished_date_1')
         sql = '''
             select
+            'atribuida' as "tipo",
             off_sol.id,
             off_sol.legal_name as "sol_legal_name",
             p.id as id_correspondent,
@@ -197,6 +198,7 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
             group by off_sol.id, p.id, "sol_legal_name", "cor_legal_name"
             union
             select 
+            'delegada' as "tipo",
             off_sol.id,
             off_sol.legal_name as "sol_legal_name",
             off_cor.id as id_correspondent,
