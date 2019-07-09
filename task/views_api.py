@@ -144,24 +144,17 @@ class TotalToPayByOfficeViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
 class TaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
     serializer_class = TaskToPayDashboardSerializer
     pagination_class = CustomResultsSetPagination
-    filter_backends = (DjangoFilterBackend, OrderingFilter,)
-    filter_class = TaskApiFilter
 
     def get_queryset(self):
         queryset = Task.objects \
             .select_related('office') \
             .select_related('type_task') \
-            .select_related('movement__type_movement') \
-            .select_related('movement__folder') \
-            .select_related('movement__folder__person_customer') \
-            .select_related('movement__folder__cost_center') \
-            .select_related('movement__law_suit') \
-            .select_related('movement__law_suit__court_district') \
             .select_related('parent__type_task') \
-            .filter(task_status=TaskStatus.FINISHED,
-                    parent__isnull=True,
-                    amount_to_pay__gt=Decimal('0.00')) \
-            .order_by('office_id', '-finished_date')
+            .filter(
+                    task_status=TaskStatus.FINISHED,
+                    finished_date__gte=self.request.query_params.get('finished_date_0'),
+                    finished_date__lte=self.request.query_params.get('finished_date_1'),
+                    ).order_by('office_id', '-finished_date')
         params = self.request.query_params
         queryset = filter_api_queryset_by_params(queryset, params)
         return queryset
@@ -179,6 +172,7 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
         sql = '''
             select
             'atribuida' as "tipo",
+            t.parent_id as parent_id,
             off_sol.id,
             off_sol.legal_name as "sol_legal_name",
             p.id as id_correspondent,
@@ -195,10 +189,11 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
             and t.office_id = '{office_id}' and t.task_status='{task_status}'
             and t.person_executed_by_id is not null
             and t.parent_id is null
-            group by off_sol.id, p.id, "sol_legal_name", "cor_legal_name"
+            group by off_sol.id, p.id, "sol_legal_name", "cor_legal_name", t.parent_id
             union
             select 
             'delegada' as "tipo",
+            t.parent_id as parent_id,
             off_sol.id,
             off_sol.legal_name as "sol_legal_name",
             off_cor.id as id_correspondent,
@@ -217,7 +212,7 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
             and t.office_id = '{office_id}' and t.task_status='{task_status}'
             and t.person_executed_by_id is null
             and t.parent_id is null
-            group by off_sol.id, off_cor.id, "sol_legal_name", "cor_legal_name"
+            group by off_sol.id, off_cor.id, "sol_legal_name", "cor_legal_name", t.parent_id
             order by "sol_legal_name", "cor_legal_name"
         '''.format(finished_date_0=finished_date_0, finished_date_1=finished_date_1,
                    office_id=office_id, task_status=TaskStatus.FINISHED)
