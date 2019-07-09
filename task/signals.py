@@ -427,11 +427,15 @@ def post_save_geolocation(sender, instance, **kwargs):
     checkin_type = 'executed_by_checkin'
     if task.person_company_representative and create_user == task.person_company_representative.auth_user:
         checkin_type = 'company_representative_checkin'
-    setattr(task, checkin_type, instance)
+    # atualiza na task o id do checkin
+    if instance.checkpointtype == 'Checkin':
+        setattr(task, checkin_type, instance)
     task.save()
     while task.parent:
         task = task.parent
-        setattr(task, checkin_type, instance)
+        # atualiza na task o id do checkin
+        if instance.checkpointtype == 'Checkin':
+            setattr(task, checkin_type, instance)
         task.save()
     pre_save.connect(pre_save_task, sender=Task)
     post_save.connect(post_save_task, sender=Task)
