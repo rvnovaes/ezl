@@ -1,3 +1,4 @@
+import collections
 import os
 import json
 from enum import Enum
@@ -25,6 +26,8 @@ from simple_history.models import HistoricalRecords
 from core.models import BaseHistoricalModel, NotesMixin
 import inspect
 from financial.enums import CategoryPrice, RateType
+from django_json_ordered.fields import JsonOrderedField
+from jsonfield import JSONField as JSF
 
 
 class ChoiceArrayField(ArrayField):
@@ -428,7 +431,8 @@ class TaskBase(Audit, LegacyCode, OfficeMixin):
 class Task(TaskBase):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
-    survey_result = JSONField(
+    survey_result = JSF(
+        load_kwargs={'object_pairs_hook': collections.OrderedDict},
         verbose_name=u'Respotas do Formulário', blank=True, null=True)
     amount_delegated = models.DecimalField(
         null=False,
@@ -971,4 +975,4 @@ class TaskShowStatus(Audit):
 class TaskSurveyAnswer(Audit):
     tasks = models.ManyToManyField(Task, blank=True)
     survey = models.ForeignKey('survey.Survey', on_delete=models.CASCADE, null=True, blank=True)
-    survey_result = JSONField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    survey_result = JSF(load_kwargs={'object_pairs_hook': collections.OrderedDict}, verbose_name=u'Respotas do Formulário', blank=True, null=True)

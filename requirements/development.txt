@@ -12,3 +12,7 @@ coverage
 model-mommy
 
 pudb==2018.1
+
+jsonfield2==3.0.2
+
+django-json-ordered==0.7.0
