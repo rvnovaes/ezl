@@ -1543,7 +1543,6 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 for question, answer in answer.survey_result.items():
                     if question not in columns:
                         columns.append(question)
-        columns.sort()
         return columns
 
 
