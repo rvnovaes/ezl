@@ -432,7 +432,6 @@ class Task(TaskBase):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
     survey_result = JSF(
-        load_kwargs={'object_pairs_hook': collections.OrderedDict},
         verbose_name=u'Respotas do Formulário', blank=True, null=True)
     amount_delegated = models.DecimalField(
         null=False,
@@ -975,4 +974,4 @@ class TaskShowStatus(Audit):
 class TaskSurveyAnswer(Audit):
     tasks = models.ManyToManyField(Task, blank=True)
     survey = models.ForeignKey('survey.Survey', on_delete=models.CASCADE, null=True, blank=True)
-    survey_result = JSF(load_kwargs={'object_pairs_hook': collections.OrderedDict}, verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    survey_result = JSF(verbose_name=u'Respotas do Formulário', blank=True, null=True)
