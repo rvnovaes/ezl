@@ -6,9 +6,7 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from sqlalchemy import String, cast
 import dateutil.parser
-from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCorrespondente, \
-    JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente, JuridAgendaTable, \
-    JuridGedMain, JuridCorrespondenteHist, JuridGEDLig
+from advwin_models.advwin import JuridAgendaTable, JuridGedMain, JuridCorrespondenteHist, JuridGEDLig
 from connections.db_connection import get_advwin_engine
 from etl.utils import ecm_path_ezl2advwin, get_ecm_file_name
 from task.models import Task, TaskStatus, Ecm, HistoricalTask
@@ -467,6 +465,16 @@ def export_task(self, task_id, task=None, execute=True):
             'Data_backoffice': timezone.localtime(task.acceptance_service_date),
             'envio_alerta': 0,
             'Obs': get_task_observation(task, 'Aceita por Back Office:', 'acceptance_service_date'),
+        }
+    elif task.task_status == TaskStatus.REQUESTED.value:
+        values = {
+            'SubStatus': 10,
+            'Status': 0,
+            'prazo_lido': 0,
+            'envio_alerta': 0,
+            'Data_backoffice': timezone.localtime(task.refused_service_date),
+            'substatus_prazo': 1,
+            'Obs': get_task_observation(task, 'Recusada pelo correspondente', 'refused_service_date'),
         }
     elif task.task_status == TaskStatus.REFUSED_SERVICE.value:
         values = {
