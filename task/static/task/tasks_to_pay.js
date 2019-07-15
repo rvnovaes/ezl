@@ -123,6 +123,14 @@ class ReportToPay {
 
     billingTasks(){
         let data = {tasks: this.tasksToPay};
+        swal({
+           title: "Faturando as OS's",
+           html: '<h4>Aguarde...</h4>',
+           allowOutsideClick: false,
+           onOpen: ()=>{
+               swal.showLoading();
+           }
+        });
         $.ajax({
             type: 'POST',
             url: '/relatorios/os-a-pagar-data',

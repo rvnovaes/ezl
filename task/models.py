@@ -1,4 +1,3 @@
-import collections
 import os
 import json
 from enum import Enum

@@ -692,7 +692,7 @@ class ToReceiveTaskReportView(TaskReportBase):
                 post_save.disconnect(signals.post_save_task, sender=Task)
                 task = Task.objects.get(id=task_id, office=office)
                 setattr(task, self.datetime_field, timezone.now())
-                task.save()
+                task.save_without_historical_record()
             except:
                 pass
             finally:
@@ -804,7 +804,7 @@ class ToPayTaskReportView(View):
                 post_save.disconnect(signals.post_save_task, sender=Task)
                 task = Task.objects.get(id=task_id, office=office)
                 setattr(task, self.datetime_field, timezone.now())
-                task.save()
+                task.save_without_historical_record()
             except:
                 pass
             finally:
