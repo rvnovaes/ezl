@@ -24,7 +24,6 @@ from django.forms import MultipleChoiceField
 from .mail import TaskCompanyRepresentativeChangeMail
 from simple_history.models import HistoricalRecords
 from core.models import BaseHistoricalModel, NotesMixin
-import inspect
 from financial.enums import CategoryPrice, RateType
 from jsonfield import JSONField as JSF
 
