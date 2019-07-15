@@ -31,7 +31,8 @@ def get_tasks_to_pay(task_ids, order):
             (parent.amount_to_pay - parent.amount_delegated) as fee,
             client.refunds_correspondent_service as client_refunds,
             COALESCE(cost_center."name",  '') as cost_center,
-            COALESCE(billing_charge.charge_id, '') as charge_id
+            COALESCE(billing_charge.charge_id, '') as charge_id,
+            COALESCE(state.initials,  '') as "uf"
         FROM TASK as task
         INNER JOIN task as parent ON parent.id = task.parent_id
         INNER JOIN core_office as office ON office.id = task.office_id
@@ -41,6 +42,7 @@ def get_tasks_to_pay(task_ids, order):
         INNER JOIN person AS client ON client.id = folder.person_customer_id
         INNER JOIN type_task ON type_task.id = parent.type_task_id
         LEFT JOIN court_district ON lawsuit.court_district_id = court_district.id
+        LEFT JOIN state ON court_district.state_id = state.id
         LEFT JOIN billing_charge ON billing_charge.id = parent.charge_id
         LEFT JOIN cost_center ON cost_center.id = folder.cost_center_id
         WHERE parent.task_status = 'Finalizada' and task.task_status = 'Finalizada'

@@ -12,4 +12,4 @@ Site do [Easy Lawyer](http://www.ezlawyer.com.br/)
 Atenção:
 =======
 
-Toda a documentação de desenvolvimento deve estar contida na [wiki](https://bitbucket.org/mttechlegal/ezl/wiki/Home).
+Toda a documentação de desenvolvimento deve estar contida na [wiki](https://bitbucket.org/ezlteam/ezl/wiki/Home).

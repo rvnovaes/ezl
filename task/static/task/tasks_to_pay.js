@@ -225,6 +225,7 @@ class ReportToPay {
 	                <td>${task.lawsuit_number}</td>
 	                <td>${task.cost_center}</td>
 	                <td>${task.court_district}</td>
+	                <td>${task.uf}</td>
 	                <td>${this.setDefaultOfNull(task.opposing_party)}</td>
 	                <td>${this.setDefaultOfNull(task.task_legacy_code)}</td>
 	                <td>${this.getBillingDate(task.billing_date)}</td>
@@ -238,7 +239,7 @@ class ReportToPay {
     getTrfoot() {
         return `
 	        <tr class="total-container">
-	            <th colspan="14" class="text-right" >Total Geral (R$)</th>
+	            <th colspan="15" class="text-right" >Total Geral (R$)</th>
 	            <th colspan="2" class="text-right">${this.formatMoney(this.totalToPay.toFixed(2))}</th>
 	        </tr>`;
     };
@@ -351,7 +352,8 @@ class ReportToPayGroupByOffice extends ReportToPay {
     getTrOffice(officeId, officeName){
         return `
 	        <tr>
-	            <th colspan="14">${officeName}</th>
+                <!-- 15 = nr de colunas do relatorio -->
+	            <th colspan="15">${officeName}</th>
 	            <th></th>
 	            <th><center><span office-id="${officeId}">|officePay=${officeId}|</span></center></th>
 	        </tr>
@@ -362,7 +364,8 @@ class ReportToPayGroupByOffice extends ReportToPay {
         return `
 	        <tr>
 	            <th></th>
-	            <th colspan="14">
+                <!-- 15 = nr de colunas do relatorio -->
+	            <th colspan="15">
 	                <div class="col-xs-10">
 	                    ${clientName}                            
 	                </div>
@@ -454,7 +457,8 @@ class ReportToPayGroupByClient extends ReportToPay {
     getTrClient(clientId, clientName, clientRefunds){
         return `
 	        <tr>
-	            <th colspan="14">
+                <!-- 15 = nr de colunas do relatorio -->
+	            <th colspan="15">
 	            	<div class="col-xs-10">
 	            		${clientName}
 	            	</div>	
@@ -470,7 +474,8 @@ class ReportToPayGroupByClient extends ReportToPay {
         return `
 	        <tr>
 	            <th></th>
-	            <th colspan="14">
+                <!-- 15 = nr de colunas do relatorio -->
+	            <th colspan="15">
 	                <div class="col-xs-10">
 	                    ${officeName}                            
 	                </div>

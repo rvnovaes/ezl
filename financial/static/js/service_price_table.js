@@ -11,6 +11,10 @@ class ServicePriceTable {
         this.elTaskValue = $('#id_value');
         this.elTaskValueToPay = $('#id_value_to_pay');
         this.elTaskValueToReceive = $('#id_value_to_receive');
+        this.elRateCommissionRequestor = $('#id_rate_commission_requestor');
+        this.elRateCommissionCorrespondent = $('#id_rate_commission_correspondent');
+        this.elRateTypeReceive = $('#id_rate_type_receive');
+        this.elRateTypePay = $('#id_rate_type_pay');
         this.onChangeOfficeNetwork();
         this.onChangeOfficeCorrespondent();
         this.onSaveSubmit();
@@ -171,6 +175,38 @@ class ServicePriceTable {
         return this.elTaskValueToReceive.val(value);
     }
 
+    get rateCommissionRequestor(){
+        return this.elRateCommissionRequestor.val();
+    }
+
+    set rateCommissionRequestor(value){
+        return this.elRateCommissionRequestor.val(value);
+    }
+
+    get rateCommissionCorrespondent(){
+        return this.elRateCommissionCorrespondent.val();
+    }
+
+    set rateCommissionCorrespondent(value){
+        return this.elRateCommissionCorrespondent.val(value);
+    }
+
+    get rateTypePay(){
+        return this.elRateTypePay.val();
+    }
+
+    set rateTypePay(value){
+        return this.elRateTypePay.val(value);
+    }
+
+    get rateTypeReceive(){
+        return this.elRateTypeReceive.val();
+    }
+
+    set rateTypeReceive(value){
+        return this.elRateTypeReceive.val(value);
+    }
+
     get pricePolicyCategory(){
         return (this.policyPrice) ? this.policyPrices[this.policyPrice].category : null;
     }
@@ -212,7 +248,7 @@ class ServicePriceTable {
 
     onSaveSubmit() {
         $('[type=submit]').on('click', (el)=> {
-            this.checkValue();
+            this.checkValues();
             this.validatePolicyPrice(false);
             if (this.formErrors.length > 0){
                 el.preventDefault();
@@ -221,19 +257,65 @@ class ServicePriceTable {
             }
             ServicePriceTable.enableElement(this.elOfficeNetwork);
             ServicePriceTable.enableElement(this.elOfficeCorrespondent);
-            if (this.taskValueToPay === ''){
-                this.taskValueToPay = this.taskValue;
-            }
-            if (this.taskValueToReceive === ''){
-                this.taskValueToReceive = this.taskValue;
-            }
+
+            this.calculateComissionValues();
         });
     }
 
-    checkValue(){
+    checkValues(){
         if (this.taskValue === ''){
             this.taskValue = '0,00';
         }
+        if (this.taskValueToReceive === ''){
+            this.taskValueToReceive = '0,00';
+        }
+        if (this.taskValueToPay === ''){
+            this.taskValueToPay = '0,00';
+        }
+        // se nao informou os valores com comissao, considera que nao tem comissao
+        if (this.taskValueToPay === '0,00'){
+            this.taskValueToPay = this.taskValue;
+        }
+        if (this.taskValueToReceive === '0,00'){
+            this.taskValueToReceive = this.taskValue;
+        }
+        if (this.rateCommissionRequestor === ''){
+            this.rateCommissionRequestor = '0,00';
+        }
+        if (this.rateCommissionCorrespondent === ''){
+            this.rateCommissionCorrespondent = '0,00';
+        }
+    }
+
+    calculateComissionValues(){
+        var taskValue = this.taskValue;
+        taskValue = taskValue.replace(".", "");
+        taskValue = taskValue.replace(",",".");
+        taskValue = parseFloat(taskValue);
+
+        var rateCommissionCorrespondent = this.rateCommissionCorrespondent;
+        rateCommissionCorrespondent = rateCommissionCorrespondent.replace(".", "");
+        rateCommissionCorrespondent = rateCommissionCorrespondent.replace(",",".");
+        rateCommissionCorrespondent = parseFloat(rateCommissionCorrespondent);
+
+        var rateCommissionRequestor = this.rateCommissionRequestor;
+        rateCommissionRequestor = rateCommissionRequestor.replace(".", "");
+        rateCommissionRequestor = rateCommissionRequestor.replace(",",".");
+        rateCommissionRequestor = parseFloat(rateCommissionRequestor);
+
+        if (this.rateTypePay === 'PERCENT'){
+            this.taskValueToPay = taskValue - taskValue * rateCommissionCorrespondent;
+        } else {
+            this.taskValueToPay = taskValue - rateCommissionCorrespondent;
+        }
+        this.taskValueToPay = parseFloat(this.taskValueToPay).toFixed(2);
+
+        if (this.rateTypeReceive === 'PERCENT'){
+            this.taskValueToReceive = taskValue + taskValue * rateCommissionRequestor;
+        } else {
+            this.taskValueToReceive = taskValue + rateCommissionRequestor;
+        }
+        this.taskValueToReceive = parseFloat(this.taskValueToReceive).toFixed(2);
     }
 
     validatePolicyPrice(showAlert) {

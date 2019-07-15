@@ -37,7 +37,7 @@ from task.delegate import DelegateTask
 from task.filters import TaskFilter, TaskToPayFilter, TaskToReceiveFilter, OFFICE, BatchChangTaskFilter, \
     TaskCheckinReportFilter
 from task.forms import TaskForm, TaskDetailForm, TaskCreateForm, TaskToAssignForm, FilterForm, TypeTaskForm, \
-    ImportTaskListForm, TaskBulkCreateForm, TaskChangeAskedBy
+    ImportTaskListForm, TaskBulkCreateForm, TaskChangeAskedBy, TaskChangeRepresentativeBy
 from task.models import Task, Ecm, TaskStatus, TypeTask, TaskHistory, TaskFilterViewModel, Filter, TaskFeedback, \
     TaskGeolocation, TypeTaskMain, TaskSurveyAnswer
 from .report import TaskToPayXlsx, ExportFilterTask
@@ -342,6 +342,19 @@ class BatchTaskChangeAskedByView(AuditFormMixin, UpdateView):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
 
+class BatchTaskChangeRepresentativeByView(AuditFormMixin, UpdateView):
+    def post(self, request, *args, **kwargs):
+        try:
+            task_id = kwargs.get('pk')
+            task = Task.objects.get(pk=task_id)
+            form = TaskChangeRepresentativeBy(request.POST, instance=task)
+            if form.is_valid():
+                form.save()
+                return JsonResponse({'status': 'ok'})
+            return JsonResponse({'status': 'error', 'errors': form})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
 class BatchTaskToDelegateView(AuditFormMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         try:
@@ -453,7 +466,7 @@ class TaskReportBase(PermissionRequiredMixin, CustomLoginRequiredView,
             if self.request.GET['group_by_tasks'] == OFFICE:
                 office_list, total, total_to_receive, amount_total = self.get_os_grouped_by_office()
             else:
-                office_list, total, total_to_receive = self.get_os_grouped_by_client()
+                office_list, total, total_to_receive, amount_total = self.get_os_grouped_by_client()
         except:
             office_list, total, total_to_pay, amount_total = self.get_os_grouped_by_office()
         context['offices_report'] = office_list
@@ -771,6 +784,7 @@ class ToPayTaskReportView(View):
             .select_related('movement__folder') \
             .select_related('movement__folder__person_customer') \
             .select_related('movement__law_suit__court_district') \
+            .select_related('movement__law_suit__court_district__state') \
             .select_related('parent__type_task') \
             .filter(parent__office=office, parent__task_status=TaskStatus.FINISHED, parent__isnull=False)
         queryset = self.filter_queryset(queryset)
@@ -2099,6 +2113,12 @@ class BatchChangeTasksView(CustomPermissionRequiredMixin, DashboardSearchView):
         context = super().get_context_data()
         context[self.context_filter_name] = self.filter
         table = self.table_class(self.object_list)
+        if self.option == 'P':
+            geo_list = []
+            for p in self.object_list:
+                if TaskGeolocation.objects.filter(task_id=p.id):
+                    geo_list.append(p.id)
+            table = self.table_class(self.object_list.exclude(id__in=geo_list))
         RequestConfig(self.request, paginate={'per_page': 30}).configure(table)
         context['table'] = table
         context['option'] = self.option
