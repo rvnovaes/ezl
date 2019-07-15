@@ -26,7 +26,6 @@ from simple_history.models import HistoricalRecords
 from core.models import BaseHistoricalModel, NotesMixin
 import inspect
 from financial.enums import CategoryPrice, RateType
-from django_json_ordered.fields import JsonOrderedField
 from jsonfield import JSONField as JSF
 
 
