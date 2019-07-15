@@ -630,6 +630,14 @@ class Task(TaskBase):
         self.on_change_person_company_representative()
         return super().save(*args, **kwargs)
 
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
+
     @transaction.atomic
     def get_task_number(self):
         return get_next_value('office_{office_pk}_{name}'.format(
