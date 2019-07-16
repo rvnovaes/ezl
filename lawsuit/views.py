@@ -843,8 +843,13 @@ class CourtDistrictSelect2Autocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = self.base_queryset
         states = self.forwarded.get('state', None)
+        city = self.forwarded.get('city', None)
         if states:
             qs = qs.filter(state__in=states)
+
+        if city:
+            qs = qs.filter(city=city)
+
         if self.q:
             filters = Q(court_district_str__unaccent__icontains=self.q)
             qs = qs.filter(filters)

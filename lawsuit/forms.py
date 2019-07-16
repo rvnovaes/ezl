@@ -120,7 +120,8 @@ class LawSuitForm(BaseForm):
         required=False)
     court_district = forms.ModelChoiceField(label='Comarca',
                                             required=False,
-                                            widget=MDSelect(url='/processos/courtdistrict_select2', ),
+                                            widget=MDSelect(url='/processos/courtdistrict_select2',
+                                                            forward=['city']),
                                             queryset=CourtDistrict.objects.all())
     city = forms.ModelChoiceField(label='Cidade',
                                   required=False,
