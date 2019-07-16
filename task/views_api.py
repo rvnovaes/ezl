@@ -157,6 +157,8 @@ class TaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
                     ).order_by('office_id', '-finished_date')
         params = self.request.query_params
         queryset = filter_api_queryset_by_params(queryset, params)
+        id_list = queryset.values_list('parent__id', flat=True)
+        queryset = Task.objects.filter(id__in=id_list)
         return queryset
 
 
