@@ -124,7 +124,8 @@ class LawSuitForm(BaseForm):
                                             queryset=CourtDistrict.objects.all())
     city = forms.ModelChoiceField(label='Cidade',
                                   required=False,
-                                  widget=MDSelect(url='/city/autocomplete_select2/', ),
+                                  widget=MDSelect(url='/city/autocomplete_select2/',
+                                                  forward=['court_district']),
                                   queryset=City.objects.all())
     court_district_complement = forms.ModelChoiceField(label='Complemento de Comarca',
                                                        required=False,

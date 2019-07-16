@@ -1567,6 +1567,9 @@ class CityAutoCompleteView(TypeaHeadGenericSearch):
 class CitySelect2Autocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = filter_valid_choice_form(City.objects.filter(is_active=True))
+        court_district = self.forwarded.get('court_district', None)
+        if court_district:
+            qs = qs.filter(court_district_id=court_district)
         if self.q:
             filters = Q(name__unaccent__icontains=self.q)
             filters |= Q(state__initials__unaccent__icontains=self.q)
