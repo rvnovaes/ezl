@@ -173,11 +173,11 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
         finished_date_1 = self.request.query_params.get('finished_date_1')
         sql = '''
             select
-            'atribuida' as "tipo",
+            'atribuida' as "os_type",
             t.parent_id as parent_id,
             off_sol.id,
             off_sol.legal_name as "sol_legal_name",
-            p.id as id_correspondent,
+            p.id as executed_by_id,
             p.legal_name as "cor_legal_name",
             sum(t.amount_delegated) as "amount_delegated",
             sum(t.amount_to_pay) as "amount_to_pay"
@@ -194,11 +194,11 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
             group by off_sol.id, p.id, "sol_legal_name", "cor_legal_name", t.parent_id
             union
             select 
-            'delegada' as "tipo",
+            'delegada' as "os_type",
             t.parent_id as parent_id,
             off_sol.id,
             off_sol.legal_name as "sol_legal_name",
-            off_cor.id as id_correspondent,
+            off_cor.id as executed_by_id,
             off_cor.legal_name as "cor_legal_name",
             sum(t.amount_delegated) as "amount_delegated",
             sum(t.amount_to_pay) as "amount_to_pay"
