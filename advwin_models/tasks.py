@@ -466,15 +466,17 @@ def export_task(self, task_id, task=None, execute=True):
             'envio_alerta': 0,
             'Obs': get_task_observation(task, 'Aceita por Back Office:', 'acceptance_service_date'),
         }
-    elif task.task_status == TaskStatus.REQUESTED.value:
+    # TODO: no momento que a OS filha for recusada pelo service ou recusada tem que verificar se a OS pai usa service
+    # se usar service, tem que alterar no advwin os seguintes campos abaixo:
+    # Atenção: depois que foi aceita pelo correspondente também tem a opção de recusar quando não usa service
+    elif
         values = {
             'SubStatus': 10,
-            'Status': 0,
-            'prazo_lido': 0,
-            'envio_alerta': 0,
-            'Data_backoffice': timezone.localtime(task.refused_service_date),
-            'substatus_prazo': 1,
-            'Obs': get_task_observation(task, 'Recusada pelo correspondente', 'refused_service_date'),
+            'Advogado': None,
+            'Data_backoffice': None,
+            'Data_delegacao': None,
+            'Data_confirmacao': None,
+            'Obs': get_task_observation(task, 'Recusada pelo correspondente. Usuário: ', 'refused_service_date'),
         }
     elif task.task_status == TaskStatus.REFUSED_SERVICE.value:
         values = {
