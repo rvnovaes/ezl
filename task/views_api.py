@@ -152,6 +152,7 @@ class TaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
             .select_related('parent__type_task') \
             .filter(
                     task_status=TaskStatus.FINISHED,
+                    parent__parent_id__isnull=True,
                     parent__finished_date__gte=self.request.query_params.get('finished_date_0') + ' 00:00:00',
                     parent__finished_date__lte=self.request.query_params.get('finished_date_1') + ' 23:59:59',
                     ).order_by('office_id', '-finished_date')
