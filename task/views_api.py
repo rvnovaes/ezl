@@ -131,7 +131,8 @@ class TotalToPayByOfficeViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
             .select_related('office')\
             .filter(task_status=TaskStatus.FINISHED,
                     parent__isnull=True,
-                    amount_to_pay__gte=Decimal('0.00'))
+                    child__id__isnull=False,
+                    child__task_status=TaskStatus.FINISHED)
         params = self.request.query_params
         queryset = filter_api_queryset_by_params(queryset, params)
 
@@ -172,6 +173,7 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
         office_id = self.request.query_params.get('office_id')
         finished_date_0 = self.request.query_params.get('finished_date_0')
         finished_date_1 = self.request.query_params.get('finished_date_1')
+        # iasmini - ver se pode remover as atribuidas
         sql = '''
             select
             'atribuida' as "os_type",
@@ -205,7 +207,8 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
             sum(t.amount_to_pay) as "amount_to_pay"
             from task as t
             inner join task as child on
-            child.parent_id = t.id
+            child.parent_id = t.id and
+            child.task_status = 'Finalizada'
             inner join core_office as off_cor on
             child.office_id = off_cor.id
             inner join core_office as off_sol on
