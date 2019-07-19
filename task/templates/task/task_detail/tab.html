@@ -41,13 +41,13 @@
                 </section>
                 <section id="sec-part" style="padding: 0 0 0 0">
                     {% if show_person_executed_by_in_tab %}
-                        {% if form.instance.get_child %}
+                        {% if form.instance.get_latest_child_not_refused %}
                             <h3>Escritório Contratado</h3>
                         {% else %}
                             <h3>Correspondente</h3>
                         {% endif %}
-                        {% if form.instance.get_child %}
-                            {% include 'task/office_info.html' with office=form.instance.get_child.office %}
+                        {% if form.instance.get_latest_child_not_refused %}
+                            {% include 'task/office_info.html' with office=form.instance.get_latest_child_not_refused.office %}
                         {% else %}
                             {% include 'task/person_info.html' with person=form.instance.person_executed_by %}
                         {% endif %}

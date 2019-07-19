@@ -300,9 +300,9 @@ def export_task_history(self, task_history_id, task_history=None, execute=True, 
     person_executed_by_legal_name = None
     justification = task_history.history_notes[:1000] if task_history.history_notes else ''
     values = {}
-    if task.get_child:
+    if task.get_latest_child_not_refused:
         person_executed_by_legacy_code = None
-        person_executed_by_legal_name = task.get_child.office.legal_name
+        person_executed_by_legal_name = task.get_latest_child_not_refused.office.legal_name
     elif task.person_executed_by:
         person_executed_by_legacy_code = task.person_executed_by.legacy_code
         person_executed_by_legal_name = task.person_executed_by.legal_name

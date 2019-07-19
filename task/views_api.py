@@ -178,9 +178,9 @@ class ChildTaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
         if parent_id:
             id_list = []
             task = Task.objects.get(pk=parent_id)
-            while task.get_child:
-                id_list.append(task.get_child.id)
-                task = task.get_child
+            while task.get_latest_child_not_refused:
+                id_list.append(task.get_latest_child_not_refused.id)
+                task = task.get_latest_child_not_refused
 
             queryset = Task.objects \
                 .select_related('office') \

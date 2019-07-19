@@ -2178,7 +2178,7 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.POST.get('task_id'))
-        child_task = task.get_child
+        child_task = task.get_latest_child_not_refused
         current_amount = task.amount_delegated
         new_amount = request.POST.get('amount_delegated')
         child_task.amount = task.amount_delegated = Decimal(new_amount)

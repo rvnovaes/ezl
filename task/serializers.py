@@ -93,7 +93,7 @@ class TaskDashboardSerializer(serializers.ModelSerializer):
         return 'providencias/external-task-detail/' + obj.task_hash.hex
 
     def get_have_child(self, obj):
-        return obj.get_child != None
+        return obj.get_latest_child_not_refused != None
 
     def get_default_user(self, obj):
         default_user = obj.office.get_template_value(TemplateKeys.DEFAULT_USER.name)
@@ -146,13 +146,13 @@ class TaskToPayDashboardSerializer(serializers.ModelSerializer):
                   'task_hash', 'external_url')
 
     def get_have_child(self, obj):
-        return obj.get_child != None
+        return obj.get_latest_child_not_refused != None
 
     def get_office_legal_name(self, obj):
         return obj.office.legal_name
 
     def get_executed_by_legal_name(self, obj):
-        return obj.get_child.office.legal_name if obj.get_child else obj.person_executed_by.legal_name
+        return obj.get_latest_child_not_refused.office.legal_name if obj.get_latest_child_not_refused else obj.person_executed_by.legal_name
 
     def get_type_task_name(self, obj):
         return obj.type_task.name

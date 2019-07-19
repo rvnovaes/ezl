@@ -42,8 +42,8 @@
   {% if object.parent  %}
     parent_id = {{object.parent.pk}};
   {%endif%}
-  {% if object.get_child %}
-    child_id = {{object.get_child.pk}};
+  {% if object.get_latest_child_not_refused %}
+    child_id = {{object.get_latest_child_not_refused.pk}};
   {% endif %}
 </script>
 {%verbatim%}

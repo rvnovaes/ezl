@@ -163,8 +163,8 @@ def delegate_child_task(object_parent, office_correspondent, type_task=None, amo
     :param type_task: Tipo de servico a considerado para a criacao da OS filha
     :return:
     """
-    if object_parent.get_child:
-        if TaskStatus(object_parent.get_child.task_status) not in [
+    if object_parent.get_latest_child_not_refused:
+        if TaskStatus(object_parent.get_latest_child_not_refused.task_status) not in [
                 TaskStatus.REFUSED, TaskStatus.REFUSED_SERVICE,
                 TaskStatus.FINISHED
         ]:

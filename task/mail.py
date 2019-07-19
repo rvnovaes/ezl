@@ -102,7 +102,7 @@ class TaskFinishedEmail(BaseTemplateEmail):
 class TaskOpenMailTemplate(BaseTemplateEmail):
 
     def get_dynamic_template_data(self):
-        task = self.task if self.task.parent else self.task.get_child
+        task = self.task if self.task.parent else self.task.get_latest_child_not_refused
         office = self.task.parent.office if self.task.parent else self.task.office
         project_link = '{}{}'.format(get_project_link(self.task), reverse('task_detail', kwargs={'pk': task.pk}))
         return {

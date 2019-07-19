@@ -188,8 +188,8 @@ class ChatMenssage(View):
         if task:
             if task.parent and task.parent.office == office:
                 task_id = task.parent.pk
-            elif task.get_child and task.get_child.office == office:
-                task_id = task.get_child.pk
+            elif task.get_latest_child_not_refused and task.get_latest_child_not_refused.office == office:
+                task_id = task.get_latest_child_not_refused.pk
             else:
                 task_id = task.pk
         else:
@@ -229,8 +229,8 @@ class InternalChatOffices(View):
                 task.parent.office.pk,  # "Deve ser o pk do office do parent"
                 'name': task.parent.office.legal_name
             })
-        if task.get_child:
-            task_child = task.get_child
+        if task.get_latest_child_not_refused:
+            task_child = task.get_latest_child_not_refused
             data.append({
                 'chat':
                 task_child.chat.pk,  # "Deve ser o pk do chat da task filha"
@@ -247,7 +247,7 @@ class InternalChatOffices(View):
                         'office_pk': task_child.office.pk,
                         'name': task_child.office.legal_name
                     })
-        if not any([task.parent, task.get_child]):
+        if not any([task.parent, task.get_latest_child_not_refused]):
             data.append({
                 'chat': task.chat.pk,  # "Deve ser o pk do chat da task filha"
                 'office_pk': task.office.pk,
