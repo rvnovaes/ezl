@@ -286,9 +286,14 @@ def recalculate_amounts(old_amount, amount_to_pay, amount_to_receive, new_amount
 def filter_api_queryset_by_params(queryset, params):
     if params.getlist('office_id[]'):
         queryset = queryset.filter(office_id__in=params.getlist('office_id[]'))
-    if params.getlist('person_executed_by_id[]'):
+
+    if params.get('correspondent'):
+        queryset = queryset.filter(office_id=params.get('correspondent'), parent__office_id=params.get('office_id'))
+
+    if params.get('person_executed_by_id[]'):
         queryset = queryset.filter(person_executed_by_id__in=params.getlist('person_executed_by_id[]'))
     if params.getlist('task_status[]'):
         status_to_filter = params.getlist('task_status[]')
         queryset = queryset.filter(task_status__in=[getattr(TaskStatus, status) for status in status_to_filter])
+
     return queryset

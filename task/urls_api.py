@@ -9,6 +9,7 @@ router.register(r'task', views.TaskViewSet, base_name='task')
 router.register(r'task_dashboard', views.TaskDashboardEZLViewSet, base_name='task_dashboard')
 router.register(r'total_by_office', views.TotalToPayByOfficeViewSet, base_name='total_by_office')
 router.register(r'task_to_pay', views.TaskToPayViewSet, base_name='task_to_pay')
+router.register(r'amount_by_correspondent', views.AmountByCorrespondentViewSet, base_name='amount_by_correspondent')
 router.register(r'tasks_child', views.ChildTaskToPayViewSet, base_name='tasks_child')
 router.register(r'ecm_task', views.EcmTaskViewSet, base_name='task')
 
