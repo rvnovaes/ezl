@@ -126,7 +126,6 @@ class TaskToPaySerializer(serializers.ModelSerializer):
 
 
 class AmountByCorrespondentSerializer(serializers.Serializer):
-    os_type = serializers.CharField()
     id = serializers.IntegerField()
     executed_by_id = serializers.IntegerField()
     sol_legal_name = serializers.CharField()

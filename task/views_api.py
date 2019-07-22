@@ -153,6 +153,7 @@ class TaskToPayViewSet(viewsets.ReadOnlyModelViewSet, ApplicationView):
             .select_related('parent__type_task') \
             .filter(
                     task_status=TaskStatus.FINISHED,
+                    parent__task_status=TaskStatus.FINISHED,
                     parent__parent_id__isnull=True,
                     parent__finished_date__gte=self.request.query_params.get('finished_date_0') + ' 00:00:00',
                     parent__finished_date__lte=self.request.query_params.get('finished_date_1') + ' 23:59:59',
@@ -173,31 +174,8 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
         office_id = self.request.query_params.get('office_id')
         finished_date_0 = self.request.query_params.get('finished_date_0')
         finished_date_1 = self.request.query_params.get('finished_date_1')
-        # iasmini - ver se pode remover as atribuidas
         sql = '''
-            select
-            'atribuida' as "os_type",
-            t.parent_id as parent_id,
-            off_sol.id,
-            off_sol.legal_name as "sol_legal_name",
-            p.id as executed_by_id,
-            p.legal_name as "cor_legal_name",
-            sum(t.amount_delegated) as "amount_delegated",
-            sum(t.amount_to_pay) as "amount_to_pay"
-            from task as t
-            inner join person as p on
-            t.person_executed_by_id = p.id
-            inner join core_office as off_sol on
-            t.office_id = off_sol.id
-            where 
-            t.finished_date between '{finished_date_0} 00:00:00' and '{finished_date_1} 23:59:59'\
-            and t.office_id = '{office_id}' and t.task_status='{task_status}'
-            and t.person_executed_by_id is not null
-            and t.parent_id is null
-            group by off_sol.id, p.id, "sol_legal_name", "cor_legal_name", t.parent_id
-            union
             select 
-            'delegada' as "os_type",
             t.parent_id as parent_id,
             off_sol.id,
             off_sol.legal_name as "sol_legal_name",
@@ -216,8 +194,8 @@ class AmountByCorrespondentViewSet(viewsets.ReadOnlyModelViewSet, ApplicationVie
             where 
             t.finished_date between '{finished_date_0} 00:00:00' and '{finished_date_1} 23:59:59'\
             and t.office_id = '{office_id}' and t.task_status='{task_status}'
-            and t.person_executed_by_id is null
             and t.parent_id is null
+            and t.task_status = 'Finalizada'
             group by off_sol.id, off_cor.id, "sol_legal_name", "cor_legal_name", t.parent_id
             order by "sol_legal_name", "cor_legal_name"
         '''.format(finished_date_0=finished_date_0, finished_date_1=finished_date_1,
