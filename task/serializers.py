@@ -125,10 +125,20 @@ class TaskToPaySerializer(serializers.ModelSerializer):
         fields = ('pk', 'amount', 'parent')
 
 
+class AmountByCorrespondentSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    executed_by_id = serializers.IntegerField()
+    sol_legal_name = serializers.CharField()
+    cor_legal_name = serializers.CharField()
+    amount_delegated = serializers.IntegerField()
+    amount_to_pay = serializers.IntegerField()
+
+
 class TaskToPayDashboardSerializer(serializers.ModelSerializer):
     have_child = serializers.SerializerMethodField()
     office_legal_name = serializers.SerializerMethodField()
     executed_by_legal_name = serializers.SerializerMethodField()
+    executed_by_id = serializers.SerializerMethodField()
     type_task_name = serializers.SerializerMethodField()
     fee = serializers.SerializerMethodField()
     fee_child = serializers.SerializerMethodField()
@@ -140,10 +150,10 @@ class TaskToPayDashboardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('id', 'have_child', 'office_id', 'office_legal_name', 'executed_by_legal_name', 'type_task_name',
-                  'task_number', 'finished_date', 'amount_delegated', 'amount_to_pay', 'amount', 'amount_to_receive',
-                  'court_district_name', 'cost_center_name', 'fee', 'fee_child', 'default_user', 'law_suit_number',
-                  'task_hash', 'external_url')
+        fields = ('id', 'have_child', 'office_id', 'office_legal_name', 'executed_by_id', 'executed_by_legal_name',
+                  'type_task_name', 'task_number', 'finished_date', 'amount_delegated', 'amount_to_pay', 'amount',
+                  'amount_to_receive', 'court_district_name', 'cost_center_name', 'fee', 'fee_child', 'default_user',
+                  'law_suit_number', 'task_hash', 'external_url')
 
     def get_have_child(self, obj):
         return obj.get_latest_child_not_refused != None
@@ -153,6 +163,9 @@ class TaskToPayDashboardSerializer(serializers.ModelSerializer):
 
     def get_executed_by_legal_name(self, obj):
         return obj.get_latest_child_not_refused.office.legal_name if obj.get_latest_child_not_refused else obj.person_executed_by.legal_name
+
+    def get_executed_by_id(self, obj):
+        return obj.get_child.office.id if obj.get_child else obj.person_executed_by.id
 
     def get_type_task_name(self, obj):
         return obj.type_task.name
