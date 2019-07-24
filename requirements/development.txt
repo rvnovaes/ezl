@@ -12,5 +12,3 @@ coverage
 model-mommy
 
 pudb==2018.1
-
-jsonfield2==3.0.2
