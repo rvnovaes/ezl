@@ -64,6 +64,10 @@
                 <span class="btn-label"><i class="mdi mdi-backburger"></i></span> Retornar
             </button>
         {% endif %}
+        {% if form.instance.get_latest_child_not_refused.task_status == 'Glosada' %}
+            <br></br>
+            <p>Essa OS não pode ser finalizada, pois encontra-se glosada no escritório do correspondente.</p>
+        {% endif %}
         {% if 'view_delegated_tasks' in office_session_perms %}
             {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
                 <div class="col-sm-3">
