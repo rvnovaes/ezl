@@ -39,7 +39,7 @@ def ezl_export_task_to_advwin(sender, instance, **kwargs):
     try:
         if not getattr(instance, '_skip_signal',
                        None) and instance.legacy_code:
-            export_task.delay(instance.pk)
+            export_task.delay(instance.pk, None, True, instance.__previous_status.value)
     except:
         pass
 
