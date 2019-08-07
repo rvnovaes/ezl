@@ -255,8 +255,8 @@ def ecm_task_post_save(sender, instance, created, **kwargs):
     # Copia o EcmTask para todos os pais e filhos recursivamente
     if instance.task.parent:
         create_ecm_task(instance.ecm, instance.task.parent)
-    if instance.task.get_child:
-        create_ecm_task(instance.ecm, instance.task.get_child)
+    if instance.task.get_latest_child_not_refused:
+        create_ecm_task(instance.ecm, instance.task.get_latest_child_not_refused)
 
 
 @receiver(post_save, sender=Ecm)
@@ -336,7 +336,7 @@ def change_status(sender, instance, **kwargs):
         elif new_status is TaskStatus.FINISHED:
             instance.finished_date = now_date
 
-        if new_status is TaskStatus.DONE and previous_status is TaskStatus.OPEN and instance.get_child:
+        if new_status is TaskStatus.DONE and previous_status is TaskStatus.OPEN and instance.get_latest_child_not_refused:
             instance.execution_date = now_date
 
         instance.alter_date = now_date
@@ -385,7 +385,7 @@ def update_status_child_task(sender, instance, **kwargs):
     status = get_child_status(instance.status)
     if TaskStatus(instance.task_status) == TaskStatus(instance.__previous_status):
         setattr(instance, '_skip_signal', True)
-    child = instance.get_child
+    child = instance.get_latest_child_not_refused
     while child and status:
         child.task_status = status
         child._mail_attrs = get_child_recipients(instance.task_status)
@@ -398,7 +398,7 @@ def update_status_child_task(sender, instance, **kwargs):
                 'from_parent': True
             })
         status = get_child_status(child.status)
-        child = child.get_child
+        child = child.get_latest_child_not_refused
 
 
 @receiver(pre_save, sender=Task)
@@ -427,11 +427,15 @@ def post_save_geolocation(sender, instance, **kwargs):
     checkin_type = 'executed_by_checkin'
     if task.person_company_representative and create_user == task.person_company_representative.auth_user:
         checkin_type = 'company_representative_checkin'
-    setattr(task, checkin_type, instance)
+    # atualiza na task o id do checkin
+    if instance.checkpointtype == 'Checkin':
+        setattr(task, checkin_type, instance)
     task.save()
     while task.parent:
         task = task.parent
-        setattr(task, checkin_type, instance)
+        # atualiza na task o id do checkin
+        if instance.checkpointtype == 'Checkin':
+            setattr(task, checkin_type, instance)
         task.save()
     pre_save.connect(pre_save_task, sender=Task)
     post_save.connect(post_save_task, sender=Task)
@@ -454,7 +458,7 @@ def pre_create_historical_record_callback(sender, **kwargs):
 def post_create_historical_record_callback(sender, **kwargs):
     history_instance = kwargs.get('history_instance')
     instance = kwargs.get('instance')
-    status = get_child_status(instance.status) if instance.get_child else None
+    status = get_child_status(instance.status) if instance.get_latest_child_not_refused else None
     try:
         request = HistoricalRecords.thread.request
         msg = request.POST.get('notes', '')
@@ -462,7 +466,7 @@ def post_create_historical_record_callback(sender, **kwargs):
         msg = ''
     task_number = None
     if status == TaskStatus.REFUSED and instance.task_status == TaskStatus.REQUESTED:
-        task_number = instance.get_child.task_number
+        task_number = instance.get_latest_child_not_refused.task_number
     if instance.task_status == TaskStatus.REFUSED and instance.parent:
         task_number = instance.task_number
     if task_number:

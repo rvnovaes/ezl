@@ -40,7 +40,7 @@
                     <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
                 </button>
             {% elif refused_action == 'INVALID_CHILD_STATUS' %}
-                <p>Essa OS não pode ser recusada, pois encontra-se no status {{ form.instance.get_child.task_status|lower }} no escritório correspondente.</p>
+                <p>Essa OS não pode ser recusada, pois encontra-se no status {{ form.instance.get_latest_child_not_refused.task_status|lower }} no escritório correspondente.</p>
             {% endif %}
         {% endif %}
         {% if 'block_payment_tasks' in office_session_perms %}
@@ -50,16 +50,23 @@
             </button>
         {% endif %}
         {% if 'validate_all_tasks' in office_session_perms %}
-            <button type="button" id="FINISHED" onclick="taskDetail.makeTaskAction(this)" data-toggle="" data-target="#confirmAction"
-                    class="text-white btn btn-raised btn-ezl-finished FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
-                <span class="btn-label"><i class="mdi mdi-gavel"></i></span> Finalizar
-            </button>
+            <!--não permite finalizar a OS pai se a filha estiver glosada -->
+            {% if form.instance.get_latest_child_not_refused.task_status != 'Glosada' %}
+                <button type="button" id="FINISHED" onclick="taskDetail.makeTaskAction(this)" data-toggle="" data-target="#confirmAction"
+                        class="text-white btn btn-raised btn-ezl-finished FINISHED {% if not form.instance.status.name == 'DONE' %}hidden{% endif %}">
+                    <span class="btn-label"><i class="mdi mdi-gavel"></i></span> Finalizar
+                </button>
+            {% endif %}
         {% endif %}
         {% if 'return_all_tasks' in office_session_perms %}
             <button type="button" id="RETURN" onclick="taskDetail.makeTaskAction(this)" data-toggle="" data-target="#confirmAction"
                     class="text-white btn btn-ezl-return {% if not  form.instance.status.name == 'DONE' %}hidden{% endif %}">
                 <span class="btn-label"><i class="mdi mdi-backburger"></i></span> Retornar
             </button>
+        {% endif %}
+        {% if form.instance.get_latest_child_not_refused.task_status == 'Glosada' %}
+            <br></br>
+            <p>Essa OS não pode ser finalizada, pois encontra-se glosada no escritório do correspondente.</p>
         {% endif %}
         {% if 'view_delegated_tasks' in office_session_perms %}
             {% if form.instance.status.name == 'ACCEPTED' or form.instance.status.name == 'RETURN' %}
@@ -103,6 +110,6 @@
                     <span class="btn-label"><i class="mdi mdi-map-marker"></i></span> <span id="label_button">Checkin do preposto</span>
                 </button>
             {% endif %}
-        {% endif %}         
+        {% endif %}
     {% endif %}
 {% endwith %}

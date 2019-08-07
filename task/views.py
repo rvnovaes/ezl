@@ -692,7 +692,7 @@ class ToReceiveTaskReportView(TaskReportBase):
                 post_save.disconnect(signals.post_save_task, sender=Task)
                 task = Task.objects.get(id=task_id, office=office)
                 setattr(task, self.datetime_field, timezone.now())
-                task.save()
+                task.save_without_historical_record()
             except:
                 pass
             finally:
@@ -804,7 +804,7 @@ class ToPayTaskReportView(View):
                 post_save.disconnect(signals.post_save_task, sender=Task)
                 task = Task.objects.get(id=task_id, office=office)
                 setattr(task, self.datetime_field, timezone.now())
-                task.save()
+                task.save_without_historical_record()
             except:
                 pass
             finally:
@@ -1557,7 +1557,6 @@ class DashboardSearchView(CustomLoginRequiredView, SingleTableView):
                 for question, answer in answer.survey_result.items():
                     if question not in columns:
                         columns.append(question)
-        columns.sort()
         return columns
 
 
@@ -2179,7 +2178,7 @@ class ViewTaskToPersonCompanyRepresentative(DashboardSearchView):
 class TaskUpdateAmountView(CustomLoginRequiredView, View):
     def post(self, request, *args, **kwargs):
         task = Task.objects.get(pk=request.POST.get('task_id'))
-        child_task = task.get_child
+        child_task = task.get_latest_child_not_refused
         current_amount = task.amount_delegated
         new_amount = request.POST.get('amount_delegated')
         child_task.amount = task.amount_delegated = Decimal(new_amount)
