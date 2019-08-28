@@ -500,8 +500,8 @@ def export_task(self, task_id, task=None, execute=True, previous_status=None):
         }
     elif task.task_status == TaskStatus.OPEN.value:
         advwin_advogado = None
-        if task.get_child:
-            delegated_office = task.get_child.office
+        if task.get_latest_child_not_refused:
+            delegated_office = task.get_latest_child_not_refused.office
             delegated_to = delegated_office.legal_name or ''
             office_office_relation = task.office.from_offices.filter(to_office=delegated_office).first()
             if office_office_relation and office_office_relation.person_reference:
