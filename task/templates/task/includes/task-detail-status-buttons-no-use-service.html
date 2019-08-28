@@ -22,7 +22,7 @@
                     <span class="btn-label"><i class="mdi mdi-clipboard-alert"></i></span> Recusar
                 </button>
                 {% elif refused_acton == 'INVALID_CHILD_STATUS' %}
-                    <p>Essa OS não pode ser recusada, pois encontra-se no status {{ form.instance.get_child.task_status|lower }} no escritório correspondente.</p>
+                    <p>Essa OS não pode ser recusada, pois encontra-se no status {{ form.instance.get_latest_child_not_refused.task_status|lower }} no escritório correspondente.</p>
                 {% endif %}            
         {% endif %}
         {% if 'block_payment_tasks' in office_session_perms %}

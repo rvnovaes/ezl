@@ -23,8 +23,8 @@ from django.forms import MultipleChoiceField
 from .mail import TaskCompanyRepresentativeChangeMail
 from simple_history.models import HistoricalRecords
 from core.models import BaseHistoricalModel, NotesMixin
-import inspect
 from financial.enums import CategoryPrice, RateType
+from jsonfield import JSONField as JSF
 
 
 class ChoiceArrayField(ArrayField):
@@ -416,7 +416,7 @@ class TaskBase(Audit, LegacyCode, OfficeMixin):
         return TaskStatus(self.task_status)
 
     @property
-    def get_child(self):
+    def get_latest_child_not_refused(self):
         if self.child.exists() and self.child.latest('pk').task_status not in [
             TaskStatus.REFUSED.__str__(),
             TaskStatus.REFUSED_SERVICE.__str__()
@@ -428,7 +428,7 @@ class TaskBase(Audit, LegacyCode, OfficeMixin):
 class Task(TaskBase):
     TASK_NUMBER_SEQUENCE = 'task_task_task_number'
 
-    survey_result = JSONField(
+    survey_result = JSF(
         verbose_name=u'Respotas do Formulário', blank=True, null=True)
     amount_delegated = models.DecimalField(
         null=False,
@@ -657,8 +657,8 @@ class Task(TaskBase):
         survey_dict = self.get_survey_dict
         if survey_dict:
             task_id_list = [self.pk]
-            if self.get_child:
-                task_id_list.append(self.get_child.pk)
+            if self.get_latest_child_not_refused:
+                task_id_list.append(self.get_latest_child_not_refused.pk)
             pending_survey_company_representative = pending_survey = False
             if survey_dict.get('survey', None):
                 pending_survey = not TaskSurveyAnswer.objects.filter(tasks__in=task_id_list,
@@ -971,4 +971,4 @@ class TaskShowStatus(Audit):
 class TaskSurveyAnswer(Audit):
     tasks = models.ManyToManyField(Task, blank=True)
     survey = models.ForeignKey('survey.Survey', on_delete=models.CASCADE, null=True, blank=True)
-    survey_result = JSONField(verbose_name=u'Respotas do Formulário', blank=True, null=True)
+    survey_result = JSF(verbose_name=u'Respotas do Formulário', blank=True, null=True)

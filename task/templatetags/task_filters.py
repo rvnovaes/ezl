@@ -31,8 +31,8 @@ def get_refused_action(user, task, office_session_perms):
         if task.person_executed_by == user.person:
             if task.status.name == 'OPEN':
                 refused_action = default_action
-        elif task.get_child:
-            refused_action = default_action if valid_status(task.get_child.task_status) else 'INVALID_CHILD_STATUS'
+        elif task.get_latest_child_not_refused:
+            refused_action = default_action if valid_status(task.get_latest_child_not_refused.task_status) else 'INVALID_CHILD_STATUS'
         elif 'can_distribute_tasks' in office_session_perms:
             refused_action = default_action
     elif task.status.name == 'ERROR' and 'can_distribute_tasks' in office_session_perms:
@@ -102,21 +102,21 @@ def show_delegation_modal(task):
 def show_edit_amount(task):
     return task.status.name in ['RETURN', 'OPEN', 'ACCEPTED', 'DONE'] \
            and task.price_category != 'NETWORK' \
-           and task.get_child
+           and task.get_latest_child_not_refused
 
 
 @register.filter
 def show_button_accepted(task):
     # A checagem do status se da caso a os tenha sido recusada pelo office correspondente
     # E atribuida ao invés de delegada posteriormente
-    if task.get_child and task.get_child.status.name not in ['REFUSED_SERVICE', 'REFUSED']:
+    if task.get_latest_child_not_refused and task.get_latest_child_not_refused.status.name not in ['REFUSED_SERVICE', 'REFUSED']:
         return False
     return True
 
 
 @register.filter
 def show_button_done(task):
-    if task.get_child and task.get_child.status.name in ['ACCEPTED_SERVICE', 'OPEN', 'ACCEPTED', 'DONE']:
+    if task.get_latest_child_not_refused and task.get_latest_child_not_refused.status.name in ['ACCEPTED_SERVICE', 'OPEN', 'ACCEPTED', 'DONE']:
         return False
     return True
 

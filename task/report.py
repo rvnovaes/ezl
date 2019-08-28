@@ -53,7 +53,7 @@ class TaskToPayXlsx(DefaultXlsFile):
         self.data = data
         self.columns = [
                     {'label': 'OS', 'size': 10},
-                    {'label': 'Escritórioaaaa', 'size': 40},
+                    {'label': 'Escritório', 'size': 40},
                     {'label': 'Finalização', 'size': 15}, 
                     {'label': 'Serviço', 'size': 50}, 
                     {'label': 'Processo', 'size': 30}, 

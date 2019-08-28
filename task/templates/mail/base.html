@@ -529,9 +529,9 @@
                                                             <br><h2>Dados do solicitante</h2>
                                                             {% include 'mail/abstract_person_info.html' with abstract_person=task.person_asked_by %}
                                                         {% endif %}
-                                                        {% if task.get_child %}
+                                                        {% if task.get_latest_child_not_refused %}
                                                             <br><h2>Escritório contratado</h2>
-                                                            {% include 'mail/abstract_person_info.html' with abstract_person=task.get_child.office %}
+                                                            {% include 'mail/abstract_person_info.html' with abstract_person=task.get_latest_child_not_refused.office %}
                                                         {% else %}
                                                             <br><h2>Dados do correspondente</h2>
                                                             {% include 'mail/abstract_person_info.html' with abstract_person=task.person_executed_by %}

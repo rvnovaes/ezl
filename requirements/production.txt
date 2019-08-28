@@ -76,3 +76,6 @@ py-moneyed==0.8.0
 gerencianet==1.0.9
 
 tornado<6.0.0
+
+# save chat answers
+jsonfield2==3.0.2
