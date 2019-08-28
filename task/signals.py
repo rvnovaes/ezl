@@ -60,7 +60,7 @@ def create_or_update_user_by_chat(task, task_to_fields, fields):
                         'chat': task.chat
                     })
             except MultipleObjectsReturned:
-                #Tratamento específico para cenário da tarefa EZL-904
+                # Tratamento específico para cenário da tarefa EZL-904
                 user = UserByChat.objects.filter(
                     user_by_chat=user, chat=task.chat).first()
             user = user.user_by_chat
