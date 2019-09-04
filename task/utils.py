@@ -189,7 +189,7 @@ def delegate_child_task(object_parent, office_correspondent, type_task=None, amo
     new_task.amount_delegated = Decimal('0.00')
     new_task.amount_to_receive = amount_to_receive
     new_task._mail_attrs = get_child_recipients(TaskStatus.OPEN)
-    new_task.save()
+    new_task.save(**{'from_parent': True})
     clone_task_ecms(object_parent, new_task)
 
 
