@@ -39,7 +39,7 @@ def ezl_export_task_to_advwin(sender, instance, **kwargs):
     try:
         if not getattr(instance, '_skip_signal',
                        None) and instance.legacy_code:
-            export_task.delay(instance.pk)
+            export_task.delay(instance.pk, None, True, instance.__previous_status.value)
     except:
         pass
 
@@ -60,7 +60,7 @@ def create_or_update_user_by_chat(task, task_to_fields, fields):
                         'chat': task.chat
                     })
             except MultipleObjectsReturned:
-                #Tratamento específico para cenário da tarefa EZL-904
+                # Tratamento específico para cenário da tarefa EZL-904
                 user = UserByChat.objects.filter(
                     user_by_chat=user, chat=task.chat).first()
             user = user.user_by_chat

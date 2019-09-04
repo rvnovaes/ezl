@@ -6,9 +6,7 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from sqlalchemy import String, cast
 import dateutil.parser
-from advwin_models.advwin import JuridFMAudienciaCorrespondente, JuridFMAlvaraCorrespondente, \
-    JuridFMProtocoloCorrespondente, JuridFMDiligenciaCorrespondente, JuridAgendaTable, \
-    JuridGedMain, JuridCorrespondenteHist, JuridGEDLig
+from advwin_models.advwin import JuridAgendaTable, JuridGedMain, JuridCorrespondenteHist, JuridGEDLig
 from connections.db_connection import get_advwin_engine
 from etl.utils import ecm_path_ezl2advwin, get_ecm_file_name
 from task.models import Task, TaskStatus, Ecm, HistoricalTask
@@ -244,15 +242,15 @@ def get_task_survey_values(task):
 
 
 def get_task_observation(task, message, date_field):
-    last_taskhistory = task.taskhistory_set.filter(status=task.task_status).last()
-    last_taskhistory_notes = last_taskhistory.notes if last_taskhistory else ''
+    last_task_history = task.history.filter(task_status=task.task_status).latest('pk')
+    history_notes = last_task_history.history_notes if last_task_history else ''
     dt = getattr(task, date_field)
     date = dt.strftime('%d/%m/%Y') if dt else ''
     s = '{} *** {} {}: {} em {}'.format(
         linesep,
         message,
         task.alter_user.username,
-        last_taskhistory_notes,
+        history_notes,
         date)
     return cast(JuridAgendaTable.Obs, String()) + s
 
@@ -452,11 +450,10 @@ def update_advwin_task(task, values, execute=True):
 
 
 @shared_task(bind=True, max_retries=10)
-def export_task(self, task_id, task=None, execute=True):
+def export_task(self, task_id, task=None, execute=True, previous_status=None):
     if task is None:
         task = Task.objects.get(pk=task_id)
 
-    table = JuridAgendaTable.__table__
     values = {}
 
     if task.task_status == TaskStatus.ACCEPTED_SERVICE.value:
@@ -467,6 +464,16 @@ def export_task(self, task_id, task=None, execute=True):
             'Data_backoffice': timezone.localtime(task.acceptance_service_date),
             'envio_alerta': 0,
             'Obs': get_task_observation(task, 'Aceita por Back Office:', 'acceptance_service_date'),
+        }
+    elif task.task_status == TaskStatus.REQUESTED.value and task.task_status != previous_status:
+        obs = get_task_observation(task, '', 'alter_date')
+        values = {
+            'SubStatus': 10,
+            'Advogado': None,
+            'Data_backoffice': None,
+            'Data_delegacao': None,
+            'Data_confirmacao': None,
+            'Obs': obs
         }
     elif task.task_status == TaskStatus.REFUSED_SERVICE.value:
         values = {
@@ -493,8 +500,8 @@ def export_task(self, task_id, task=None, execute=True):
         }
     elif task.task_status == TaskStatus.OPEN.value:
         advwin_advogado = None
-        if task.get_child:
-            delegated_office = task.get_child.office
+        if task.get_latest_child_not_refused:
+            delegated_office = task.get_latest_child_not_refused.office
             delegated_to = delegated_office.legal_name or ''
             office_office_relation = task.office.from_offices.filter(to_office=delegated_office).first()
             if office_office_relation and office_office_relation.person_reference:
