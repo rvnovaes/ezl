@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.contrib import admin
 from .models import ServicePriceTable, ImportServicePriceTable, PolicyPrice
 
+
 @admin.register(ServicePriceTable)
 class ServicePriceTableModelAdmin(admin.ModelAdmin):
     list_display = ['office',
@@ -15,14 +16,13 @@ class ServicePriceTableModelAdmin(admin.ModelAdmin):
                     'city',
                     'value',
                     'office_network',
-                    'is_active' ]
+                    'is_active']
     search_fields = ['office__name']
     list_filter = ['is_active', 'state']
     change_form_template = 'financial/admin_change_form.html'
     add_form_template = change_form_template
 
     def response_change(self, request, obj):
-        print(request.POST)
         if 'rate_commission_requestor' in request.POST and not request.POST['rate_commission_requestor'] == '':
             percent = Decimal(request.POST['rate_commission_requestor']) / 100
             if percent > 0:
@@ -76,13 +76,11 @@ class ServicePriceTableModelAdmin(admin.ModelAdmin):
     actions = ['deactivate_price', 'activate_price']
 
 
-
-
 @admin.register(ImportServicePriceTable)
 class ImportServicePriceTableModelAdmin(admin.ModelAdmin):
-	pass
+    pass
 
 
 @admin.register(PolicyPrice)
 class PolicyPriceAdmin(admin.ModelAdmin):
-	pass
+    pass
