@@ -54,12 +54,14 @@
                     <span class="hide-menu">Pessoas</span>
                 </a>
             </li>
+            {% if 'group_admin' in office_session_perms or 'can_see_tasks_from_team_members' in office_session_perms or request.user.is_superuser or request.user.is_staff %}
             <li> <!-- TABELA DE PREÇOS -->
                 <a href="{% url 'servicepricetable_list' %}" target="_self">
                     <i class="fa fa-money fa-fw"></i>
                     <span class="hide-menu">Tabela de preços</span>
                 </a>
             </li>
+            {% endif %}
             <li> <!-- TIPOS DE MOVIMENTAÇÃO -->
                 <a href="{% url 'type_movement_list' %}" target="_self">
                     <i class="fa fa-exchange fa-fw"></i>
@@ -151,12 +153,14 @@
                     <span class="hide-menu">Importação de OS</span>
                 </a>
             </li>
+            {% if 'group_admin' in office_session_perms or 'can_see_tasks_from_team_members' in office_session_perms or request.user.is_superuser or request.user.is_staff %}
             <li><!-- IMPORTAÇÃO TABELA DE PREÇO -->
                 <a href="{% url 'import_service_price_table' %}" target="_self">
                     <i class="fa fa-money fa-fw"></i>
                     <span class="hide-menu">Importação de Tabela de Preços</span>
                 </a>
             </li>
+            {% endif %}
             {% if 'group_admin' in office_session_perms or request.user.is_superuser %}
                 <li> <!-- QUESTIONARIOS -->
                     <a href="{% url 'survey_list' %}" target="_self">
