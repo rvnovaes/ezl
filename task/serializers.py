@@ -165,7 +165,7 @@ class TaskToPayDashboardSerializer(serializers.ModelSerializer):
         return obj.get_latest_child_not_refused.office.legal_name if obj.get_latest_child_not_refused else obj.person_executed_by.legal_name
 
     def get_executed_by_id(self, obj):
-        return obj.get_child.office.id if obj.get_child else obj.person_executed_by.id
+        return obj.get_latest_child_not_refused.office.id if obj.get_child else obj.person_executed_by.id
 
     def get_type_task_name(self, obj):
         return obj.type_task.name
